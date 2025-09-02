@@ -266,6 +266,79 @@ To access the Admin UI, users must have:
 
 ---
 
+## 🧪 QA & Troubleshooting
+
+### QA Helper Pages (Admin Only)
+
+Access diagnostic pages for system troubleshooting and user verification:
+
+#### Who Am I (`/qa/whoami`) 
+- **Current user details** from Supabase Auth session
+- **User profile data** from user_profiles table
+- **Active roles by location** with assignment details
+- **Permission overrides** with grant/deny status
+- **Raw JSON output** for technical debugging
+
+**Required Permission**: Admin role (manage_users)
+
+#### Health Check (`/qa/health`)
+- **System status** and response times
+- **Environment configuration** (NODE_ENV, version)
+- **Supabase connectivity** (URL, key presence - masked)
+- **Environment variables** (NEXT_PUBLIC_* detection)
+- **Raw health data** for infrastructure monitoring
+
+**Required Permission**: Admin role (manage_users)
+
+#### Usage
+```bash
+# Navigate to QA pages (admin users only)
+https://your-app.com/qa/whoami
+https://your-app.com/qa/health
+
+# Or use the sidebar navigation under "QA & Debug"
+```
+
+#### API Health Endpoint
+```bash
+# Programmatic health check
+curl https://your-app.com/api/health
+
+# Response includes:
+# - System status
+# - Environment info  
+# - Supabase configuration status
+# - Environment variables detection
+```
+
+#### Security Notes
+- **Admin-only access**: Both pages require admin permissions
+- **Masked secrets**: All sensitive values are masked (e.g., `eyJhbG...U2eA`)
+- **No plain text secrets**: API keys and tokens are never displayed in full
+- **Server-side rendering**: Data fetched securely on the server
+
+#### Troubleshooting Common Issues
+
+**Permission Denied**
+- Verify user has admin role assigned via `user_roles_locations` 
+- Check role is active (`is_active = true`)
+- Ensure user is authenticated
+
+**Missing Environment Variables**
+- Check `.env.local` file exists with required variables
+- Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set
+- Restart development server after env changes
+
+**Supabase Connection Issues**
+- Verify Supabase project is active and accessible
+- Check network connectivity to Supabase servers
+- Validate API keys haven't expired or been rotated
+
+**RLS Policy Conflicts**
+- Use `/qa/whoami` to verify current user permissions
+- Check user roles and overrides for conflicts
+- Review audit logs (when available) for permission changes
+
 ## 📊 Monitoring & Governance
 
 ### Audit Logging

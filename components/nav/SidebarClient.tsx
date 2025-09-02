@@ -22,7 +22,9 @@ import {
   MessageSquare,
   AppWindow,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bug,
+  Activity
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 
@@ -47,6 +49,23 @@ const navigation = [
         href: '/admin/flags',
         icon: Flag,
         permission: 'locations.manage_flags'
+      }
+    ]
+  },
+  {
+    name: 'QA & Debug',
+    items: [
+      {
+        name: 'Chi sono io?',
+        href: '/qa/whoami',
+        icon: Bug,
+        permission: 'manage_users'  // Admin only
+      },
+      {
+        name: 'Health Check',
+        href: '/qa/health',
+        icon: Activity,
+        permission: 'manage_users'  // Admin only
       }
     ]
   },
