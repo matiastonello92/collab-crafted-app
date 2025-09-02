@@ -12,8 +12,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="mx-auto max-w-screen-2xl px-4">
-            <Suspense fallback={<div className="h-14" />}>
-              {/* @ts-expect-error Async Server Component */}
+            <Suspense fallback={<div className="h-14" />}> 
               <Header />
             </Suspense>
           </div>
