@@ -187,6 +187,71 @@ staff-management/
 - Grant/deny individual permissions
 - Audit trail of all changes
 
+### Admin UI (Read-Only)
+
+**Navigation**: `/admin/users`
+
+Access the administrative interface to manage users and view their permissions:
+
+#### User List (`/admin/users`)
+- **Real-time user data** from Supabase with server-side rendering
+- **Search functionality** by name or email
+- **Pagination** for large user lists (20 users per page)
+- **User details**: ID, email, name, active status, registration date
+- **Direct access** to user detail pages
+
+#### User Detail (`/admin/users/[id]`)
+Comprehensive read-only view with three main panels:
+
+**1. Roles by Location Panel**
+- Display user roles per location from `user_roles_locations`
+- Role hierarchy and assignment dates
+- Show who assigned each role and when
+- Active/inactive role status
+
+**2. Permission Overrides Panel**  
+- Direct permission grants/denials from `user_permissions`
+- Permission scope (global vs location-specific)
+- Organized by permission category
+- Grant dates and grantor information
+
+**3. Activity Panel (Audit Trail)**
+- Recent user activity and changes
+- Currently shows placeholder data
+- Structure ready for future audit system integration
+- Action types: role assignments, permission changes, profile updates
+
+#### Access Control
+- **Admin-only access** - requires admin role via RLS
+- **403/redirect** for unauthorized users
+- **Server-side permission verification** before data access
+- **Location-scoped data** respecting user permissions
+
+#### Technical Features
+- **Server-Side Rendering (SSR)** for optimal performance
+- **RLS compliance** - all queries respect Row Level Security
+- **Type-safe data fetching** with comprehensive error handling
+- **Responsive design** with proper mobile support
+- **Loading states** and graceful error handling
+
+#### Required Permissions
+To access the Admin UI, users must have:
+- Admin role assigned via `user_roles_locations` 
+- Active status in the system
+- Access to the organization/location being managed
+
+#### Current Limitations
+- **Read-only interface** - no write operations available
+- **Placeholder email addresses** - auth.users table not directly accessible
+- **Mock audit data** - audit system integration pending
+- **No user invitation system** - invitation functionality disabled
+
+**Next Steps for Full Admin Features**:
+- Enable user invitation workflow
+- Implement role/permission modification capabilities  
+- Add real audit trail integration
+- Enhance search with advanced filters
+
 ### Feature Flags
 - Global flags (affect entire organization)
 - Location-specific flags (per physical location)
