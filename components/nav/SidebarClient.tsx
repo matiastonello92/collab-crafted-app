@@ -46,7 +46,7 @@ const navigation = [
       },
       {
         name: 'Feature Flags',
-        href: '/admin/flags',
+        href: '/admin/feature-flags',
         icon: Flag,
         permission: 'locations.manage_flags'
       }

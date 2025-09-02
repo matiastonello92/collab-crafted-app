@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Bell, MapPin, Building } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { UserBadge } from '@/components/UserBadge'
+import { UserDropdown } from '@/components/nav/UserDropdown'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { setAppContext } from '@/lib/appContext'
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions'
@@ -151,7 +151,7 @@ export default function HeaderClient() {
             </Badge>
           </Button>
 
-          <UserBadge />
+          <UserDropdown />
         </div>
       </div>
     </header>

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
@@ -55,7 +56,7 @@ export default function HomePage() {
     {
       title: 'Feature Flags',
       description: 'Configura funzionalità per moduli',
-      href: '/admin/flags',
+      href: '/admin/feature-flags',
       icon: Flag,
       permission: 'locations.manage_flags'
     },
@@ -143,36 +144,45 @@ export default function HomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {quickActions.map((action, index) => {
-              const canAccess = hasPermission(action.permission)
-              
-              return (
-                <Card key={index} className={!canAccess ? 'opacity-50' : ''}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <action.icon className="h-6 w-6" />
-                      <h3 className="font-semibold">{action.title}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {action.description}
-                    </p>
-                    {canAccess ? (
-                      <Button asChild className="w-full">
-                        <Link href={action.href}>
-                          Accedi
-                        </Link>
-                      </Button>
-                    ) : (
-                      <Button disabled className="w-full">
-                        Accesso Negato
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+          <TooltipProvider>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {quickActions.map((action, index) => {
+                const canAccess = hasPermission(action.permission)
+                
+                return (
+                  <Card key={index} className={!canAccess ? 'opacity-50' : ''}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <action.icon className="h-6 w-6" />
+                        <h3 className="font-semibold">{action.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {action.description}
+                      </p>
+                      {canAccess ? (
+                        <Button asChild className="w-full">
+                          <Link href={action.href}>
+                            Accedi
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button disabled className="w-full">
+                              Accesso Negato
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Non hai i permessi necessari per accedere a questa sezione</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TooltipProvider>
         </CardContent>
       </Card>
 
