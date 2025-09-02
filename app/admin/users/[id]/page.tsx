@@ -94,10 +94,18 @@ export default async function UserDetailPage({ params }: Props) {
         {/* Three Panels */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {/* Panel 1: Roles by Location */}
-          <RolesByLocationPanel roles={rolesByLocation} />
+          <RolesByLocationPanel 
+            roles={rolesByLocation} 
+            userId={params.id}
+            onUpdate={() => window.location.reload()} 
+          />
           
           {/* Panel 2: Permission Overrides */}
-          <PermissionOverridesPanel overrides={permissionOverrides} />
+          <PermissionOverridesPanel 
+            overrides={permissionOverrides} 
+            userId={params.id}
+            onUpdate={() => window.location.reload()} 
+          />
           
           {/* Panel 3: Activity */}
           <ActivityPanel userId={params.id} />
