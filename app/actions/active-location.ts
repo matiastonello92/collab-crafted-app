@@ -4,17 +4,18 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 
-// Adatta nomi tabella/colonne se servono
 async function userHasLocation(userId: string, locationId: string) {
   const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from('user_locations')
-    .select('location_id')
+  // Tabella corretta: public.user_roles_locations
+  // Check di esistenza senza scaricare righe
+  const { count, error } = await supabase
+    .from('user_roles_locations')
+    .select('location_id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .eq('location_id', locationId)
-    .limit(1);
+    .eq('location_id', locationId);
+
   if (error) throw error;
-  return !!(data && data.length);
+  return !!(count && count > 0);
 }
 
 export async function setActiveLocationAction(locationId?: string | null) {
