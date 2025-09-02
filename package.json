@@ -14,7 +14,9 @@
     "seed": "tsx scripts/seed.ts",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:smoke": "tsx tests/smoke.ts"
+    "test:smoke": "tsx tests/smoke.ts",
+    "build:dev": "next build",
+    "preview": "next start -p ${PORT:-3000}"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
