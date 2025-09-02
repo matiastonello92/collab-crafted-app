@@ -1,18 +1,16 @@
-'use client'
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
-import { useAppStore } from '@/lib/store'
-import { useRequireSession } from '@/lib/useRequireSession'
 import { can } from '@/lib/permissions'
+import { getActiveLocationServer } from '@/lib/server/activeLocation'
+import { getEffectivePermissions } from '@/lib/server/effectivePermissions'
 
-export default function HomePage() {
-  useRequireSession()
-  const { context, permissions } = useAppStore()
+export default async function HomePage() {
+  const { active } = await getActiveLocationServer()
+  const permBag = await getEffectivePermissions(active?.id ?? null)
 
   // Mock stats for demonstration
   const stats = [
@@ -87,9 +85,9 @@ export default function HomePage() {
           <p className="text-muted-foreground mt-2">
             Sistema di gestione del personale multi-location
           </p>
-          {context.location_name && (
+          {active?.name && (
             <div className="flex gap-2 mt-4">
-              <Badge variant="outline">Location: {context.location_name}</Badge>
+              <Badge variant="outline">Location: {active.name}</Badge>
             </div>
           )}
         </div>
@@ -98,8 +96,6 @@ export default function HomePage() {
           <span className="text-sm text-muted-foreground">Sistema Operativo</span>
         </div>
       </div>
-
-
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -140,8 +136,8 @@ export default function HomePage() {
           <TooltipProvider>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {quickActions.map((action, index) => {
-                const canAccess = can(permissions, action.permission)
-                
+                const canAccess = can(permBag, action.permission)
+
                 return (
                   <Card key={index} className={!canAccess ? 'opacity-50' : ''}>
                     <CardContent className="pt-6">
@@ -223,3 +219,4 @@ export default function HomePage() {
     </div>
   )
 }
+
