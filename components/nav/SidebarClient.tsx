@@ -16,14 +16,14 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { can, type Permission } from '@/lib/permissions'
+import { can } from '@/lib/permissions'
 
-const navigation: { name: string; href: string; icon: any; permission: Permission | null }[] = [
+const navigation: { name: string; href: string; icon: any; permission: string | null }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
-  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'locations.manage_users' as Permission },
-  { name: 'QA & Debug', href: '/qa', icon: Bug, permission: 'manage_users' as Permission },
-  { name: 'Moduli', href: '/modules', icon: Package, permission: 'modules.view' as Permission },
-  { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'locations.view' as Permission },
+  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'locations.manage_users' },
+  { name: 'QA & Debug', href: '/qa', icon: Bug, permission: 'manage_users' },
+  { name: 'Moduli', href: '/modules', icon: Package, permission: 'modules.view' },
+  { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'locations.view' },
 ]
 
 export default function SidebarClient() {

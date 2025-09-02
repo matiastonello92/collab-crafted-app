@@ -8,7 +8,7 @@ import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
 import { useRequireSession } from '@/lib/useRequireSession'
-import { can, type Permission } from '@/lib/permissions'
+import { can } from '@/lib/permissions'
 
 export default function HomePage() {
   useRequireSession()
@@ -51,7 +51,7 @@ export default function HomePage() {
     description: string
     href: string
     icon: any
-    permission: Permission | Permission[]
+    permission: string | string[]
   }
 
   const quickActions: QuickAction[] = [
@@ -60,21 +60,21 @@ export default function HomePage() {
       description: 'Amministra utenti e permessi',
       href: '/admin/users',
       icon: Users,
-      permission: 'locations.manage_users' as Permission
+        permission: 'locations.manage_users'
     },
     {
       title: 'Feature Flags',
       description: 'Configura funzionalità per moduli',
       href: '/admin/feature-flags',
       icon: Flag,
-      permission: 'locations.manage_flags' as Permission
+        permission: 'locations.manage_flags'
     },
     {
       title: 'Impostazioni',
       description: 'Configurazioni generali',
       href: '/settings',
       icon: Settings,
-      permission: 'locations.view' as Permission
+        permission: 'locations.view'
     }
   ]
 
