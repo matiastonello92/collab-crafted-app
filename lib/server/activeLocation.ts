@@ -44,7 +44,7 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
 /** Ritorna la location attiva (cookie valido -> by cookie, altrimenti first) + flag se il cookie è già persistito */
 export async function getActiveLocationServer(): Promise<{ active: Loc | null; locations: Loc[]; persisted: boolean }> {
   try {
-    const jar = cookies(); // sync in Server Components
+    const jar = await cookies();
     const cookieId = jar.get('pn_loc')?.value ?? null;
 
     const { user, locations } = await getUserLocations();
