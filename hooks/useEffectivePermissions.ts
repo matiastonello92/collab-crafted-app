@@ -9,13 +9,13 @@ export function useEffectivePermissions() {
 
   useEffect(() => {
     async function load() {
-      const perms = await getUserPermissions(context.org_id || undefined, context.location_id || undefined)
+      const perms = await getUserPermissions(undefined, context.location_id || undefined)
       setPermissions(perms)
     }
-    if (context.org_id) {
+    if (context.location_id) {
       void load()
     } else {
       setPermissions([])
     }
-  }, [context.org_id, context.location_id, setPermissions])
+  }, [context.location_id, setPermissions])
 }

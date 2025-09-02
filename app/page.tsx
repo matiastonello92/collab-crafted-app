@@ -8,10 +8,11 @@ import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
 import { useRequireSession } from '@/lib/useRequireSession'
+import { can } from '@/lib/permissions'
 
 export default function HomePage() {
   useRequireSession()
-  const { context, hasPermission } = useAppStore()
+  const { context, permissions } = useAppStore()
 
   // Mock stats for demonstration
   const stats = [
@@ -78,10 +79,9 @@ export default function HomePage() {
           <p className="text-muted-foreground mt-2">
             Sistema di gestione del personale multi-location
           </p>
-          {context.org_id && (
+          {context.location_name && (
             <div className="flex gap-2 mt-4">
-              <Badge variant="outline">Org: Demo Organization</Badge>
-              <Badge variant="outline">Location: {context.location_id ? 'Lyon' : 'Tutte'}</Badge>
+              <Badge variant="outline">Location: {context.location_name}</Badge>
             </div>
           )}
         </div>
@@ -91,22 +91,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Context Warning */}
-      {!context.org_id && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-yellow-500" />
-              <div>
-                <p className="font-medium">Contesto non impostato</p>
-                <p className="text-sm text-muted-foreground">
-                  Seleziona un&apos;organizzazione e una location per accedere alle funzionalità complete.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -147,7 +132,7 @@ export default function HomePage() {
           <TooltipProvider>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {quickActions.map((action, index) => {
-                const canAccess = hasPermission(action.permission)
+                const canAccess = can(permissions, action.permission as any)
                 
                 return (
                   <Card key={index} className={!canAccess ? 'opacity-50' : ''}>

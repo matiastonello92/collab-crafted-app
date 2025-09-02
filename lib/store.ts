@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 interface AppContext {
   org_id: string | null
   location_id: string | null
+  location_name: string | null
   user_id: string | null
 }
 
@@ -22,13 +23,14 @@ export const useAppStore = create<AppState>()(
       context: {
         org_id: null,
         location_id: null,
+        location_name: null,
         user_id: null,
       },
       permissions: [],
       setContext: (context) => set({ context }),
       setPermissions: (permissions) => set({ permissions }),
-      clearContext: () => set({ 
-        context: { org_id: null, location_id: null, user_id: null },
+      clearContext: () => set({
+        context: { org_id: null, location_id: null, location_name: null, user_id: null },
         permissions: []
       }),
       hasPermission: (permission) => {
