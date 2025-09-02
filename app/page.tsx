@@ -8,7 +8,7 @@ import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
 import { useRequireSession } from '@/lib/useRequireSession'
-import { can } from '@/lib/permissions'
+import { can, type Permission } from '@/lib/permissions'
 
 export default function HomePage() {
   useRequireSession()
@@ -46,27 +46,35 @@ export default function HomePage() {
     }
   ]
 
-  const quickActions = [
+  type QuickAction = {
+    title: string
+    description: string
+    href: string
+    icon: any
+    permission: Permission | Permission[]
+  }
+
+  const quickActions: QuickAction[] = [
     {
       title: 'Gestisci Utenti',
       description: 'Amministra utenti e permessi',
       href: '/admin/users',
       icon: Users,
-      permission: 'locations.manage_users'
+      permission: 'locations.manage_users' as Permission
     },
     {
       title: 'Feature Flags',
       description: 'Configura funzionalità per moduli',
       href: '/admin/feature-flags',
       icon: Flag,
-      permission: 'locations.manage_flags'
+      permission: 'locations.manage_flags' as Permission
     },
     {
       title: 'Impostazioni',
       description: 'Configurazioni generali',
       href: '/settings',
       icon: Settings,
-      permission: 'locations.view'
+      permission: 'locations.view' as Permission
     }
   ]
 
@@ -132,7 +140,7 @@ export default function HomePage() {
           <TooltipProvider>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {quickActions.map((action, index) => {
-                const canAccess = can(permissions, action.permission as any)
+                const canAccess = can(permissions, action.permission)
                 
                 return (
                   <Card key={index} className={!canAccess ? 'opacity-50' : ''}>
