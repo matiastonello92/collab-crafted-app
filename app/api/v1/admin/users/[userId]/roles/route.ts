@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
-import { checkIsAdmin } from "@/lib/data/admin"
+import { checkAdminAccess } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,21 +34,13 @@ export async function POST(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const supabase = createSupabaseServerClient()
-    const supabaseAdmin = createSupabaseAdminClient()
-    
-    // Verify admin permissions
-    const isAdmin = await checkIsAdmin()
-    if (!isAdmin) {
+    // Check admin access using centralized guard
+    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get current user for audit
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
+    const supabaseAdmin = createSupabaseAdminClient()
     const { userId } = params
     const body: AssignRoleRequest = await req.json()
 
@@ -112,7 +104,7 @@ export async function POST(
       user_id: userId,
       role_id: body.role_id,
       location_id: body.location_id || null,
-      assigned_by: user.id,
+      assigned_by: actorId,
       assigned_at: new Date().toISOString(),
       is_active: true
     }
@@ -123,7 +115,7 @@ export async function POST(
       const { data, error } = await supabaseAdmin
         .from('user_roles_locations')
         .update({
-          assigned_by: user.id,
+          assigned_by: actorId,
           assigned_at: new Date().toISOString(),
           is_active: true
         })
@@ -155,7 +147,7 @@ export async function POST(
       role_name: role.name,
       location_id: body.location_id,
       location_name: location?.name
-    }, user.id)
+    }, actorId)
 
     // Emit outbox event
     await emitOutboxEvent('permissions.updated', {
@@ -167,7 +159,7 @@ export async function POST(
         location_id: body.location_id,
         location_name: location?.name
       },
-      actor_id: user.id,
+      actor_id: actorId,
       at: new Date().toISOString()
     })
 
@@ -188,21 +180,13 @@ export async function DELETE(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const supabase = createSupabaseServerClient()
-    const supabaseAdmin = createSupabaseAdminClient()
-    
-    // Verify admin permissions
-    const isAdmin = await checkIsAdmin()
-    if (!isAdmin) {
+    // Check admin access using centralized guard
+    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get current user for audit
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
+    const supabaseAdmin = createSupabaseAdminClient()
     const { userId } = params
     const body: RevokeRoleRequest = await req.json()
 
@@ -258,7 +242,7 @@ export async function DELETE(
       role_name: role.name,
       location_id: body.location_id,
       location_name: location?.name
-    }, user.id)
+    }, actorId)
 
     // Emit outbox event
     await emitOutboxEvent('permissions.updated', {
@@ -270,7 +254,7 @@ export async function DELETE(
         location_id: body.location_id,
         location_name: location?.name
       },
-      actor_id: user.id,
+      actor_id: actorId,
       at: new Date().toISOString()
     })
 

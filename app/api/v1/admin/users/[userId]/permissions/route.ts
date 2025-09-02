@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
-import { checkIsAdmin } from "@/lib/data/admin"
+import { checkAdminAccess } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -30,21 +30,13 @@ export async function PUT(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const supabase = createSupabaseServerClient()
-    const supabaseAdmin = createSupabaseAdminClient()
-    
-    // Verify admin permissions
-    const isAdmin = await checkIsAdmin()
-    if (!isAdmin) {
+    // Check admin access using centralized guard
+    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get current user for audit
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
+    const supabaseAdmin = createSupabaseAdminClient()
     const { userId } = params
     const body: SetOverrideRequest = await req.json()
 
@@ -106,7 +98,7 @@ export async function PUT(
       permission_id: body.permission_id,
       location_id: body.location_id || null,
       granted: body.granted,
-      granted_by: user.id,
+      granted_by: actorId,
       granted_at: new Date().toISOString()
     }
 
@@ -117,7 +109,7 @@ export async function PUT(
         .from('user_permissions')
         .update({
           granted: body.granted,
-          granted_by: user.id,
+          granted_by: actorId,
           granted_at: new Date().toISOString()
         })
         .eq('id', existing.id)
@@ -152,7 +144,7 @@ export async function PUT(
       location_id: body.location_id,
       location_name: location?.name,
       previous_value: existing?.granted
-    }, user.id)
+    }, actorId)
 
     // Emit outbox event
     await emitOutboxEvent('permissions.updated', {
@@ -166,7 +158,7 @@ export async function PUT(
         location_name: location?.name,
         previous_value: existing?.granted
       },
-      actor_id: user.id,
+      actor_id: actorId,
       at: new Date().toISOString()
     })
 
@@ -190,21 +182,13 @@ export async function DELETE(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const supabase = createSupabaseServerClient()
-    const supabaseAdmin = createSupabaseAdminClient()
-    
-    // Verify admin permissions
-    const isAdmin = await checkIsAdmin()
-    if (!isAdmin) {
+    // Check admin access using centralized guard
+    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Get current user for audit
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
+    const supabaseAdmin = createSupabaseAdminClient()
     const { userId } = params
     const url = new URL(req.url)
     const permission_id = url.searchParams.get('permission_id')
@@ -260,7 +244,7 @@ export async function DELETE(
       previous_granted: existing.granted,
       location_id,
       location_name: location?.name
-    }, user.id)
+    }, actorId)
 
     // Emit outbox event
     await emitOutboxEvent('permissions.updated', {
@@ -273,7 +257,7 @@ export async function DELETE(
         location_id,
         location_name: location?.name
       },
-      actor_id: user.id,
+      actor_id: actorId,
       at: new Date().toISOString()
     })
 
