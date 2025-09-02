@@ -1,22 +1,34 @@
 import { cookies } from 'next/headers';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 
-export async function getUserLocations() {
-  const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { user: null, locations: [] as { id: string; name: string }[] };
+type Loc = { id: string; name: string };
 
-  // Adatta la query alla tua struttura
-  const { data, error } = await supabase
-    .from('user_locations')
-    .select('location:locations(id,name)')
-    .eq('user_id', user.id);
+export async function getUserLocations(): Promise<{ user: { id: string } | null; locations: Loc[] }> {
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { user: null, locations: [] };
 
-  if (error) throw error;
-  const locations = ((data ?? []).map((r: any) => r.location).filter(Boolean)) as {
-    id: string; name: string
-  }[];
-  return { user, locations };
+    // Tabella corretta + join alla tabella locations
+    const { data, error } = await supabase
+      .from('user_roles_locations')
+      .select('location:locations(id,name)')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('[activeLocation] user_roles_locations query error', error);
+      return { user, locations: [] };
+    }
+
+    const locations = (data ?? [])
+      .map((r: any) => r.location)
+      .filter(Boolean) as Loc[];
+
+    return { user, locations };
+  } catch (err) {
+    console.error('[activeLocation] getUserLocations fatal', err);
+    return { user: null, locations: [] };
+  }
 }
 
 export async function getActiveLocationServer() {
