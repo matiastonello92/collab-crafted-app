@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useTransition } from 'react'
+import { useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,14 +19,17 @@ import { useEffectivePermissions } from '@/hooks/useEffectivePermissions'
 export default function HeaderClient({
   locations,
   activeLocationId,
+  persisted,
   setActiveLocation,
 }: {
   locations: { id: string; name: string }[]
   activeLocationId: string | null
+  persisted: boolean
   setActiveLocation: (id?: string | null) => Promise<void>
 }) {
   const router = useRouter()
-  const [, startTransition] = useTransition()
+  const [pending, startTransition] = useTransition()
+  const didPersistRef = useRef(false)
   const setContext = useAppStore(s => s.setContext)
 
   useEffectivePermissions()
@@ -36,11 +39,27 @@ export default function HeaderClient({
     setContext({ org_id: null, location_id: activeLocationId, user_id: null, location_name: name })
   }, [activeLocationId, locations, setContext])
 
+  // Se il server ha scelto una location ma il cookie non è allineato, persistila una sola volta post-mount
+  useEffect(() => {
+    if (!didPersistRef.current && activeLocationId && !persisted) {
+      didPersistRef.current = true
+      startTransition(async () => {
+        await setActiveLocation(activeLocationId)
+        router.refresh()
+      })
+    }
+  }, [activeLocationId, persisted, setActiveLocation, router])
+
   const onSelect = (id: string) => {
     startTransition(async () => {
       await setActiveLocation(id)
       router.refresh()
     })
+  }
+
+  // Nessuna location → niente switcher (mostreremo un banner in dashboard/UI)
+  if (!locations?.length) {
+    return null
   }
 
   return (
