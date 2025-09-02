@@ -5,6 +5,7 @@ interface AppContext {
   org_id: string | null
   location_id: string | null
   user_id: string | null
+  location_name: string | null
 }
 
 interface AppState {
@@ -23,12 +24,13 @@ export const useAppStore = create<AppState>()(
         org_id: null,
         location_id: null,
         user_id: null,
+        location_name: null,
       },
       permissions: [],
       setContext: (context) => set({ context }),
       setPermissions: (permissions) => set({ permissions }),
-      clearContext: () => set({ 
-        context: { org_id: null, location_id: null, user_id: null },
+      clearContext: () => set({
+        context: { org_id: null, location_id: null, user_id: null, location_name: null },
         permissions: []
       }),
       hasPermission: (permission) => {

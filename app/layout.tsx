@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/lib/providers'
 import { Suspense } from 'react'
-import HeaderClient from '@/components/nav/HeaderClient'
+import HeaderServer from '@/components/nav/HeaderServer'
 import SidebarClient from '@/components/nav/SidebarClient'
 import { ErrorBoundary } from '@/components/error-boundary'
 
@@ -27,7 +27,7 @@ export default function RootLayout({
               </Suspense>
               <div className="flex-1 flex flex-col overflow-hidden">
                 <Suspense fallback={null}>
-                  <HeaderClient />
+                  <HeaderServer />
                 </Suspense>
                 <main className="flex-1 overflow-y-auto">
                   {children}

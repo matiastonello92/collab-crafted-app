@@ -6,25 +6,14 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import {
   Home,
   Users,
-  Flag,
-  Settings,
+  Bug,
   Database,
-  Package,
-  Wrench,
-  AlertTriangle,
-  Truck,
-  ShoppingCart,
-  CheckSquare,
-  MessageSquare,
-  AppWindow,
+  Settings,
   ChevronLeft,
   ChevronRight,
-  Bug,
-  Activity
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 
@@ -33,101 +22,26 @@ const navigation = [
     name: 'Dashboard',
     href: '/',
     icon: Home,
-    permission: null
+    permission: null,
   },
   {
     name: 'Amministrazione',
-    items: [
-      {
-        name: 'Utenti & Permessi',
-        href: '/admin/users',
-        icon: Users,
-        permission: 'locations.manage_users'
-      },
-      {
-        name: 'Feature Flags',
-        href: '/admin/feature-flags',
-        icon: Flag,
-        permission: 'locations.manage_flags'
-      }
-    ]
+    href: '/admin/users',
+    icon: Users,
+    permission: 'locations.manage_users',
   },
   {
     name: 'QA & Debug',
-    items: [
-      {
-        name: 'Chi sono io?',
-        href: '/qa/whoami',
-        icon: Bug,
-        permission: 'manage_users'  // Admin only
-      },
-      {
-        name: 'Health Check',
-        href: '/qa/health',
-        icon: Activity,
-        permission: 'manage_users'  // Admin only
-      }
-    ]
+    href: '/qa',
+    icon: Bug,
+    permission: 'manage_users',
   },
   {
     name: 'Moduli',
-    items: [
-      {
-        name: 'Locations',
-        href: '/locations',
-        icon: Database,
-        permission: 'locations.view'
-      },
-      {
-        name: 'Inventario',
-        href: '/inventario',
-        icon: Package,
-        permission: 'inventory.view'
-      },
-      {
-        name: 'Tecnici',
-        href: '/tecnici',
-        icon: Wrench,
-        permission: 'technicians.view'
-      },
-      {
-        name: 'Incidents',
-        href: '/incidents',
-        icon: AlertTriangle,
-        permission: 'incidents.view'
-      },
-      {
-        name: 'Fornitori',
-        href: '/fornitori',
-        icon: Truck,
-        permission: 'suppliers.view'
-      },
-      {
-        name: 'Ordini',
-        href: '/ordini',
-        icon: ShoppingCart,
-        permission: 'orders.view'
-      },
-      {
-        name: 'Task',
-        href: '/task',
-        icon: CheckSquare,
-        permission: 'tasks.view'
-      },
-      {
-        name: 'Chat',
-        href: '/chat',
-        icon: MessageSquare,
-        permission: 'chat.view'
-      },
-      {
-        name: 'API',
-        href: '/api-docs',
-        icon: AppWindow,
-        permission: 'api.view'
-      }
-    ]
-  }
+    href: '/modules',
+    icon: Database,
+    permission: 'locations.view',
+  },
 ]
 
 export default function SidebarClient() {
@@ -136,10 +50,12 @@ export default function SidebarClient() {
   const { hasPermission, context } = useAppStore()
 
   return (
-    <div className={cn(
-      "bg-card border-r border-border transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
-    )}>
+    <div
+      className={cn(
+        'bg-card border-r border-border transition-all duration-300',
+        collapsed ? 'w-16' : 'w-64'
+      )}
+    >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
@@ -164,90 +80,45 @@ export default function SidebarClient() {
         </div>
 
         {/* Context Info */}
-        {!collapsed && context.org_id && (
+        {!collapsed && context.location_name && (
           <div className="p-4 border-b border-border">
-            <div className="space-y-2">
-              <Badge variant="outline" className="w-full justify-center">
-                Demo Organization
-              </Badge>
-              <Badge variant="secondary" className="w-full justify-center">
-                {context.location_id ? 'Lyon' : 'Tutte le location'}
-              </Badge>
-            </div>
+            <Badge variant="secondary" className="w-full justify-center">
+              {context.location_name}
+            </Badge>
           </div>
         )}
 
         {/* Navigation */}
         <nav className="flex-1 space-y-2 p-4">
-          {navigation.map((section, sectionIndex) => (
-            <div key={sectionIndex}>
-              {section.name && !collapsed && (
-                <h3 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {section.name}
-                </h3>
-              )}
-
-              {section.href ? (
-                // Single item
-                <Link
-                  href={section.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                    pathname === section.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                  )}
-                >
-                  <section.icon className="h-4 w-4" />
-                  {!collapsed && section.name}
-                </Link>
-              ) : (
-                // Section with items
-                <div className="space-y-1">
-                  {section.items?.map((item) => {
-                    const canAccess = !item.permission || hasPermission(item.permission)
-
-                    if (!canAccess && !collapsed) {
-                      return null // Hide inaccessible items when expanded
-                    }
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                          canAccess
-                            ? "hover:bg-accent hover:text-accent-foreground"
-                            : "opacity-50 cursor-not-allowed",
-                          pathname === item.href && canAccess
-                            ? "bg-accent text-accent-foreground"
-                            : "text-muted-foreground",
-                        )}
-                        onClick={(e) => {
-                          if (!canAccess) {
-                            e.preventDefault()
-                          }
-                        }}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && (
-                          <span className="flex-1">{item.name}</span>
-                        )}
-                        {!collapsed && !canAccess && (
-                          <Badge variant="secondary" className="text-xs">
-                            Bloccato
-                          </Badge>
-                        )}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-
-              {sectionIndex < navigation.length - 1 && !collapsed && (
-                <Separator className="my-4" />
-              )}
-            </div>
-          ))}
+          {navigation.map((item) => {
+            const canAccess = !item.permission || hasPermission(item.permission)
+            if (!canAccess && !collapsed) {
+              return null
+            }
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  canAccess
+                    ? 'hover:bg-accent hover:text-accent-foreground'
+                    : 'opacity-50 cursor-not-allowed',
+                  pathname === item.href && canAccess
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground'
+                )}
+                onClick={(e) => {
+                  if (!canAccess) {
+                    e.preventDefault()
+                  }
+                }}
+              >
+                <item.icon className="h-4 w-4" />
+                {!collapsed && item.name}
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Footer */}
@@ -258,10 +129,27 @@ export default function SidebarClient() {
                 <div className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-xs text-muted-foreground">Sistema Attivo</span>
               </div>
-              <Button variant="outline" size="sm" className="w-full">
-                <Settings className="mr-2 h-4 w-4" />
-                Impostazioni
-              </Button>
+              {(() => {
+                const canSettings = hasPermission('locations.view')
+                return (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn('w-full', !canSettings && 'opacity-50 cursor-not-allowed')}
+                    asChild
+                  >
+                    <Link
+                      href="/settings"
+                      onClick={(e) => {
+                        if (!canSettings) e.preventDefault()
+                      }}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Impostazioni
+                    </Link>
+                  </Button>
+                )
+              })()}
             </div>
           ) : (
             <div className="flex justify-center">
@@ -273,4 +161,3 @@ export default function SidebarClient() {
     </div>
   )
 }
-

@@ -81,7 +81,7 @@ export default function HomePage() {
           {context.org_id && (
             <div className="flex gap-2 mt-4">
               <Badge variant="outline">Org: Demo Organization</Badge>
-              <Badge variant="outline">Location: {context.location_id ? 'Lyon' : 'Tutte'}</Badge>
+          <Badge variant="outline">Location: {context.location_name}</Badge>
             </div>
           )}
         </div>
