@@ -37,6 +37,8 @@ const navigation = [
   },
   {
     name: 'Amministrazione',
+    href: '/admin',
+    permission: 'locations.manage_users',
     items: [
       {
         name: 'Utenti & Permessi',
@@ -46,7 +48,7 @@ const navigation = [
       },
       {
         name: 'Feature Flags',
-        href: '/admin/flags',
+        href: '/admin/feature-flags',
         icon: Flag,
         permission: 'locations.manage_flags'
       }
@@ -54,6 +56,8 @@ const navigation = [
   },
   {
     name: 'QA & Debug',
+    href: '/qa',
+    permission: 'manage_users',
     items: [
       {
         name: 'Chi sono io?',
@@ -71,6 +75,8 @@ const navigation = [
   },
   {
     name: 'Moduli',
+    href: '/modules',
+    permission: 'locations.view',
     items: [
       {
         name: 'Locations',
@@ -164,14 +170,11 @@ export default function SidebarClient() {
         </div>
 
         {/* Context Info */}
-        {!collapsed && context.org_id && (
+        {!collapsed && context.location_name && (
           <div className="p-4 border-b border-border">
             <div className="space-y-2">
               <Badge variant="outline" className="w-full justify-center">
-                Demo Organization
-              </Badge>
-              <Badge variant="secondary" className="w-full justify-center">
-                {context.location_id ? 'Lyon' : 'Tutte le location'}
+                {context.location_name}
               </Badge>
             </div>
           </div>
@@ -181,26 +184,32 @@ export default function SidebarClient() {
         <nav className="flex-1 space-y-2 p-4">
           {navigation.map((section, sectionIndex) => (
             <div key={sectionIndex}>
-              {section.name && !collapsed && (
-                <h3 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {section.name}
-                </h3>
+              {section.items && section.name && !collapsed && (
+                section.href ? (
+                  <Link
+                    href={section.href}
+                    className={cn(
+                      'mb-2 px-2 text-xs font-semibold uppercase tracking-wider rounded-sm',
+                      hasPermission(section.permission)
+                        ? 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        : 'text-muted-foreground opacity-50 cursor-not-allowed'
+                    )}
+                    onClick={(e) => {
+                      if (section.permission && !hasPermission(section.permission)) {
+                        e.preventDefault()
+                      }
+                    }}
+                  >
+                    {section.name}
+                  </Link>
+                ) : (
+                  <h3 className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {section.name}
+                  </h3>
+                )
               )}
 
-              {section.href ? (
-                // Single item
-                <Link
-                  href={section.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                    pathname === section.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                  )}
-                >
-                  <section.icon className="h-4 w-4" />
-                  {!collapsed && section.name}
-                </Link>
-              ) : (
-                // Section with items
+              {section.items ? (
                 <div className="space-y-1">
                   {section.items?.map((item) => {
                     const canAccess = !item.permission || hasPermission(item.permission)
@@ -241,6 +250,17 @@ export default function SidebarClient() {
                     )
                   })}
                 </div>
+              ) : (
+                <Link
+                  href={section.href || '#'}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === section.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {section.icon && <section.icon className="h-4 w-4" />}
+                  {!collapsed && section.name}
+                </Link>
               )}
 
               {sectionIndex < navigation.length - 1 && !collapsed && (
@@ -258,10 +278,26 @@ export default function SidebarClient() {
                 <div className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-xs text-muted-foreground">Sistema Attivo</span>
               </div>
-              <Button variant="outline" size="sm" className="w-full">
-                <Settings className="mr-2 h-4 w-4" />
-                Impostazioni
-              </Button>
+              {(() => {
+                const canSettings = hasPermission('locations.view')
+                return (
+                  <Link
+                    href={canSettings ? '/settings' : '#'}
+                    onClick={(e) => {
+                      if (!canSettings) e.preventDefault()
+                    }}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn('w-full', !canSettings && 'cursor-not-allowed opacity-50')}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Impostazioni
+                    </Button>
+                  </Link>
+                )
+              })()}
             </div>
           ) : (
             <div className="flex justify-center">

@@ -55,7 +55,7 @@ export default function HomePage() {
     {
       title: 'Feature Flags',
       description: 'Configura funzionalità per moduli',
-      href: '/admin/flags',
+      href: '/admin/feature-flags',
       icon: Flag,
       permission: 'locations.manage_flags'
     },

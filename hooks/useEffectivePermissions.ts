@@ -12,10 +12,6 @@ export function useEffectivePermissions() {
       const perms = await getUserPermissions(context.org_id || undefined, context.location_id || undefined)
       setPermissions(perms)
     }
-    if (context.org_id) {
-      void load()
-    } else {
-      setPermissions([])
-    }
+    void load()
   }, [context.org_id, context.location_id, setPermissions])
 }
