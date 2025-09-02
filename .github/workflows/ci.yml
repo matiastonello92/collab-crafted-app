@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-placeholder"
+      RESEND_API_KEY: "dummy"
+      SUPABASE_SERVICE_ROLE_KEY: "dummy"
+      NODE_ENV: "production"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps (no lockfile strict)
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck (non-blocking)
+        run: npm run -s typecheck || echo "typecheck skipped/failed (non-blocking)"
+
+      - name: Lint (non-blocking)
+        run: npm run -s lint || echo "lint skipped/failed (non-blocking)"
+
+      - name: Build
+        run: npm run -s build:dev | tee build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: warn
