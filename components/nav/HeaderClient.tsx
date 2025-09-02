@@ -15,6 +15,7 @@ import { UserDropdown } from '@/components/nav/UserDropdown'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { setAppContext } from '@/lib/appContext'
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions'
+import { setActiveLocationAction } from '@/lib/activeLocation'
 
 // Mock data for demonstration
 const mockOrgs = [
@@ -74,6 +75,7 @@ export default function HeaderClient() {
     }
     router.replace(`?${params.toString()}`)
     await setAppContext(context.org_id ?? undefined, newLoc ?? undefined)
+    await setActiveLocationAction(newLoc ?? undefined)
   }
 
   return (
