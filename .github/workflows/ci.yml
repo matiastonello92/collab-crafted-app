@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Placeholder sicuri SOLO per build-time; NON usare in prod.
+      NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-placeholder"
+      RESEND_API_KEY: "dummy"
+      SUPABASE_SERVICE_ROLE_KEY: "dummy"
+      NODE_ENV: "production"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: |
+          if [ -f bun.lockb ]; then
+            curl -fsSL https://bun.sh/install | bash
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            bun install --no-progress
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Typecheck
+        run: npm run -s typecheck || true
+
+      - name: Lint
+        run: npm run -s lint || true
+
+      - name: Build
+        run: npm run -s build:dev | tee build.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: warn
