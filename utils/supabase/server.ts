@@ -25,12 +25,13 @@ export async function createSupabaseServerClient() {
     }
   );
 
-  // Imposta il contesto RLS se abbiamo una location persistita
-  const loc = cookieStore.get('pn_loc')?.value;
-  if (loc) {
+  // Imposta il contesto RLS se abbiamo un'organizzazione/location persistite
+  const org = cookieStore.get('pn_org')?.value || null;
+  const loc = cookieStore.get('pn_loc')?.value || null;
+  if (org || loc) {
     try {
       await supabase.rpc('app.set_context_checked', {
-        p_org: null,
+        p_org: org,
         p_location: loc,
       });
     } catch (err) {

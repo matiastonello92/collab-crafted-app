@@ -9,6 +9,11 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
     const supabase = await createSupabaseServerClient();
     const jar = await cookies();
     const cookieId = jar.get('pn_loc')?.value ?? null;
+    const orgId = jar.get('pn_org')?.value ?? null;
+
+    if (orgId) {
+      await supabase.rpc('app.set_context_checked', { p_org: orgId, p_location: null });
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { user: null, locations: [], meta: {} };
@@ -34,6 +39,11 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
     if (e2) {
       console.error('[activeLocation] locations error', e2);
       return { user, locations: [], meta: { error: 'locations' } };
+    }
+
+    const restoreLoc = cookieId || (locs?.[0]?.id ?? null);
+    if (orgId && restoreLoc) {
+      await supabase.rpc('app.set_context_checked', { p_org: orgId, p_location: restoreLoc });
     }
 
     return { user, locations: (locs ?? []) as Loc[], meta: {} };
