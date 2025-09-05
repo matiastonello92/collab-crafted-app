@@ -8,7 +8,7 @@ export type AuthSnapshot = {
 };
 
 export async function getAuthSnapshot(): Promise<AuthSnapshot> {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const jar = await cookies();
   const orgId = jar.get('pn_org')?.value ?? null;
   const locId = jar.get('pn_loc')?.value ?? null;

@@ -2,9 +2,14 @@ import { cookies } from 'next/headers';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { requireSupabaseEnv } from './config';
 
-export function createSupabaseServerClient() {
+export async function createSupabaseServerClient() {
   const { url, anon } = requireSupabaseEnv();
-  const cookieStore = cookies() as any;
+  const cookieStore = await cookies();
+
+  if (process.env.NODE_ENV !== 'production') {
+    const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);
+    if (match) console.log('[supabase][server]', match[1]);
+  }
 
   return createServerClient(url, anon, {
     cookies: {

@@ -87,7 +87,7 @@ export async function getUsersWithDetails(
   search: string = ''
 ): Promise<{ users: UserWithDetails[]; total: number; hasMore: boolean }> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -151,7 +151,7 @@ export async function getUsersWithDetails(
  */
 export async function getUserById(userId: string): Promise<UserWithDetails | null> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -195,7 +195,7 @@ export async function getUserById(userId: string): Promise<UserWithDetails | nul
  */
 export async function getUserRolesByLocation(userId: string): Promise<UserRolesByLocation[]> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -248,7 +248,7 @@ export async function getUserRolesByLocation(userId: string): Promise<UserRolesB
  */
 export async function getUserPermissionOverrides(userId: string): Promise<UserPermissionOverride[]> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()

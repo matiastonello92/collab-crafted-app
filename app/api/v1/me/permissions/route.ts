@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const locationId = url.searchParams.get("locationId") ?? "";
 
     // 1) Authenticate user using server-side Supabase client (via @supabase/ssr)
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const supabaseAdmin = createSupabaseAdminClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
