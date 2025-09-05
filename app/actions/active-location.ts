@@ -4,39 +4,48 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 
-async function userHasLocation(userId: string, locationId: string) {
-  const supabase = await createSupabaseServerClient();
-  // Tabella corretta: public.user_roles_locations
-  // Check di esistenza senza scaricare righe
-  const { count, error } = await supabase
-    .from('user_roles_locations')
-    .select('location_id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('location_id', locationId);
-
-  if (error) throw error;
-  return !!(count && count > 0);
-}
-
 export async function setActiveLocationAction(locationId?: string | null) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 
   const jar = await cookies();
-
   if (!locationId) {
-    jar.delete('pn_loc'); // <-- fix: usare (await cookies()).delete
+    const current = jar.get('pn_loc')?.value ?? null;
+    let orgId: string | null = null;
+    if (current) {
+      const { data: loc } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', current)
+        .single();
+      orgId = loc?.org_id ?? null;
+    }
+    await supabase.rpc('app.set_context_checked', { p_org: orgId, p_location: null });
+    jar.delete('pn_loc');
     revalidatePath('/', 'layout');
     revalidatePath('/dashboard');
     return;
   }
 
-  const ok = await userHasLocation(user.id, locationId);
-  if (!ok) throw new Error('Forbidden');
+  const { data: loc, error: locError } = await supabase
+    .from('locations')
+    .select('org_id')
+    .eq('id', locationId)
+    .single();
+  if (locError || !loc) throw locError ?? new Error('Forbidden');
+
+  const { error: rpcError } = await supabase.rpc('app.set_context_checked', {
+    p_org: loc.org_id,
+    p_location: locationId,
+  });
+  if (rpcError) throw rpcError;
 
   jar.set('pn_loc', locationId, {
-    httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 90
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 90,
   });
 
   revalidatePath('/', 'layout');

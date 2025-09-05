@@ -7,6 +7,25 @@ type Meta = { error?: string };
 export async function getUserLocations(): Promise<{ user: { id: string } | null; locations: Loc[]; meta: Meta }> {
   try {
     const supabase = await createSupabaseServerClient();
+    const jar = await cookies();
+    const cookieId = jar.get('pn_loc')?.value ?? null;
+
+    let orgId: string | null = null;
+    if (cookieId) {
+      const { data: loc } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', cookieId)
+        .single();
+      orgId = loc?.org_id ?? null;
+      if (orgId) {
+        await supabase.rpc('app.set_context_checked', {
+          p_org: orgId,
+          p_location: cookieId,
+        });
+      }
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { user: null, locations: [], meta: {} };
 
