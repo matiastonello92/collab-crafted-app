@@ -1,19 +1,29 @@
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { requireSupabaseEnv } from './config';
 
-export function createSupabaseServerClient() {
-  const { url, anon } = requireSupabaseEnv();
-  const cookieStore = cookies() as any;
+// Rende esplicito che va usato con await
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies(); // Next 15: cookies() è async
 
-  return createServerClient(url, anon, {
-    cookies: {
-      get: (name: string) => cookieStore.get(name)?.value,
-      set: (name: string, value: string, options: CookieOptions) =>
-        cookieStore.set({ name, value, ...options }),
-      remove: (name: string, options: CookieOptions) =>
-        cookieStore.set({ name, value: '', ...options, maxAge: 0 }),
-    },
-  });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          // NB: set/remove funzionano in Server Actions/Route Handlers.
+          // In Server Components non verranno chiamati (ed è OK).
+          cookieStore.set(name, value, options);
+        },
+        remove(name: string, options: any) {
+          cookieStore.set(name, '', { ...options, maxAge: 0 });
+        },
+      },
+    }
+  );
+
+  return supabase;
 }
-

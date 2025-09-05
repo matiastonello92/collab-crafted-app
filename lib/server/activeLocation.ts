@@ -6,7 +6,7 @@ type Meta = { error?: string };
 
 export async function getUserLocations(): Promise<{ user: { id: string } | null; locations: Loc[]; meta: Meta }> {
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { user: null, locations: [], meta: {} };
 
