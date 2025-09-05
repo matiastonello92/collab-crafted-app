@@ -1,59 +1,36 @@
-import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { canAny } from '@/lib/permissions/can'
+import { redirect } from 'next/navigation';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { getAuthSnapshot } from '@/lib/server/authContext';
 
-/**
- * Server-side admin guard - checks if user has admin permissions
- * Redirects to home page if not authorized
- */
-export async function requireAdmin(): Promise<string> {
-  try {
-    const supabase = createSupabaseServerClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+const ADMIN_PERMS = ['manage_users', 'manage_settings', 'assign_roles'];
 
-    if (authError || !user) {
-      redirect('/login')
-    }
-
-    // Check if user has admin-level permissions
-    const hasAdminAccess = await canAny(user.id, [
-      'manage_users',
-      'assign_roles',
-      'admin.manage'
-    ])
-
-    if (!hasAdminAccess) {
-      redirect('/?error=unauthorized')
-    }
-
-    return user.id
-  } catch (error) {
-    console.error('Error in admin guard:', error)
-    redirect('/?error=server_error')
-  }
+function hasAdminPerms(perms: string[]) {
+  return ADMIN_PERMS.some(p => perms.includes(p));
 }
 
-/**
- * Check admin access without redirect (for API routes)
- */
+export async function requireAdmin(): Promise<string | void> {
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { permissions } = await getAuthSnapshot();
+
+  if (!user || !hasAdminPerms(permissions)) {
+    redirect('/?error=unauthorized');
+  }
+
+  return user.id;
+}
+
 export async function checkAdminAccess(): Promise<{ userId: string | null; hasAccess: boolean }> {
-  try {
-    const supabase = createSupabaseServerClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { userId: null, hasAccess: false };
 
-    if (authError || !user) {
-      return { userId: null, hasAccess: false }
-    }
-
-    const hasAdminAccess = await canAny(user.id, [
-      'manage_users',
-      'assign_roles', 
-      'admin.manage'
-    ])
-
-    return { userId: user.id, hasAccess: hasAdminAccess }
-  } catch (error) {
-    console.error('Error checking admin access:', error)
-    return { userId: null, hasAccess: false }
-  }
+  const { permissions } = await getAuthSnapshot();
+  return { userId: user.id, hasAccess: hasAdminPerms(permissions) };
 }
+
+export async function isAdmin(): Promise<boolean> {
+  const { permissions } = await getAuthSnapshot();
+  return hasAdminPerms(permissions);
+}
+
