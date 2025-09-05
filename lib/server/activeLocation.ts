@@ -9,12 +9,6 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
     const supabase = await createSupabaseServerClient();
     const jar = await cookies();
     const cookieId = jar.get('pn_loc')?.value ?? null;
-    if (cookieId) {
-      await supabase.rpc('app.set_context_checked', {
-        p_org: null,
-        p_location: cookieId,
-      });
-    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { user: null, locations: [], meta: {} };
