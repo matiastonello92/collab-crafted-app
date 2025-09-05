@@ -1,22 +1,19 @@
-import { getActiveLocationServer } from '@/lib/server/activeLocation';
+import { cookies } from 'next/headers';
+import { getAuthSnapshot } from '@/lib/server/auth-snapshot';
 import { setActiveLocationAction } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
 
 export default async function Header() {
-  const { active, locations, persisted, meta } = await getActiveLocationServer();
-
-  const errorMessage =
-    meta?.error === 'memberships' ? 'Impossibile leggere le assegnazioni.'
-    : meta?.error === 'locations' ? 'Impossibile leggere le sedi.'
-    : meta?.error === 'fatal' ? 'Errore inatteso.'
-    : undefined;
+  const { locations, activeLocationId, permissions } = await getAuthSnapshot();
+  const persisted = !!(await cookies()).get('pn_loc');
 
   return (
     <HeaderClient
       locations={locations}
-      activeLocationId={active?.id ?? null}
+      activeLocationId={activeLocationId}
       persisted={persisted}
-      errorMessage={errorMessage}
+      errorMessage={undefined}
+      permissions={permissions}
       setActiveLocation={setActiveLocationAction}
     />
   );

@@ -3,23 +3,38 @@
 import { useEffect, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
+import { useAppStore } from '@/lib/store';
 
 export default function HeaderClient({
   locations,
   activeLocationId,
   persisted,
   errorMessage,
+  permissions,
   setActiveLocation,
 }: {
   locations: { id: string; name: string }[];
   activeLocationId: string | null;
   persisted: boolean;
   errorMessage?: string;
+  permissions: string[];
   setActiveLocation: (id?: string | null) => Promise<void>;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
+  const { setContext, setPermissions } = useAppStore();
+
+  useEffect(() => {
+    const name = locations.find(l => l.id === activeLocationId)?.name ?? null;
+    setContext({
+      org_id: null,
+      location_id: activeLocationId,
+      location_name: name,
+      user_id: null,
+    });
+    setPermissions(permissions);
+  }, [locations, activeLocationId, permissions, setContext, setPermissions]);
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { canAny } from '@/lib/permissions/can'
+import { getAuthSnapshot } from '@/lib/server/auth-snapshot'
 
 /**
  * Server-side admin guard - checks if user has admin permissions
@@ -15,12 +15,9 @@ export async function requireAdmin(): Promise<string> {
       redirect('/login')
     }
 
-    // Check if user has admin-level permissions
-    const hasAdminAccess = await canAny(user.id, [
-      'manage_users',
-      'assign_roles',
-      'admin.manage'
-    ])
+    const { permissions } = await getAuthSnapshot()
+    const adminPerms = ['locations.manage_users', 'locations.assign_roles', 'locations.manage_settings']
+    const hasAdminAccess = adminPerms.some(p => permissions.includes(p))
 
     if (!hasAdminAccess) {
       redirect('/?error=unauthorized')
@@ -45,11 +42,9 @@ export async function checkAdminAccess(): Promise<{ userId: string | null; hasAc
       return { userId: null, hasAccess: false }
     }
 
-    const hasAdminAccess = await canAny(user.id, [
-      'manage_users',
-      'assign_roles', 
-      'admin.manage'
-    ])
+    const { permissions } = await getAuthSnapshot()
+    const adminPerms = ['locations.manage_users', 'locations.assign_roles', 'locations.manage_settings']
+    const hasAdminAccess = adminPerms.some(p => permissions.includes(p))
 
     return { userId: user.id, hasAccess: hasAdminAccess }
   } catch (error) {

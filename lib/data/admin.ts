@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { getAuthSnapshot } from '@/lib/server/auth-snapshot'
 
 export interface UserWithDetails {
   id: string
@@ -68,32 +69,9 @@ export interface UserPermissionOverride {
  */
 export async function checkIsAdmin(): Promise<boolean> {
   try {
-    const supabase = createSupabaseServerClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return false
-    }
-
-    // Controlla se l'utente ha ruolo admin tramite user_roles_locations
-    const { data, error } = await supabase
-      .from('user_roles_locations')
-      .select(`
-        roles!inner (
-          name
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .eq('roles.name', 'admin')
-      .limit(1)
-
-    if (error) {
-      console.error('Error checking admin status:', error)
-      return false
-    }
-
-    return (data?.length ?? 0) > 0
+    const { permissions } = await getAuthSnapshot()
+    const adminPerms = ['locations.manage_users', 'locations.assign_roles', 'locations.manage_settings']
+    return adminPerms.some(p => permissions.includes(p))
   } catch (error) {
     console.error('Error in checkIsAdmin:', error)
     return false
