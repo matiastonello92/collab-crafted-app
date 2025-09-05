@@ -3,16 +3,18 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 async function userHasLocation(userId: string, locationId: string) {
-  const supabase = createSupabaseServerClient();
+  const admin = createSupabaseAdminClient();
   // Tabella corretta: public.user_roles_locations
   // Check di esistenza senza scaricare righe
-  const { count, error } = await supabase
+  const { count, error } = await admin
     .from('user_roles_locations')
     .select('location_id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .eq('location_id', locationId);
+    .eq('location_id', locationId)
+    .eq('is_active', true);
 
   if (error) throw error;
   return !!(count && count > 0);

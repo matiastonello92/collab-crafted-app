@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 type Loc = { id: string; name: string };
 type Meta = { error?: string };
@@ -10,10 +11,12 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { user: null, locations: [], meta: {} };
 
-    const { data: mems, error: e1 } = await supabase
+    const admin = createSupabaseAdminClient();
+    const { data: mems, error: e1 } = await admin
       .from('user_roles_locations')
       .select('location_id')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('is_active', true);
 
     if (e1) {
       console.error('[activeLocation] memberships error', e1);
@@ -23,7 +26,7 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
     const ids = (mems ?? []).map((m: any) => m.location_id).filter(Boolean);
     if (ids.length === 0) return { user, locations: [], meta: {} };
 
-    const { data: locs, error: e2 } = await supabase
+    const { data: locs, error: e2 } = await admin
       .from('locations')
       .select('id,name')
       .in('id', ids);
