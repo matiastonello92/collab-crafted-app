@@ -3,25 +3,21 @@ import { setActiveLocationAction } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
 
 export default async function Header() {
-  try {
-    const { active, locations, persisted } = await getActiveLocationServer();
-    return (
-      <HeaderClient
-        locations={locations}
-        activeLocationId={active?.id ?? null}
-        persisted={persisted}
-        setActiveLocation={setActiveLocationAction}
-      />
-    );
-  } catch (err) {
-    console.error('[Header] render fatal', err);
-    return (
-      <HeaderClient
-        locations={[]}
-        activeLocationId={null}
-        persisted={false}
-        setActiveLocation={async () => {}}
-      />
-    );
-  }
+  const { active, locations, persisted, meta } = await getActiveLocationServer();
+
+  const errorMessage =
+    meta?.error === 'memberships' ? 'Impossibile leggere le assegnazioni.'
+    : meta?.error === 'locations' ? 'Impossibile leggere le sedi.'
+    : meta?.error === 'fatal' ? 'Errore inatteso.'
+    : undefined;
+
+  return (
+    <HeaderClient
+      locations={locations}
+      activeLocationId={active?.id ?? null}
+      persisted={persisted}
+      errorMessage={errorMessage}
+      setActiveLocation={setActiveLocationAction}
+    />
+  );
 }
