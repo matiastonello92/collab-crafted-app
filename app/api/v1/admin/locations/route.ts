@@ -1,37 +1,46 @@
 import { NextResponse } from "next/server"
-import { createSupabaseAdminClient } from "@/lib/supabase/server"
 import { checkAdminAccess } from "@/lib/admin/guards"
+import { createSupabaseAdminClient } from "@/lib/supabase/server"
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const runtime = 'nodejs'
 
 export async function GET() {
-  try {
-    // Check admin access using centralized guard
-    const { hasAccess } = await checkAdminAccess()
-    if (!hasAccess) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
-
-    const supabaseAdmin = createSupabaseAdminClient()
-
-    // Fetch all active locations
-    const { data: locations, error } = await supabaseAdmin
-      .from('locations')
-      .select('id, name, city, country')
-      .eq('is_active', true)
-      .order('name', { ascending: true })
-
-    if (error) {
-      console.error('Error fetching locations:', error)
-      return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 })
-    }
-
-    return NextResponse.json({ locations: locations || [] })
-
-  } catch (error: any) {
-    console.error('Error in locations endpoint:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+  const { hasAccess } = await checkAdminAccess()
+  if (!hasAccess) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
+
+  const supabase = createSupabaseAdminClient()
+  const { data: locations, error } = await supabase
+    .from('locations')
+    .select('*')
+    .order('name')
+
+  if (error) {
+    return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 })
+  }
+
+  return NextResponse.json({ locations })
+}
+
+export async function POST(request: Request) {
+  const { hasAccess } = await checkAdminAccess()
+  if (!hasAccess) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
+  const body = await request.json()
+  const supabase = createSupabaseAdminClient()
+  
+  const { data: location, error } = await supabase
+    .from('locations')
+    .insert(body)
+    .select()
+    .single()
+
+  if (error) {
+    return NextResponse.json({ error: 'Failed to create location' }, { status: 500 })
+  }
+
+  return NextResponse.json({ location })
 }

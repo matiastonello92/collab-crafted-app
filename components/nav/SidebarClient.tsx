@@ -11,15 +11,17 @@ import {
   Users,
   Bug,
   Settings,
+  MapPin,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { can } from '@/lib/permissions'
 
-const navigation: { name: string; href: string; icon: any; permission: string | null }[] = [
+const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
+  { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
 ]
@@ -66,17 +68,23 @@ export default function SidebarClient() {
         <nav className="flex-1 space-y-2 p-4">
           {navigation.map((item) => {
             const canAccess = !item.permission || can(permissions, item.permission)
+            const isAdmin = can(permissions, '*')
+            
+            // Per Locations: se non è admin, redirect a /locations/manage
+            const finalHref = item.name === 'Locations' && !isAdmin && canAccess 
+              ? '/locations/manage' 
+              : item.href
 
             return (
               <Link
                 key={item.href}
-                href={canAccess ? item.href : '#'}
+                href={canAccess ? finalHref : '#'}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                   canAccess
                     ? 'hover:bg-accent hover:text-accent-foreground'
                     : 'opacity-50 cursor-not-allowed',
-                  pathname === item.href && canAccess
+                  (pathname === item.href || pathname === finalHref) && canAccess
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground'
                 )}
