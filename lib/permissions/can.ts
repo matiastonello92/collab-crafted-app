@@ -23,26 +23,8 @@ export async function can(
       const { createSupabaseAdminClient } = await import('@/lib/supabase/server')
       const supabaseAdmin = createSupabaseAdminClient()
 
-      // Use the existing get_effective_permissions function if available
-      try {
-        const { data, error } = await supabaseAdmin.rpc('get_effective_permissions', {
-          p_user: userId,
-          p_org: context?.orgId || '',
-          p_location: context?.locationId || null,
-        })
-
-        if (error) {
-          console.error('Error checking permissions via RPC:', error)
-          return false
-        }
-
-        const permissions = Array.isArray(data) ? data.filter(p => typeof p === 'string') : []
-        return permissions.includes(permission)
-      } catch (rpcError) {
-        // Fallback to direct table queries if RPC not available
-        console.warn('RPC not available, using direct queries:', rpcError)
-        return await canFallbackQuery(supabaseAdmin, userId, permission, context)
-      }
+      // Use fallback query with optimized admin check
+      return await canFallbackQuery(supabaseAdmin, userId, permission, context)
     } else {
       // Client-side check via API
       const params = new URLSearchParams()
@@ -79,19 +61,15 @@ async function canFallbackQuery(
   context?: PermissionContext
 ): Promise<boolean> {
   try {
-    // Check if user has admin role (admin can do everything)
-    const { data: adminRoles } = await supabaseAdmin
-      .from('user_roles_locations')
-      .select(`
-        roles!inner (
-          name
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .eq('roles.name', 'admin')
+    // Check for wildcard permission first
+    if (permission === '*') {
+      const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: userId })
+      return Boolean(isAdmin)
+    }
 
-    if (adminRoles && adminRoles.length > 0) {
+    // Check if user has admin privileges (admin can do everything)
+    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: userId })
+    if (isAdmin) {
       return true // Admin has all permissions
     }
 

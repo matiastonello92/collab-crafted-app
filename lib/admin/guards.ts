@@ -17,6 +17,7 @@ export async function requireAdmin(): Promise<string> {
 
     // Check if user has admin-level permissions
     const hasAdminAccess = await canAny(user.id, [
+      '*',
       'manage_users',
       'assign_roles',
       'admin.manage'
@@ -46,6 +47,7 @@ export async function checkAdminAccess(): Promise<{ userId: string | null; hasAc
     }
 
     const hasAdminAccess = await canAny(user.id, [
+      '*',
       'manage_users',
       'assign_roles', 
       'admin.manage'
