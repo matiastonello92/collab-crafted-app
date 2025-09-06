@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Sistema multi-tenant per la gestione del personale con RBAC e feature flags',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function AppLayout({
   children,
 }: {

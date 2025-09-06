@@ -8,7 +8,7 @@ import { canAny } from '@/lib/permissions/can'
  */
 export async function requireAdmin(): Promise<string> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -38,7 +38,7 @@ export async function requireAdmin(): Promise<string> {
  */
 export async function checkAdminAccess(): Promise<{ userId: string | null; hasAccess: boolean }> {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

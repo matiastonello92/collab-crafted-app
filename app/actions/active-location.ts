@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 
 async function userHasLocation(userId: string, locationId: string) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   // Tabella corretta: public.user_roles_locations
   // Check di esistenza senza scaricare righe
   const { count, error } = await supabase
@@ -19,7 +19,7 @@ async function userHasLocation(userId: string, locationId: string) {
 }
 
 export async function setActiveLocationAction(locationId?: string | null) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 

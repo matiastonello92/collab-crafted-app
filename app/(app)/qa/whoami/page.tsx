@@ -11,7 +11,7 @@ export default async function QAWhoAmIPage() {
   const currentUserId = await requireAdmin()
   
   // Get current user details
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   if (authError || !user) {

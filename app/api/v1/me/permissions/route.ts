@@ -1,46 +1,73 @@
-import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { NextResponse } from 'next/server';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const orgId = url.searchParams.get("orgId") ?? "";
-    const locationId = url.searchParams.get("locationId") ?? "";
+    const locationId = url.searchParams.get('locationId') || undefined;
 
-    // 1) Authenticate user using server-side Supabase client (via @supabase/ssr)
-    const supabase = createSupabaseServerClient();
-    const supabaseAdmin = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
-      return NextResponse.json({}, { status: 401 });
+      return NextResponse.json({ permissions: [] }, { status: 401 });
     }
-    if (!orgId) {
+
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    let assignmentsQuery = supabaseAdmin
+      .from('user_roles_locations')
+      .select('role_id, location_id')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
+    if (locationId) {
+      assignmentsQuery = assignmentsQuery.eq('location_id', locationId);
+    }
+
+    const { data: assignments, error: assignErr } = await assignmentsQuery;
+    if (assignErr) {
       return NextResponse.json({ permissions: [] }, { status: 200 });
     }
 
-    // 2) RPC con service role
-    const { data, error } = await supabaseAdmin.rpc("get_effective_permissions", {
-      p_user: user.id,
-      p_org: orgId,
-      p_location: locationId || null,
+    const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean);
+    const permSet = new Set<string>();
+
+    if (roleIds.length > 0) {
+      const { data: rolePerms } = await supabaseAdmin
+        .from('role_permissions')
+        .select('permissions(name)')
+        .in('role_id', roleIds);
+
+      (rolePerms || []).forEach(rp => {
+        const name = (rp as any).permissions?.name as string | undefined;
+        if (name) permSet.add(name);
+      });
+    }
+
+    let overridesQuery = supabaseAdmin
+      .from('user_permissions')
+      .select('granted, location_id, permissions!inner(name)')
+      .eq('user_id', user.id);
+
+    if (locationId) {
+      overridesQuery = overridesQuery.in('location_id', [locationId, null]);
+    }
+
+    const { data: overrides } = await overridesQuery;
+    (overrides || []).forEach(ov => {
+      const name = (ov.permissions as any)?.name as string | undefined;
+      if (!name) return;
+      if (ov.granted) permSet.add(name);
+      else permSet.delete(name);
     });
 
-    if (error) {
-      // fallback safe per non bloccare la UI
-      return NextResponse.json({ permissions: [] }, { status: 200 });
-    }
-
-    const perms = Array.isArray(data)
-      ? data.filter((x: unknown): x is string => typeof x === "string")
-      : [];
-
-    return NextResponse.json({ permissions: Array.from(new Set(perms)) }, { status: 200 });
+    return NextResponse.json({ permissions: Array.from(permSet) }, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "internal" }, { status: 500 });
+    return NextResponse.json({ error: e?.message ?? 'internal' }, { status: 500 });
   }
 }
