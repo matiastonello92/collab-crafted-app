@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createSupabaseAdminClient } from "@/lib/supabase/server"
+import { admin } from "@/lib/supabase/service"
 import { checkAdminAccess } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const supabaseAdmin = createSupabaseAdminClient()
+    const supabaseAdmin = admin
 
     // Fetch all active roles
     const { data: roles, error } = await supabaseAdmin

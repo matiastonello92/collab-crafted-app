@@ -1,6 +1,7 @@
 import { runSmokeTests } from '../tests/smoke'
 import { runRLSPermissionTests } from '../tests/rls-permissions'
-import { supabaseAdmin } from '../lib/supabase/server'
+import { admin as supabaseAdmin } from '../lib/supabase/service'
+import { getSupabaseServiceRoleKey } from '../lib/env'
 
 async function generateReport() {
   console.log('📋 Generating comprehensive test report...\n')
@@ -9,7 +10,14 @@ async function generateReport() {
   console.log('🔧 Environment Configuration:')
   console.log(`   SUPABASE_URL: ${process.env.SUPABASE_URL ? '✓ Set' : '❌ Missing'}`)
   console.log(`   SUPABASE_ANON_KEY: ${process.env.SUPABASE_ANON_KEY ? `✓ Set (last 4: ...${process.env.SUPABASE_ANON_KEY.slice(-4)})` : '❌ Missing'}`)
-  console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? `✓ Set (last 4: ...${process.env.SUPABASE_SERVICE_ROLE_KEY.slice(-4)})` : '❌ Missing'}`)
+  let serviceRoleInfo
+  try {
+    const key = getSupabaseServiceRoleKey()
+    serviceRoleInfo = `✓ Set (last 4: ...${key.slice(-4)})`
+  } catch {
+    serviceRoleInfo = '❌ Missing'
+  }
+  console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${serviceRoleInfo}`)
   console.log(`   RESEND_API_KEY: ${process.env.RESEND_API_KEY ? `✓ Set (last 4: ...${process.env.RESEND_API_KEY.slice(-4)})` : '❌ Missing'}`)
   console.log('')
   

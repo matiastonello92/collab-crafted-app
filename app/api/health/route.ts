@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getSupabaseServiceRoleKey } from '@/lib/env'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -15,10 +16,17 @@ export async function GET() {
     }
 
     // Supabase configuration check
+    let serviceRolePresent = true
+    try {
+      getSupabaseServiceRoleKey()
+    } catch {
+      serviceRolePresent = false
+    }
+
     const supabase = {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'not_set',
       anon_key_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      service_role_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      service_role_present: serviceRolePresent
     }
 
     // Environment variables check (NEXT_PUBLIC_* only, for security)

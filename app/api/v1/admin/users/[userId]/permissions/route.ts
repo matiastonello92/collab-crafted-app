@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { admin } from '@/lib/supabase/service'
 import { normalizeSet } from '@/lib/permissions'
 
 export const runtime = 'nodejs'
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabaseAdmin = createSupabaseAdminClient()
+    const supabaseAdmin = admin
     
     // Check if current user can view user permissions
     const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })

@@ -13,8 +13,7 @@ const envVars = [
   'NEXT_PUBLIC_SUPABASE_URL', 
   'SUPABASE_ANON_KEY',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'SUPABASE_SERVICE_KEY'
+  'SUPABASE_SERVICE_ROLE_KEY'
 ]
 
 console.log('📋 Environment Variables:')
@@ -34,7 +33,7 @@ envVars.forEach(varName => {
 console.log('\n🎯 Expected Configuration:')
 console.log('   SUPABASE_URL: https://gsgqcsaycyjkbeepwoto.supabase.co')
 console.log('   ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (starts with eyJ)')
-console.log('   SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (starts with eyJ)')
+console.log('   SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (starts with eyJ)')
 
 console.log('\n💡 Next Steps:')
 console.log('   1. Get keys from Supabase Dashboard > Settings > API')

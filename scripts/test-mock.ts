@@ -3,6 +3,8 @@
  * Runs without requiring actual Supabase credentials
  */
 
+import { getSupabaseServiceRoleKey } from '../lib/env'
+
 async function mockDatabaseConnectivity() {
   console.log('🔌 Testing database connectivity...')
   console.log('   ✅ Database connection successful (mocked)')
@@ -134,7 +136,14 @@ async function generateSystemReport() {
   console.log('🔧 Environment Configuration:')
   console.log(`   SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ Set' : '❌ Missing (use .env.example)'}`)
   console.log(`   SUPABASE_ANON_KEY: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? `✓ Set (last 4: ...${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.slice(-4)})` : '❌ Missing (use .env.example)'}`)
-  console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? `✓ Set (last 4: ...${process.env.SUPABASE_SERVICE_ROLE_KEY.slice(-4)})` : '❌ Missing (use .env.example)'}`)
+  let serviceRoleInfo
+  try {
+    const key = getSupabaseServiceRoleKey()
+    serviceRoleInfo = `✓ Set (last 4: ...${key.slice(-4)})`
+  } catch {
+    serviceRoleInfo = '❌ Missing (use .env.example)'
+  }
+  console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${serviceRoleInfo}`)
   console.log(`   RESEND_API_KEY: ${process.env.RESEND_API_KEY ? `✓ Set (last 4: ...${process.env.RESEND_API_KEY.slice(-4)})` : '❌ Missing (use .env.example)'}`)
   console.log('')
   

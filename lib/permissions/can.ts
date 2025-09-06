@@ -20,8 +20,7 @@ export async function can(
     // Server-side check (when running in Node.js environment)
     if (typeof window === 'undefined') {
       // Import server utilities only on server-side
-      const { createSupabaseAdminClient } = await import('@/lib/supabase/server')
-      const supabaseAdmin = createSupabaseAdminClient()
+      const { admin: supabaseAdmin } = await import('@/lib/supabase/service')
 
       // Use the existing get_effective_permissions function if available
       try {
