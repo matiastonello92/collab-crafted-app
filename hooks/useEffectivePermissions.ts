@@ -55,8 +55,10 @@ export function useEffectivePermissions() {
         if (context.location_id) {
           const scoped = await getUserPermissions(context.location_id)
           if (!mounted) return
+          // Merge global permissions with scoped, never reset
           setPermissions(normalizeSet([...globalPerms.current, ...scoped]))
         } else {
+          // Keep global permissions when no location selected
           setPermissions(normalizeSet(globalPerms.current))
         }
       } finally {
@@ -67,5 +69,5 @@ export function useEffectivePermissions() {
     return () => {
       mounted = false
     }
-  }, [context.location_id, setPermissions])
+  }, [context.location_id, setPermissions, setPermissionsLoading])
 }
