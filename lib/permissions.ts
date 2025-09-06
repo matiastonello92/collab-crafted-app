@@ -34,20 +34,28 @@ export function normalizePermission(p: string): string {
 }
 
 /** Normalizza e deduplica una lista di permessi */
-export function normalizeSet(list: string[]): string[] {
-  return Array.from(new Set(list.map(normalizePermission)));
+export function normalizeSet(list: Array<string | Permission>): Permission[] {
+  const out = new Set<Permission>();
+  for (const raw of list) {
+    const n = normalizePermission(String(raw)) as Permission;
+    if (n) out.add(n);
+  }
+  return Array.from(out);
 }
 
 /** Normalizza un contenitore di permessi in Set<string> */
 export function toPermSet(perms: PermBag): Set<AnyPermission> {
   const arr = perms instanceof Set ? Array.from(perms) : perms;
-  return new Set(normalizeSet(arr as string[]));
+  return new Set<AnyPermission>(
+    normalizeSet(arr as Array<string | Permission>) as AnyPermission[]
+  );
 }
 
 /** Ritorna true se TUTTI i permessi richiesti sono presenti */
 export function can(perms: PermBag, required: PermReq): boolean {
-  const bag = toPermSet(perms);
-  if (bag.has('*')) return true;
+  const rawBag = perms instanceof Set ? Array.from(perms) : perms;
+  if (rawBag.some(p => String(p) === '*')) return true;
+  const bag = toPermSet(rawBag);
   const reqs = Array.isArray(required) ? required : [required];
   return reqs.map(normalizePermission).every(r => {
     if (bag.has(r)) return true;
@@ -59,9 +67,13 @@ export function can(perms: PermBag, required: PermReq): boolean {
 export async function getUserPermissions(locationId?: string): Promise<Permission[]> {
   const qs = new URLSearchParams();
   if (locationId) qs.set('locationId', locationId);
-  const res = await fetch(`/api/v1/me/permissions?${qs.toString()}`, { credentials: 'include' });
+  const res = await fetch(`/api/v1/me/permissions?${qs.toString()}`, {
+    credentials: 'include',
+  });
   if (!res.ok) return [];
   const json = await res.json();
-  const perms = Array.isArray(json?.permissions) ? (json.permissions as Permission[]) : [];
+  const perms = Array.isArray(json?.permissions)
+    ? (json.permissions as Array<string | Permission>)
+    : [];
   return normalizeSet(perms);
 }
