@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { admin } from '@/lib/supabase/service';
 import { normalizeSet } from '@/lib/permissions';
 
 export const runtime = 'nodejs';
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ permissions: [] }, { status: 401 });
     }
 
-    const supabaseAdmin = createSupabaseAdminClient();
+    const supabaseAdmin = admin;
 
     let assignmentsQuery = supabaseAdmin
       .from('user_roles_locations')

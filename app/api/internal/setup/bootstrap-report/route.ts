@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseServiceRoleKey } from '@/lib/env'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -26,6 +27,11 @@ export async function GET(request: NextRequest) {
     console.log('📊 Generating Bootstrap Implementation Report...')
 
     // Environment Status
+    let serviceRoleKey: string | undefined
+    try {
+      serviceRoleKey = getSupabaseServiceRoleKey()
+    } catch {}
+
     const envStatus = {
       supabase_url: {
         configured: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -40,10 +46,10 @@ export async function GET(request: NextRequest) {
           : 'NOT SET'
       },
       supabase_service_role_key: {
-        configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-        format_valid: process.env.SUPABASE_SERVICE_ROLE_KEY?.startsWith('eyJ') || false,
-        masked: process.env.SUPABASE_SERVICE_ROLE_KEY 
-          ? `${process.env.SUPABASE_SERVICE_ROLE_KEY.substring(0, 20)}...`
+        configured: !!serviceRoleKey,
+        format_valid: serviceRoleKey?.startsWith('eyJ') || false,
+        masked: serviceRoleKey
+          ? `${serviceRoleKey.substring(0, 20)}...`
           : 'NOT SET'
       },
       resend_api_key: {

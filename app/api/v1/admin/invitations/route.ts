@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { admin } from '@/lib/supabase/service'
+import { getSupabaseServiceRoleKey } from '@/lib/env'
 import { z } from 'zod'
 import { randomBytes } from 'crypto'
 
@@ -29,7 +30,7 @@ export async function GET() {
     }
 
     // Check if user can manage users
-    const supabaseAdmin = createSupabaseAdminClient()
+    const supabaseAdmin = admin
     const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
     
     if (!isAdmin) {
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
     }
 
     // Check permissions
-    const supabaseAdmin = createSupabaseAdminClient()
+    const supabaseAdmin = admin
     const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
     
     if (!isAdmin) {
@@ -180,7 +181,7 @@ export async function POST(request: Request) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          'Authorization': `Bearer ${getSupabaseServiceRoleKey()}`,
         },
         body: JSON.stringify(emailPayload),
       })

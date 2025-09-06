@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { admin } from '@/lib/supabase/service';
+import { getSupabaseServiceRoleKey } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,10 +13,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
     }
 
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ ok: false, error: 'service_role_not_configured' }, { status: 503 });
-    }
-
     const dbUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
     if (!dbUrl) {
       return NextResponse.json({ ok: false, error: 'db_not_configured' }, { status: 503 });
@@ -22,8 +20,8 @@ export async function POST(req: NextRequest) {
 
     let supabase;
     try {
-      const { createSupabaseAdminClient } = await import('@/lib/supabase/server');
-      supabase = createSupabaseAdminClient();
+      getSupabaseServiceRoleKey();
+      supabase = admin;
     } catch {
       return NextResponse.json({ ok: false, error: 'service_role_not_configured' }, { status: 503 });
     }
