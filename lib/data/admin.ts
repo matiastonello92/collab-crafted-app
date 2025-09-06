@@ -69,31 +69,14 @@ export interface UserPermissionOverride {
 export async function checkIsAdmin(): Promise<boolean> {
   try {
     const supabase = await createSupabaseServerClient()
-    
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return false
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return false
 
-    // Controlla se l'utente ha ruolo admin tramite user_roles_locations
-    const { data, error } = await supabase
-      .from('user_roles_locations')
-      .select(`
-        roles!inner (
-          name
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .eq('roles.name', 'admin')
-      .limit(1)
+    const meta: any = (user as any).app_metadata || {}
+    const perms: string[] = Array.isArray(meta.permissions) ? meta.permissions : []
+    const roleLevel = Number(meta.role_level ?? meta.roleLevel ?? 0)
 
-    if (error) {
-      console.error('Error checking admin status:', error)
-      return false
-    }
-
-    return (data?.length ?? 0) > 0
+    return perms.includes('*') || (Number.isFinite(roleLevel) && roleLevel >= 90)
   } catch (error) {
     console.error('Error in checkIsAdmin:', error)
     return false

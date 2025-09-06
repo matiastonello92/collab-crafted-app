@@ -20,6 +20,14 @@ export async function GET(req: Request) {
 
     const supabaseAdmin = createSupabaseAdminClient();
 
+    // Initialize permission set from JWT claims (app_metadata)
+    const permSet = new Set<string>();
+    const meta: any = (user as any).app_metadata || {};
+    const claimPerms: string[] = Array.isArray(meta.permissions) ? meta.permissions : [];
+    for (const p of claimPerms) { if (typeof p === 'string') permSet.add(p); }
+    const roleLevel = Number(meta.role_level ?? meta.roleLevel ?? 0);
+    if (Number.isFinite(roleLevel) && roleLevel >= 90) permSet.add('*');
+
     let assignmentsQuery = supabaseAdmin
       .from('user_roles_locations')
       .select('role_id, location_id')
@@ -38,7 +46,6 @@ export async function GET(req: Request) {
     }
 
     const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean);
-    const permSet = new Set<string>();
 
     // Robust permission fetching from roles - two-step query to avoid nested select issues
     if (roleIds.length > 0) {

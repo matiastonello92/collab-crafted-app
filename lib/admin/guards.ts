@@ -1,61 +1,46 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { canAny } from '@/lib/permissions/can'
+
 
 /**
  * Server-side admin guard - checks if user has admin permissions
  * Redirects to home page if not authorized
  */
 export async function requireAdmin(): Promise<string> {
-  try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      redirect('/login')
-    }
-
-    // Check if user has admin-level permissions
-    const hasAdminAccess = await canAny(user.id, [
-      '*',
-      'manage_users',
-      'assign_roles',
-      'admin.manage'
-    ])
-
-    if (!hasAdminAccess) {
-      redirect('/?error=unauthorized')
-    }
-
-    return user.id
-  } catch (error) {
-    console.error('Error in admin guard:', error)
-    redirect('/?error=server_error')
+  if (!user) {
+    redirect('/login')
   }
+
+  const meta: any = (user as any).app_metadata || {}
+  const perms: string[] = Array.isArray(meta.permissions) ? meta.permissions : []
+  const roleLevel = Number(meta.role_level ?? meta.roleLevel ?? 0)
+  const hasAdminAccess = perms.includes('*') || (Number.isFinite(roleLevel) && roleLevel >= 90)
+
+  if (!hasAdminAccess) {
+    redirect('/?error=unauthorized')
+  }
+
+  return user.id
 }
 
 /**
  * Check admin access without redirect (for API routes)
  */
 export async function checkAdminAccess(): Promise<{ userId: string | null; hasAccess: boolean }> {
-  try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      return { userId: null, hasAccess: false }
-    }
-
-    const hasAdminAccess = await canAny(user.id, [
-      '*',
-      'manage_users',
-      'assign_roles', 
-      'admin.manage'
-    ])
-
-    return { userId: user.id, hasAccess: hasAdminAccess }
-  } catch (error) {
-    console.error('Error checking admin access:', error)
+  if (!user) {
     return { userId: null, hasAccess: false }
   }
+
+  const meta: any = (user as any).app_metadata || {}
+  const perms: string[] = Array.isArray(meta.permissions) ? meta.permissions : []
+  const roleLevel = Number(meta.role_level ?? meta.roleLevel ?? 0)
+  const hasAccess = perms.includes('*') || (Number.isFinite(roleLevel) && roleLevel >= 90)
+
+  return { userId: user.id, hasAccess }
 }
