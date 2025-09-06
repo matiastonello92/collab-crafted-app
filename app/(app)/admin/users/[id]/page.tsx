@@ -4,10 +4,13 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, User, Shield, Activity } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ArrowLeft, User, Shield, Activity, Settings, Mail } from 'lucide-react'
 import RolesByLocationPanel from './components/RolesByLocationPanel'
 import PermissionOverridesPanel from './components/PermissionOverridesPanel'
 import ActivityPanel from './components/ActivityPanel'
+import { UserOverview } from './components/UserOverview'
+import { EffectivePermissions } from './components/EffectivePermissions'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
@@ -38,6 +41,28 @@ export default async function UserDetailPage({ params }: Props) {
     return parts.length > 0 ? parts.join(' ') : 'Nome non disponibile'
   }
 
+  // Extract locations and top roles for overview
+  const userLocations = Array.from(new Set(
+    rolesByLocation.map(r => r.location_name).filter(Boolean)
+  )).map((name, index) => ({ id: index.toString(), name }))
+
+  const topRoles = Array.from(new Set(
+    rolesByLocation.map(r => ({ name: r.role_name, display_name: r.role_display_name }))
+      .filter(r => r.name)
+  ))
+
+  const userForOverview = {
+    id: user.id,
+    name: getFullName(),
+    email: user.email || '',
+    phone: undefined, // Not available in UserWithDetails
+    avatar_url: undefined, // Not available in UserWithDetails  
+    created_at: user.created_at || new Date().toISOString(),
+    is_active: user.is_active ?? true,
+    last_activity: undefined, // Not available in UserWithDetails
+    email_confirmed: true // We don't have this field in our schema, defaulting to true
+  }
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       {/* Header */}
@@ -48,7 +73,7 @@ export default async function UserDetailPage({ params }: Props) {
             Torna alla lista
           </Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <User className="h-8 w-8" />
             {getFullName()}
@@ -57,69 +82,93 @@ export default async function UserDetailPage({ params }: Props) {
             {user.email} • ID: {user.id.slice(0, 8)}...
           </p>
         </div>
+
+        {/* Quick Actions */}
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" disabled>
+            <Mail className="h-4 w-4 mr-2" />
+            Resend Invito
+          </Button>
+          <Button variant="outline" size="sm" disabled>
+            <Settings className="h-4 w-4 mr-2" />
+            Gestisci Ruoli
+          </Button>
+        </div>
       </div>
 
-      {/* User Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Informazioni Utente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Email</label>
-              <p className="text-sm">{user.email || 'N/D'}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Nome</label>
-              <p className="text-sm">{getFullName()}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Stato</label>
-              <div className="flex items-center gap-2">
-                <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                  {user.is_active ? 'Attivo' : 'Inattivo'}
-                </Badge>
+      {/* Tabs */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="roles">Ruoli & Location</TabsTrigger>
+          <TabsTrigger value="permissions">Permessi Effettivi</TabsTrigger>
+          <TabsTrigger value="activity">Attività</TabsTrigger>
+          <TabsTrigger value="security">Sicurezza</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <UserOverview 
+            user={userForOverview}
+            locations={userLocations}
+            topRoles={topRoles}
+          />
+        </TabsContent>
+
+        <TabsContent value="roles" className="mt-6">
+          <Suspense fallback={<div>Caricamento ruoli...</div>}>
+            <RolesByLocationPanel 
+              roles={rolesByLocation} 
+              userId={params.id}
+              onUpdate={() => window.location.reload()} 
+            />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="permissions" className="mt-6">
+          <EffectivePermissions userId={params.id} />
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-6">
+          <Suspense fallback={<div>Caricamento attività...</div>}>
+            <ActivityPanel userId={params.id} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="security" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sicurezza Account</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Sessioni Attive</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Gestisci le sessioni attive dell'utente
+                    </p>
+                  </div>
+                  <Button variant="outline" disabled>
+                    Revoca Tutte
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Reset Password</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Invia email per reset password
+                    </p>
+                  </div>
+                  <Button variant="outline" disabled>
+                    Invia Reset
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Registrato</label>
-              <p className="text-sm">
-                {user.created_at 
-                  ? new Date(user.created_at).toLocaleDateString('it-IT')
-                  : 'N/D'
-                }
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Three Panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Panel 1: Roles by Location */}
-        <Suspense fallback={<div>Caricamento ruoli...</div>}>
-          <RolesByLocationPanel 
-            roles={rolesByLocation} 
-            userId={params.id}
-            onUpdate={() => window.location.reload()} 
-          />
-        </Suspense>
-        
-        {/* Panel 2: Permission Overrides */}
-        <Suspense fallback={<div>Caricamento permessi...</div>}>
-          <PermissionOverridesPanel 
-            overrides={permissionOverrides} 
-            userId={params.id}
-            onUpdate={() => window.location.reload()} 
-          />
-        </Suspense>
-        
-        {/* Panel 3: Activity */}
-        <Suspense fallback={<div>Caricamento attività...</div>}>
-          <ActivityPanel userId={params.id} />
-        </Suspense>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

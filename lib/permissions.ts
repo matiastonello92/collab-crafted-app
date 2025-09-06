@@ -11,8 +11,16 @@ const synonymMap: Record<string, string> = {
   'view:users': 'users:view',
   'assign:roles': 'users:manage',
   'invite:users': 'users:invite',
+  'manage_users': 'users:manage',
+  'view_users': 'users:view',
+  'invite_users': 'users:invite',
+  'assign_roles': 'users:manage',
   'flags:view': 'flags:view',
+  'flags.view': 'flags:view',
+  'view_flags': 'flags:view',
   'locations:view': 'locations:view',
+  'locations.view': 'locations:view',
+  'view_locations': 'locations:view',
   'manage:inventory': 'inventory:manage',
   'view:inventory': 'inventory:view',
   'manage:orders': 'orders:manage',
@@ -25,6 +33,8 @@ const synonymMap: Record<string, string> = {
   'view:financial': 'financial:view',
   'manage:settings': 'settings:manage',
   'view:settings': 'settings:view',
+  'manage_settings': 'settings:manage',
+  'view_settings': 'settings:view',
 };
 
 /** Normalizza il nome di un permesso */

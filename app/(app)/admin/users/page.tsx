@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 import AdminGate from './components/AdminGate'
 import UserTable from './components/UserTable'
 import { getUsersWithDetails } from '@/lib/data/admin'
@@ -35,9 +36,11 @@ export default async function AdminUsersPage({
             Amministrazione utenti del sistema
           </p>
         </div>
-        <Button disabled>
-          <Plus className="mr-2 h-4 w-4" />
-          Invita Utente
+        <Button asChild>
+          <Link href="/admin/users/invite">
+            <Plus className="mr-2 h-4 w-4" />
+            Invita Utente
+          </Link>
         </Button>
       </div>
 
