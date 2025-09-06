@@ -1,23 +1,31 @@
 import { cookies } from 'next/headers';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import {
+  createServerClient,
+  type CookieOptions,
+  type CookieMethodsServer,
+} from '@supabase/ssr';
 import { requireSupabaseEnv } from './config';
 
 export async function createSupabaseServerClient() {
   const { url, anon } = requireSupabaseEnv();
-  const cookieStore = await cookies();
+  const jar = await cookies();
 
-  return createServerClient(url, anon, {
-    cookies: () => ({
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options?: CookieOptions) {
-        cookieStore.set(name, value, options);
-      },
-      remove(name: string, options?: CookieOptions) {
-        cookieStore.set(name, '', { ...(options ?? {}), maxAge: 0 });
-      },
-    }),
-  });
+  const methods: CookieMethodsServer = {
+    get(name: string) {
+      return jar.get(name)?.value;
+    },
+    set(name: string, value: string, options?: CookieOptions) {
+      try {
+        jar.set(name, value, options);
+      } catch {
+        jar.set({ name, value, ...(options ?? {}) });
+      }
+    },
+    remove(name: string, options?: CookieOptions) {
+      jar.set(name, '', { ...(options ?? {}), maxAge: 0 });
+    },
+  };
+
+  return createServerClient(url, anon, { cookies: methods });
 }
 
