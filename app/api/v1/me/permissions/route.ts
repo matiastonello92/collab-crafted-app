@@ -40,16 +40,26 @@ export async function GET(req: Request) {
     const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean);
     const permSet = new Set<string>();
 
+    // Robust permission fetching from roles - two-step query to avoid nested select issues
     if (roleIds.length > 0) {
-      const { data: rolePerms } = await supabaseAdmin
+      const { data: rolePermissions } = await supabaseAdmin
         .from('role_permissions')
-        .select('permissions(name)')
+        .select('permission_id')
         .in('role_id', roleIds);
 
-      (rolePerms || []).forEach(rp => {
-        const name = (rp as any).permissions?.name as string | undefined;
-        if (name) permSet.add(name);
-      });
+      if (rolePermissions && rolePermissions.length > 0) {
+        const permissionIds = rolePermissions.map(rp => rp.permission_id).filter(Boolean);
+        if (permissionIds.length > 0) {
+          const { data: permissions } = await supabaseAdmin
+            .from('permissions')
+            .select('name')
+            .in('id', permissionIds);
+
+          (permissions || []).forEach(p => {
+            if (p.name) permSet.add(p.name);
+          });
+        }
+      }
     }
 
     let overridesQuery = supabaseAdmin
@@ -71,8 +81,8 @@ export async function GET(req: Request) {
       else permSet.delete(name);
     });
 
-    // check if user is admin
-    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { uid: user.id });
+    // check if user is admin - CRITICAL FIX: correct parameter name
+    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id });
     if (isAdmin) permSet.add('*');
 
     const permissions = normalizeSet(Array.from(permSet));

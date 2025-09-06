@@ -62,7 +62,7 @@ export default function HomePage() {
       description: 'Amministra utenti e permessi',
       href: '/admin/users',
       icon: Users,
-      permission: 'users:manage'
+      permission: 'manage_users'
     },
     {
       title: 'Feature Flags',
@@ -76,7 +76,7 @@ export default function HomePage() {
       description: 'Configurazioni generali',
       href: '/settings',
       icon: Settings,
-      permission: '*'
+      permission: 'view_settings'
     }
   ]
 
