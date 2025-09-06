@@ -62,21 +62,21 @@ export default function HomePage() {
       description: 'Amministra utenti e permessi',
       href: '/admin/users',
       icon: Users,
-        permission: 'locations.manage_users'
+      permission: 'users:manage'
     },
     {
       title: 'Feature Flags',
       description: 'Configura funzionalità per moduli',
       href: '/admin/feature-flags',
       icon: Flag,
-        permission: 'locations.manage_flags'
+      permission: 'flags:view'
     },
     {
       title: 'Impostazioni',
       description: 'Configurazioni generali',
       href: '/settings',
       icon: Settings,
-        permission: 'locations.view'
+      permission: '*'
     }
   ]
 

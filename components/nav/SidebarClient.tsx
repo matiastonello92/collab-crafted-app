@@ -10,7 +10,6 @@ import {
   Home,
   Users,
   Bug,
-  Package,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -20,10 +19,9 @@ import { can } from '@/lib/permissions'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
-  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'locations.manage_users' },
-  { name: 'QA & Debug', href: '/qa', icon: Bug, permission: 'manage_users' },
-  { name: 'Moduli', href: '/modules', icon: Package, permission: 'modules.view' },
-  { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'locations.view' },
+  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'users:manage' },
+  { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
+  { name: 'Impostazioni', href: '/settings', icon: Settings, permission: null },
 ]
 
 export default function SidebarClient() {

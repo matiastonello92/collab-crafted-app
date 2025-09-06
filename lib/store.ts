@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { can } from './permissions'
 
 interface AppContext {
   org_id: string | null
@@ -35,7 +36,7 @@ export const useAppStore = create<AppState>()(
       }),
       hasPermission: (permission) => {
         const { permissions } = get()
-        return permissions.includes(permission)
+        return can(permissions, permission)
       },
     }),
     {
