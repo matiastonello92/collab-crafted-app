@@ -1,31 +1,26 @@
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import {
-  createServerClient,
-  type CookieOptions,
-  type CookieMethodsServer,
-} from '@supabase/ssr';
-import { requireSupabaseEnv } from './config';
 
 export async function createSupabaseServerClient() {
-  const { url, anon } = requireSupabaseEnv();
   const jar = await cookies();
 
-  const methods: CookieMethodsServer = {
-    get(name: string) {
-      return jar.get(name)?.value;
-    },
-    set(name: string, value: string, options?: CookieOptions) {
-      try {
-        jar.set(name, value, options);
-      } catch {
-        jar.set({ name, value, ...(options ?? {}) });
-      }
-    },
-    remove(name: string, options?: CookieOptions) {
-      jar.set(name, '', { ...(options ?? {}), maxAge: 0 });
-    },
-  };
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  return createServerClient(url, anon, { cookies: methods });
+  return createServerClient(url, anon, {
+    cookies: {
+      get(name: string) {
+        return jar.get(name)?.value;
+      },
+      set(name: string, value: string, options?: CookieOptions) {
+        // Next 15 supporta (name, value, options)
+        // se dà fastidio in dev, fallback: jar.set({ name, value, ...options })
+        jar.set(name, value, options);
+      },
+      remove(name: string, options?: CookieOptions) {
+        jar.set(name, '', { ...(options || {}), maxAge: 0 });
+      },
+    },
+  });
 }
 
