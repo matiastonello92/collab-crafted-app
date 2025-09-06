@@ -9,7 +9,7 @@ export function useEffectivePermissions() {
 
   useEffect(() => {
     async function load() {
-      const perms = await getUserPermissions(undefined, context.location_id || undefined)
+      const perms = await getUserPermissions(context.location_id || undefined)
       setPermissions(perms)
     }
     if (context.location_id) {

@@ -10,6 +10,8 @@ import { useAppStore } from '@/lib/store'
 import { useRequireSession } from '@/lib/useRequireSession'
 import { can } from '@/lib/permissions'
 
+export const dynamic = 'force-dynamic'
+
 export default function HomePage() {
   useRequireSession()
   const { context, permissions } = useAppStore()

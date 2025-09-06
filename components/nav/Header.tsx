@@ -2,6 +2,8 @@ import { getActiveLocationServer } from '@/lib/server/activeLocation';
 import { setActiveLocationAction } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Header() {
   const { active, locations, persisted, meta } = await getActiveLocationServer();
 

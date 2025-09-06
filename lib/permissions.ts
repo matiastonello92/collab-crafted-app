@@ -18,9 +18,8 @@ export function can(perms: PermBag, required: PermReq): boolean {
   return reqs.every(r => bag.has(r));
 }
 
-export async function getUserPermissions(orgId?: string, locationId?: string): Promise<Permission[]> {
+export async function getUserPermissions(locationId?: string): Promise<Permission[]> {
   const qs = new URLSearchParams();
-  if (orgId) qs.set('orgId', orgId);
   if (locationId) qs.set('locationId', locationId);
   const res = await fetch(`/api/v1/me/permissions?${qs.toString()}`, { credentials: 'include' });
   if (!res.ok) return [];

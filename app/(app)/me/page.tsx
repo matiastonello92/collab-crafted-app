@@ -30,7 +30,7 @@ async function getUserData(): Promise<{
   roles: UserRole[]
   locations: Array<{ id: string; name: string }>
 }> {
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {
