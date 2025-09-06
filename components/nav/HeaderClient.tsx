@@ -41,7 +41,13 @@ export default function HeaderClient({
       didPersistRef.current = true;
       startTransition(async () => {
         await setActiveLocation(activeLocationId);
-        router.refresh();
+        // Debounced refresh only after permissions are ready
+        setTimeout(() => {
+          const { permissionsLoading } = useAppStore.getState();
+          if (!permissionsLoading) {
+            router.refresh();
+          }
+        }, 180);
       });
     }
   }, [activeLocationId, persisted, setActiveLocation, router]);
@@ -49,7 +55,12 @@ export default function HeaderClient({
   const onSelect = (id: string) => {
     startTransition(async () => {
       await setActiveLocation(id);
-      router.refresh();
+      setTimeout(() => {
+        const { permissionsLoading } = useAppStore.getState();
+        if (!permissionsLoading) {
+          router.refresh();
+        }
+      }, 180);
     });
   };
 

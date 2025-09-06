@@ -12,8 +12,10 @@ interface AppContext {
 interface AppState {
   context: AppContext
   permissions: string[]
+  permissionsLoading: boolean
   setContext: (context: AppContext) => void
   setPermissions: (permissions: string[]) => void
+  setPermissionsLoading: (loading: boolean) => void
   clearContext: () => void
   hasPermission: (permission: string) => boolean
 }
@@ -28,11 +30,14 @@ export const useAppStore = create<AppState>()(
         user_id: null,
       },
       permissions: [],
+      permissionsLoading: false,
       setContext: (context) => set({ context }),
       setPermissions: (permissions) => set({ permissions }),
+      setPermissionsLoading: (loading) => set({ permissionsLoading: loading }),
       clearContext: () => set({
         context: { org_id: null, location_id: null, location_name: null, user_id: null },
-        permissions: []
+        permissions: [],
+        permissionsLoading: false,
       }),
       hasPermission: (permission) => {
         const { permissions } = get()

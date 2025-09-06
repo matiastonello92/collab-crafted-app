@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
-      return NextResponse.json({ permissions: [] }, { status: 401 });
+      return NextResponse.json({ permissions: [] }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
     }
 
     const supabaseAdmin = createSupabaseAdminClient();
@@ -42,7 +42,7 @@ export async function GET(req: Request) {
 
     const { data: assignments, error: assignErr } = await assignmentsQuery;
     if (assignErr) {
-      return NextResponse.json({ permissions: [] }, { status: 200 });
+      return NextResponse.json({ permissions: [] }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
     }
 
     const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean);
@@ -96,7 +96,7 @@ export async function GET(req: Request) {
     const body: any = { permissions };
     if (isAdmin) body.is_admin = true;
 
-    return NextResponse.json(body, { status: 200 });
+    return NextResponse.json(body, { status: 200, headers: { 'Cache-Control': 'no-store' } });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'internal' }, { status: 500 });
   }

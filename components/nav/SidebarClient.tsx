@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,9 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { can } from '@/lib/permissions'
+import { Skeleton } from '@/components/ui/skeleton'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { isAdminFromClaims } from '@/lib/admin/claims'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
@@ -28,8 +31,18 @@ const navigation: { name: string; href: string; icon: any; permission: string | 
 
 export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
+  const [isAdminClaims, setIsAdminClaims] = useState(false)
   const pathname = usePathname()
   const { permissions, context } = useAppStore()
+  const permissionsLoading = useAppStore(state => state.permissionsLoading)
+
+  // Read admin claims once to avoid depending on scoped perms
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAdminClaims(isAdminFromClaims(user as any))
+    }).catch(() => setIsAdminClaims(false))
+  }, [])
 
   return (
     <div
@@ -66,44 +79,50 @@ export default function SidebarClient() {
         )}
 
         <nav className="flex-1 space-y-2 p-4">
-          {navigation.map((item) => {
-            const canAccess = !item.permission || can(permissions, item.permission)
-            const isAdmin = can(permissions, '*')
-            
-            // Per Locations: se non è admin, redirect a /locations/manage
-            const finalHref = item.name === 'Locations' && !isAdmin && canAccess 
-              ? '/locations/manage' 
-              : item.href
+          {(permissionsLoading || permissions.length === 0) ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
+              ))}
+            </div>
+          ) : (
+            navigation.map((item) => {
+              const isAdmin = isAdminClaims || can(permissions, '*')
+              const canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+              const finalHref = item.name === 'Locations' && !isAdmin && canAccess 
+                ? '/locations/manage' 
+                : item.href
 
-            return (
-              <Link
-                key={item.href}
-                href={canAccess ? finalHref : '#'}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                  canAccess
-                    ? 'hover:bg-accent hover:text-accent-foreground'
-                    : 'opacity-50 cursor-not-allowed',
-                  (pathname === item.href || pathname === finalHref) && canAccess
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground'
-                )}
-                onClick={(e) => {
-                  if (!canAccess) {
-                    e.preventDefault()
-                  }
-                }}
-              >
-                <item.icon className="h-4 w-4" />
-                {!collapsed && <span className="flex-1">{item.name}</span>}
-                {!collapsed && !canAccess && (
-                  <Badge variant="secondary" className="text-xs">
-                    Bloccato
-                  </Badge>
-                )}
-              </Link>
-            )
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={canAccess ? finalHref : '#'}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                    canAccess
+                      ? 'hover:bg-accent hover:text-accent-foreground'
+                      : 'opacity-50 cursor-not-allowed',
+                    (pathname === item.href || pathname === finalHref) && canAccess
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground'
+                  )}
+                  onClick={(e) => {
+                    if (!canAccess) {
+                      e.preventDefault()
+                    }
+                  }}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {!collapsed && <span className="flex-1">{item.name}</span>}
+                  {!collapsed && !canAccess && (
+                    <Badge variant="secondary" className="text-xs">
+                      Bloccato
+                    </Badge>
+                  )}
+                </Link>
+              )
+            })
+          )}
         </nav>
 
         <div className="border-t border-border p-4">
