@@ -1,21 +1,46 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppStore } from '@/lib/store'
-import { getUserPermissions } from '@/lib/permissions'
+import { getUserPermissions, normalizeSet } from '@/lib/permissions'
 
 export function useEffectivePermissions() {
   const { context, setPermissions } = useAppStore()
+  const globalPerms = useRef<string[]>([])
 
+  // load global permissions once
   useEffect(() => {
-    async function load() {
-      const perms = await getUserPermissions(context.location_id || undefined)
-      setPermissions(perms)
+    let mounted = true
+    async function loadGlobal() {
+      const perms = await getUserPermissions()
+      if (!mounted) return
+      globalPerms.current = perms
+      const { context: ctx } = useAppStore.getState()
+      if (!ctx.location_id) {
+        setPermissions(normalizeSet(perms))
+      }
     }
-    if (context.location_id) {
-      void load()
-    } else {
-      setPermissions([])
+    void loadGlobal()
+    return () => {
+      mounted = false
+    }
+  }, [setPermissions])
+
+  // load location scoped permissions when location changes
+  useEffect(() => {
+    let mounted = true
+    async function loadScoped() {
+      if (context.location_id) {
+        const scoped = await getUserPermissions(context.location_id)
+        if (!mounted) return
+        setPermissions(normalizeSet([...globalPerms.current, ...scoped]))
+      } else {
+        setPermissions(normalizeSet(globalPerms.current))
+      }
+    }
+    void loadScoped()
+    return () => {
+      mounted = false
     }
   }, [context.location_id, setPermissions])
 }

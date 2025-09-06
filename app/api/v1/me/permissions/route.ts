@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { normalizeSet } from '@/lib/permissions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,9 @@ export async function GET(req: Request) {
       .eq('is_active', true);
 
     if (locationId) {
-      assignmentsQuery = assignmentsQuery.eq('location_id', locationId);
+      assignmentsQuery = assignmentsQuery.in('location_id', [locationId, null]);
+    } else {
+      assignmentsQuery = assignmentsQuery.is('location_id', null);
     }
 
     const { data: assignments, error: assignErr } = await assignmentsQuery;
@@ -56,6 +59,8 @@ export async function GET(req: Request) {
 
     if (locationId) {
       overridesQuery = overridesQuery.in('location_id', [locationId, null]);
+    } else {
+      overridesQuery = overridesQuery.is('location_id', null);
     }
 
     const { data: overrides } = await overridesQuery;
@@ -66,7 +71,15 @@ export async function GET(req: Request) {
       else permSet.delete(name);
     });
 
-    return NextResponse.json({ permissions: Array.from(permSet) }, { status: 200 });
+    // check if user is admin
+    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { uid: user.id });
+    if (isAdmin) permSet.add('*');
+
+    const permissions = normalizeSet(Array.from(permSet));
+    const body: any = { permissions };
+    if (isAdmin) body.is_admin = true;
+
+    return NextResponse.json(body, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'internal' }, { status: 500 });
   }
