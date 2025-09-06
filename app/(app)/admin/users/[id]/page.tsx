@@ -15,6 +15,8 @@ import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from 
 import { requireAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
 
+export const runtime = 'nodejs';
+
 interface Props {
   params: {
     id: string

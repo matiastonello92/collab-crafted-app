@@ -9,6 +9,8 @@ import { getUsersWithDetails } from '@/lib/data/admin'
 import { requireAdmin } from '@/lib/admin/guards'
 import { TableSkeleton } from '@/components/ui/loading-skeleton'
 
+export const runtime = 'nodejs';
+
 interface SearchParams {
   page?: string
   search?: string

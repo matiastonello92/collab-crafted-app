@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
+export const runtime = 'nodejs';
+
 export default async function InviteUserPage() {
   await requireAdmin()
 

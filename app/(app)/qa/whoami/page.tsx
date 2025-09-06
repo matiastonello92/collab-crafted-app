@@ -5,6 +5,7 @@ import { User, Shield, MapPin, Key, Clock } from 'lucide-react'
 import { requireAdmin } from '@/lib/admin/guards'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
+export const runtime = 'nodejs';
 
 export default async function QAWhoAmIPage() {
   // Guard: require admin permissions

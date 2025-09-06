@@ -19,7 +19,7 @@ import { can } from '@/lib/permissions'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
-  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
+  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'users:manage' },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
 ]

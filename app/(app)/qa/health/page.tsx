@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Activity, Server, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { requireAdmin } from '@/lib/admin/guards'
 
+export const runtime = 'nodejs';
 interface HealthCheckResult {
   status: string
   timestamp: string
