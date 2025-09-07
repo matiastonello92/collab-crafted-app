@@ -198,8 +198,14 @@ export function InviteAcceptance({ token }: Props) {
 
       // Step 4: Accept invitation with retry
       await withRetry(async () => {
-        const { error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
+        const { data: result, error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
         if (ae) throw ae
+        if (!result?.ok) {
+          const errorMsg = result?.code === 'INVITE_NO_ROLES' 
+            ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
+            : result?.code || 'Errore sconosciuto'
+          throw new Error(errorMsg)
+        }
         return true
       })
 
@@ -242,9 +248,16 @@ export function InviteAcceptance({ token }: Props) {
         return
       }
       
-      const { error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
+      const { data: result, error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
       if (ae) {
         toast.error(ae.message)
+        return
+      }
+      if (!result?.ok) {
+        const errorMsg = result?.code === 'INVITE_NO_ROLES' 
+          ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
+          : result?.code || 'Errore sconosciuto'
+        toast.error(errorMsg)
         return
       }
       
@@ -280,9 +293,15 @@ export function InviteAcceptance({ token }: Props) {
           console.log('Login successful, accepting invitation')
           // Accept the invitation with retry
           await withRetry(async () => {
-            const { error: acceptError } = await supabase
+            const { data: result, error: acceptError } = await supabase
               .rpc('invitation_accept_v2', { p_token: token })
             if (acceptError) throw acceptError
+            if (!result?.ok) {
+              const errorMsg = result?.code === 'INVITE_NO_ROLES' 
+                ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
+                : result?.code || 'Errore sconosciuto'
+              throw new Error(errorMsg)
+            }
             return true
           })
 
@@ -310,9 +329,15 @@ export function InviteAcceptance({ token }: Props) {
         console.log('Accepting invitation directly')
         
         await withRetry(async () => {
-          const { error: acceptError } = await supabase
+          const { data: result, error: acceptError } = await supabase
             .rpc('invitation_accept_v2', { p_token: token })
           if (acceptError) throw acceptError
+          if (!result?.ok) {
+            const errorMsg = result?.code === 'INVITE_NO_ROLES' 
+              ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
+              : result?.code || 'Errore sconosciuto'
+            throw new Error(errorMsg)
+          }
           return true
         })
 

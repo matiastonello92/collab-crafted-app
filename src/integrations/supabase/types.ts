@@ -782,7 +782,7 @@ export type Database = {
       }
       invitation_accept_v2: {
         Args: { p_token: string }
-        Returns: boolean
+        Returns: Json
       }
       invitation_create_v2: {
         Args:
