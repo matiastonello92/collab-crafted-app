@@ -24,6 +24,7 @@ import { isAdminFromClaims } from '@/lib/admin/claims'
 const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
+  { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
   { name: 'Console Admin', href: '/admin/settings', icon: Settings, permission: '*', adminOnly: true },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },

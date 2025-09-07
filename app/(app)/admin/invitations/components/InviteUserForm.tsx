@@ -1,0 +1,394 @@
+'use client'
+
+import { useState, useTransition, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
+import { Send, X, Copy, Check } from 'lucide-react'
+import { fetchAvailableLocations, fetchAvailableRoles } from '@/lib/admin/data-fetchers'
+import { PERMISSIONS } from '@/lib/permissions/registry'
+import type { Location, Role } from '@/lib/admin/data-fetchers'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+
+const inviteSchema = z.object({
+  email: z.string().email('Email non valida'),
+  days: z.number().min(1).max(30),
+})
+
+type InviteForm = z.infer<typeof inviteSchema>
+
+interface OverrideItem {
+  location_id: string
+  permission_name: string 
+  granted: boolean
+}
+
+interface RolePreset {
+  [permissionName: string]: boolean
+}
+
+export function InviteUserForm() {
+  const [isPending, startTransition] = useTransition()
+  const [locations, setLocations] = useState<Location[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('')
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([])
+  const [rolePresets, setRolePresets] = useState<RolePreset>({})
+  const [overrides, setOverrides] = useState<{ [locationId: string]: { [permissionName: string]: boolean } }>({})
+  const [invitationLink, setInvitationLink] = useState<string>('')
+  const [copied, setCopied] = useState(false)
+
+  const allPermissions = Object.values(PERMISSIONS).flat()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<InviteForm>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: { days: 7 }
+  })
+
+  const selectedDays = watch('days')
+
+  // Load locations and roles
+  useEffect(() => {
+    const loadData = async () => {
+      const [locationsData, rolesData] = await Promise.all([
+        fetchAvailableLocations(),
+        fetchAvailableRoles(),
+      ])
+      setLocations(locationsData)
+      setRoles(rolesData)
+    }
+    void loadData()
+  }, [])
+
+  // Load role presets when role changes
+  useEffect(() => {
+    if (!selectedRoleId) {
+      setRolePresets({})
+      return
+    }
+
+    const loadRolePresets = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient()
+        const { data, error } = await supabase
+          .from('role_permissions')
+          .select(`
+            permission:permissions(name, display_name)
+          `)
+          .eq('role_id', selectedRoleId)
+        
+        if (error) throw error
+
+        const presets: RolePreset = {}
+        data?.forEach((item: any) => {
+          if (item.permission?.name) {
+            presets[item.permission.name] = true
+          }
+        })
+        
+        setRolePresets(presets)
+        
+        // Initialize overrides for selected locations with role presets
+        const newOverrides: typeof overrides = {}
+        selectedLocationIds.forEach(locationId => {
+          newOverrides[locationId] = { ...presets }
+        })
+        setOverrides(newOverrides)
+      } catch (error) {
+        console.error('Error loading role presets:', error)
+        toast.error('Errore nel caricamento dei permessi del ruolo')
+      }
+    }
+
+    loadRolePresets()
+  }, [selectedRoleId, selectedLocationIds])
+
+  const handleLocationChange = (locationId: string, checked: boolean) => {
+    setSelectedLocationIds(prev => {
+      const newIds = checked 
+        ? [...prev, locationId]
+        : prev.filter(id => id !== locationId)
+      
+      // Update overrides when locations change
+      const newOverrides = { ...overrides }
+      if (checked) {
+        newOverrides[locationId] = { ...rolePresets }
+      } else {
+        delete newOverrides[locationId]
+      }
+      setOverrides(newOverrides)
+      
+      return newIds
+    })
+  }
+
+  const handlePermissionOverride = (locationId: string, permissionName: string, granted: boolean) => {
+    setOverrides(prev => ({
+      ...prev,
+      [locationId]: {
+        ...prev[locationId],
+        [permissionName]: granted
+      }
+    }))
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(invitationLink)
+      setCopied(true)
+      toast.success('Link copiato negli appunti!')
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast.error('Errore nella copia del link')
+    }
+  }
+
+  const onSubmit = async (data: InviteForm) => {
+    if (!selectedRoleId || selectedLocationIds.length === 0) {
+      toast.error('Seleziona almeno un ruolo e una location')
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        // Calculate only the differences from role presets
+        const calculatedOverrides: OverrideItem[] = []
+        
+        selectedLocationIds.forEach(locationId => {
+          const locationOverrides = overrides[locationId] || {}
+          
+          allPermissions.forEach(permissionName => {
+            const roleHasPermission = rolePresets[permissionName] || false
+            const overrideValue = locationOverrides[permissionName]
+            
+            // Only include if different from role preset
+            if (overrideValue !== undefined && overrideValue !== roleHasPermission) {
+              calculatedOverrides.push({
+                location_id: locationId,
+                permission_name: permissionName,
+                granted: overrideValue
+              })
+            }
+          })
+        })
+
+        const supabase = createSupabaseBrowserClient()
+        const { data: result, error } = await supabase
+          .rpc('invitation_create_v2', {
+            p_email: data.email.toLowerCase(),
+            p_role_id: selectedRoleId,
+            p_location_ids: selectedLocationIds,
+            p_days: data.days,
+            p_overrides: calculatedOverrides
+          })
+
+        if (error) throw error
+
+        const link = `${window.location.origin}/invite/${result.token}`
+        setInvitationLink(link)
+        
+        toast.success('Invito creato con successo!')
+        
+        // Reset form
+        reset()
+        setSelectedRoleId('')
+        setSelectedLocationIds([])
+        setRolePresets({})
+        setOverrides({})
+      } catch (error: any) {
+        console.error('Error creating invitation:', error)
+        toast.error(error.message || 'Errore durante la creazione dell\'invito')
+      }
+    })
+  }
+
+  if (invitationLink) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-green-600 mb-2">
+            Invito Creato con Successo!
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Copia e invia questo link all'utente invitato:
+          </p>
+        </div>
+        
+        <div className="flex gap-2">
+          <Input 
+            value={invitationLink} 
+            readOnly 
+            className="font-mono text-xs"
+          />
+          <Button onClick={copyToClipboard} variant="outline" size="sm">
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        <Button 
+          onClick={() => {
+            setInvitationLink('')
+            setCopied(false)
+          }} 
+          className="w-full"
+        >
+          Crea Nuovo Invito
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Email */}
+      <div className="space-y-2">
+        <Label htmlFor="email">Email *</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="utente@example.com"
+          {...register('email')}
+        />
+        {errors.email && (
+          <p className="text-sm text-destructive">{errors.email.message}</p>
+        )}
+      </div>
+
+      {/* Role Selection */}
+      <div className="space-y-2">
+        <Label>Ruolo *</Label>
+        <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Seleziona ruolo..." />
+          </SelectTrigger>
+          <SelectContent>
+            {roles.map(role => (
+              <SelectItem key={role.id} value={role.id}>
+                {role.display_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Location Selection */}
+      <div className="space-y-3">
+        <Label>Locations * (almeno una)</Label>
+        <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+          {locations.map(location => (
+            <div key={location.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={location.id}
+                checked={selectedLocationIds.includes(location.id)}
+                onCheckedChange={(checked) => 
+                  handleLocationChange(location.id, checked as boolean)
+                }
+              />
+              <Label htmlFor={location.id} className="flex-1 cursor-pointer">
+                {location.name}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Permission Overrides */}
+      {selectedLocationIds.length > 0 && selectedRoleId && (
+        <div className="space-y-3">
+          <Label>Override Permessi per Location</Label>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-2 font-medium">Permesso</th>
+                    {selectedLocationIds.map(locationId => {
+                      const location = locations.find(l => l.id === locationId)
+                      return (
+                        <th key={locationId} className="text-center p-2 font-medium min-w-24">
+                          {location?.name}
+                        </th>
+                      )
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allPermissions.map(permission => (
+                    <tr key={permission} className="border-t">
+                      <td className="p-2 font-mono text-xs">{permission}</td>
+                      {selectedLocationIds.map(locationId => {
+                        const isRoleDefault = rolePresets[permission] || false
+                        const overrideValue = overrides[locationId]?.[permission]
+                        const currentValue = overrideValue !== undefined ? overrideValue : isRoleDefault
+                        
+                        return (
+                          <td key={locationId} className="p-2 text-center">
+                            <Checkbox
+                              checked={currentValue}
+                              onCheckedChange={(checked) =>
+                                handlePermissionOverride(locationId, permission, checked as boolean)
+                              }
+                              className={
+                                overrideValue !== undefined && overrideValue !== isRoleDefault
+                                  ? 'border-orange-500'
+                                  : ''
+                              }
+                            />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            I checkbox con bordo arancione indicano override rispetto ai permessi del ruolo
+          </p>
+        </div>
+      )}
+
+      {/* Expiry Days */}
+      <div className="space-y-2">
+        <Label htmlFor="days">Scadenza (giorni)</Label>
+        <Input
+          id="days"
+          type="number"
+          min="1"
+          max="30"
+          {...register('days', { valueAsNumber: true })}
+        />
+        {errors.days && (
+          <p className="text-sm text-destructive">{errors.days.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          L'invito scadrà tra {selectedDays} giorni
+        </p>
+      </div>
+
+      {/* Submit */}
+      <Button
+        type="submit"
+        disabled={isPending || !selectedRoleId || selectedLocationIds.length === 0}
+        className="w-full"
+      >
+        <Send className="h-4 w-4 mr-2" />
+        {isPending ? 'Creazione in corso...' : 'Crea Invito'}
+      </Button>
+    </form>
+  )
+}
