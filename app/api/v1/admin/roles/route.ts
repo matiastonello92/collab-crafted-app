@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
 import { checkAdminAccess } from "@/lib/admin/guards"
 
@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Check admin access using centralized guard
     const { hasAccess } = await checkAdminAccess()
@@ -15,13 +15,20 @@ export async function GET() {
     }
 
     const supabaseAdmin = createSupabaseAdminClient()
+    
+    // Check if filtering for invite form only
+    const inviteOnly = request.nextUrl.searchParams.get('inviteOnly') === 'true'
 
-    // Fetch all active roles
-    const { data: roles, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('roles')
       .select('id, name, display_name, level, description')
       .eq('is_active', true)
-      .order('level', { ascending: true })
+    
+    if (inviteOnly) {
+      query = query.in('name', ['base', 'manager'])
+    }
+    
+    const { data: roles, error } = await query.order('level', { ascending: true })
 
     if (error) {
       console.error('Error fetching roles:', error)

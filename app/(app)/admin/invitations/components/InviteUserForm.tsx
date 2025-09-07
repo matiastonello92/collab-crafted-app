@@ -72,18 +72,12 @@ export function InviteUserForm() {
     const loadData = async () => {
       const [locationsData, rolesData, jobTagsData] = await Promise.all([
         fetchAvailableLocations(),
-        fetchAvailableRoles(),
+        fetchAvailableRoles(true), // Pass true to filter to base/manager only
         fetchAvailableJobTags(),
       ])
       setLocations(locationsData)
-      // Filter roles to show only authorization roles (base, manager)
-      const filteredRoles = rolesData.filter(role => 
-        ['base', 'manager'].includes(role.name)
-      )
-      setRoles(filteredRoles)
-      // Filter job tags to show only active ones
-      const activeJobTags = jobTagsData.filter(tag => tag.is_active)
-      setJobTags(activeJobTags)
+      setRoles(rolesData) // Already filtered on server side
+      setJobTags(jobTagsData) // Already filtered to active only on server side
     }
     void loadData()
   }, [])
@@ -98,14 +92,12 @@ export function InviteUserForm() {
     const loadRolePresets = async () => {
       try {
         const supabase = createSupabaseBrowserClient()
-        // Load role presets using the correct join path
+        // Load role permissions directly from role_permissions table
         const { data, error } = await supabase
-          .from('role_permission_presets')
+          .from('role_permissions')
           .select(`
-            preset:permission_presets(
-              items:permission_preset_items(
-                permission
-              )
+            permission:permissions(
+              name
             )
           `)
           .eq('role_id', selectedRoleId)
@@ -113,12 +105,10 @@ export function InviteUserForm() {
         if (error) throw error
 
         const presets: RolePreset = {}
-        data?.forEach((rolePreset: any) => {
-          rolePreset.preset?.items?.forEach((item: any) => {
-            if (item.permission) {
-              presets[item.permission] = true
-            }
-          })
+        data?.forEach((rolePermission: any) => {
+          if (rolePermission.permission?.name) {
+            presets[rolePermission.permission.name] = true
+          }
         })
         
         setRolePresets(presets)
@@ -314,7 +304,7 @@ export function InviteUserForm() {
             <SelectValue placeholder="Seleziona ruolo..." />
           </SelectTrigger>
           <SelectContent 
-            className="bg-background border shadow-lg z-50" 
+            className="bg-white dark:bg-gray-900 border shadow-md z-50" 
             position="popper"
             sideOffset={4}
           >

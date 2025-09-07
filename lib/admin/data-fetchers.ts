@@ -31,9 +31,10 @@ export interface JobTag {
 /**
  * Fetch available roles for role assignment
  */
-export async function fetchAvailableRoles(): Promise<Role[]> {
+export async function fetchAvailableRoles(inviteOnly: boolean = false): Promise<Role[]> {
   try {
-    const response = await fetch('/api/v1/admin/roles', {
+    const params = inviteOnly ? '?inviteOnly=true' : ''
+    const response = await fetch(`/api/v1/admin/roles${params}`, {
       method: 'GET',
     })
 

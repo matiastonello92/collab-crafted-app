@@ -1,33 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { checkAdminAccess } from '@/lib/admin/guards'
+import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    
-    // Get current user
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader) {
+    const { userId, hasAccess } = await checkAdminAccess()
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Verify admin permissions
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if user is admin
-    const { data: isAdmin } = await supabase.rpc('jwt_is_admin')
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const supabase = createSupabaseAdminClient()
 
     // Fetch active job tags
     const { data: jobTags, error } = await supabase
