@@ -28,6 +28,8 @@ export function InvitationsList() {
   const loadInvitations = async () => {
     try {
       const supabase = createSupabaseBrowserClient()
+      
+      // Filter active invitations: pending, not revoked, not accepted, not expired
       const { data, error } = await supabase
         .from('invitations')
         .select(`
@@ -37,11 +39,17 @@ export function InvitationsList() {
           status,
           expires_at,
           created_at,
+          revoked_at,
+          accepted_at,
           invitation_roles_locations (
             role:roles (name, display_name),
             location:locations (name)
           )
         `)
+        .eq('status', 'pending')
+        .is('revoked_at', null)
+        .is('accepted_at', null)
+        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(20)
 
@@ -91,19 +99,16 @@ export function InvitationsList() {
 
   const revokeInvitation = async (id: string) => {
     try {
-      const supabase = createSupabaseBrowserClient()
-      const { error } = await supabase
-        .from('invitations')
-        .update({ 
-          status: 'revoked',
-          revoked_at: new Date().toISOString()
-        })
-        .eq('id', id)
+      const response = await fetch(`/api/v1/admin/invitations/${id}/revoke`, {
+        method: 'POST',
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error('Failed to revoke invitation')
+      }
 
       toast.success('Invito revocato')
-      loadInvitations()
+      loadInvitations() // Refresh list
     } catch (error) {
       console.error('Error revoking invitation:', error)
       toast.error('Errore nella revoca dell\'invito')
@@ -149,9 +154,9 @@ export function InvitationsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          {invitations.length} inviti trovati
+          {invitations.length} inviti attivi trovati
         </p>
         <Button
           variant="outline"
@@ -166,7 +171,8 @@ export function InvitationsList() {
 
       {invitations.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <p>Nessun invito trovato</p>
+          <p>Nessun invito attivo trovato</p>
+          <p className="text-xs mt-1">Gli inviti scaduti, revocati o già accettati non vengono mostrati</p>
         </div>
       ) : (
         <div className="space-y-3">

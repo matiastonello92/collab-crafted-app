@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { randomBytes } from 'crypto'
 
@@ -102,6 +103,29 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = inviteSchema.parse(body)
 
+    // Check for duplicate active invitation
+    const { data: existingInvite, error: checkError } = await supabaseAdmin
+      .from('invitations')
+      .select('id, token')
+      .eq('email', validatedData.email.toLowerCase())
+      .eq('status', 'pending')
+      .is('revoked_at', null)
+      .is('accepted_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .single()
+
+    if (!checkError && existingInvite) {
+      return NextResponse.json({ 
+        error: 'Invito già presente',
+        code: 'DUPLICATE_INVITATION',
+        actions: {
+          copyLink: true,
+          revokeFirst: true
+        },
+        existingToken: existingInvite.token
+      }, { status: 409 })
+    }
+
     // Generate invitation token
     const token = randomBytes(32).toString('hex')
     const expiresAt = new Date()
@@ -194,6 +218,9 @@ export async function POST(request: Request) {
       // Don't fail the invitation creation
     }
 
+    // Revalidate and redirect on success
+    revalidatePath('/admin/invitations')
+    
     return NextResponse.json({ 
       invitation,
       message: 'Invito creato con successo',

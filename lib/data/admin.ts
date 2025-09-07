@@ -101,47 +101,88 @@ export async function getUsersWithDetails(
     }
 
     const offset = (page - 1) * limit
+    let users: UserWithDetails[] = []
+    let total = 0
 
-    // Query base per utenti
-    let query = supabase
-      .from('user_profiles')
-      .select(`
-        id,
-        first_name,
-        last_name,
-        phone,
-        is_active,
-        created_at
-      `)
-      .order('created_at', { ascending: false })
+    try {
+      // Prima prova con user_profiles
+      let query = supabase
+        .from('user_profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          phone,
+          is_active,
+          created_at
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
 
-    // Applica filtro di ricerca se presente
-    if (search.trim()) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`)
-    }
+      // Applica filtro di ricerca se presente
+      if (search.trim()) {
+        query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`)
+      }
 
-    // Applica paginazione
-    query = query.range(offset, offset + limit - 1)
+      // Applica paginazione
+      query = query.range(offset, offset + limit - 1)
 
-    const { data: users, error, count } = await query
+      const { data: profileUsers, error: profileError, count } = await query
 
-    if (error) {
-      console.error('Error fetching users:', error)
+      if (!profileError && profileUsers && profileUsers.length > 0) {
+        // Usa user_profiles
+        users = profileUsers.map(user => ({
+          ...user,
+          email: null // Will be populated later if needed
+        }))
+        total = count || 0
+      } else {
+        // Fallback a auth.admin.listUsers per super-admin
+        console.log('Fallback to auth.admin.listUsers')
+        
+        // Use admin client for auth operations
+        const { createSupabaseAdminClient } = await import('@/lib/supabase/server')
+        const adminSupabase = createSupabaseAdminClient()
+        
+        const { data: authData, error: authError } = await adminSupabase.auth.admin.listUsers({
+          page: page,
+          perPage: limit
+        })
+
+        if (authError) {
+          console.error('Error fetching auth users:', authError)
+          return { users: [], total: 0, hasMore: false }
+        }
+
+        // Filter by search if provided
+        let filteredUsers = authData.users || []
+        if (search.trim()) {
+          const searchLower = search.toLowerCase()
+          filteredUsers = filteredUsers.filter(user => 
+            user.email?.toLowerCase().includes(searchLower) ||
+            user.user_metadata?.full_name?.toLowerCase().includes(searchLower)
+          )
+        }
+
+        users = filteredUsers.map(user => ({
+          id: user.id,
+          email: user.email || null,
+          first_name: user.user_metadata?.first_name || null,
+          last_name: user.user_metadata?.last_name || null,
+          is_active: true, // Assume active from auth
+          created_at: user.created_at,
+        }))
+
+        total = authData.total || users.length
+      }
+    } catch (fallbackError) {
+      console.error('Error in fallback query:', fallbackError)
       return { users: [], total: 0, hasMore: false }
     }
 
-    // Per ogni utente, recupera email da auth.users via RPC o query separata
-    // Nota: auth.users non è esposta via API, quindi creiamo un placeholder email
-    const usersWithEmail: UserWithDetails[] = (users || []).map(user => ({
-      ...user,
-      email: `user_${user.id.slice(0, 8)}@example.com` // Placeholder - in produzione servirebbe un trigger o RPC
-    }))
-
-    const total = count || 0
     const hasMore = total > offset + limit
 
     return {
-      users: usersWithEmail,
+      users,
       total,
       hasMore
     }

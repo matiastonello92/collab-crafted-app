@@ -12,6 +12,7 @@ import ActivityPanel from './components/ActivityPanel'
 import JobTagsPanel from './components/JobTagsPanel'
 import { UserOverview } from './components/UserOverview'
 import { EffectivePermissions } from './components/EffectivePermissions'
+import { DeleteUserDialog } from './components/DeleteUserDialog'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
@@ -94,6 +95,11 @@ export default async function UserDetailPage({ params }: Props) {
             <Settings className="h-4 w-4 mr-2" />
             Gestisci Ruoli
           </Button>
+          <DeleteUserDialog 
+            userId={user.id}
+            userEmail={user.email || ''}
+            userName={getFullName()}
+          />
         </div>
       </div>
 

@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { UserPlus, Eye, EyeOff, CheckCircle, XCircle, Clock, Shield } from 'lucide-react'
+import { UserPlus, Eye, EyeOff, CheckCircle, XCircle, Clock, Shield, LogIn, LogOut, User } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
@@ -50,8 +51,9 @@ export function InviteAcceptance({ token }: Props) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string>('')
   const [showPassword, setShowPassword] = useState(false)
-  const [step, setStep] = useState<'validate' | 'signup' | 'login'>('validate')
-  const [existingUser, setExistingUser] = useState(false)
+  const [step, setStep] = useState<'validate' | 'signup' | 'login' | 'success'>('validate')
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [emailMismatch, setEmailMismatch] = useState(false)
 
   const {
     register,
@@ -89,12 +91,20 @@ export function InviteAcceptance({ token }: Props) {
 
         setInvitationData(inviteData)
         
-        // Check if user already exists
+        // Check if user is already logged in
         const { data: userData } = await supabase.auth.getUser()
-        if (userData.user?.email === inviteData.email) {
-          setExistingUser(true)
-          setStep('login')
+        if (userData.user) {
+          setCurrentUser(userData.user)
+          if (userData.user.email?.toLowerCase() === inviteData.email.toLowerCase()) {
+            // Correct user, can accept directly
+            setStep('login')
+          } else {
+            // Wrong user, show mismatch
+            setEmailMismatch(true)
+            setStep('login')
+          }
         } else {
+          // Not logged in, show signup flow
           setStep('signup')
         }
       } catch (error: any) {
@@ -114,8 +124,10 @@ export function InviteAcceptance({ token }: Props) {
     startTransition(async () => {
       try {
         const supabase = createSupabaseBrowserClient()
+        console.log('Attempting signup for:', invitationData.email)
+        
         // Sign up the user
-        const { error: signupError } = await supabase.auth.signUp({
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({
           email: invitationData.email,
           password: data.password,
           options: {
@@ -123,53 +135,132 @@ export function InviteAcceptance({ token }: Props) {
           }
         })
 
-        if (signupError) throw signupError
-
-        // Accept the invitation
-        const { data: acceptResult, error: acceptError } = await supabase
-          .rpc('invitation_accept_v2', { p_token: token })
-
-        if (acceptError) throw acceptError
-
-        toast.success('Account creato e invito accettato con successo!')
-        
-        // Redirect to dashboard
-        router.push('/')
-      } catch (error: any) {
-        console.error('Error during signup/acceptance:', error)
-        
-        if (error.message?.includes('User already registered')) {
-          setExistingUser(true)
-          setStep('login')
-          toast.info('Utente già registrato. Effettua il login per accettare l\'invito.')
-        } else {
-          toast.error(error.message || 'Errore durante la registrazione')
+        if (signupError) {
+          console.error('Signup error:', signupError)
+          if (signupError.message?.includes('User already registered')) {
+            // Show login form instead
+            setStep('login')
+            toast.info('Utente già registrato. Effettua il login per accettare l\'invito.')
+            return
+          }
+          throw signupError
         }
+
+        // Wait for session to be established
+        if (signupData.session) {
+          console.log('Session established, accepting invitation')
+          // Accept the invitation
+          const { error: acceptError } = await supabase
+            .rpc('invitation_accept_v2', { p_token: token })
+
+          if (acceptError) {
+            console.error('Accept error:', acceptError)
+            throw acceptError
+          }
+
+          setStep('success')
+          toast.success('Account creato e invito accettato!')
+          
+          // Redirect after delay
+          setTimeout(() => {
+            router.push('/')
+          }, 800)
+        } else {
+          toast.info('Account creato. Controlla la tua email per confermare.')
+        }
+      } catch (error: any) {
+        console.error('Error during signup:', error)
+        toast.error(error.message || 'Errore durante la registrazione')
       }
     })
   }
 
-  const handleLogin = async () => {
+  const handleLogin = async (data: { email: string; password: string }) => {
     if (!invitationData) return
 
     startTransition(async () => {
       try {
         const supabase = createSupabaseBrowserClient()
-        // Accept the invitation (user should already be logged in)
-        const { data: acceptResult, error: acceptError } = await supabase
+        console.log('Attempting login for:', data.email)
+        
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password
+        })
+
+        if (loginError) {
+          console.error('Login error:', loginError)
+          throw loginError
+        }
+
+        if (loginData.session) {
+          console.log('Login successful, accepting invitation')
+          // Accept the invitation
+          const { error: acceptError } = await supabase
+            .rpc('invitation_accept_v2', { p_token: token })
+
+          if (acceptError) {
+            console.error('Accept error:', acceptError)
+            throw acceptError
+          }
+
+          setStep('success')
+          toast.success('Invito accettato!')
+          
+          // Redirect after delay
+          setTimeout(() => {
+            router.push('/')
+          }, 800)
+        }
+      } catch (error: any) {
+        console.error('Error during login:', error)
+        toast.error(error.message || 'Errore durante il login')
+      }
+    })
+  }
+
+  const handleDirectAccept = async () => {
+    if (!invitationData || !currentUser) return
+
+    startTransition(async () => {
+      try {
+        const supabase = createSupabaseBrowserClient()
+        console.log('Accepting invitation directly')
+        
+        const { error: acceptError } = await supabase
           .rpc('invitation_accept_v2', { p_token: token })
 
-        if (acceptError) throw acceptError
+        if (acceptError) {
+          console.error('Accept error:', acceptError)
+          throw acceptError
+        }
 
-        toast.success('Invito accettato con successo!')
+        setStep('success')
+        toast.success('Invito accettato!')
         
-        // Redirect to dashboard
-        router.push('/')
+        // Redirect after delay
+        setTimeout(() => {
+          router.push('/')
+        }, 800)
       } catch (error: any) {
         console.error('Error accepting invitation:', error)
         toast.error(error.message || 'Errore nell\'accettazione dell\'invito')
       }
     })
+  }
+
+  const handleLogout = async () => {
+    try {
+      const supabase = createSupabaseBrowserClient()
+      await supabase.auth.signOut()
+      setCurrentUser(null)
+      setEmailMismatch(false)
+      setStep('signup')
+      toast.info('Logout effettuato')
+    } catch (error: any) {
+      console.error('Error during logout:', error)
+      toast.error('Errore durante il logout')
+    }
   }
 
   if (isLoading) {
@@ -198,141 +289,284 @@ export function InviteAcceptance({ token }: Props) {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Invitation Details */}
-      <div className="space-y-4">
-        <div className="text-center space-y-2">
-          <h3 className="text-xl font-semibold">
-            Benvenuto, {invitationData.email}!
-          </h3>
-          <p className="text-muted-foreground">
-            Sei stato invitato con il ruolo di <strong>{invitationData.role_name}</strong>
-          </p>
-        </div>
-
-        {/* Expiry Info */}
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>
-            Scade {formatDistanceToNow(new Date(invitationData.expires_at), {
-              addSuffix: true,
-              locale: it
-            })}
-          </span>
-        </div>
-
-        {/* Locations */}
-        {invitationData.location_ids && invitationData.location_ids.length > 0 && (
+  // Success step
+  if (step === 'success') {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardContent className="p-8 text-center space-y-4">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium">Locations assegnate:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {/* We'd need to fetch location names, for now show IDs */}
-              {invitationData.location_ids.map((locationId, idx) => (
-                <Badge key={idx} variant="secondary">
-                  Location {idx + 1}
-                </Badge>
-              ))}
+            <h3 className="text-xl font-semibold text-green-800">Invito Accettato!</h3>
+            <p className="text-muted-foreground">
+              Reindirizzamento alla dashboard...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="max-w-md mx-auto">
+      <CardHeader className="text-center">
+        <CardTitle className="flex items-center justify-center gap-2">
+          <User className="h-6 w-6" />
+          Invito al Sistema
+        </CardTitle>
+        <CardDescription>
+          Benvenuto, {invitationData.email}!
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Invitation Details */}
+        <div className="space-y-4 p-4 bg-muted rounded-lg">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="outline" className="text-sm">
+                {invitationData.role_name}
+              </Badge>
             </div>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>
+                Scade {formatDistanceToNow(new Date(invitationData.expires_at), {
+                  addSuffix: true,
+                  locale: it
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Locations */}
+          {invitationData.location_ids && invitationData.location_ids.length > 0 && (
+            <div className="space-y-1 text-center">
+              <p className="text-xs font-medium text-muted-foreground">Locations:</p>
+              <div className="flex flex-wrap gap-1 justify-center">
+                {invitationData.location_ids.map((locationId, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    Loc {idx + 1}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Permission Overrides */}
+          {invitationData.overrides && invitationData.overrides.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground flex items-center justify-center gap-1">
+                <Shield className="h-3 w-3" />
+                Permessi personalizzati
+              </p>
+              <div className="text-xs space-y-1 max-h-20 overflow-y-auto">
+                {invitationData.overrides.map((override, idx) => (
+                  <div key={idx} className="flex justify-between">
+                    <span className="font-mono text-xs">{override.permission_name}</span>
+                    <Badge variant={override.granted ? "default" : "destructive"} className="text-xs h-4">
+                      {override.granted ? "✓" : "✗"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Email Mismatch Warning */}
+        {emailMismatch && currentUser && (
+          <Alert variant="destructive">
+            <XCircle className="h-4 w-4" />
+            <AlertDescription>
+              Sei loggato come <strong>{currentUser.email}</strong> ma l'invito è per <strong>{invitationData.email}</strong>.
+              Effettua il logout per accettare l'invito con l'account corretto.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Step Forms */}
+        {step === 'signup' && (
+          <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
+            <div className="space-y-3">
+              <div className="text-center">
+                <h4 className="font-medium">Crea Account</h4>
+                <p className="text-sm text-muted-foreground">Passaggio 1 di 2</p>
+              </div>
+              
+              <div className="space-y-1">
+                <Label className="text-sm">Email</Label>
+                <Input 
+                  value={invitationData.email} 
+                  disabled 
+                  className="bg-muted text-sm"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="password" className="text-sm">Password *</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Minimo 6 caratteri"
+                    className="text-sm pr-10"
+                    {...register('password')}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </Button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="confirmPassword" className="text-sm">Conferma Password *</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Ripeti password"
+                  className="text-sm"
+                  {...register('confirmPassword')}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" disabled={isPending} className="w-full">
+              <UserPlus className="h-4 w-4 mr-2" />
+              {isPending ? 'Creazione...' : 'Crea Account'}
+            </Button>
+          </form>
+        )}
+
+        {step === 'login' && !emailMismatch && currentUser && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h4 className="font-medium">Accetta Invito</h4>
+              <p className="text-sm text-muted-foreground">Passaggio finale</p>
+            </div>
+            
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Sei loggato come <strong>{currentUser.email}</strong>. 
+                Clicca per accettare l'invito.
+              </AlertDescription>
+            </Alert>
+            
+            <Button onClick={handleDirectAccept} disabled={isPending} className="w-full">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              {isPending ? 'Accettazione...' : 'Accetta Invito'}
+            </Button>
           </div>
         )}
 
-        {/* Permission Overrides */}
-        {invitationData.overrides && invitationData.overrides.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Permessi personalizzati:
-            </p>
-            <div className="bg-muted rounded-lg p-3 text-xs space-y-1">
-              {invitationData.overrides.map((override, idx) => (
-                <div key={idx} className="flex justify-between">
-                  <span className="font-mono">{override.permission_name}</span>
-                  <Badge variant={override.granted ? "default" : "destructive"} className="text-xs">
-                    {override.granted ? "Concesso" : "Negato"}
-                  </Badge>
-                </div>
-              ))}
+        {step === 'login' && emailMismatch && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h4 className="font-medium">Login Richiesto</h4>
+              <p className="text-sm text-muted-foreground">Accedi con l'account dell'invito</p>
             </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handleLogout} variant="outline" className="flex-1">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+
+            <LoginForm 
+              invitationData={invitationData}
+              onSubmit={handleLogin}
+              isPending={isPending}
+            />
           </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Separate login form component
+function LoginForm({ 
+  invitationData, 
+  onSubmit, 
+  isPending 
+}: { 
+  invitationData: InvitationData; 
+  onSubmit: (data: { email: string; password: string }) => void;
+  isPending: boolean;
+}) {
+  const [showPassword, setShowPassword] = useState(false)
+  
+  const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1, 'Password richiesta'),
+  })
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{ email: string; password: string }>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: invitationData.email,
+    }
+  })
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <div className="space-y-1">
+        <Label className="text-sm">Email</Label>
+        <Input 
+          {...register('email')}
+          disabled
+          className="bg-muted text-sm"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="loginPassword" className="text-sm">Password</Label>
+        <div className="relative">
+          <Input
+            id="loginPassword"
+            type={showPassword ? "text" : "password"}
+            placeholder="Inserisci password"
+            className="text-sm pr-10"
+            {...register('password')}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+          </Button>
+        </div>
+        {errors.password && (
+          <p className="text-xs text-destructive">{errors.password.message}</p>
         )}
       </div>
 
-      {/* Action Forms */}
-      {step === 'signup' && (
-        <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
-          <div className="space-y-4">
-            <h4 className="text-lg font-medium">Crea il tuo Account</h4>
-            
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input 
-                value={invitationData.email} 
-                disabled 
-                className="bg-muted"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Inserisci la tua password"
-                  {...register('password')}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Conferma Password *</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Conferma la tua password"
-                {...register('confirmPassword')}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-          </div>
-
-          <Button type="submit" disabled={isPending} className="w-full">
-            <UserPlus className="h-4 w-4 mr-2" />
-            {isPending ? 'Creazione in corso...' : 'Crea Account e Accetta Invito'}
-          </Button>
-        </form>
-      )}
-
-      {step === 'login' && (
-        <div className="space-y-4">
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              Sei già registrato con questa email. Clicca per accettare l'invito.
-            </AlertDescription>
-          </Alert>
-          
-          <Button onClick={handleLogin} disabled={isPending} className="w-full">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {isPending ? 'Accettazione in corso...' : 'Accetta Invito'}
-          </Button>
-        </div>
-      )}
-    </div>
+      <Button type="submit" disabled={isPending} className="w-full">
+        <LogIn className="h-4 w-4 mr-2" />
+        {isPending ? 'Login...' : 'Accedi e Accetta'}
+      </Button>
+    </form>
   )
 }
