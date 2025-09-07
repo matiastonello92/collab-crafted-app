@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image, Send, CheckCircle, XCircle, Save } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image, Send, CheckCircle, XCircle, Save, RotateCcw, History } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,10 +16,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { setAppSetting, uploadLogo } from '@/app/actions/app-settings'
+import { saveBanner, getBannerHistory, republishBanner } from '@/app/actions/banner'
 
 interface EnvStatus {
   resendApiKey: boolean
   resendFrom: boolean
+}
+
+interface BannerHistoryItem {
+  id: string
+  message: string
+  status: string
+  published_at: string | null
+  created_at: string
+  created_by: string | null
 }
 
 interface AppSettings {
@@ -34,6 +45,7 @@ interface AdminSettingsClientProps {
 }
 
 export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsClientProps) {
+  const router = useRouter()
   const [email, setEmail] = useState('matias@pecoranegra.fr')
   const [isSending, setIsSending] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -44,7 +56,12 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
   // Local state for form inputs
   const [localBusiness, setLocalBusiness] = useState(appSettings.business || {})
   const [localAccess, setLocalAccess] = useState(appSettings.access || {})
-  const [localBanner, setLocalBanner] = useState(appSettings.banner || { enabled: false, message: '' })
+  
+  // Banner state - fully controlled and decoupled
+  const [bannerEnabled, setBannerEnabled] = useState(!!appSettings.banner?.enabled)
+  const [bannerMessage, setBannerMessage] = useState(appSettings.banner?.message || '')
+  const [bannerHistory, setBannerHistory] = useState<BannerHistoryItem[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
   
   // Saving states
   const [savingBusiness, setSavingBusiness] = useState(false)
@@ -52,6 +69,24 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
   const [savingBanner, setSavingBanner] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Load banner history
+  const loadBannerHistory = async () => {
+    setLoadingHistory(true)
+    try {
+      const history = await getBannerHistory()
+      setBannerHistory(history)
+    } catch (error: any) {
+      toast.error(`Errore caricamento storico: ${error.message}`)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  // Load history on mount
+  useEffect(() => {
+    loadBannerHistory()
+  }, [])
 
   const handleSendTest = async () => {
     if (!email.trim()) {
@@ -72,13 +107,18 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Errore sconosciuto')
+        if (data.error?.includes('domain not verified') || data.error?.includes('from not authorized')) {
+          toast.error(`Errore Resend: ${data.error}. Verifica il dominio su resend.com/domains`)
+        } else {
+          toast.error(data.error || 'Errore sconosciuto')
+        }
+        return
       }
 
-      if (data.success) {
-        toast.success(`Email di test inviata! ID: ${data.id || 'N/A'}`)
+      if (data.id) {
+        toast.success(`Email inviata! ID: ${data.id}`)
       } else {
-        throw new Error('Risposta server non valida')
+        toast.error('Email inviata ma nessun ID ricevuto')
       }
     } catch (error: any) {
       toast.error(`Errore nell'invio: ${error.message}`)
@@ -152,34 +192,49 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
     }
   }
 
-  const saveBanner = async () => {
+  const handleSaveBanner = async () => {
     setSavingBanner(true)
     try {
-      await setAppSetting('banner', localBanner)
-      setServerSettings(prev => ({ ...prev, banner: localBanner }))
+      await saveBanner(bannerMessage, bannerEnabled)
+      
+      // Update server state
+      const newBanner = { enabled: bannerEnabled, message: bannerMessage }
+      setServerSettings(prev => ({ ...prev, banner: newBanner }))
+      
       toast.success('Banner salvato!')
+      router.refresh() // Force layout refresh to show/hide banner immediately
+      
+      // Reload history to show the new entry
+      loadBannerHistory()
     } catch (error: any) {
       toast.error(`Errore nel salvataggio: ${error.message}`)
       // Rollback on error
-      setLocalBanner(serverSettings.banner || { enabled: false, message: '' })
+      setBannerEnabled(!!serverSettings.banner?.enabled)
+      setBannerMessage(serverSettings.banner?.message || '')
     } finally {
       setSavingBanner(false)
     }
   }
 
-  // Banner toggle handler (immediate save for UX)
-  const handleBannerToggle = async (enabled: boolean) => {
-    const newBanner = { ...localBanner, enabled }
-    setLocalBanner(newBanner)
-    
-    // Save immediately for switches
+  const handleRepublishBanner = async (id: string) => {
     try {
-      await setAppSetting('banner', newBanner)
-      setServerSettings(prev => ({ ...prev, banner: newBanner }))
+      await republishBanner(id)
+      
+      // Reload current banner state from history
+      const historyItem = bannerHistory.find(h => h.id === id)
+      if (historyItem) {
+        setBannerEnabled(true)
+        setBannerMessage(historyItem.message)
+        
+        const newBanner = { enabled: true, message: historyItem.message }
+        setServerSettings(prev => ({ ...prev, banner: newBanner }))
+      }
+      
+      toast.success('Banner ripubblicato!')
+      router.refresh() // Force layout refresh
+      loadBannerHistory() // Reload history
     } catch (error: any) {
-      toast.error(`Errore: ${error.message}`)
-      // Rollback
-      setLocalBanner((prev: any) => ({ ...prev, enabled: !enabled }))
+      toast.error(`Errore nella ripubblicazione: ${error.message}`)
     }
   }
 
@@ -425,55 +480,114 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   Mostra messaggi importanti a tutti gli utenti
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="banner_enabled"
-                    checked={localBanner.enabled || false}
-                    onCheckedChange={handleBannerToggle}
-                  />
-                  <Label htmlFor="banner_enabled">Banner attivo</Label>
-                </div>
-                <div>
-                  <Label htmlFor="banner_message">Messaggio banner</Label>
-                  <Textarea
-                    id="banner_message"
-                    value={localBanner.message || ''}
-                    onChange={(e) => setLocalBanner((prev: any) => ({ ...prev, message: e.target.value }))}
-                    placeholder="Messaggio da mostrare nel banner..."
-                    rows={3}
-                    disabled={!localBanner.enabled}
-                  />
-                </div>
-                {localBanner.enabled && localBanner.message && (
-                  <div>
-                    <Label>Anteprima</Label>
-                    <Alert className="mt-2 bg-amber-50 border-amber-200">
-                      <AlertTriangle className="h-4 w-4 text-amber-600" />
-                      <AlertDescription className="text-amber-800">
-                        {localBanner.message}
-                      </AlertDescription>
-                    </Alert>
+              <CardContent className="space-y-6">
+                {/* Banner Editor */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="banner_enabled"
+                      checked={bannerEnabled}
+                      onCheckedChange={setBannerEnabled}
+                      aria-label="Attiva banner"
+                    />
+                    <Label htmlFor="banner_enabled">Banner attivo</Label>
                   </div>
-                )}
-                <div className="pt-4">
-                  <Button 
-                    onClick={saveBanner}
-                    disabled={savingBanner || !localBanner.enabled}
-                    className="w-full sm:w-auto"
-                  >
-                    {savingBanner ? (
-                      <>
-                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
-                        Salvataggio...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4 mr-2" />
-                        Salva banner
-                      </>
-                    )}
-                  </Button>
+                  <div>
+                    <Label htmlFor="banner_message">Messaggio banner</Label>
+                    <Textarea
+                      id="banner_message"
+                      value={bannerMessage}
+                      onChange={(e) => setBannerMessage(e.target.value)}
+                      placeholder="Messaggio da mostrare nel banner..."
+                      rows={3}
+                      disabled={!bannerEnabled}
+                    />
+                  </div>
+                  {bannerEnabled && bannerMessage && (
+                    <div>
+                      <Label>Anteprima</Label>
+                      <Alert className="mt-2 bg-amber-50 border-amber-200">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <AlertDescription className="text-amber-800">
+                          {bannerMessage}
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                  <div className="pt-2">
+                    <Button 
+                      onClick={handleSaveBanner}
+                      disabled={savingBanner}
+                      className="w-full sm:w-auto"
+                    >
+                      {savingBanner ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Salva
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Banner History */}
+                <div className="border-t pt-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <History className="h-4 w-4" />
+                    <h4 className="font-medium">Storico Banner</h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadBannerHistory}
+                      disabled={loadingHistory}
+                    >
+                      <RotateCcw className="h-3 w-3 mr-1" />
+                      Ricarica
+                    </Button>
+                  </div>
+                  
+                  {loadingHistory ? (
+                    <div className="text-sm text-muted-foreground">Caricamento storico...</div>
+                  ) : bannerHistory.length > 0 ? (
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {bannerHistory.map((item) => (
+                        <div
+                          key={item.id}
+                          className="p-3 border rounded-lg bg-muted/30 space-y-2"
+                        >
+                          <div className="text-sm font-medium truncate">
+                            {item.message}
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>
+                              {item.published_at 
+                                ? new Date(item.published_at).toLocaleString('it-IT')
+                                : new Date(item.created_at).toLocaleString('it-IT')
+                              }
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRepublishBanner(item.id)}
+                              className="h-6 text-xs"
+                            >
+                              <RotateCcw className="h-3 w-3 mr-1" />
+                              Ripubblica
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      Nessun banner nello storico
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
