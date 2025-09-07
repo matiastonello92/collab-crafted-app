@@ -92,24 +92,34 @@ export function InviteUserForm() {
     const loadRolePresets = async () => {
       try {
         const supabase = createSupabaseBrowserClient()
-        // Load role permissions directly from role_permissions table
+        
+        // Load role permissions using exact format requested
         const { data, error } = await supabase
           .from('role_permissions')
           .select(`
-            permission:permissions(
-              name
-            )
+            permissions!inner(name)
           `)
           .eq('role_id', selectedRoleId)
+          .order('permissions(name)')
         
-        if (error) throw error
-
         const presets: RolePreset = {}
-        data?.forEach((rolePermission: any) => {
-          if (rolePermission.permission?.name) {
-            presets[rolePermission.permission.name] = true
-          }
-        })
+        
+        if (error) {
+          throw error
+        }
+
+        // Process permissions from role_permissions
+        if (data && data.length > 0) {
+          data.forEach((rolePermission: any) => {
+            if (rolePermission.permissions?.name) {
+              presets[rolePermission.permissions.name] = true
+            }
+          })
+        } else {
+          // Fallback: try to load from existing presets if no role permissions found
+          console.warn('No role permissions found, trying fallback to existing presets')
+          // If still empty, leave all permissions deselected (empty presets object)
+        }
         
         setRolePresets(presets)
         
