@@ -12,9 +12,9 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { Send, X, Copy, Check } from 'lucide-react'
-import { fetchAvailableLocations, fetchAvailableRoles } from '@/lib/admin/data-fetchers'
+import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } from '@/lib/admin/data-fetchers'
 import { PERMISSIONS } from '@/lib/permissions/registry'
-import type { Location, Role } from '@/lib/admin/data-fetchers'
+import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
 const inviteSchema = z.object({
@@ -30,6 +30,11 @@ interface OverrideItem {
   granted: boolean
 }
 
+interface JobTagItem {
+  location_id: string
+  tag_name: string
+}
+
 interface RolePreset {
   [permissionName: string]: boolean
 }
@@ -38,8 +43,10 @@ export function InviteUserForm() {
   const [isPending, startTransition] = useTransition()
   const [locations, setLocations] = useState<Location[]>([])
   const [roles, setRoles] = useState<Role[]>([])
+  const [jobTags, setJobTags] = useState<JobTag[]>([])
   const [selectedRoleId, setSelectedRoleId] = useState<string>('')
   const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([])
+  const [selectedJobTagIds, setSelectedJobTagIds] = useState<string[]>([])
   const [rolePresets, setRolePresets] = useState<RolePreset>({})
   const [overrides, setOverrides] = useState<{ [locationId: string]: { [permissionName: string]: boolean } }>({})
   const [invitationLink, setInvitationLink] = useState<string>('')
@@ -60,12 +67,13 @@ export function InviteUserForm() {
 
   const selectedDays = watch('days')
 
-  // Load locations and roles
+  // Load locations, roles, and job tags
   useEffect(() => {
     const loadData = async () => {
-      const [locationsData, rolesData] = await Promise.all([
+      const [locationsData, rolesData, jobTagsData] = await Promise.all([
         fetchAvailableLocations(),
         fetchAvailableRoles(),
+        fetchAvailableJobTags(),
       ])
       setLocations(locationsData)
       // Filter roles to show only authorization roles (base, manager)
@@ -73,6 +81,9 @@ export function InviteUserForm() {
         ['base', 'manager'].includes(role.name)
       )
       setRoles(filteredRoles)
+      // Filter job tags to show only active ones
+      const activeJobTags = jobTagsData.filter(tag => tag.is_active)
+      setJobTags(activeJobTags)
     }
     void loadData()
   }, [])
@@ -196,6 +207,20 @@ export function InviteUserForm() {
           })
         })
 
+        // Prepare job tags for all selected locations
+        const jobTagsForLocations: JobTagItem[] = []
+        selectedJobTagIds.forEach(tagId => {
+          const jobTag = jobTags.find(tag => tag.id === tagId)
+          if (jobTag) {
+            selectedLocationIds.forEach(locationId => {
+              jobTagsForLocations.push({
+                location_id: locationId,
+                tag_name: jobTag.name
+              })
+            })
+          }
+        })
+
         const supabase = createSupabaseBrowserClient()
         const { data: result, error } = await supabase
           .rpc('invitation_create_v2', {
@@ -203,7 +228,8 @@ export function InviteUserForm() {
             p_role_id: selectedRoleId,
             p_location_ids: selectedLocationIds,
             p_days: data.days,
-            p_overrides: calculatedOverrides
+            p_overrides: calculatedOverrides,
+            p_job_tags: jobTagsForLocations
           })
 
         if (error) throw error
@@ -217,6 +243,7 @@ export function InviteUserForm() {
         reset()
         setSelectedRoleId('')
         setSelectedLocationIds([])
+        setSelectedJobTagIds([])
         setRolePresets({})
         setOverrides({})
       } catch (error: any) {
@@ -253,7 +280,8 @@ export function InviteUserForm() {
           onClick={() => {
             setInvitationLink('')
             setCopied(false)
-          }} 
+            setSelectedJobTagIds([])
+          }}
           className="w-full"
         >
           Crea Nuovo Invito
@@ -318,6 +346,46 @@ export function InviteUserForm() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Job Tags Selection */}
+      <div className="space-y-3">
+        <Label>Job Titles (opzionale)</Label>
+        <p className="text-sm text-muted-foreground">
+          I job titles selezionati verranno applicati a tutte le locations selezionate
+        </p>
+        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+          {jobTags.map(jobTag => (
+            <div key={jobTag.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={jobTag.id}
+                checked={selectedJobTagIds.includes(jobTag.id)}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedJobTagIds(prev => [...prev, jobTag.id])
+                  } else {
+                    setSelectedJobTagIds(prev => prev.filter(id => id !== jobTag.id))
+                  }
+                }}
+              />
+              <Label htmlFor={jobTag.id} className="flex-1 cursor-pointer text-sm">
+                {jobTag.label}
+              </Label>
+            </div>
+          ))}
+        </div>
+        {selectedJobTagIds.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {selectedJobTagIds.map(tagId => {
+              const tag = jobTags.find(t => t.id === tagId)
+              return tag ? (
+                <Badge key={tagId} variant="secondary" className="text-xs">
+                  {tag.label}
+                </Badge>
+              ) : null
+            })}
+          </div>
+        )}
       </div>
 
       {/* Permission Overrides */}

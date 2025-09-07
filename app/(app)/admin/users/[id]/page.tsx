@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, User, Shield, Activity, Settings, Mail } from 'lucide-react'
+import { ArrowLeft, User, Shield, Activity, Settings, Mail, Tag } from 'lucide-react'
 import RolesByLocationPanel from './components/RolesByLocationPanel'
 import PermissionOverridesPanel from './components/PermissionOverridesPanel'
 import ActivityPanel from './components/ActivityPanel'
+import JobTagsPanel from './components/JobTagsPanel'
 import { UserOverview } from './components/UserOverview'
 import { EffectivePermissions } from './components/EffectivePermissions'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
@@ -98,9 +99,10 @@ export default async function UserDetailPage({ params }: Props) {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="roles">Ruoli & Location</TabsTrigger>
+          <TabsTrigger value="job-tags">Job Tags</TabsTrigger>
           <TabsTrigger value="permissions">Permessi Effettivi</TabsTrigger>
           <TabsTrigger value="activity">Attività</TabsTrigger>
           <TabsTrigger value="security">Sicurezza</TabsTrigger>
@@ -122,6 +124,26 @@ export default async function UserDetailPage({ params }: Props) {
               onUpdate={() => window.location.reload()} 
             />
           </Suspense>
+        </TabsContent>
+
+        <TabsContent value="job-tags" className="mt-6">
+          <div className="space-y-6">
+            {userLocations.map(location => (
+              <JobTagsPanel
+                key={location.id}
+                userId={params.id}
+                locationId={rolesByLocation.find(r => r.location_name === location.name)?.location_id || ''}
+                locationName={location.name}
+              />
+            ))}
+            {userLocations.length === 0 && (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  L'utente non è assegnato a nessuna location
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="permissions" className="mt-6">
