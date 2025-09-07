@@ -68,7 +68,11 @@ export function InviteUserForm() {
         fetchAvailableRoles(),
       ])
       setLocations(locationsData)
-      setRoles(rolesData)
+      // Filter roles to show only authorization roles (base, manager)
+      const filteredRoles = rolesData.filter(role => 
+        ['base', 'manager'].includes(role.name)
+      )
+      setRoles(filteredRoles)
     }
     void loadData()
   }, [])
@@ -83,20 +87,27 @@ export function InviteUserForm() {
     const loadRolePresets = async () => {
       try {
         const supabase = createSupabaseBrowserClient()
+        // Load role presets using the correct join path
         const { data, error } = await supabase
-          .from('role_permissions')
+          .from('role_permission_presets')
           .select(`
-            permission:permissions(name, display_name)
+            preset:permission_presets(
+              items:permission_preset_items(
+                permission
+              )
+            )
           `)
           .eq('role_id', selectedRoleId)
         
         if (error) throw error
 
         const presets: RolePreset = {}
-        data?.forEach((item: any) => {
-          if (item.permission?.name) {
-            presets[item.permission.name] = true
-          }
+        data?.forEach((rolePreset: any) => {
+          rolePreset.preset?.items?.forEach((item: any) => {
+            if (item.permission) {
+              presets[item.permission] = true
+            }
+          })
         })
         
         setRolePresets(presets)
@@ -274,7 +285,11 @@ export function InviteUserForm() {
           <SelectTrigger>
             <SelectValue placeholder="Seleziona ruolo..." />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent 
+            className="bg-background border shadow-lg z-50" 
+            position="popper"
+            sideOffset={4}
+          >
             {roles.map(role => (
               <SelectItem key={role.id} value={role.id}>
                 {role.display_name}
