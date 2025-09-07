@@ -84,7 +84,7 @@ export function InviteUserForm() {
     void loadData()
   }, [])
 
-  // Load role presets when role changes - two-step fetch with normalization
+  // Load role presets using server route - anti-RLS & single source
   useEffect(() => {
     if (!selectedRoleId) {
       setRolePresets({})
@@ -92,84 +92,40 @@ export function InviteUserForm() {
       return
     }
 
-    const fetchRoleDefaultPermissions = async (roleId: string) => {
-      setIsLoadingPresets(true)
+    async function loadRolePresets(roleId: string, selectedLocs: string[]) {
       try {
-        const supabase = createSupabaseBrowserClient()
-        
-        // Step 1: Get permission IDs from role_permissions
-        const { data: rolePermData, error: rolePermError } = await supabase
-          .from('role_permissions')
-          .select('permission_id')
-          .eq('role_id', roleId)
-        
-        if (rolePermError) throw rolePermError
-        
-        if (!rolePermData || rolePermData.length === 0) {
-          console.warn('No role permissions found, trying fallback to existing presets')
-          setRolePresets({})
-          return {}
-        }
+        setIsLoadingPresets(true)
+        const res = await fetch(`/api/admin/roles/${roleId}/defaults`, { cache: 'no-store' })
+        if (!res.ok) throw new Error(await res.text())
+        const { permissions } = await res.json() as { permissions: string[] }
 
-        const permissionIds = rolePermData.map(rp => rp.permission_id)
-        
-        // Step 2: Get permission names using the IDs
-        const { data: permissionsData, error: permissionsError } = await supabase
-          .from('permissions')
-          .select('name')
-          .in('id', permissionIds)
-          .order('name')
-        
-        if (permissionsError) throw permissionsError
-        
         const presets: RolePreset = {}
-        
-        // Process and normalize permission names
-        if (permissionsData && permissionsData.length > 0) {
-          permissionsData.forEach((permission: any) => {
-            if (permission.name) {
-              const normalizedName = normalizePermission(permission.name)
-              presets[normalizedName] = true
+        permissions.forEach((n) => { presets[n] = true })
+        setRolePresets(presets)
+
+        // preserva i delta dell'utente rispetto ai nuovi presets
+        const newOverrides: typeof overrides = {}
+        selectedLocs.forEach((locId) => {
+          const prev = overrides[locId] ?? {}
+          const delta: Record<string, boolean> = {}
+          allPermissions.forEach((perm) => {
+            if (prev[perm] !== undefined && prev[perm] !== (presets[perm] ?? false)) {
+              delta[perm] = prev[perm]
             }
           })
-        }
-        
-        return presets
-      } catch (error) {
-        console.error('Error loading role presets:', error)
+          newOverrides[locId] = { ...presets, ...delta }
+        })
+        setOverrides(newOverrides)
+      } catch (err) {
+        console.error('loadRolePresets failed', err)
         toast.error('Errore nel caricamento dei permessi del ruolo')
-        return {}
+        setRolePresets({})
       } finally {
         setIsLoadingPresets(false)
       }
     }
 
-    const loadRolePresets = async () => {
-      // Preserve user deltas when role changes
-      const previousOverrides = { ...overrides }
-      
-      const presets = await fetchRoleDefaultPermissions(selectedRoleId)
-      setRolePresets(presets)
-      
-      // Initialize overrides for selected locations with role presets
-      const newOverrides: typeof overrides = {}
-      selectedLocationIds.forEach(locationId => {
-        const existingOverrides = previousOverrides[locationId] || {}
-        const combinedOverrides = { ...presets }
-        
-        // Preserve user modifications
-        Object.keys(existingOverrides).forEach(permName => {
-          if (existingOverrides[permName] !== presets[permName]) {
-            combinedOverrides[permName] = existingOverrides[permName]
-          }
-        })
-        
-        newOverrides[locationId] = combinedOverrides
-      })
-      setOverrides(newOverrides)
-    }
-
-    loadRolePresets()
+    loadRolePresets(selectedRoleId, selectedLocationIds)
   }, [selectedRoleId, selectedLocationIds])
 
   const handleLocationChange = (locationId: string, checked: boolean) => {
