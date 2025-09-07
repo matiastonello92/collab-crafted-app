@@ -5,13 +5,12 @@ import { requireAdmin } from '@/lib/admin/guards'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 export async function POST(request: NextRequest) {
   try {
     // Admin guard - redirects if not authorized
     await requireAdmin()
 
+    const resend = new Resend(process.env.RESEND_API_KEY!)
     const body = await request.json()
     
     if (!body.to || typeof body.to !== 'string') {
