@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { requireAdmin } from '@/lib/admin/guards'
+import { checkAdminAccess } from '@/lib/admin/guards'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function POST(request: NextRequest) {
   try {
-    // Admin guard - redirects if not authorized
-    await requireAdmin()
+    // Admin guard - check authorization for API route
+    const { hasAccess } = await checkAdminAccess()
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { 
+          status: 401,
+          headers: { 'Cache-Control': 'no-store' }
+        }
+      )
+    }
 
     const resend = new Resend(process.env.RESEND_API_KEY!)
     const body = await request.json()
