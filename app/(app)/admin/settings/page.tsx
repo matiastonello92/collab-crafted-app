@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/admin/guards'
 import { AdminSettingsClient } from './AdminSettingsClient'
+import { getAppSetting } from '@/app/actions/app-settings'
 
 export default async function AdminSettingsPage() {
   // Server-side admin protection
@@ -11,5 +12,20 @@ export default async function AdminSettingsPage() {
     resendFrom: !!process.env.RESEND_FROM
   }
 
-  return <AdminSettingsClient envStatus={envStatus} />
+  // Load app settings
+  const [branding, business, access, banner] = await Promise.all([
+    getAppSetting('branding'),
+    getAppSetting('business'), 
+    getAppSetting('access'),
+    getAppSetting('banner')
+  ])
+
+  const appSettings = {
+    branding,
+    business,
+    access,
+    banner
+  }
+
+  return <AdminSettingsClient envStatus={envStatus} appSettings={appSettings} />
 }
