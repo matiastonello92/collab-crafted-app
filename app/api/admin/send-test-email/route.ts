@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { checkAdminAccess } from '@/lib/admin/guards'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -47,7 +48,11 @@ export async function POST(request: NextRequest) {
     const result = await resend.emails.send(emailData)
 
     return NextResponse.json(
-      { success: true, messageId: result.data?.id },
+      { 
+        success: true, 
+        id: result.data?.id,
+        message: 'Email inviata con successo'
+      },
       { 
         status: 200,
         headers: { 'Cache-Control': 'no-store' }

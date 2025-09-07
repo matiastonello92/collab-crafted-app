@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image, Send, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image, Send, CheckCircle, XCircle, Save } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -37,7 +37,20 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
   const [email, setEmail] = useState('matias@pecoranegra.fr')
   const [isSending, setIsSending] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [settings, setSettings] = useState(appSettings)
+  
+  // Server state (source of truth)
+  const [serverSettings, setServerSettings] = useState(appSettings)
+  
+  // Local state for form inputs
+  const [localBusiness, setLocalBusiness] = useState(appSettings.business || {})
+  const [localAccess, setLocalAccess] = useState(appSettings.access || {})
+  const [localBanner, setLocalBanner] = useState(appSettings.banner || { enabled: false, message: '' })
+  
+  // Saving states
+  const [savingBusiness, setSavingBusiness] = useState(false)
+  const [savingAccess, setSavingAccess] = useState(false)
+  const [savingBanner, setSavingBanner] = useState(false)
+  
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSendTest = async () => {
@@ -62,7 +75,11 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
         throw new Error(data.error || 'Errore sconosciuto')
       }
 
-      toast.success('Email di test inviata con successo!')
+      if (data.success) {
+        toast.success(`Email di test inviata! ID: ${data.id || 'N/A'}`)
+      } else {
+        throw new Error('Risposta server non valida')
+      }
     } catch (error: any) {
       toast.error(`Errore nell'invio: ${error.message}`)
     } finally {
@@ -80,42 +97,90 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
       formData.append('logo', file)
       
       const logoUrl = await uploadLogo(formData)
-      setSettings(prev => ({
+      
+      // Update server state optimistically
+      const newBranding = { ...serverSettings.branding, logo_url: logoUrl }
+      setServerSettings(prev => ({
         ...prev,
-        branding: { ...prev.branding, logo_url: logoUrl }
+        branding: newBranding
       }))
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
       
       toast.success('Logo caricato con successo!')
     } catch (error: any) {
       toast.error(`Errore nel caricamento: ${error.message}`)
+      // Reset file input on error too
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } finally {
       setIsUploading(false)
     }
   }
 
-  const updateSetting = async (key: string, value: any) => {
+  const saveBusiness = async () => {
+    setSavingBusiness(true)
     try {
-      await setAppSetting(key, value)
-      setSettings(prev => ({ ...prev, [key]: value }))
-      toast.success('Impostazione salvata!')
+      await setAppSetting('business', localBusiness)
+      setServerSettings(prev => ({ ...prev, business: localBusiness }))
+      toast.success('Informazioni aziendali salvate!')
     } catch (error: any) {
       toast.error(`Errore nel salvataggio: ${error.message}`)
+      // Rollback on error
+      setLocalBusiness(serverSettings.business || {})
+    } finally {
+      setSavingBusiness(false)
     }
   }
 
-  const handleBusinessChange = (field: string, value: string) => {
-    const newBusiness = { ...settings.business, [field]: value }
-    updateSetting('business', newBusiness)
+  const saveAccess = async () => {
+    setSavingAccess(true)
+    try {
+      await setAppSetting('access', localAccess)
+      setServerSettings(prev => ({ ...prev, access: localAccess }))
+      toast.success('Impostazioni accesso salvate!')
+    } catch (error: any) {
+      toast.error(`Errore nel salvataggio: ${error.message}`)
+      // Rollback on error
+      setLocalAccess(serverSettings.access || {})
+    } finally {
+      setSavingAccess(false)
+    }
   }
 
-  const handleAccessChange = (field: string, value: any) => {
-    const newAccess = { ...settings.access, [field]: value }
-    updateSetting('access', newAccess)
+  const saveBanner = async () => {
+    setSavingBanner(true)
+    try {
+      await setAppSetting('banner', localBanner)
+      setServerSettings(prev => ({ ...prev, banner: localBanner }))
+      toast.success('Banner salvato!')
+    } catch (error: any) {
+      toast.error(`Errore nel salvataggio: ${error.message}`)
+      // Rollback on error
+      setLocalBanner(serverSettings.banner || { enabled: false, message: '' })
+    } finally {
+      setSavingBanner(false)
+    }
   }
 
-  const handleBannerChange = (field: string, value: any) => {
-    const newBanner = { ...settings.banner, [field]: value }
-    updateSetting('banner', newBanner)
+  // Banner toggle handler (immediate save for UX)
+  const handleBannerToggle = async (enabled: boolean) => {
+    const newBanner = { ...localBanner, enabled }
+    setLocalBanner(newBanner)
+    
+    // Save immediately for switches
+    try {
+      await setAppSetting('banner', newBanner)
+      setServerSettings(prev => ({ ...prev, banner: newBanner }))
+    } catch (error: any) {
+      toast.error(`Errore: ${error.message}`)
+      // Rollback
+      setLocalBanner((prev: any) => ({ ...prev, enabled: !enabled }))
+    }
   }
 
   return (
@@ -174,10 +239,10 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                 <div>
                   <Label>Logo aziendale</Label>
                   <div className="mt-2 space-y-4">
-                    {settings.branding?.logo_url && (
+                    {serverSettings.branding?.logo_url && (
                       <div className="flex items-center gap-4">
                         <img 
-                          src={settings.branding.logo_url} 
+                          src={serverSettings.branding.logo_url} 
                           alt="Logo" 
                           className="h-16 w-16 object-contain rounded border"
                         />
@@ -203,12 +268,6 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                         {isUploading ? 'Caricamento...' : 'Carica nuovo logo'}
                       </Button>
                     </div>
-                    <Alert>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        Per il caricamento logo è necessario creare manualmente il bucket "branding" (pubblico) su Supabase Storage.
-                      </AlertDescription>
-                    </Alert>
                   </div>
                 </div>
               </CardContent>
@@ -228,8 +287,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="legal_name">Ragione sociale</Label>
                   <Input
                     id="legal_name"
-                    value={settings.business?.legal_name || ''}
-                    onChange={(e) => handleBusinessChange('legal_name', e.target.value)}
+                    value={localBusiness.legal_name || ''}
+                    onChange={(e) => setLocalBusiness((prev: any) => ({ ...prev, legal_name: e.target.value }))}
                     placeholder="Es: Pecora Negra S.r.l."
                   />
                 </div>
@@ -237,8 +296,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="vat_number">Partita IVA</Label>
                   <Input
                     id="vat_number"
-                    value={settings.business?.vat_number || ''}
-                    onChange={(e) => handleBusinessChange('vat_number', e.target.value)}
+                    value={localBusiness.vat_number || ''}
+                    onChange={(e) => setLocalBusiness((prev: any) => ({ ...prev, vat_number: e.target.value }))}
                     placeholder="Es: IT12345678901"
                   />
                 </div>
@@ -246,8 +305,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="address">Indirizzo</Label>
                   <Textarea
                     id="address"
-                    value={settings.business?.address || ''}
-                    onChange={(e) => handleBusinessChange('address', e.target.value)}
+                    value={localBusiness.address || ''}
+                    onChange={(e) => setLocalBusiness((prev: any) => ({ ...prev, address: e.target.value }))}
                     placeholder="Indirizzo completo dell'azienda"
                     rows={3}
                   />
@@ -257,8 +316,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Input
                     id="support_email"
                     type="email"
-                    value={settings.business?.support_email || ''}
-                    onChange={(e) => handleBusinessChange('support_email', e.target.value)}
+                    value={localBusiness.support_email || ''}
+                    onChange={(e) => setLocalBusiness((prev: any) => ({ ...prev, support_email: e.target.value }))}
                     placeholder="support@example.com"
                   />
                 </div>
@@ -266,10 +325,29 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="support_phone">Telefono supporto</Label>
                   <Input
                     id="support_phone"
-                    value={settings.business?.support_phone || ''}
-                    onChange={(e) => handleBusinessChange('support_phone', e.target.value)}
+                    value={localBusiness.support_phone || ''}
+                    onChange={(e) => setLocalBusiness((prev: any) => ({ ...prev, support_phone: e.target.value }))}
                     placeholder="+39 123 456 7890"
                   />
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={saveBusiness}
+                    disabled={savingBusiness}
+                    className="w-full sm:w-auto"
+                  >
+                    {savingBusiness ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                        Salvataggio...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salva informazioni aziendali
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -287,8 +365,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                 <div>
                   <Label htmlFor="signup_mode">Modalità registrazione</Label>
                   <Select
-                    value={settings.access?.signup_mode || 'invite_only'}
-                    onValueChange={(value) => handleAccessChange('signup_mode', value)}
+                    value={localAccess.signup_mode || 'invite_only'}
+                    onValueChange={(value) => setLocalAccess((prev: any) => ({ ...prev, signup_mode: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -304,10 +382,10 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="allowed_domains">Domini email autorizzati</Label>
                   <Textarea
                     id="allowed_domains"
-                    value={(settings.access?.allowed_domains || []).join('\n')}
+                    value={(localAccess.allowed_domains || []).join('\n')}
                     onChange={(e) => {
                       const domains = e.target.value.split('\n').filter(d => d.trim())
-                      handleAccessChange('allowed_domains', domains)
+                      setLocalAccess((prev: any) => ({ ...prev, allowed_domains: domains }))
                     }}
                     placeholder="example.com&#10;company.it&#10;altro-dominio.org"
                     rows={4}
@@ -315,6 +393,25 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <p className="text-sm text-muted-foreground mt-1">
                     Un dominio per riga. Lascia vuoto per permettere qualsiasi dominio.
                   </p>
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={saveAccess}
+                    disabled={savingAccess}
+                    className="w-full sm:w-auto"
+                  >
+                    {savingAccess ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                        Salvataggio...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salva impostazioni accesso
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -332,8 +429,8 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="banner_enabled"
-                    checked={settings.banner?.enabled || false}
-                    onCheckedChange={(checked) => handleBannerChange('enabled', checked)}
+                    checked={localBanner.enabled || false}
+                    onCheckedChange={handleBannerToggle}
                   />
                   <Label htmlFor="banner_enabled">Banner attivo</Label>
                 </div>
@@ -341,24 +438,43 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
                   <Label htmlFor="banner_message">Messaggio banner</Label>
                   <Textarea
                     id="banner_message"
-                    value={settings.banner?.message || ''}
-                    onChange={(e) => handleBannerChange('message', e.target.value)}
+                    value={localBanner.message || ''}
+                    onChange={(e) => setLocalBanner((prev: any) => ({ ...prev, message: e.target.value }))}
                     placeholder="Messaggio da mostrare nel banner..."
                     rows={3}
-                    disabled={!settings.banner?.enabled}
+                    disabled={!localBanner.enabled}
                   />
                 </div>
-                {settings.banner?.enabled && settings.banner?.message && (
+                {localBanner.enabled && localBanner.message && (
                   <div>
                     <Label>Anteprima</Label>
-                    <Alert className="mt-2">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        {settings.banner.message}
+                    <Alert className="mt-2 bg-amber-50 border-amber-200">
+                      <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      <AlertDescription className="text-amber-800">
+                        {localBanner.message}
                       </AlertDescription>
                     </Alert>
                   </div>
                 )}
+                <div className="pt-4">
+                  <Button 
+                    onClick={saveBanner}
+                    disabled={savingBanner || !localBanner.enabled}
+                    className="w-full sm:w-auto"
+                  >
+                    {savingBanner ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                        Salvataggio...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salva banner
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
