@@ -17,6 +17,7 @@ import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { withRetry } from '@/lib/utils/retry'
+import { getEmailRedirectTo } from '@/lib/url'
 
 const passwordSchema = z.object({
   password: z.string().min(6, 'Password deve essere di almeno 6 caratteri'),
@@ -45,6 +46,11 @@ interface Props {
   token: string
 }
 
+type UiState =
+  | { status: 'idle' }
+  | { status: 'pending-email-confirm'; note: string }
+  | { status: 'error'; note: string }
+
 export function InviteAcceptance({ token }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -55,6 +61,8 @@ export function InviteAcceptance({ token }: Props) {
   const [step, setStep] = useState<'validate' | 'signup' | 'login' | 'success'>('validate')
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [emailMismatch, setEmailMismatch] = useState(false)
+  const [uiState, setUiState] = useState<UiState>({ status: 'idle' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
     register,
@@ -122,80 +130,132 @@ export function InviteAcceptance({ token }: Props) {
   const handleSignup = async (data: PasswordForm) => {
     if (!invitationData) return
 
-    startTransition(async () => {
-      try {
-        const supabase = createSupabaseBrowserClient()
-        console.log('Attempting signup for:', invitationData.email)
+    setIsSubmitting(true)
+    setUiState({ status: 'idle' })
+
+    try {
+      const supabase = createSupabaseBrowserClient()
+      console.log('Attempting signup for:', invitationData.email)
+      
+      // Step 1: Sign up the user
+      const { data: su, error: se } = await supabase.auth.signUp({
+        email: invitationData.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: getEmailRedirectTo()
+        }
+      })
+
+      if (se) {
+        console.error('Signup error:', se)
+        if (se.message?.includes('User already registered')) {
+          setStep('login')
+          toast.info('Utente già registrato. Effettua il login per accettare l\'invito.')
+          setIsSubmitting(false)
+          return
+        }
+        setUiState({ status: 'error', note: se.message })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Step 2: If no session, try server-first approach
+      if (!su.session) {
+        console.log('No session from signup, using server-first approach')
         
-        // Step 1: Sign up the user
-        const { data: su, error: se } = await supabase.auth.signUp({
-          email: invitationData.email,
-          password: data.password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`
-          }
-        })
-
-        if (se) {
-          console.error('Signup error:', se)
-          if (se.message?.includes('User already registered')) {
-            setStep('login')
-            toast.info('Utente già registrato. Effettua il login per accettare l\'invito.')
-            return
-          }
-          throw se
-        }
-
-        // Step 2: If no session, try server-first approach
-        if (!su.session) {
-          console.log('No session from signup, using server-first approach')
-          
-          // Try server route for user creation
-          const response = await fetch('/api/public/invite/accept', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              token,
-              email: invitationData.email,
-              password: data.password
-            })
+        // Try server route for user creation
+        const response = await fetch('/api/public/invite/accept', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token,
+            email: invitationData.email,
+            password: data.password
           })
-          
-          if (!response.ok) {
-            toast.error('Errore creazione account (server)')
-            return
-          }
+        })
+        
+        if (!response.ok) {
+          toast.error('Errore creazione account (server)')
+          setIsSubmitting(false)
+          return
         }
 
-        // Step 3: Sign in with password
+        // Step 3: Try to sign in
         const { data: si, error: le } = await supabase.auth.signInWithPassword({
           email: invitationData.email,
           password: data.password
         })
         
         if (le || !si?.session) {
-          toast.info('Account creato. Conferma l\'email e riprova il login.')
+          const note = `Ti abbiamo inviato un'email di conferma a ${invitationData.email}. ` +
+            `Apri il link per completare l'attivazione, poi torna qui e premi "Accedi ora".`
+          setUiState({ status: 'pending-email-confirm', note })
+          toast.info('Email di conferma inviata. Controlla la casella di posta.')
+          setIsSubmitting(false)
           return
         }
-
-        // Step 4: Accept invitation with retry
-        await withRetry(async () => {
-          const { error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
-          if (ae) throw ae
-          return true
-        })
-
-        setStep('success')
-        toast.success('Account creato e invito accettato!')
-        
-        setTimeout(() => {
-          router.push('/')
-        }, 800)
-      } catch (error: any) {
-        console.error('Error during signup:', error)
-        toast.error(error.message || 'Errore durante la registrazione')
       }
-    })
+
+      // Step 4: Accept invitation with retry
+      await withRetry(async () => {
+        const { error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
+        if (ae) throw ae
+        return true
+      })
+
+      setStep('success')
+      toast.success('Account creato e invito accettato!')
+      
+      setTimeout(() => {
+        router.push('/')
+      }, 800)
+    } catch (error: any) {
+      console.error('Error during signup:', error)
+      setUiState({ status: 'error', note: error.message || 'Errore durante la registrazione' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleLoginAfterConfirm = async () => {
+    if (!invitationData) return
+
+    setIsSubmitting(true)
+    try {
+      const supabase = createSupabaseBrowserClient()
+      // Get password from the current form
+      const passwordElement = document.getElementById('password') as HTMLInputElement
+      const password = passwordElement?.value || ''
+      
+      if (!password) {
+        toast.error('Inserisci la password per continuare')
+        return
+      }
+      
+      const { data: si, error: le } = await supabase.auth.signInWithPassword({
+        email: invitationData.email,
+        password: password
+      })
+      
+      if (le || !si?.session) {
+        toast.error('Accesso non riuscito. Verifica di aver cliccato il link nella mail.')
+        return
+      }
+      
+      const { error: ae } = await supabase.rpc('invitation_accept_v2', { p_token: token })
+      if (ae) {
+        toast.error(ae.message)
+        return
+      }
+      
+      toast.success('Invito accettato! Benvenuto 👋')
+      router.push('/')
+    } catch (error: any) {
+      console.error('Error in handleLoginAfterConfirm:', error)
+      toast.error('Errore durante l\'accesso')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleLogin = async (data: { email: string; password: string }) => {
@@ -407,6 +467,31 @@ export function InviteAcceptance({ token }: Props) {
           </Alert>
         )}
 
+        {/* Email Confirmation Banner */}
+        {uiState.status === 'pending-email-confirm' && (
+          <div className="mb-4 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
+            <p className="mb-2">{uiState.note}</p>
+            <Button
+              type="button"
+              onClick={handleLoginAfterConfirm}
+              variant="outline"
+              size="sm"
+              disabled={isSubmitting}
+              className="bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              {isSubmitting ? 'Accesso...' : 'Accedi ora'}
+            </Button>
+          </div>
+        )}
+
+        {/* Error Banner */}
+        {uiState.status === 'error' && (
+          <div className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+            {uiState.note}
+          </div>
+        )}
+
         {/* Step Forms */}
         {step === 'signup' && (
           <form onSubmit={handleSubmit(handleSignup)} className="space-y-4">
@@ -465,9 +550,9 @@ export function InviteAcceptance({ token }: Props) {
               </div>
             </div>
 
-            <Button type="submit" disabled={isPending} className="w-full">
+            <Button type="submit" disabled={isPending || isSubmitting} className="w-full">
               <UserPlus className="h-4 w-4 mr-2" />
-              {isPending ? 'Creazione...' : 'Crea Account'}
+              {(isPending || isSubmitting) ? 'Creazione...' : 'Crea Account'}
             </Button>
           </form>
         )}
