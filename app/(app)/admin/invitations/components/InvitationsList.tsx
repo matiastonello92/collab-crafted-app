@@ -58,7 +58,7 @@ export function InvitationsList() {
       const processedInvitations: Invitation[] = data?.map((inv: any) => {
         const roleInfo = inv.invitation_roles_locations?.[0]?.role
         const locationNames = inv.invitation_roles_locations?.map(
-          (irl: any) => irl.location?.name
+          (invRoleLocation: any) => invRoleLocation.location?.name
         ).filter(Boolean) || []
 
         return {
