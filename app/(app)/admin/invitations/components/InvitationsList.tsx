@@ -85,6 +85,12 @@ export function InvitationsList() {
 
   useEffect(() => {
     loadInvitations()
+    
+    // Listen for invitation creation events
+    const handleInvitationCreated = () => loadInvitations()
+    window.addEventListener('invitation:created', handleInvitationCreated)
+    
+    return () => window.removeEventListener('invitation:created', handleInvitationCreated)
   }, [])
 
   const copyInviteLink = async (token: string) => {

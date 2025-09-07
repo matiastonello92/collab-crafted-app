@@ -166,7 +166,85 @@ export function InviteAcceptance({ token }: Props) {
             router.push('/')
           }, 800)
         } else {
-          toast.info('Account creato. Controlla la tua email per confermare.')
+          console.log('No session from signup, trying fallback approaches')
+          
+          // Option A: Try immediate signIn fallback
+          try {
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+              email: invitationData.email,
+              password: data.password
+            })
+
+            if (loginError) {
+              console.error('Login fallback error:', loginError)
+              toast.info('Conferma l\'email e riprova, oppure usa il link di login.')
+              return
+            }
+
+            if (loginData.session) {
+              console.log('Login fallback successful, accepting invitation')
+              const { error: acceptError } = await supabase
+                .rpc('invitation_accept_v2', { p_token: token })
+
+              if (acceptError) {
+                console.error('Accept error after login fallback:', acceptError)
+                throw acceptError
+              }
+
+              setStep('success')
+              toast.success('Account creato e invito accettato!')
+              
+              setTimeout(() => {
+                router.push('/')
+              }, 800)
+            }
+          } catch (fallbackError) {
+            console.error('Fallback login failed:', fallbackError)
+            
+            // Option B: Try server route for user creation
+            try {
+              const response = await fetch('/api/public/invite/accept', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  token,
+                  email: invitationData.email,
+                  password: data.password
+                })
+              })
+
+              if (response.ok) {
+                // Now try to sign in
+                const { data: finalLoginData, error: finalLoginError } = await supabase.auth.signInWithPassword({
+                  email: invitationData.email,
+                  password: data.password
+                })
+
+                if (finalLoginError) throw finalLoginError
+
+                if (finalLoginData.session) {
+                  const { error: acceptError } = await supabase
+                    .rpc('invitation_accept_v2', { p_token: token })
+
+                  if (acceptError) throw acceptError
+
+                  setStep('success')
+                  toast.success('Account creato e invito accettato!')
+                  
+                  setTimeout(() => {
+                    router.push('/')
+                  }, 800)
+                } else {
+                  toast.info('Account creato. Controlla la tua email per confermare.')
+                }
+              } else {
+                toast.info('Account creato. Controlla la tua email per confermare.')
+              }
+            } catch (serverError) {
+              console.error('Server route failed:', serverError)
+              toast.info('Account creato. Controlla la tua email per confermare.')
+            }
+          }
         }
       } catch (error: any) {
         console.error('Error during signup:', error)

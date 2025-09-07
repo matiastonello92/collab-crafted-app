@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { Send, X, Copy, Check } from 'lucide-react'
 import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } from '@/lib/admin/data-fetchers'
 import { PERMISSIONS } from '@/lib/permissions/registry'
+import { normalizePermission } from '@/lib/permissions'
 import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
@@ -51,6 +52,7 @@ export function InviteUserForm() {
   const [overrides, setOverrides] = useState<{ [locationId: string]: { [permissionName: string]: boolean } }>({})
   const [invitationLink, setInvitationLink] = useState<string>('')
   const [copied, setCopied] = useState(false)
+  const [isLoadingPresets, setIsLoadingPresets] = useState(false)
 
   const allPermissions = Object.values(PERMISSIONS).flat()
 
@@ -82,57 +84,89 @@ export function InviteUserForm() {
     void loadData()
   }, [])
 
-  // Load role presets when role changes
+  // Load role presets when role changes - two-step fetch with normalization
   useEffect(() => {
     if (!selectedRoleId) {
       setRolePresets({})
+      setIsLoadingPresets(false)
       return
     }
 
-    const loadRolePresets = async () => {
+    const fetchRoleDefaultPermissions = async (roleId: string) => {
+      setIsLoadingPresets(true)
       try {
         const supabase = createSupabaseBrowserClient()
         
-        // Load role permissions using exact format requested
-        const { data, error } = await supabase
+        // Step 1: Get permission IDs from role_permissions
+        const { data: rolePermData, error: rolePermError } = await supabase
           .from('role_permissions')
-          .select(`
-            permissions!inner(name)
-          `)
-          .eq('role_id', selectedRoleId)
-          .order('permissions(name)')
+          .select('permission_id')
+          .eq('role_id', roleId)
+        
+        if (rolePermError) throw rolePermError
+        
+        if (!rolePermData || rolePermData.length === 0) {
+          console.warn('No role permissions found, trying fallback to existing presets')
+          setRolePresets({})
+          return {}
+        }
+
+        const permissionIds = rolePermData.map(rp => rp.permission_id)
+        
+        // Step 2: Get permission names using the IDs
+        const { data: permissionsData, error: permissionsError } = await supabase
+          .from('permissions')
+          .select('name')
+          .in('id', permissionIds)
+          .order('name')
+        
+        if (permissionsError) throw permissionsError
         
         const presets: RolePreset = {}
         
-        if (error) {
-          throw error
-        }
-
-        // Process permissions from role_permissions
-        if (data && data.length > 0) {
-          data.forEach((rolePermission: any) => {
-            if (rolePermission.permissions?.name) {
-              presets[rolePermission.permissions.name] = true
+        // Process and normalize permission names
+        if (permissionsData && permissionsData.length > 0) {
+          permissionsData.forEach((permission: any) => {
+            if (permission.name) {
+              const normalizedName = normalizePermission(permission.name)
+              presets[normalizedName] = true
             }
           })
-        } else {
-          // Fallback: try to load from existing presets if no role permissions found
-          console.warn('No role permissions found, trying fallback to existing presets')
-          // If still empty, leave all permissions deselected (empty presets object)
         }
         
-        setRolePresets(presets)
-        
-        // Initialize overrides for selected locations with role presets
-        const newOverrides: typeof overrides = {}
-        selectedLocationIds.forEach(locationId => {
-          newOverrides[locationId] = { ...presets }
-        })
-        setOverrides(newOverrides)
+        return presets
       } catch (error) {
         console.error('Error loading role presets:', error)
         toast.error('Errore nel caricamento dei permessi del ruolo')
+        return {}
+      } finally {
+        setIsLoadingPresets(false)
       }
+    }
+
+    const loadRolePresets = async () => {
+      // Preserve user deltas when role changes
+      const previousOverrides = { ...overrides }
+      
+      const presets = await fetchRoleDefaultPermissions(selectedRoleId)
+      setRolePresets(presets)
+      
+      // Initialize overrides for selected locations with role presets
+      const newOverrides: typeof overrides = {}
+      selectedLocationIds.forEach(locationId => {
+        const existingOverrides = previousOverrides[locationId] || {}
+        const combinedOverrides = { ...presets }
+        
+        // Preserve user modifications
+        Object.keys(existingOverrides).forEach(permName => {
+          if (existingOverrides[permName] !== presets[permName]) {
+            combinedOverrides[permName] = existingOverrides[permName]
+          }
+        })
+        
+        newOverrides[locationId] = combinedOverrides
+      })
+      setOverrides(newOverrides)
     }
 
     loadRolePresets()
@@ -239,6 +273,9 @@ export function InviteUserForm() {
         
         toast.success('Invito creato con successo!')
         
+        // Dispatch event for list refresh
+        window.dispatchEvent(new CustomEvent('invitation:created'))
+        
         // Reset form
         reset()
         setSelectedRoleId('')
@@ -246,6 +283,7 @@ export function InviteUserForm() {
         setSelectedJobTagIds([])
         setRolePresets({})
         setOverrides({})
+        setIsLoadingPresets(false)
       } catch (error: any) {
         console.error('Error creating invitation:', error)
         toast.error(error.message || 'Errore durante la creazione dell\'invito')
@@ -409,36 +447,46 @@ export function InviteUserForm() {
                   </tr>
                 </thead>
                 <tbody>
-                  {allPermissions.map(permission => (
-                    <tr key={permission} className="border-t">
-                      <td className="p-2 font-mono text-xs">{permission}</td>
-                      {selectedLocationIds.map(locationId => {
-                        const isRoleDefault = rolePresets[permission] || false
-                        const overrideValue = overrides[locationId]?.[permission]
-                        const currentValue = overrideValue !== undefined ? overrideValue : isRoleDefault
-                        
-                        return (
-                          <td key={locationId} className="p-2 text-center">
-                            <Checkbox
-                              checked={currentValue}
-                              onCheckedChange={(checked) =>
-                                handlePermissionOverride(locationId, permission, checked as boolean)
-                              }
-                              className={
-                                overrideValue !== undefined && overrideValue !== isRoleDefault
-                                  ? 'border-orange-500'
-                                  : ''
-                              }
-                            />
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  ))}
+                  {allPermissions.map(permission => {
+                    const normalizedPermission = normalizePermission(permission)
+                    return (
+                      <tr key={permission} className="border-t">
+                        <td className="p-2 font-mono text-xs">{permission}</td>
+                        {selectedLocationIds.map(locationId => {
+                          const isRoleDefault = rolePresets[normalizedPermission] || false
+                          const overrideValue = overrides[locationId]?.[normalizedPermission]
+                          const currentValue = overrideValue !== undefined ? overrideValue : isRoleDefault
+                          
+                          return (
+                            <td key={locationId} className="p-2 text-center">
+                              <Checkbox
+                                checked={currentValue}
+                                disabled={isLoadingPresets}
+                                onCheckedChange={(checked) =>
+                                  handlePermissionOverride(locationId, normalizedPermission, checked as boolean)
+                                }
+                                className={
+                                  overrideValue !== undefined && overrideValue !== isRoleDefault
+                                    ? 'border-orange-500'
+                                    : ''
+                                }
+                              />
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
           </div>
+          {isLoadingPresets && (
+            <div className="text-center py-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto"></div>
+              <p className="text-xs text-muted-foreground mt-1">Caricamento permessi...</p>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             I checkbox con bordo arancione indicano override rispetto ai permessi del ruolo
           </p>
