@@ -1,0 +1,16 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="klyra-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C5CE7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22D3EE;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="32" height="32" rx="8" fill="url(#klyra-icon-gradient)"/>
+  
+  <!-- Stylized K -->
+  <path d="M9 8V24H12V17L16.5 24H20L15 16.5L19.5 8H16L13 14V8H9Z" fill="white"/>
+  
+  <!-- Accent element -->
+  <circle cx="24" cy="12" r="2" fill="white" opacity="0.8"/>
+</svg>

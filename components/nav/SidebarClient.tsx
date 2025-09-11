@@ -56,13 +56,18 @@ export default function SidebarClient() {
       <div className="flex h-full flex-col">
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
           {!collapsed && (
-            <h2 className="text-lg font-semibold">Staff Management</h2>
+            <div className="flex items-center gap-2">
+              <img src="/brand/klyra-icon.svg" alt="Klyra" className="h-6 w-6" />
+              <h2 className="text-lg font-semibold bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
+                Klyra
+              </h2>
+            </div>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 hover:bg-accent"
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -130,12 +135,12 @@ export default function SidebarClient() {
         <div className="border-t border-border p-4">
           {!collapsed ? (
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
+              <div className="h-2 w-2 rounded-full bg-klyra-success" />
               <span className="text-xs text-muted-foreground">Sistema Attivo</span>
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
+              <div className="h-2 w-2 rounded-full bg-klyra-success" />
             </div>
           )}
         </div>

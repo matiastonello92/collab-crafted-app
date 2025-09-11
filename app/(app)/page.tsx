@@ -85,18 +85,25 @@ export default function HomePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold">Staff Management</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <img src="/brand/klyra-logo.svg" alt="Klyra" className="h-8" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
+            Klyra
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Sistema di gestione del personale multi-location
+            Piattaforma avanzata per la gestione del personale multi-location
           </p>
           {context.location_name && (
             <div className="flex gap-2 mt-4">
-              <Badge variant="outline">Location: {context.location_name}</Badge>
+              <Badge variant="outline" className="border-klyra-primary/30 text-klyra-primary">
+                Location: {context.location_name}
+              </Badge>
             </div>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-green-500" />
+          <Activity className="h-5 w-5 text-klyra-success" />
           <span className="text-sm text-muted-foreground">Sistema Operativo</span>
         </div>
       </div>
@@ -154,8 +161,8 @@ export default function HomePage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         {action.description}
                       </p>
-                      {canAccess ? (
-                        <Button asChild className="w-full">
+                       {canAccess ? (
+                        <Button asChild className="w-full" variant="klyra">
                           <Link href={action.href}>
                             Accedi
                           </Link>
@@ -193,28 +200,28 @@ export default function HomePage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <div className="h-2 w-2 rounded-full bg-klyra-success" />
                 <span>Database Supabase</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <div className="h-2 w-2 rounded-full bg-klyra-success" />
                 <span>Storage</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <div className="h-2 w-2 rounded-full bg-klyra-success" />
                 <span>Edge Functions</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                <div className="h-2 w-2 rounded-full bg-klyra-warning" />
                 <span>Email Service (Resend)</span>
               </div>
               <Badge variant="outline">Test Richiesto</Badge>
