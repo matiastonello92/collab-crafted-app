@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ArrowLeft, User, Settings, Bell, Upload, Save } from 'lucide-react'
+import { ArrowLeft, User, Settings, Bell, Upload, Save, Mail, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,6 +24,8 @@ export function UserSettingsClient({ user, profile: initialProfile }: UserSettin
   const [profile, setProfile] = useState(initialProfile || {})
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isTestingEmail, setIsTestingEmail] = useState(false)
+  const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createSupabaseBrowserClient()
 
@@ -89,6 +91,29 @@ export function UserSettingsClient({ user, profile: initialProfile }: UserSettin
   const updateNotificationPref = (key: string, value: boolean) => {
     const newNotifPrefs = { ...profile.notif_prefs, [key]: value }
     updateProfile('notif_prefs', newNotifPrefs)
+  }
+
+  const handleTestEmail = async () => {
+    setIsTestingEmail(true)
+    try {
+      const response = await fetch('/api/settings/email-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send test email')
+      }
+      
+      toast.success('Email di test inviata con successo!')
+      setLastEmailTest(new Date().toLocaleString('it-IT'))
+    } catch (error: any) {
+      toast.error(`Errore nell'invio: ${error.message}`)
+    } finally {
+      setIsTestingEmail(false)
+    }
   }
 
   return (
@@ -270,6 +295,38 @@ export function UserSettingsClient({ user, profile: initialProfile }: UserSettin
                     checked={profile.marketing_opt_in || false}
                     onCheckedChange={(checked) => updateProfile('marketing_opt_in', checked)}
                   />
+                </div>
+
+                {/* Email Test Section */}
+                <div className="pt-4 border-t">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Test configurazione email</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Invia una email di test per verificare che tutto funzioni
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={handleTestEmail}
+                        disabled={isTestingEmail}
+                        variant="outline"
+                        size="sm"
+                      >
+                        {isTestingEmail ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4 mr-2" />
+                        )}
+                        {isTestingEmail ? 'Invio...' : 'Invia email di test'}
+                      </Button>
+                      {lastEmailTest && (
+                        <p className="text-sm text-muted-foreground">
+                          Ultimo test: {lastEmailTest}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
