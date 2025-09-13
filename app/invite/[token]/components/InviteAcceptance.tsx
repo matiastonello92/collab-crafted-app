@@ -212,8 +212,9 @@ export function InviteAcceptance({ token }: Props) {
       setStep('success')
       toast.success('Account creato e invito accettato!')
       
+      // Redirect to profile completion
       setTimeout(() => {
-        router.push('/')
+        router.push(`/invite/${token}/complete`)
       }, 800)
     } catch (error: any) {
       console.error('Error during signup:', error)
@@ -262,7 +263,7 @@ export function InviteAcceptance({ token }: Props) {
       }
       
       toast.success('Invito accettato! Benvenuto 👋')
-      router.push('/')
+      router.push(`/invite/${token}/complete`)
     } catch (error: any) {
       console.error('Error in handleLoginAfterConfirm:', error)
       toast.error('Errore durante l\'accesso')
@@ -308,9 +309,9 @@ export function InviteAcceptance({ token }: Props) {
           setStep('success')
           toast.success('Invito accettato!')
           
-          // Redirect after delay
+          // Redirect to profile completion
           setTimeout(() => {
-            router.push('/')
+            router.push(`/invite/${token}/complete`)
           }, 800)
         }
       } catch (error: any) {
@@ -344,9 +345,9 @@ export function InviteAcceptance({ token }: Props) {
         setStep('success')
         toast.success('Invito accettato!')
         
-        // Redirect after delay
+        // Redirect to profile completion
         setTimeout(() => {
-          router.push('/')
+          router.push(`/invite/${token}/complete`)
         }, 800)
       } catch (error: any) {
         console.error('Error accepting invitation:', error)
@@ -406,7 +407,7 @@ export function InviteAcceptance({ token }: Props) {
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-green-800">Invito Accettato!</h3>
             <p className="text-muted-foreground">
-              Reindirizzamento alla dashboard...
+              Completamento profilo in corso...
             </p>
           </div>
         </CardContent>
