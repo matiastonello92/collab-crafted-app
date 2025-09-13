@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { X, Plus, Send } from 'lucide-react'
 import { fetchAvailableLocations, fetchAvailableRoles } from '@/lib/admin/data-fetchers'
 import type { Location, Role } from '@/lib/admin/data-fetchers'
+import { PermissionGrid } from './PermissionGrid'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -41,6 +42,10 @@ export function InviteUserForm() {
   const [globalRoleId, setGlobalRoleId] = useState<string>('')
   const [selectedLocationId, setSelectedLocationId] = useState<string>('')
   const [selectedRoleId, setSelectedRoleId] = useState<string>('')
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
+
+  // Determine active role for permission presets (prioritize global, then first location role)
+  const activeRoleForPermissions = globalRoleId || locationRoles[0]?.roleId || ''
 
   const {
     register,
@@ -105,6 +110,7 @@ export function InviteUserForm() {
           locationId: lr.locationId,
           roleId: lr.roleId,
         })),
+        permissions: selectedPermissions, // Include selected permissions
       }
 
       const response = await fetch('/api/v1/admin/invitations', {
@@ -254,6 +260,13 @@ export function InviteUserForm() {
           </div>
         )}
       </div>
+
+      {/* Permission Selection */}
+      <PermissionGrid
+        selectedPermissions={selectedPermissions}
+        onPermissionChange={setSelectedPermissions}
+        roleId={activeRoleForPermissions}
+      />
 
       {/* Notes */}
       <div className="space-y-2">
