@@ -1,0 +1,233 @@
+{
+  "snapshot_date": "2025-09-13",
+  "snapshot_type": "pre_migration_multi_tenant",
+  "database_summary": {
+    "total_tables": 20,
+    "total_indexes": 29,
+    "total_rls_policies": 54,
+    "total_functions": 20
+  },
+  "tables": {
+    "app_settings": {
+      "columns": [
+        {"name": "key", "type": "text", "nullable": false, "default": null, "position": 1},
+        {"name": "value", "type": "jsonb", "nullable": false, "default": "'{}'::jsonb", "position": 2},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 3}
+      ]
+    },
+    "invitation_job_tags": {
+      "columns": [
+        {"name": "invitation_id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "tag_id", "type": "uuid", "nullable": false, "default": null, "position": 2},
+        {"name": "location_id", "type": "uuid", "nullable": false, "default": null, "position": 3},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 4},
+        {"name": "created_by", "type": "uuid", "nullable": true, "default": null, "position": 5}
+      ]
+    },
+    "invitation_permissions": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "invitation_id", "type": "uuid", "nullable": true, "default": null, "position": 2},
+        {"name": "permission_id", "type": "uuid", "nullable": true, "default": null, "position": 3},
+        {"name": "location_id", "type": "uuid", "nullable": true, "default": null, "position": 4},
+        {"name": "granted", "type": "boolean", "nullable": false, "default": "true", "position": 5}
+      ]
+    },
+    "invitation_roles_locations": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "invitation_id", "type": "uuid", "nullable": true, "default": null, "position": 2},
+        {"name": "role_id", "type": "uuid", "nullable": true, "default": null, "position": 3},
+        {"name": "location_id", "type": "uuid", "nullable": true, "default": null, "position": 4}
+      ]
+    },
+    "invitations": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "email", "type": "character varying", "nullable": false, "default": null, "max_length": 255, "position": 2},
+        {"name": "first_name", "type": "character varying", "nullable": true, "default": null, "max_length": 100, "position": 3},
+        {"name": "last_name", "type": "character varying", "nullable": true, "default": null, "max_length": 100, "position": 4},
+        {"name": "invited_by", "type": "uuid", "nullable": true, "default": null, "position": 5},
+        {"name": "status", "type": "character varying", "nullable": true, "default": "'pending'::character varying", "max_length": 20, "position": 6},
+        {"name": "token", "type": "character varying", "nullable": false, "default": null, "max_length": 255, "position": 7},
+        {"name": "expires_at", "type": "timestamp with time zone", "nullable": false, "default": null, "position": 8},
+        {"name": "accepted_at", "type": "timestamp with time zone", "nullable": true, "default": null, "position": 9},
+        {"name": "revoked_at", "type": "timestamp with time zone", "nullable": true, "default": null, "position": 10},
+        {"name": "notes", "type": "text", "nullable": true, "default": null, "position": 11},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 12},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 13}
+      ]
+    },
+    "job_tags": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "name", "type": "text", "nullable": false, "default": null, "position": 2},
+        {"name": "label", "type": "text", "nullable": false, "default": null, "position": 3},
+        {"name": "is_active", "type": "boolean", "nullable": false, "default": "true", "position": 4},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 5},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 6}
+      ]
+    },
+    "location_admins": {
+      "columns": [
+        {"name": "location_id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "user_id", "type": "uuid", "nullable": false, "default": null, "position": 2},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 3}
+      ]
+    },
+    "locations": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "name", "type": "character varying", "nullable": false, "default": null, "position": 2},
+        {"name": "slug", "type": "text", "nullable": true, "default": null, "position": 3},
+        {"name": "description", "type": "text", "nullable": true, "default": null, "position": 4},
+        {"name": "phone", "type": "character varying", "nullable": true, "default": null, "position": 5},
+        {"name": "email", "type": "character varying", "nullable": true, "default": null, "position": 6},
+        {"name": "address_line1", "type": "text", "nullable": true, "default": null, "position": 7},
+        {"name": "address_line2", "type": "text", "nullable": true, "default": null, "position": 8},
+        {"name": "city", "type": "character varying", "nullable": true, "default": null, "position": 9},
+        {"name": "postcode", "type": "text", "nullable": true, "default": null, "position": 10},
+        {"name": "country", "type": "character varying", "nullable": true, "default": "'France'::character varying", "position": 11},
+        {"name": "timezone", "type": "text", "nullable": true, "default": "'Europe/Paris'::text", "position": 12},
+        {"name": "currency", "type": "text", "nullable": true, "default": "'EUR'::text", "position": 13},
+        {"name": "vat_number", "type": "text", "nullable": true, "default": null, "position": 14},
+        {"name": "status", "type": "text", "nullable": true, "default": "'active'::text", "position": 15},
+        {"name": "photo_url", "type": "text", "nullable": true, "default": null, "position": 16},
+        {"name": "opening_hours", "type": "jsonb", "nullable": true, "default": "'{}'::jsonb", "position": 17},
+        {"name": "open_days", "type": "ARRAY", "nullable": true, "default": "'{}'::text[]", "position": 18},
+        {"name": "is_active", "type": "boolean", "nullable": true, "default": "true", "position": 19},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 20},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 21}
+      ]
+    },
+    "permission_preset_items": {
+      "columns": [
+        {"name": "preset_id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "permission", "type": "text", "nullable": false, "default": null, "position": 2},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 3}
+      ]
+    },
+    "permission_presets": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "name", "type": "text", "nullable": false, "default": null, "position": 2},
+        {"name": "description", "type": "text", "nullable": true, "default": null, "position": 3},
+        {"name": "is_system", "type": "boolean", "nullable": false, "default": "false", "position": 4},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 5},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 6}
+      ]
+    },
+    "permissions": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "name", "type": "character varying", "nullable": false, "default": null, "position": 2},
+        {"name": "display_name", "type": "character varying", "nullable": false, "default": null, "position": 3},
+        {"name": "category", "type": "character varying", "nullable": false, "default": null, "position": 4},
+        {"name": "description", "type": "text", "nullable": true, "default": null, "position": 5},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 6}
+      ]
+    },
+    "profiles": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "full_name", "type": "text", "nullable": true, "default": null, "position": 2},
+        {"name": "avatar_url", "type": "text", "nullable": true, "default": null, "position": 3},
+        {"name": "phone", "type": "text", "nullable": true, "default": null, "position": 4},
+        {"name": "locale", "type": "text", "nullable": true, "default": null, "position": 5},
+        {"name": "timezone", "type": "text", "nullable": true, "default": null, "position": 6},
+        {"name": "marketing_opt_in", "type": "boolean", "nullable": true, "default": "false", "position": 7},
+        {"name": "notif_prefs", "type": "jsonb", "nullable": true, "default": "'{}'::jsonb", "position": 8},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 9},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 10}
+      ]
+    },
+    "role_permission_presets": {
+      "columns": [
+        {"name": "role_id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "preset_id", "type": "uuid", "nullable": false, "default": null, "position": 2},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 3}
+      ]
+    },
+    "role_permissions": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "role_id", "type": "uuid", "nullable": true, "default": null, "position": 2},
+        {"name": "permission_id", "type": "uuid", "nullable": true, "default": null, "position": 3},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 4}
+      ]
+    },
+    "roles": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "name", "type": "character varying", "nullable": false, "default": null, "position": 2},
+        {"name": "display_name", "type": "character varying", "nullable": false, "default": null, "position": 3},
+        {"name": "description", "type": "text", "nullable": true, "default": null, "position": 4},
+        {"name": "level", "type": "integer", "nullable": false, "default": "0", "position": 5},
+        {"name": "is_active", "type": "boolean", "nullable": true, "default": "true", "position": 6},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 7},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 8}
+      ]
+    },
+    "system_banners": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "message", "type": "text", "nullable": false, "default": null, "position": 2},
+        {"name": "status", "type": "text", "nullable": false, "default": "'published'::text", "position": 3},
+        {"name": "created_by", "type": "uuid", "nullable": true, "default": null, "position": 4},
+        {"name": "published_at", "type": "timestamp with time zone", "nullable": true, "default": null, "position": 5},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 6}
+      ]
+    },
+    "user_job_tags": {
+      "columns": [
+        {"name": "user_id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "tag_id", "type": "uuid", "nullable": false, "default": null, "position": 2},
+        {"name": "location_id", "type": "uuid", "nullable": false, "default": null, "position": 3},
+        {"name": "assigned_by", "type": "uuid", "nullable": true, "default": null, "position": 4},
+        {"name": "assigned_at", "type": "timestamp with time zone", "nullable": false, "default": "now()", "position": 5}
+      ]
+    },
+    "user_permissions": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "user_id", "type": "uuid", "nullable": true, "default": null, "position": 2},
+        {"name": "permission_id", "type": "uuid", "nullable": true, "default": null, "position": 3},
+        {"name": "location_id", "type": "uuid", "nullable": true, "default": null, "position": 4},
+        {"name": "granted", "type": "boolean", "nullable": true, "default": "true", "position": 5},
+        {"name": "granted_by", "type": "uuid", "nullable": true, "default": null, "position": 6},
+        {"name": "granted_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 7}
+      ]
+    },
+    "user_profiles": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": null, "position": 1},
+        {"name": "first_name", "type": "character varying", "nullable": true, "default": null, "position": 2},
+        {"name": "last_name", "type": "character varying", "nullable": true, "default": null, "position": 3},
+        {"name": "phone", "type": "character varying", "nullable": true, "default": null, "position": 4},
+        {"name": "avatar_url", "type": "text", "nullable": true, "default": null, "position": 5},
+        {"name": "notes", "type": "text", "nullable": true, "default": null, "position": 6},
+        {"name": "is_active", "type": "boolean", "nullable": true, "default": "true", "position": 7},
+        {"name": "can_invite_users", "type": "boolean", "nullable": true, "default": "false", "position": 8},
+        {"name": "created_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 9},
+        {"name": "updated_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 10}
+      ]
+    },
+    "user_roles_locations": {
+      "columns": [
+        {"name": "id", "type": "uuid", "nullable": false, "default": "gen_random_uuid()", "position": 1},
+        {"name": "user_id", "type": "uuid", "nullable": true, "default": null, "position": 2},
+        {"name": "role_id", "type": "uuid", "nullable": true, "default": null, "position": 3},
+        {"name": "location_id", "type": "uuid", "nullable": true, "default": null, "position": 4},
+        {"name": "is_active", "type": "boolean", "nullable": true, "default": "true", "position": 5},
+        {"name": "assigned_by", "type": "uuid", "nullable": true, "default": null, "position": 6},
+        {"name": "assigned_at", "type": "timestamp with time zone", "nullable": true, "default": "now()", "position": 7}
+      ]
+    }
+  },
+  "indexes": {
+    "primary_keys": 20,
+    "unique_constraints": 9,
+    "regular_indexes": 0,
+    "composite_indexes": 0
+  }
+}
