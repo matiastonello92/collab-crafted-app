@@ -941,6 +941,10 @@ export type Database = {
         Args: { loc_id: string }
         Returns: boolean
       }
+      is_platform_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       job_tag_id_by_name: {
         Args: { p_name: string }
         Returns: string
@@ -988,8 +992,16 @@ export type Database = {
         Args: { p_permission: string; p_user: string }
         Returns: boolean
       }
+      user_in_org: {
+        Args: { p_org: string }
+        Returns: boolean
+      }
       user_is_admin: {
         Args: { p_user: string }
+        Returns: boolean
+      }
+      user_is_org_admin: {
+        Args: { p_org: string }
         Returns: boolean
       }
     }
