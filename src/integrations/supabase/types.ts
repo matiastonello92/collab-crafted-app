@@ -343,6 +343,91 @@ export type Database = {
         }
         Relationships: []
       }
+      memberships: {
+        Row: {
+          created_at: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      organization_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          is_primary: boolean
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          is_primary?: boolean
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          is_primary?: boolean
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_domains_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          name: string
+          org_id: string
+          slug: string
+          status: string
+          timezone: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          org_id?: string
+          slug: string
+          status?: string
+          timezone?: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          org_id?: string
+          slug?: string
+          status?: string
+          timezone?: string
+        }
+        Relationships: []
+      }
       permission_preset_items: {
         Row: {
           created_at: string
@@ -779,6 +864,30 @@ export type Database = {
       admin_remove_manager: {
         Args: { loc_id: string; target_email: string }
         Returns: undefined
+      }
+      citext: {
+        Args: { "": boolean } | { "": string } | { "": unknown }
+        Returns: string
+      }
+      citext_hash: {
+        Args: { "": string }
+        Returns: number
+      }
+      citextin: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      citextout: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      citextrecv: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      citextsend: {
+        Args: { "": string }
+        Returns: string
       }
       invitation_accept_v2: {
         Args: { p_token: string }
