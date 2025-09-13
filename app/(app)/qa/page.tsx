@@ -36,6 +36,13 @@ export default async function QAPage() {
       status: 'operational'
     },
     {
+      title: 'Step 6 Verification',
+      description: 'Suite verifica SaaS: RLS, funzioni, email',
+      href: '/qa/step6',
+      icon: CheckCircle,
+      status: 'operational'
+    },
+    {
       title: 'Database Status',
       description: 'Stato connessioni DB',
       href: '#',
