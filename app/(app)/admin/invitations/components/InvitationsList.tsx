@@ -46,7 +46,7 @@ export function InvitationsList() {
             location:locations (name)
           )
         `)
-        .eq('status', 'pending')
+        .in('status', ['pending', 'sent'])
         .is('revoked_at', null)
         .is('accepted_at', null)
         .gt('expires_at', new Date().toISOString())
@@ -132,6 +132,7 @@ export function InvitationsList() {
     
     if (status === 'accepted') return 'default'
     if (status === 'revoked') return 'destructive'
+    if (status === 'sent') return 'default'
     if (now > expiryDate) return 'secondary'
     return 'secondary'
   }
@@ -142,8 +143,9 @@ export function InvitationsList() {
     
     if (status === 'accepted') return 'Accettato'
     if (status === 'revoked') return 'Revocato'
+    if (status === 'sent') return 'Email inviata'
     if (now > expiryDate) return 'Scaduto'
-    return 'Pending'
+    return 'In attesa'
   }
 
   if (isLoading) {
@@ -226,7 +228,7 @@ export function InvitationsList() {
                 </div>
               </div>
 
-              {invitation.status === 'pending' && new Date() < new Date(invitation.expires_at) && (
+              {(invitation.status === 'pending' || invitation.status === 'sent') && new Date() < new Date(invitation.expires_at) && (
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
