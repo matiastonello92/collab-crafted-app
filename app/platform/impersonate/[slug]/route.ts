@@ -8,10 +8,7 @@ export async function POST(
 ) {
   try {
     // Platform admin guard
-    const adminCheck = await requirePlatformAdmin()
-    if (!adminCheck.ok) {
-      return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 403 })
-    }
+    await requirePlatformAdmin()
 
     const { slug } = params
     if (!slug) {

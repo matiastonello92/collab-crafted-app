@@ -7,10 +7,7 @@ import { Shield, Users, Building2, Mail, Activity, AlertTriangle } from 'lucide-
 
 export default async function PlatformAdminPage() {
   // Platform admin guard
-  const adminCheck = await requirePlatformAdmin()
-  if (!adminCheck.ok) {
-    redirect('/login')
-  }
+  await requirePlatformAdmin()
 
   const supabase = await createSupabaseServerClient()
 
