@@ -1,3 +1,6 @@
+// app/platform/layout.tsx
+// Sub-layout: nessun <html>/<body>, nessun import di globals.css
+// Usa lo stesso theme e gli stessi componenti shell della app
 import type { Metadata } from 'next'
 import { PlatformChrome } from './PlatformChrome'
 
@@ -6,11 +9,7 @@ export const metadata: Metadata = {
   description: 'Global platform administration and monitoring',
 }
 
-export default function PlatformLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <PlatformChrome />

@@ -1,5 +1,8 @@
-@import "tailwindcss";
 @import "./styles/theme.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Design System Utilities */
 .gradient-title {
