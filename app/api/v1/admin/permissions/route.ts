@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
-import { checkAdminAccess } from "@/lib/admin/guards"
+import { checkOrgAdmin } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -9,7 +9,7 @@ export const runtime = 'nodejs'
 export async function GET() {
   try {
     // Check admin access using centralized guard
-    const { hasAccess } = await checkAdminAccess()
+    const { hasAccess } = await checkOrgAdmin()
     if (!hasAccess) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }

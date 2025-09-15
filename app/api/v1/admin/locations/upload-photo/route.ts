@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
-import { checkAdminAccess } from "@/lib/admin/guards"
+import { checkOrgAdmin } from "@/lib/admin/guards"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const { hasAccess } = await checkAdminAccess()
+  const { hasAccess } = await checkOrgAdmin()
   if (!hasAccess) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAdminAccess } from '@/lib/admin/guards'
+import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: { invitationId: string } }
 ) {
   try {
-    const { userId, hasAccess } = await checkAdminAccess()
+    const { userId, hasAccess } = await checkOrgAdmin()
     if (!hasAccess) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

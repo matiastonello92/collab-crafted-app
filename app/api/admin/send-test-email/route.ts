@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -8,7 +8,7 @@ export const revalidate = 0
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin()
+    await requireOrgAdmin()
 
     const body = await request.json()
     

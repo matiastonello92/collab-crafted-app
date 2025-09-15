@@ -1,11 +1,11 @@
 'use server'
 
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { revalidatePath } from 'next/cache'
 
 export async function saveBanner(message: string, enabled: boolean) {
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const supabase = await createSupabaseServerClient()
   
@@ -44,7 +44,7 @@ export async function saveBanner(message: string, enabled: boolean) {
 }
 
 export async function getBannerHistory() {
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const supabase = await createSupabaseServerClient()
   
@@ -69,7 +69,7 @@ export async function getBannerHistory() {
 }
 
 export async function republishBanner(id: string) {
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const supabase = await createSupabaseServerClient()
   

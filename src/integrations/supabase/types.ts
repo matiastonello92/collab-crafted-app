@@ -1547,6 +1547,10 @@ export type Database = {
         Args: { loc_id: string }
         Returns: boolean
       }
+      is_org_admin: {
+        Args: { p_org: string }
+        Returns: boolean
+      }
       is_platform_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

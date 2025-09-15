@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
-import { checkAdminAccess } from "@/lib/admin/guards"
+import { checkOrgAdmin } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -35,7 +35,7 @@ export async function POST(
 ) {
   try {
     // Check admin access using centralized guard
-    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    const { userId: actorId, hasAccess } = await checkOrgAdmin()
     if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
@@ -181,7 +181,7 @@ export async function DELETE(
 ) {
   try {
     // Check admin access using centralized guard
-    const { userId: actorId, hasAccess } = await checkAdminAccess()
+    const { userId: actorId, hasAccess } = await checkOrgAdmin()
     if (!hasAccess || !actorId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }

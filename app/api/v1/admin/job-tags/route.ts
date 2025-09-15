@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAdminAccess } from '@/lib/admin/guards'
+import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId, hasAccess } = await checkAdminAccess()
+    const { hasAccess } = await checkOrgAdmin()
     if (!hasAccess) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
