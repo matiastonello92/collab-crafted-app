@@ -36,10 +36,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 403 })
     }
 
-    // Validate path starts with user's org and user ID for security
-    const expectedPrefix = `${profile.org_id}/${user.id}/`
-    if (!name.startsWith(expectedPrefix)) {
-      return NextResponse.json({ error: 'Access denied to this path' }, { status: 403 })
+    // Validate path based on bucket type
+    if (bucket === 'avatars') {
+      // For avatars: must be <org_id>/<user_id>/avatar.jpg
+      const expectedPrefix = `${profile.org_id}/${user.id}/`
+      if (!name.startsWith(expectedPrefix)) {
+        return NextResponse.json({ error: 'Access denied to this avatar path' }, { status: 403 })
+      }
+    } else if (bucket === 'branding' || bucket === 'photos') {
+      // For branding/photos: must start with <org_id>/
+      const expectedPrefix = `${profile.org_id}/`
+      if (!name.startsWith(expectedPrefix)) {
+        return NextResponse.json({ error: 'Access denied to this org path' }, { status: 403 })
+      }
     }
 
     // Create signed URL (15 minutes = 900 seconds)

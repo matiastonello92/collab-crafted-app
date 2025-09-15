@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { checkAdminAccess } from "@/lib/admin/guards"
-import { createSupabaseAdminClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/utils/supabase/server"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,19 +28,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 })
     }
 
-    const supabase = createSupabaseAdminClient()
+    const supabase = await createSupabaseServerClient()
     
-    // Generate unique filename
+    // Get user session for org context
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
+    }
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single()
+    
+    if (!profile?.org_id) {
+      return NextResponse.json({ error: 'User org not found' }, { status: 403 })
+    }
+    
+    // Generate filename with org path: photos/<org_id>/photo_<timestamp>.<ext>
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-    const filePath = `photos/${fileName}`
+    const fileName = `photo_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`
+    const filePath = `${profile.org_id}/${fileName}`
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage (photos bucket)
     const { data, error } = await supabase.storage
-      .from('locations')
+      .from('photos')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
+        contentType: file.type
       })
 
     if (error) {
@@ -48,12 +65,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('locations')
-      .getPublicUrl(filePath)
+    // Get signed URL instead of public URL
+    const { data: signedUrlData, error: signedError } = await supabase.storage
+      .from('photos')
+      .createSignedUrl(filePath, 900) // 15 minutes
 
-    return NextResponse.json({ url: publicUrl })
+    if (signedError) {
+      console.error('Signed URL error:', signedError)
+      return NextResponse.json({ error: 'Failed to create signed URL' }, { status: 500 })
+    }
+
+    return NextResponse.json({ url: signedUrlData.signedUrl })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })

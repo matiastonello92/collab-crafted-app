@@ -51,27 +51,47 @@ export async function uploadLogo(formData: FormData) {
     throw new Error('No file provided')
   }
   
-  // Generate unique filename
-  const fileExt = file.name.split('.').pop()
-  const fileName = `logo-${Date.now()}.${fileExt}`
+  // Get org context for proper path
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('org_id')
+    .eq('id', user.id)
+    .single()
+  
+  if (!profile?.org_id) {
+    throw new Error('User org not found')
+  }
+  
+  // Use org-based path: branding/<org_id>/logo.jpg
+  const key = `${profile.org_id}/logo.jpg`
   
   const { data, error } = await supabase.storage
     .from('branding')
-    .upload(fileName, file, {
-      upsert: true
+    .upload(key, file, {
+      upsert: true,
+      contentType: file.type
     })
   
   if (error) {
     throw new Error(`Failed to upload logo: ${error.message}`)
   }
   
-  // Get public URL
-  const { data: urlData } = supabase.storage
+  // Get signed URL directly from Supabase instead of internal API call
+  const { data: signedUrlData, error: signedError } = await supabase.storage
     .from('branding')
-    .getPublicUrl(data.path)
+    .createSignedUrl(key, 900) // 15 minutes
+  
+  if (signedError) {
+    throw new Error(`Failed to create signed URL: ${signedError.message}`)
+  }
   
   // Save to app_settings
-  await setAppSetting('branding', { logo_url: urlData.publicUrl })
+  await setAppSetting('branding', { logo_url: signedUrlData.signedUrl })
   
-  return urlData.publicUrl
+  return signedUrlData.signedUrl
 }
