@@ -1,13 +1,13 @@
 @import "tailwindcss";
 @import "./styles/theme.css";
 
-/* Platform Design Utilities */
+/* Design System Utilities */
 .gradient-title {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-klyra-primary to-klyra-accent;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
 }
 
-.platform-card {
-  @apply rounded-2xl bg-card/70 backdrop-blur border border-white/10 shadow-card;
+.card-elevated {
+  @apply rounded-2xl bg-card/70 backdrop-blur border border-border/50 shadow-lg;
 }
 
 .glow-ring {
@@ -16,27 +16,11 @@
 
 .glow-ring::before {
   content: '';
-  @apply absolute inset-0 rounded-2xl bg-gradient-to-r from-klyra-primary/30 to-klyra-accent/20 blur-2xl opacity-40 -z-10;
+  @apply absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 to-accent/20 blur-2xl opacity-40 -z-10;
 }
 
 .grid-bg {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.03) 1px, transparent 0);
   background-size: 24px 24px;
-}
-
-.noise-overlay {
-  position: relative;
-}
-
-.noise-overlay::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.01) 50%, transparent 100%);
-  opacity: 0.5;
-  pointer-events: none;
 }
 

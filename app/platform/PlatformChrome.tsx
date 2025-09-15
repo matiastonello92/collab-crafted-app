@@ -16,7 +16,7 @@ export function PlatformChrome() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-50 bg-klyra-bg/80 backdrop-blur-xl border-b border-white/10">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
@@ -26,7 +26,7 @@ export function PlatformChrome() {
             <nav className="hidden md:flex items-center space-x-4">
               <Link 
                 href="/platform/dashboard"
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm text-klyra-muted hover:text-klyra-fg hover:bg-white/5 transition-all"
+                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
               >
                 <Activity size={16} />
                 <span>Dashboard</span>
@@ -35,7 +35,7 @@ export function PlatformChrome() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-xs text-klyra-subtle">
+            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <Clock size={14} />
               <span>Last sync: {lastSync.toLocaleTimeString()}</span>
             </div>
