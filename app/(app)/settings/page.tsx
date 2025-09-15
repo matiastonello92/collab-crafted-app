@@ -10,12 +10,17 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  // Load user profile
+  // Load user profile including org_id for storage context
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .maybeSingle()
 
-  return <UserSettingsClient user={user} profile={profile} />
+  if (!profile?.org_id) {
+    // User has no org_id - this shouldn't happen in a proper setup
+    redirect('/login')
+  }
+
+  return <UserSettingsClient user={user} profile={profile} orgId={profile.org_id} />
 }

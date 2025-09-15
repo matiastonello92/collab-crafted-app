@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { ArrowLeft, User, Settings, Bell, Upload, Save, Mail, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, User, Settings, Bell, Save, Mail, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,52 +14,21 @@ import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { AvatarUploader } from '@/components/AvatarUploader'
 
 interface UserSettingsClientProps {
   user: any
   profile: any
+  orgId: string
 }
 
-export function UserSettingsClient({ user, profile: initialProfile }: UserSettingsClientProps) {
+export function UserSettingsClient({ user, profile: initialProfile, orgId }: UserSettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile || {})
-  const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createSupabaseBrowserClient()
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setIsUploading(true)
-    try {
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop()
-      const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`
-      
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, {
-          upsert: true
-        })
-      
-      if (error) throw error
-      
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(data.path)
-      
-      setProfile((prev: any) => ({ ...prev, avatar_url: urlData.publicUrl }))
-      toast.success('Avatar caricato con successo!')
-    } catch (error: any) {
-      toast.error(`Errore nel caricamento: ${error.message}`)
-    } finally {
-      setIsUploading(false)
-    }
-  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -168,39 +137,12 @@ export function UserSettingsClient({ user, profile: initialProfile }: UserSettin
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar Section */}
-                <div className="flex items-center gap-6">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={profile.avatar_url || ''} />
-                    <AvatarFallback className="text-lg">
-                      {profile.full_name 
-                        ? profile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-                        : user.email?.[0]?.toUpperCase() || 'U'
-                      }
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Foto profilo</p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {isUploading ? 'Caricamento...' : 'Cambia foto'}
-                    </Button>
-                    <p className="text-xs text-muted-foreground">
-                      Formati: JPG, PNG, GIF. Max 5MB.
-                    </p>
-                  </div>
-                </div>
+                <AvatarUploader
+                  orgId={orgId}
+                  userId={user.id}
+                  currentUrl={profile.avatar_url}
+                  onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
+                />
 
                 {/* Profile Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
