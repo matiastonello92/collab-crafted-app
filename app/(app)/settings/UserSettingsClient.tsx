@@ -20,9 +20,10 @@ interface UserSettingsClientProps {
   user: any
   profile: any
   orgId: string
+  canBranding: boolean
 }
 
-export function UserSettingsClient({ user, profile: initialProfile, orgId }: UserSettingsClientProps) {
+export function UserSettingsClient({ user, profile: initialProfile, orgId, canBranding }: UserSettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile || {})
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
@@ -136,13 +137,15 @@ export function UserSettingsClient({ user, profile: initialProfile, orgId }: Use
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Avatar Section */}
-                <AvatarUploader
-                  orgId={orgId}
-                  userId={user.id}
-                  currentUrl={profile.avatar_url}
-                  onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
-                />
+                {/* Avatar Section - only if branding feature enabled */}
+                {canBranding && (
+                  <AvatarUploader
+                    orgId={orgId}
+                    userId={user.id}
+                    currentUrl={profile.avatar_url}
+                    onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
+                  />
+                )}
 
                 {/* Profile Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

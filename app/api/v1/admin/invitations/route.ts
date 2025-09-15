@@ -31,6 +31,28 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get user's org_id
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    const orgId = membership?.org_id
+    if (!orgId) {
+      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    }
+
+    // Check invitations feature
+    const { data: canInvite } = await supabase.rpc('feature_enabled', { 
+      p_org: orgId, 
+      p_feature_key: 'invitations' 
+    })
+    
+    if (!canInvite) {
+      return NextResponse.json({ error: 'FEATURE_NOT_ENABLED' }, { status: 403 })
+    }
+
     // Check if user can manage users
     const supabaseAdmin = createSupabaseAdminClient()
     const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
@@ -85,6 +107,28 @@ export async function POST(request: Request) {
     const { data: { user }, error: authErr } = await supabase.auth.getUser()
     if (authErr || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get user's org_id
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    const orgId = membership?.org_id
+    if (!orgId) {
+      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    }
+
+    // Check invitations feature
+    const { data: canInvite } = await supabase.rpc('feature_enabled', { 
+      p_org: orgId, 
+      p_feature_key: 'invitations' 
+    })
+    
+    if (!canInvite) {
+      return NextResponse.json({ error: 'FEATURE_NOT_ENABLED' }, { status: 403 })
     }
 
     // Check permissions

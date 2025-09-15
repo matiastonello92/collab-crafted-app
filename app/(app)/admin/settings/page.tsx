@@ -1,10 +1,30 @@
 import { requireAdmin } from '@/lib/admin/guards'
 import { AdminSettingsClient } from './AdminSettingsClient'
 import { getAppSetting } from '@/app/actions/app-settings'
+import { orgHasFeature } from '@/lib/server/features'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 export default async function AdminSettingsPage() {
   // Server-side admin protection
   await requireAdmin()
+
+  // Get org context
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  let orgId = null
+  if (user) {
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+    orgId = membership?.org_id
+  }
+
+  // Check feature flags
+  const canBranding = orgId ? await orgHasFeature(orgId, 'branding') : false
+  const canInvitations = orgId ? await orgHasFeature(orgId, 'invitations') : false
 
   // Environment status (server-side only)
   const envStatus = {
@@ -27,5 +47,15 @@ export default async function AdminSettingsPage() {
     banner
   }
 
-  return <AdminSettingsClient envStatus={envStatus} appSettings={appSettings} />
+  const featureFlags = {
+    canBranding,
+    canInvitations
+  }
+
+  return <AdminSettingsClient 
+    envStatus={envStatus} 
+    appSettings={appSettings}
+    featureFlags={featureFlags}
+    orgId={orgId}
+  />
 }

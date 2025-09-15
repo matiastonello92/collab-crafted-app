@@ -31,6 +31,31 @@ export async function POST(request: NextRequest) {
       .single()
 
     const orgId = membership?.org_id
+    if (!orgId) {
+      return NextResponse.json(
+        { error: 'No organization found' },
+        { 
+          status: 400,
+          headers: { 'Cache-Control': 'no-store' }
+        }
+      )
+    }
+
+    // Check branding feature for email test
+    const { data: canBranding } = await supabase.rpc('feature_enabled', { 
+      p_org: orgId, 
+      p_feature_key: 'branding' 
+    })
+    
+    if (!canBranding) {
+      return NextResponse.json(
+        { error: 'FEATURE_NOT_ENABLED' },
+        { 
+          status: 403,
+          headers: { 'Cache-Control': 'no-store' }
+        }
+      )
+    }
 
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json(

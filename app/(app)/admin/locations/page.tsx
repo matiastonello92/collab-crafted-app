@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { 
   Table,
   TableBody,
@@ -16,12 +17,25 @@ import {
 } from '@/components/ui/table'
 import { Plus, MapPin, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { orgFeatureLimits } from '@/lib/server/features'
 
 export default async function AdminLocationsPage() {
   // Require admin access
   await requireAdmin()
 
   const supabase = await createSupabaseServerClient()
+  
+  // Get user's org_id for feature limits
+  const { data: { user } } = await supabase.auth.getUser()
+  let orgId = null
+  if (user) {
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+    orgId = membership?.org_id
+  }
 
   // Fetch all locations
   const { data: locations, error } = await supabase
@@ -34,6 +48,12 @@ export default async function AdminLocationsPage() {
     return <div>Error loading locations</div>
   }
 
+  // Check location limits
+  const currentCount = locations?.length || 0
+  const limits = orgId ? await orgFeatureLimits(orgId, 'limits.locations') : {}
+  const maxLocations = limits?.max
+  const canAddLocation = !maxLocations || currentCount < maxLocations
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -42,15 +62,25 @@ export default async function AdminLocationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Gestione Locations</h1>
           <p className="text-muted-foreground">
             Gestisci le sedi aziendali e assegna i responsabili
+            {maxLocations && ` (${currentCount}/${maxLocations})`}
           </p>
         </div>
-        <Link href="/admin/locations/create">
-          <Button>
+        <Button asChild disabled={!canAddLocation}>
+          <Link href="/admin/locations/create">
             <Plus className="mr-2 h-4 w-4" />
             Aggiungi Location
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
+
+      {/* Plan limit alert */}
+      {maxLocations && currentCount >= maxLocations && (
+        <Alert>
+          <AlertDescription>
+            Hai raggiunto il limite del piano ({maxLocations} locations). Aggiorna il tuo piano per aggiungerne altre.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Filters */}
       <Card>

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { UserSettingsClient } from './UserSettingsClient'
+import { orgHasFeature } from '@/lib/server/features'
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient()
@@ -22,5 +23,13 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  return <UserSettingsClient user={user} profile={profile} orgId={profile.org_id} />
+  // Check branding feature for avatar uploads
+  const canBranding = await orgHasFeature(profile.org_id, 'branding')
+
+  return <UserSettingsClient 
+    user={user} 
+    profile={profile} 
+    orgId={profile.org_id}
+    canBranding={canBranding}
+  />
 }

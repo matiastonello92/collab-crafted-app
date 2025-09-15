@@ -39,12 +39,19 @@ interface AppSettings {
   banner: any
 }
 
+interface FeatureFlags {
+  canBranding: boolean
+  canInvitations: boolean
+}
+
 interface AdminSettingsClientProps {
   envStatus: EnvStatus
   appSettings: AppSettings
+  featureFlags: FeatureFlags
+  orgId: string | null
 }
 
-export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsClientProps) {
+export function AdminSettingsClient({ envStatus, appSettings, featureFlags, orgId }: AdminSettingsClientProps) {
   const router = useRouter()
   const [email, setEmail] = useState('matias@pecoranegra.fr')
   const [isSending, setIsSending] = useState(false)
@@ -258,12 +265,14 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
 
       {/* Settings Tabs */}
       <div className="space-y-6">
-        <Tabs defaultValue="branding" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="branding" className="flex items-center gap-2">
-              <Image className="h-4 w-4" />
-              Branding
-            </TabsTrigger>
+        <Tabs defaultValue={featureFlags.canBranding ? "branding" : "business"} className="w-full">
+          <TabsList className={`grid w-full ${featureFlags.canBranding ? 'grid-cols-5' : 'grid-cols-4'}`}>
+            {featureFlags.canBranding && (
+              <TabsTrigger value="branding" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Branding
+              </TabsTrigger>
+            )}
             <TabsTrigger value="business" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
               Business
@@ -282,52 +291,54 @@ export function AdminSettingsClient({ envStatus, appSettings }: AdminSettingsCli
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="branding" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Branding</CardTitle>
-                <CardDescription>
-                  Gestisci logo e elementi visuali dell'app
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Logo aziendale</Label>
-                  <div className="mt-2 space-y-4">
-                    {serverSettings.branding?.logo_url && (
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={serverSettings.branding.logo_url} 
-                          alt="Logo" 
-                          className="h-16 w-16 object-contain rounded border"
-                        />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Logo corrente</p>
+          {featureFlags.canBranding && (
+            <TabsContent value="branding" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Branding</CardTitle>
+                  <CardDescription>
+                    Gestisci logo e elementi visuali dell'app
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Logo aziendale</Label>
+                    <div className="mt-2 space-y-4">
+                      {serverSettings.branding?.logo_url && (
+                        <div className="flex items-center gap-4">
+                          <img 
+                            src={serverSettings.branding.logo_url} 
+                            alt="Logo" 
+                            className="h-16 w-16 object-contain rounded border"
+                          />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Logo corrente</p>
+                          </div>
                         </div>
+                      )}
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                        <Button
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          variant="outline"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {isUploading ? 'Caricamento...' : 'Carica nuovo logo'}
+                        </Button>
                       </div>
-                    )}
-                    <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                      />
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        variant="outline"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        {isUploading ? 'Caricamento...' : 'Carica nuovo logo'}
-                      </Button>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           <TabsContent value="business" className="space-y-4">
             <Card>
