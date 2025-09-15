@@ -1,6 +1,18 @@
+import "server-only";
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
+/**
+ * Platform admin guard - checks if user has platform admin permissions
+ */
+export async function requirePlatformAdmin() {
+  const sb = await createSupabaseServerClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { ok: false, reason: "NO_USER" };
+  const { data, error } = await sb.rpc("is_platform_admin");
+  if (error || !data) return { ok: false, reason: "NOT_PLATFORM_ADMIN" };
+  return { ok: true, user };
+}
 
 /**
  * Server-side admin guard - checks if user has admin permissions

@@ -19,11 +19,13 @@ import { AvatarUploader } from '@/components/AvatarUploader'
 interface UserSettingsClientProps {
   user: any
   profile: any
-  orgId: string
+  userId: string
+  orgId: string | null
+  avatarUrl: string | null
   canBranding: boolean
 }
 
-export function UserSettingsClient({ user, profile: initialProfile, orgId, canBranding }: UserSettingsClientProps) {
+export function UserSettingsClient({ user, profile: initialProfile, userId, orgId, avatarUrl, canBranding }: UserSettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile || {})
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
@@ -86,6 +88,40 @@ export function UserSettingsClient({ user, profile: initialProfile, orgId, canBr
     }
   }
 
+  // Show organization join CTA if no orgId
+  if (!orgId) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/">
+              <ArrowLeft className="h-4 w-4" />
+              Torna alla Dashboard
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Impostazioni</h1>
+            <p className="text-muted-foreground">Completa la configurazione del tuo account</p>
+          </div>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Configura la tua organizzazione</CardTitle>
+            <CardDescription>
+              Per accedere alle impostazioni del profilo, devi prima unirti o creare un&apos;organizzazione.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin">Vai al pannello amministratore</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
@@ -138,11 +174,11 @@ export function UserSettingsClient({ user, profile: initialProfile, orgId, canBr
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Avatar Section - only if branding feature enabled */}
-                {canBranding && (
+                {canBranding && orgId && (
                   <AvatarUploader
                     orgId={orgId}
-                    userId={user.id}
-                    currentUrl={profile.avatar_url}
+                    userId={userId}
+                    currentUrl={avatarUrl || undefined}
                     onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
                   />
                 )}

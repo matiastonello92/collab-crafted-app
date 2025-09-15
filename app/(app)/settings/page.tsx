@@ -8,6 +8,7 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
+    console.warn('[SETTINGS] no user')
     redirect('/login')
   }
 
@@ -18,18 +19,24 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!profile?.org_id) {
-    // User has no org_id - this shouldn't happen in a proper setup
-    redirect('/login')
+  // Don't redirect if profile missing - create soft placeholder
+  let orgId = profile?.org_id
+  if (!profile) {
+    console.warn('[SETTINGS] no profile for user', user.id)
+  }
+  if (!orgId) {
+    console.warn('[SETTINGS] no org_id for user', user.id)
   }
 
   // Check branding feature for avatar uploads
-  const canBranding = await orgHasFeature(profile.org_id, 'branding')
+  const canBranding = orgId ? await orgHasFeature(orgId, 'branding') : false
 
   return <UserSettingsClient 
     user={user} 
     profile={profile} 
-    orgId={profile.org_id}
+    userId={user.id}
+    orgId={orgId}
+    avatarUrl={profile?.avatar_url}
     canBranding={canBranding}
   />
 }
