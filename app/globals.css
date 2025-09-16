@@ -1,8 +1,14 @@
-@import "./styles/theme.css";
+@config "../tailwind.config.js";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "./**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../lib/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../src/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../pages/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../tests/**/*.{js,ts,jsx,tsx,mdx}";
+
+@import "./styles/theme.css";
 
 /* Design System Utilities */
 .gradient-title {
