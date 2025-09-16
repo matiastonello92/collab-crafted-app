@@ -1,18 +1,21 @@
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+
 interface SkeletonCardProps {
   className?: string
 }
 
 export function SkeletonCard({ className = "" }: SkeletonCardProps) {
   return (
-    <div className={`card-elevated p-6 space-y-4 h-32 ${className}`}>
-      <div className="animate-pulse">
+    <Card className={`h-32 ${className}`}>
+      <CardContent className="p-6">
         <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-muted rounded-full"></div>
-          <div className="h-4 bg-muted rounded w-20"></div>
+          <Skeleton className="w-10 h-10 rounded-full" />
+          <Skeleton className="h-4 w-20" />
         </div>
-        <div className="h-8 bg-muted rounded w-16 mb-2"></div>
-        <div className="h-3 bg-muted rounded w-24"></div>
-      </div>
-    </div>
+        <Skeleton className="h-8 w-16 mb-2" />
+        <Skeleton className="h-3 w-24" />
+      </CardContent>
+    </Card>
   )
 }

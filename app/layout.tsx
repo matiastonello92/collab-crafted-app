@@ -14,12 +14,12 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background text-foreground antialiased", inter.className)}>
+      <body className={cn("min-h-[100svh] bg-background text-foreground antialiased", inter.className)}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange={false}
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
           {children}
         </ThemeProvider>

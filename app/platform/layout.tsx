@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100svh] bg-background">
       <PlatformChrome />
       <main className="mx-auto max-w-7xl px-6 py-8">
         {children}

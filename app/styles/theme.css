@@ -94,10 +94,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth transitions */
-*,
-*::before,
-*::after {
+/* Interactive element transitions */
+button,
+[role="button"],
+a,
+input,
+select,
+textarea {
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),

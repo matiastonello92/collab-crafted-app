@@ -4,7 +4,7 @@ import SidebarClient from '@/components/nav/SidebarClient';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-[100svh] bg-background">
       <Suspense fallback={null}>
         <SidebarClient />
       </Suspense>
