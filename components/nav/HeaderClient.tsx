@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
@@ -61,7 +62,7 @@ export default function HeaderClient({
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <img src="/brand/klyra-icon.svg" alt="Klyra" className="h-8 w-8" />
+            <Image src="/brand/klyra-icon.svg" alt="Klyra" width={32} height={32} className="h-8 w-8" priority />
             <span className="font-bold text-xl bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
               Klyra
             </span>
@@ -86,6 +87,7 @@ export default function HeaderClient({
             className="text-sm border border-input rounded-lg px-3 py-2 bg-background text-foreground hover:bg-accent transition-colors outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
             value={activeLocationId ?? ''}
             onChange={e => onSelect(e.target.value)}
+            aria-label="Seleziona sede attiva"
           >
             {locations.map(location => (
               <option key={location.id} value={location.id} className="bg-background text-foreground">

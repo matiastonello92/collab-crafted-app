@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react'
-import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface KpiCardProps {
   icon: LucideIcon
@@ -31,7 +32,7 @@ export function KpiCard({ icon: Icon, label, value, sub, delta, loading }: KpiCa
   }
 
   return (
-    <Card className="hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 group h-32">
+    <Card className="group h-32 transition-shadow duration-200 hover:shadow-lg hover:shadow-primary/10">
       <CardContent className="p-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-2 flex items-center justify-center">
@@ -55,11 +56,16 @@ export function KpiCard({ icon: Icon, label, value, sub, delta, loading }: KpiCa
             )}
             
             {delta && (
-              <span className={`text-xs font-medium ${
-                delta.type === 'positive' ? 'text-emerald-500' :
-                delta.type === 'negative' ? 'text-red-500' :
-                'text-muted-foreground'
-              }`}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  delta.type === 'positive'
+                    ? 'text-klyra-success'
+                    : delta.type === 'negative'
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                )}
+              >
                 {delta.value}
               </span>
             )}

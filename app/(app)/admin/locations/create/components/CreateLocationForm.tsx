@@ -1,5 +1,6 @@
 'use client'
 
+import NextImage from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -202,10 +203,13 @@ export function CreateLocationForm() {
             </div>
             {formData.photo_url && (
               <div className="mt-4">
-                <img
+                <NextImage
                   src={formData.photo_url}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover rounded-md"
+                  alt="Anteprima foto location"
+                  width={128}
+                  height={128}
+                  className="h-32 w-32 rounded-md object-cover"
+                  unoptimized
                 />
               </div>
             )}

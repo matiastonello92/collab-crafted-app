@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "test:smoke": "tsx tests/smoke.ts",
     "build:dev": "next build",
-    "preview": "next start -p ${PORT:-3000}"
+    "preview": "next start -p ${PORT:-3000}",
+    "guard:layout": "node scripts/guard-layout.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

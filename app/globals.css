@@ -9,19 +9,6 @@
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
 }
 
-.card-elevated {
-  @apply rounded-2xl bg-card/70 backdrop-blur border border-border/50 shadow-lg;
-}
-
-.glow-ring {
-  @apply relative;
-}
-
-.glow-ring::before {
-  content: '';
-  @apply absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 to-accent/20 blur-2xl opacity-40 -z-10;
-}
-
 .grid-bg {
   background-image: radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.03) 1px, transparent 0);
   background-size: 24px 24px;
