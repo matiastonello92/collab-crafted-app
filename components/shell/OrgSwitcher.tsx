@@ -44,8 +44,20 @@ export function OrgSwitcher() {
 
         if (queryError) throw queryError;
 
-        const mapped = (data ?? [])
-          .map(item => ({ id: item.org_id, name: item.organizations?.name ?? "Organizzazione" }))
+        type MembershipRow = {
+          org_id: string | null;
+          organizations: { name: string | null } | null;
+        };
+
+        const mapped = ((data ?? []) as MembershipRow[])
+          .map<OrganizationOption | null>(item => {
+            if (!item.org_id) return null;
+            return {
+              id: item.org_id,
+              name: item.organizations?.name ?? "Organizzazione",
+            };
+          })
+          .filter((option): option is OrganizationOption => option !== null)
           .filter((option, index, array) => array.findIndex(candidate => candidate.id === option.id) === index)
           .sort((a, b) => a.name.localeCompare(b.name));
 
