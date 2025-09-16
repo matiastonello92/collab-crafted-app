@@ -2,7 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "./styles/theme.css";
+:root {
+  /* Klyra Brand Colors */
+  --klyra-primary: 235 90 85%;
+  --klyra-accent: 187 94 87%;
+  
+  /* Semantic Design Tokens */
+  --background: 0 0% 100%;
+  --foreground: 224 25% 15%;
+  --muted: 220 13% 97%;
+  --muted-foreground: 215 16% 47%;
+  --primary: var(--klyra-primary);
+  --accent: var(--klyra-accent);
+  --border: 220 13% 91%;
+  --ring: var(--klyra-primary);
+}
+
+.dark {
+  --background: 240 19% 7%;
+  --foreground: 224 25% 92%;
+  --muted: 232 20% 15%;
+  --muted-foreground: 214 20% 69%;
+  --border: 225 25% 18%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
 
 /* Design System Utilities */
 .gradient-title {
