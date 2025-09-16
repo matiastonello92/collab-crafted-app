@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css"; // unico import globale
-import { ThemeProvider } from "next-themes";
+import "./globals.css";
+import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
 
@@ -15,14 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="it" suppressHydrationWarning>
       <body className={cn("min-h-[100svh] bg-background text-foreground antialiased", inter.className)}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
