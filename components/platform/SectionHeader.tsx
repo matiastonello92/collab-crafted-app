@@ -7,16 +7,16 @@ interface SectionHeaderProps {
 export function SectionHeader({ title, subtitle, description }: SectionHeaderProps) {
   return (
     <div className="space-y-2 mb-8">
-      <h1 className="text-4xl font-bold gradient-title">
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
         {title}
       </h1>
       {subtitle && (
-        <p className="text-xl text-klyra-muted">
+        <p className="text-xl text-muted-foreground">
           {subtitle}
         </p>
       )}
       {description && (
-        <p className="text-sm text-klyra-subtle max-w-2xl">
+        <p className="text-sm text-muted-foreground/80 max-w-2xl">
           {description}
         </p>
       )}

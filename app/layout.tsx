@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "@/lib/providers";
-import { cn } from "@/lib/utils";
+import { AppProviders, ThemeProvider } from "@/lib/providers";
 import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
@@ -14,10 +13,10 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it" suppressHydrationWarning>
-      <body className={cn("min-h-[100svh] bg-background text-foreground antialiased", inter.className)}>
-        <Providers>
-          {children}
-        </Providers>
+      <body className={`${inter.className} min-h-[100svh] bg-background text-foreground antialiased`}>
+        <ThemeProvider>
+          <AppProviders>{children}</AppProviders>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
   Users, 
   Building2, 
@@ -77,15 +79,16 @@ export function PlatformDashboardClient() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <SectionHeader title="Platform Dashboard" subtitle="Loading..." />
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/5 opacity-60"></div>
-          <div className="relative grid-bg rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-              {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+        <SectionHeader title="Platform Dashboard" subtitle="Caricamento in corso" />
+        <Card className="border-dashed border-muted/60 bg-card/70">
+          <CardContent className="space-y-8 p-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -93,39 +96,43 @@ export function PlatformDashboardClient() {
   if (error) {
     return (
       <div className="space-y-8">
-        <SectionHeader title="Platform Dashboard" subtitle="Error occurred" />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="card-elevated max-w-md w-full p-8 text-center space-y-6">
-            <AlertTriangle className="w-8 h-8 mx-auto text-destructive" />
-            <div>
-              <h3 className="text-xl font-semibold text-foreground">Dashboard Error</h3>
-              <p className="text-muted-foreground">{error}</p>
+        <SectionHeader title="Platform Dashboard" subtitle="Si è verificato un errore" />
+        <Card className="mx-auto max-w-md shadow-card">
+          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
+            <AlertTriangle className="h-10 w-10 text-destructive" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-foreground">Dashboard non disponibile</h3>
+              <p className="text-sm text-muted-foreground">{error}</p>
             </div>
-            <Button onClick={fetchData} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
+            <Button variant="brand" onClick={fetchData}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Riprova
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   if (!data) return null
 
+  const healthStatus = data.ops.health.status?.toUpperCase() ?? 'N/A'
+  const healthBadgeClasses = data.ops.health.status === 'ok'
+    ? 'border-success/40 bg-success/15 text-success'
+    : 'border-destructive/40 bg-destructive/15 text-destructive'
+
   return (
     <div className="space-y-8 animate-fade-in">
-      <SectionHeader 
+      <SectionHeader
         title="Platform Dashboard"
         subtitle="Global platform oversight and monitoring"
         description="Real-time metrics and insights across all tenants and system operations."
       />
 
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/5 opacity-60 rounded-3xl"></div>
-        <div className="relative grid-bg rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/80 shadow-card">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/12 via-transparent to-accent/10" />
+        <div className="relative space-y-8 p-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
             <KpiCard icon={Building2} label="Organizations" value={data.tenant.total_orgs} sub="Active tenants" />
             <KpiCard icon={Users} label="Total Users" value={data.tenant.total_users} sub="All registered" />
             <KpiCard icon={Activity} label="Active Users" value={data.tenant.active_users_30d} sub="Last 30 days" />
@@ -133,66 +140,77 @@ export function PlatformDashboardClient() {
             <KpiCard icon={Mail} label="Pending Invites" value={data.tenant.pending_invites} sub="Awaiting response" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div className="card-elevated glow-ring p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-2 flex items-center justify-center">
-                  <Shield size={20} className="text-primary-foreground" />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="border border-border/70 bg-background/85 shadow-none">
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                    <Shield size={20} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">System Health</CardTitle>
+                    <CardDescription>Snapshot del controllo servizi</CardDescription>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">System Health</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    data.ops.health.status === 'ok' 
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                  }`}>
-                    {data.ops.health.status.toUpperCase()}
-                  </span>
+                <Badge variant="outline" className={healthBadgeClasses}>
+                  {healthStatus}
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Ultimo stato</span>
+                  <span className="font-medium text-foreground">{healthStatus}</span>
                 </div>
-                <pre className="text-xs bg-muted/40 p-3 rounded-lg border border-border/50 overflow-auto max-h-20 text-muted-foreground">
+                <pre className="max-h-40 overflow-auto rounded-lg border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground">
                   {JSON.stringify(data.ops.health, null, 2)}
                 </pre>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="card-elevated glow-ring p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-2 flex items-center justify-center">
-                  <Activity size={20} className="text-primary-foreground" />
+            <Card className="border border-border/70 bg-background/85 shadow-none">
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                    <Activity size={20} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Plans Distribution</CardTitle>
+                    <CardDescription>Ripartizione per tier</CardDescription>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Plans Distribution</h3>
-              </div>
-              <div className="space-y-3">
+              </CardHeader>
+              <CardContent className="space-y-3">
                 {Object.entries(data.plans.plans_by_tier).map(([tier, count]) => (
-                  <div key={tier} className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground capitalize">{tier}</span>
+                  <div key={tier} className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/15 px-4 py-3">
+                    <span className="text-sm capitalize text-muted-foreground">{tier}</span>
                     <span className="text-sm font-semibold text-foreground">{count}</span>
                   </div>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="card-elevated glow-ring p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Recent Audit Events</h3>
+          <Card className="border border-border/70 bg-background/85 shadow-none">
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle>Recent Audit Events</CardTitle>
+                <CardDescription>Attività registrate di recente</CardDescription>
+              </div>
               <span className="text-xs text-muted-foreground">
-                Updated: {lastUpdate?.toLocaleTimeString()}
+                Aggiornato: {lastUpdate?.toLocaleTimeString() ?? 'N/D'}
               </span>
-            </div>
-            
-            <div className="space-y-2 max-h-64 overflow-auto">
+            </CardHeader>
+            <CardContent className="space-y-2">
               {data.security.audit_recent.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No recent audit events</p>
+                <div className="py-10 text-center text-sm text-muted-foreground">
+                  Nessun evento recente
                 </div>
               ) : (
-                data.security.audit_recent.map((event) => (
-                  <div key={event.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/30 border border-border/50">
+                data.security.audit_recent.map(event => (
+                  <div
+                    key={event.id}
+                    className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/15 px-4 py-3"
+                  >
                     <span className="text-sm font-medium text-foreground">{event.event_key}</span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(event.timestamp).toLocaleString()}
@@ -200,8 +218,8 @@ export function PlatformDashboardClient() {
                   </div>
                 ))
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

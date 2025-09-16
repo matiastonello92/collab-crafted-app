@@ -1,11 +1,13 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
+import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
-import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
 import { useRequireSession } from '@/lib/useRequireSession'
 import { can } from '@/lib/permissions'
@@ -86,9 +88,9 @@ export default function HomePage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <img src="/brand/klyra-logo.svg" alt="Klyra" className="h-8" />
+            <Image src="/brand/klyra-logo.svg" alt="Klyra" width={132} height={32} className="h-8 w-auto" priority />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Klyra
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -96,14 +98,14 @@ export default function HomePage() {
           </p>
           {context.location_name && (
             <div className="flex gap-2 mt-4">
-              <Badge variant="outline" className="border-klyra-primary/30 text-klyra-primary">
+              <Badge variant="outline" className="border-primary/40 text-primary">
                 Location: {context.location_name}
               </Badge>
             </div>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-klyra-success" />
+          <Activity className="h-5 w-5 text-success" />
           <span className="text-sm text-muted-foreground">Sistema Operativo</span>
         </div>
       </div>
@@ -161,8 +163,8 @@ export default function HomePage() {
                       <p className="text-sm text-muted-foreground mb-4">
                         {action.description}
                       </p>
-                       {canAccess ? (
-                        <Button asChild className="w-full" variant="klyra">
+                      {canAccess ? (
+                        <Button asChild className="w-full" variant="brand">
                           <Link href={action.href}>
                             Accedi
                           </Link>
@@ -200,31 +202,33 @@ export default function HomePage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-klyra-success" />
+                <div className="h-2 w-2 rounded-full bg-success" />
                 <span>Database Supabase</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-klyra-success" />
+                <div className="h-2 w-2 rounded-full bg-success" />
                 <span>Storage</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-klyra-success" />
+                <div className="h-2 w-2 rounded-full bg-success" />
                 <span>Edge Functions</span>
               </div>
               <Badge variant="secondary">Operativo</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-klyra-warning" />
+                <div className="h-2 w-2 rounded-full bg-warning" />
                 <span>Email Service (Resend)</span>
               </div>
-              <Badge variant="outline">Test Richiesto</Badge>
+              <Badge variant="outline" className="border-warning/40 text-warning">
+                Test Richiesto
+              </Badge>
             </div>
           </div>
         </CardContent>

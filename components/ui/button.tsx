@@ -20,10 +20,10 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline",
-        klyra:
-          "bg-gradient-to-r from-klyra-primary to-klyra-primary-600 text-white shadow-klyra hover:shadow-klyra-glow hover:scale-[1.02] active:scale-[0.98]",
-        "klyra-outline":
-          "border border-klyra-primary text-klyra-primary bg-transparent hover:bg-klyra-primary/10 active:scale-[0.98]",
+        brand:
+          "bg-gradient-to-r from-primary via-primary/95 to-accent text-primary-foreground shadow-brand transition-transform hover:scale-[1.01] hover:from-primary/90 hover:to-accent/90 focus-visible:ring-ring active:scale-[0.98]",
+        "brand-outline":
+          "border border-primary/60 text-primary bg-transparent hover:bg-primary/10 active:scale-[0.98]",
       },
       size: {
         default: "h-10 px-4 py-2",

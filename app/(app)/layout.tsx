@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { ErrorBoundary } from '@/components/error-boundary'
-import AppShell from '@/components/layouts/AppShell'
+import { AppShell } from '@/components/shell/AppShell'
 import { Toaster } from '@/components/ui/sonner'
 import { getAppSetting } from '@/app/actions/app-settings'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -33,14 +33,14 @@ export default async function AppSectionLayout({
   return (
     <ErrorBoundary>
       {showBanner && (
-        <Alert className="rounded-none border-x-0 border-t-0 bg-klyra-warning/10 border-klyra-warning/20">
-          <AlertTriangle className="h-4 w-4 text-klyra-warning" />
-          <AlertDescription className="text-klyra-warning">
+        <Alert className="rounded-none border-x-0 border-t-0 border-warning/30 bg-warning/15 text-warning-foreground">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          <AlertDescription className="text-sm">
             {banner.message}
           </AlertDescription>
         </Alert>
       )}
-      <AppShell>{children}</AppShell>
+      <AppShell variant="app">{children}</AppShell>
       <Toaster richColors position="top-right" />
     </ErrorBoundary>
   )
