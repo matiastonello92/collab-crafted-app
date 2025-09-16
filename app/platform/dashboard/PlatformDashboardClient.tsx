@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { 
   Users, 
   Building2, 
@@ -95,17 +96,19 @@ export function PlatformDashboardClient() {
       <div className="space-y-8">
         <SectionHeader title="Platform Dashboard" subtitle="Error occurred" />
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="card-elevated max-w-md w-full p-8 text-center space-y-6">
-            <AlertTriangle className="w-8 h-8 mx-auto text-destructive" />
-            <div>
-              <h3 className="text-xl font-semibold text-foreground">Dashboard Error</h3>
-              <p className="text-muted-foreground">{error}</p>
-            </div>
-            <Button onClick={fetchData} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
-            </Button>
-          </div>
+          <Card className="w-full max-w-md rounded-3xl border-border/60 bg-card/90 text-center shadow-lg shadow-primary/10">
+            <CardContent className="space-y-6 p-8">
+              <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-foreground">Dashboard Error</h3>
+                <p className="text-muted-foreground">{error}</p>
+              </div>
+              <Button onClick={fetchData} className="mx-auto inline-flex items-center">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     )
@@ -133,75 +136,83 @@ export function PlatformDashboardClient() {
             <KpiCard icon={Mail} label="Pending Invites" value={data.tenant.pending_invites} sub="Awaiting response" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div className="card-elevated glow-ring p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-2 flex items-center justify-center">
-                  <Shield size={20} className="text-primary-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">System Health</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    data.ops.health.status === 'ok' 
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                  }`}>
-                    {data.ops.health.status.toUpperCase()}
-                  </span>
-                </div>
-                <pre className="text-xs bg-muted/40 p-3 rounded-lg border border-border/50 overflow-auto max-h-20 text-muted-foreground">
-                  {JSON.stringify(data.ops.health, null, 2)}
-                </pre>
-              </div>
-            </div>
-
-            <div className="card-elevated glow-ring p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent p-2 flex items-center justify-center">
-                  <Activity size={20} className="text-primary-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">Plans Distribution</h3>
-              </div>
-              <div className="space-y-3">
-                {Object.entries(data.plans.plans_by_tier).map(([tier, count]) => (
-                  <div key={tier} className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground capitalize">{tier}</span>
-                    <span className="text-sm font-semibold text-foreground">{count}</span>
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="rounded-3xl border-border/60 bg-card/80 shadow-lg shadow-primary/10 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="mb-4 flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                    <Shield size={20} />
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="card-elevated glow-ring p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Recent Audit Events</h3>
-              <span className="text-xs text-muted-foreground">
-                Updated: {lastUpdate?.toLocaleTimeString()}
-              </span>
-            </div>
-            
-            <div className="space-y-2 max-h-64 overflow-auto">
-              {data.security.audit_recent.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No recent audit events</p>
+                  <h3 className="text-lg font-semibold text-foreground">System Health</h3>
                 </div>
-              ) : (
-                data.security.audit_recent.map((event) => (
-                  <div key={event.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-muted/30 border border-border/50">
-                    <span className="text-sm font-medium text-foreground">{event.event_key}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(event.timestamp).toLocaleString()}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                        data.ops.health.status === 'ok'
+                          ? 'border-klyra-success/30 bg-klyra-success/15 text-klyra-success'
+                          : 'border-destructive/30 bg-destructive/15 text-destructive'
+                      }`}
+                    >
+                      {data.ops.health.status.toUpperCase()}
                     </span>
                   </div>
-                ))
-              )}
-            </div>
+                  <pre className="max-h-20 overflow-auto rounded-lg border border-border/50 bg-muted/40 p-3 text-xs text-muted-foreground">
+                    {JSON.stringify(data.ops.health, null, 2)}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-3xl border-border/60 bg-card/80 shadow-lg shadow-primary/10 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="mb-4 flex items-center space-x-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                    <Activity size={20} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">Plans Distribution</h3>
+                </div>
+                <div className="space-y-3">
+                  {Object.entries(data.plans.plans_by_tier).map(([tier, count]) => (
+                    <div key={tier} className="flex items-center justify-between">
+                      <span className="text-sm capitalize text-muted-foreground">{tier}</span>
+                      <span className="text-sm font-semibold text-foreground">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          <Card className="rounded-3xl border-border/60 bg-card/80 shadow-lg shadow-primary/10 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground">Recent Audit Events</h3>
+                <span className="text-xs text-muted-foreground">
+                  Updated: {lastUpdate?.toLocaleTimeString()}
+                </span>
+              </div>
+
+              <div className="max-h-64 space-y-2 overflow-auto">
+                {data.security.audit_recent.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <Activity className="mb-2 h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No recent audit events</p>
+                  </div>
+                ) : (
+                  data.security.audit_recent.map((event) => (
+                    <div key={event.id} className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
+                      <span className="text-sm font-medium text-foreground">{event.event_key}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(event.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

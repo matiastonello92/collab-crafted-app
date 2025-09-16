@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image, Send, CheckCircle, XCircle, Save, RotateCcw, History } from 'lucide-react'
+import { ArrowLeft, Settings, Mail, Check, X, AlertTriangle, Upload, Building, Shield, Megaphone, Image as ImageIcon, Send, CheckCircle, XCircle, Save, RotateCcw, History } from 'lucide-react'
 import Link from 'next/link'
+import NextImage from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -269,7 +270,7 @@ export function AdminSettingsClient({ envStatus, appSettings, featureFlags, orgI
           <TabsList className={`grid w-full ${featureFlags.canBranding ? 'grid-cols-5' : 'grid-cols-4'}`}>
             {featureFlags.canBranding && (
               <TabsTrigger value="branding" className="flex items-center gap-2">
-                <Image className="h-4 w-4" />
+                <ImageIcon className="h-4 w-4" />
                 Branding
               </TabsTrigger>
             )}
@@ -306,10 +307,13 @@ export function AdminSettingsClient({ envStatus, appSettings, featureFlags, orgI
                     <div className="mt-2 space-y-4">
                       {serverSettings.branding?.logo_url && (
                         <div className="flex items-center gap-4">
-                          <img 
-                            src={serverSettings.branding.logo_url} 
-                            alt="Logo" 
-                            className="h-16 w-16 object-contain rounded border"
+                          <NextImage
+                            src={serverSettings.branding.logo_url}
+                            alt="Logo"
+                            width={64}
+                            height={64}
+                            className="h-16 w-16 rounded border object-contain"
+                            unoptimized
                           />
                           <div>
                             <p className="text-sm text-muted-foreground">Logo corrente</p>

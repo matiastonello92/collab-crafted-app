@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -57,7 +58,7 @@ export default function SidebarClient() {
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <img src="/brand/klyra-icon.svg" alt="Klyra" className="h-6 w-6" />
+              <Image src="/brand/klyra-icon.svg" alt="Klyra" width={24} height={24} className="h-6 w-6" priority />
               <h2 className="text-lg font-semibold bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
                 Klyra
               </h2>

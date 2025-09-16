@@ -43,7 +43,7 @@ export default async function InviteTokenPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-[100svh] bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="text-center">

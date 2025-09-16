@@ -38,38 +38,36 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 function DefaultErrorFallback({ error }: { error?: Error }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-        <div className="flex items-center mb-4">
-          <div className="flex-shrink-0">
-            <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="min-h-[100svh] bg-background px-4 py-8 text-foreground">
+      <div className="mx-auto flex h-full max-w-md items-center justify-center">
+        <div className="w-full rounded-xl border border-border bg-card p-6 shadow-lg">
+          <div className="mb-4 flex items-center gap-3">
+            <svg className="h-8 w-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-gray-800">
+            <h3 className="text-sm font-medium text-foreground">
               Errore dell&apos;applicazione
             </h3>
           </div>
-        </div>
-        <div className="text-sm text-gray-600">
-          <p>Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.</p>
-          {error && (
-            <details className="mt-2">
-              <summary className="cursor-pointer text-xs text-gray-500">Dettagli tecnici</summary>
-              <pre className="mt-1 text-xs bg-gray-100 p-2 rounded overflow-auto">
-                {error.message}
-              </pre>
-            </details>
-          )}
-        </div>
-        <div className="mt-4">
-          <button
-            onClick={() => window.location.reload()}
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Ricarica Pagina
-          </button>
+          <div className="text-sm text-muted-foreground">
+            <p>Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.</p>
+            {error && (
+              <details className="mt-2 space-y-2">
+                <summary className="cursor-pointer text-xs text-muted-foreground">Dettagli tecnici</summary>
+                <pre className="max-h-40 overflow-auto rounded-md border border-border/60 bg-muted/40 p-2 text-xs text-muted-foreground">
+                  {error.message}
+                </pre>
+              </details>
+            )}
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              Ricarica Pagina
+            </button>
+          </div>
         </div>
       </div>
     </div>

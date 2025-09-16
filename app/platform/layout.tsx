@@ -1,5 +1,5 @@
 // app/platform/layout.tsx
-// Sub-layout: nessun <html>/<body>, nessun import di globals.css
+// Sub-layout: nessun tag root e nessun import dei fogli di stile globali
 // Usa lo stesso theme e gli stessi componenti shell della app
 import type { Metadata } from 'next'
 import { PlatformChrome } from './PlatformChrome'

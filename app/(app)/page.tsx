@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -86,7 +87,7 @@ export default function HomePage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <img src="/brand/klyra-logo.svg" alt="Klyra" className="h-8" />
+            <Image src="/brand/klyra-logo.svg" alt="Klyra" width={160} height={32} className="h-8 w-auto" priority />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-klyra-primary to-klyra-accent bg-clip-text text-transparent">
             Klyra
