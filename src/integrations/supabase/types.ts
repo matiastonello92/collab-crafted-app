@@ -1571,6 +1571,14 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: Json
       }
+      organization_bootstrap: {
+        Args: {
+          p_location_name?: string
+          p_org_name?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       permission_id_by_name: {
         Args: { p_name: string }
         Returns: string
