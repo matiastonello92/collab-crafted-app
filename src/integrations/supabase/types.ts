@@ -1499,6 +1499,10 @@ export type Database = {
         Args: { "": string }
         Returns: string
       }
+      create_default_permissions_for_org: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
       feature_enabled: {
         Args: { p_feature_key: string; p_org: string }
         Returns: boolean
