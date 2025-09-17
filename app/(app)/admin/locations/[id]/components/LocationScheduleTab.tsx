@@ -39,7 +39,7 @@ export function LocationScheduleTab({ location }: Props) {
   const { permissions } = useAppStore()
 
   const isAdmin = can(permissions, '*')
-  const canEdit = isAdmin || can(permissions, 'locations:manage')
+  const canEdit = isAdmin || can(permissions, 'locations:edit')
 
   useEffect(() => {
     setOpeningHours(location.opening_hours || {})
