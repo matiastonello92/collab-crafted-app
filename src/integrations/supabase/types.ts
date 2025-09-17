@@ -438,6 +438,27 @@ export type Database = {
           },
         ]
       }
+      location_admins_backup: {
+        Row: {
+          created_at: string | null
+          location_id: string | null
+          org_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          location_id?: string | null
+          org_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          location_id?: string | null
+          org_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           address: string | null
