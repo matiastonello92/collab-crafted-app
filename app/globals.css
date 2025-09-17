@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   /* Klyra Brand Colors */
@@ -33,7 +31,14 @@ body {
 
 /* Design System Utilities */
 .gradient-title {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  background-image: linear-gradient(
+    to right,
+    hsl(var(--primary)),
+    hsl(var(--accent))
+  );
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .grid-bg {

@@ -1,10 +1,12 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: ["class"],
+import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
+
+const config: Config = {
+  darkMode: "class",
   content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -75,18 +77,18 @@ module.exports = {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       backgroundImage: {
-        'radial': 'radial-gradient(ellipse at center, rgba(124, 92, 255, 0.15) 0%, transparent 50%)',
-        'grid-pattern': 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)',
+        radial: "radial-gradient(ellipse at center, rgba(124, 92, 255, 0.15) 0%, transparent 50%)",
+        "grid-pattern": "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)",
       },
       backgroundSize: {
-        'grid': '24px 24px',
+        grid: "24px 24px",
       },
       boxShadow: {
-        'klyra': 'var(--klyra-shadow)',
-        'klyra-glow': 'var(--klyra-shadow-glow)',
-        'klyra-soft': 'var(--klyra-shadow-soft)',
-        'card': '0 4px 20px -2px rgba(11, 15, 26, 0.4)',
-        'glow': '0 0 40px rgba(124, 92, 255, 0.3)',
+        klyra: "var(--klyra-shadow)",
+        "klyra-glow": "var(--klyra-shadow-glow)",
+        "klyra-soft": "var(--klyra-shadow-soft)",
+        card: "0 4px 20px -2px rgba(11, 15, 26, 0.4)",
+        glow: "0 0 40px rgba(124, 92, 255, 0.3)",
       },
       animation: {
         "fade-in": "fade-in 0.2s ease-out",
@@ -107,5 +109,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 };
+
+export default config;
