@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,7 +21,7 @@ import { orgFeatureLimits } from '@/lib/server/features'
 
 export default async function AdminLocationsPage() {
   // Require admin access
-  await requireAdmin()
+  await requireOrgAdmin()
 
   const supabase = await createSupabaseServerClient()
   

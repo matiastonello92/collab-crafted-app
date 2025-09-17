@@ -6,7 +6,7 @@ import Link from 'next/link'
 import AdminGate from './components/AdminGate'
 import UserTable from './components/UserTable'
 import { getUsersWithDetails } from '@/lib/data/admin'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { TableSkeleton } from '@/components/ui/loading-skeleton'
 
 interface SearchParams {
@@ -20,7 +20,7 @@ export default async function AdminUsersPage({
   searchParams: SearchParams 
 }) {
   // Guard: require admin permissions
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const currentPage = parseInt(searchParams.page || '1')
   const search = searchParams.search || ''

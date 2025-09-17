@@ -3,13 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Plus, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { InviteUserForm } from './components/InviteUserForm'
 import { InvitationsList } from './components/InvitationsList'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function AdminInvitationsPage() {
-  await requireAdmin()
+  await requireOrgAdmin()
 
   return (
     <div className="container mx-auto py-8 space-y-8">

@@ -1,4 +1,4 @@
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ export const runtime = 'nodejs'
 
 export default async function FeatureFlagsPage() {
   // Ensure user has admin permissions
-  await requireAdmin()
+  await requireOrgAdmin()
 
   // Mock data for the placeholder
   const mockFlags = [

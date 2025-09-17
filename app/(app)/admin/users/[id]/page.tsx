@@ -14,7 +14,7 @@ import { UserOverview } from './components/UserOverview'
 import { EffectivePermissions } from './components/EffectivePermissions'
 import { DeleteUserDialog } from './components/DeleteUserDialog'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 
 export default async function UserDetailPage({ params }: Props) {
   // Guard: require admin permissions
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const user = await getUserById(params.id)
   

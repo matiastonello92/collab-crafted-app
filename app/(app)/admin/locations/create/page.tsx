@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { CreateLocationForm } from './components/CreateLocationForm'
 
 export default async function CreateLocationPage() {
-  await requireAdmin()
+  await requireOrgAdmin()
 
   return (
     <div className="container mx-auto p-6 space-y-6">

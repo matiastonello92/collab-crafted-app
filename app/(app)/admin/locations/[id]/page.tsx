@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default async function LocationDetailPage({ params, searchParams }: Props) {
-  await requireAdmin()
+  await requireOrgAdmin()
 
   const supabase = await createSupabaseServerClient()
 

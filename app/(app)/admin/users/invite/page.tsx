@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { InviteUserForm } from './components/InviteUserForm'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default async function InviteUserPage() {
-  await requireAdmin()
+  await requireOrgAdmin()
 
   return (
     <div className="container mx-auto py-8 space-y-8">

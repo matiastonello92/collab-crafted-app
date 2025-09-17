@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Activity, Server, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 
 interface HealthCheckResult {
   status: string
@@ -51,7 +51,7 @@ async function getHealthCheck(): Promise<HealthCheckResult> {
 
 export default async function QAHealthPage() {
   // Guard: require admin permissions
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const healthData = await getHealthCheck()
 

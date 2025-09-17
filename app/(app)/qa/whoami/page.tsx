@@ -2,13 +2,13 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { User, Shield, MapPin, Key, Clock } from 'lucide-react'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 export default async function QAWhoAmIPage() {
   // Guard: require admin permissions
-  const currentUserId = await requireAdmin()
+  const { userId: currentUserId } = await requireOrgAdmin()
   
   // Get current user details
   const supabase = await createSupabaseServerClient()

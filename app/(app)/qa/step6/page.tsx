@@ -1,4 +1,4 @@
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export default async function QAStep6Page() {
   // Only admins can access QA tools
-  await requireAdmin()
+  await requireOrgAdmin()
 
   const verificationChecks = [
     {

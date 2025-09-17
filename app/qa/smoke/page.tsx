@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
-import { requireAdmin } from '@/lib/admin/guards'
+import { requireOrgAdmin } from '@/lib/admin/guards'
 import { SmokeTestClient } from './components/SmokeTestClient'
 import { orgHasFeature } from '@/lib/server/features'
 
 export default async function QASmokeTestPage() {
-  await requireAdmin()
+  await requireOrgAdmin()
   
   const supabase = await createSupabaseServerClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
