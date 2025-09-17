@@ -16,7 +16,7 @@
 - `app/api/internal/setup/apply-migrations/route.ts`: esecuzione SQL reale con tracking `schema_migrations`.
 - `middleware.ts`: gestione CSP e init Supabase protetta in try/catch.
 - `app/api/v1/admin/bootstrap/route.ts`: bootstrap org/location/ruoli con transazioni SQL.
-- `next.config.js`, `tailwind.config.js`, `postcss.config.js`: configurazioni minime di base.
+- `next.config.js`, `tailwind.config.ts`, `postcss.config.js`: configurazioni minime di base.
 - `app/globals.css`: aggiunte direttive `@tailwind`.
 - `utils/supabase/server.ts`, `utils/supabase/client.ts`, `utils/supabase/middleware.ts`: migrazione a @supabase/ssr 0.7 e nuova cookie API.
 - `utils/supabase/config.ts`, `.env.example`: rimozione fallback hardcoded.
