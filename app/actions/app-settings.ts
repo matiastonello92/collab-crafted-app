@@ -36,8 +36,6 @@ export async function setAppSetting(key: string, value: any) {
   if (error) {
     throw new Error(`Failed to set setting ${key}: ${error.message}`)
   }
-  
-  revalidatePath('/admin/settings')
 }
 
 export async function uploadLogo(formData: FormData) {

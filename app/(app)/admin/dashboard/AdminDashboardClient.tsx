@@ -303,13 +303,6 @@ export function AdminDashboardClient({ orgId }: Props) {
               <Users className="size-6 text-purple-500" />
               <span>Manage Users</span>
             </a>
-            <a
-              href="/admin/settings"
-              className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-6 text-center text-sm font-medium shadow-sm transition-transform hover:-translate-y-1 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <Settings className="size-6 text-orange-500" />
-              <span>Settings</span>
-            </a>
           </div>
         </CardContent>
       </Card>
