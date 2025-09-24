@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { getAppSetting } from '@/app/actions/app-settings'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertTriangle } from 'lucide-react'
+import { AuthGuard } from '@/components/auth/AuthGuard'
 
 export const metadata: Metadata = {
   title: 'Klyra - Sistema Gestione Personale',
@@ -32,16 +33,18 @@ export default async function AppSectionLayout({
 
   return (
     <ErrorBoundary>
-      {showBanner && (
-        <Alert className="rounded-none border-x-0 border-t-0 bg-klyra-warning/10 border-klyra-warning/20">
-          <AlertTriangle className="h-4 w-4 text-klyra-warning" />
-          <AlertDescription className="text-klyra-warning">
-            {banner.message}
-          </AlertDescription>
-        </Alert>
-      )}
-      <AppShell>{children}</AppShell>
-      <Toaster richColors position="top-right" />
+      <AuthGuard>
+        {showBanner && (
+          <Alert className="rounded-none border-x-0 border-t-0 bg-klyra-warning/10 border-klyra-warning/20">
+            <AlertTriangle className="h-4 w-4 text-klyra-warning" />
+            <AlertDescription className="text-klyra-warning">
+              {banner.message}
+            </AlertDescription>
+          </Alert>
+        )}
+        <AppShell>{children}</AppShell>
+        <Toaster richColors position="top-right" />
+      </AuthGuard>
     </ErrorBoundary>
   )
 }

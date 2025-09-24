@@ -19,7 +19,7 @@ import {
 import { useAppStore } from '@/lib/store'
 import { can } from '@/lib/permissions'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
@@ -35,17 +35,17 @@ export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const pathname = usePathname()
+  const supabase = useSupabase()
   const { permissions, context } = useAppStore()
   const permissionsLoading = useAppStore(state => state.permissionsLoading)
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient()
     supabase.auth.getUser()
       .then(({ data: { user } }) => {
         setIsAdminClaims(isAdminFromClaims(user as any))
       })
       .catch(() => setIsAdminClaims(false))
-  }, [])
+  }, [supabase])
 
   return (
     <aside

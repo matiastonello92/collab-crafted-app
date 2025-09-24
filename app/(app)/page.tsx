@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,13 +9,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
-import { useRequireSession } from '@/lib/useRequireSession'
 import { can } from '@/lib/permissions'
 
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
-  useRequireSession()
   const { context, permissions } = useAppStore()
 
   // Mock stats for demonstration

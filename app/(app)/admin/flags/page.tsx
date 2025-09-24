@@ -68,7 +68,6 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
-  useRequireSession()
   const { hasPermission } = useAppStore()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
