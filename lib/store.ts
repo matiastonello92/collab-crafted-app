@@ -1,52 +1,111 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { can } from './permissions'
+'use client'
 
-interface AppContext {
-  org_id: string | null
-  location_id: string | null
-  location_name: string | null
-  user_id: string | null
+import { create } from 'zustand'
+import { normalizeSet, can as evaluateCan } from '@/lib/permissions'
+import type { AppBootstrap, LocationSummary, OrgSummary, UserSummary } from '@/types/app-bootstrap'
+
+type AppContext = {
+  user: UserSummary | null
+  org: OrgSummary | null
+  location: LocationSummary | null
 }
 
-interface AppState {
+type PermissionInput = string | ReadonlyArray<string>
+
+type AppState = {
   context: AppContext
   permissions: string[]
+  roleLevel: number
+  orgRoles: string[]
+  locationRoles: string[]
+  features: string[]
+  plan_tags: string[]
+  role_tags: string[]
   permissionsLoading: boolean
-  setContext: (context: AppContext) => void
-  setPermissions: (permissions: string[]) => void
+  hydrate: (payload: AppBootstrap) => void
+  setContext: (patch: Partial<AppContext> | null) => void
   setPermissionsLoading: (loading: boolean) => void
-  clearContext: () => void
-  hasPermission: (permission: string) => boolean
+  clear: () => void
+  can: (permission: PermissionInput) => boolean
+  canAny: (permissions: PermissionInput) => boolean
+  canAll: (permissions: PermissionInput) => boolean
 }
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get) => ({
+const emptyContext: AppContext = {
+  user: null,
+  org: null,
+  location: null,
+}
+
+function createInitialState() {
+  return {
+    context: { ...emptyContext },
+    permissions: [] as string[],
+    roleLevel: 0,
+    orgRoles: [] as string[],
+    locationRoles: [] as string[],
+    features: [] as string[],
+    plan_tags: [] as string[],
+    role_tags: [] as string[],
+    permissionsLoading: true,
+  }
+}
+
+function ensureLocation(location: LocationSummary | null | undefined): LocationSummary | null {
+  if (!location) return null
+  return {
+    id: location.id,
+    name: location.name || 'Sede',
+    city: location.city ?? '',
+  }
+}
+
+export const useAppStore = create<AppState>()((set, get) => ({
+  ...createInitialState(),
+  hydrate: (payload) => {
+    set({
       context: {
-        org_id: null,
-        location_id: null,
-        location_name: null,
-        user_id: null,
+        user: payload.context?.user ?? null,
+        org: payload.context?.org ?? null,
+        location: ensureLocation(payload.context?.location),
       },
-      permissions: [],
+      permissions: normalizeSet(payload.permissions ?? []),
+      roleLevel: payload.role_level ?? 0,
+      orgRoles: Array.isArray(payload.org_roles) ? Array.from(new Set(payload.org_roles)) : [],
+      locationRoles: Array.isArray(payload.location_roles)
+        ? Array.from(new Set(payload.location_roles))
+        : [],
+      features: Array.isArray(payload.features) ? payload.features : [],
+      plan_tags: Array.isArray(payload.plan_tags) ? payload.plan_tags : [],
+      role_tags: Array.isArray(payload.role_tags) ? payload.role_tags : [],
       permissionsLoading: false,
-      setContext: (context) => set({ context }),
-      setPermissions: (permissions) => set({ permissions }),
-      setPermissionsLoading: (loading) => set({ permissionsLoading: loading }),
-      clearContext: () => set({
-        context: { org_id: null, location_id: null, location_name: null, user_id: null },
-        permissions: [],
-        permissionsLoading: false,
-      }),
-      hasPermission: (permission) => {
-        const { permissions } = get()
-        return can(permissions, permission)
-      },
-    }),
-    {
-      name: 'app-store',
-      partialize: (state) => ({ context: state.context }),
+    })
+  },
+  setContext: (patch) => {
+    if (!patch) {
+      set({ context: { ...emptyContext } })
+      return
     }
-  )
-)
+    set((state) => ({
+      context: {
+        user: patch.user ?? state.context.user,
+        org: patch.org ?? state.context.org,
+        location:
+          patch.location !== undefined
+            ? ensureLocation(patch.location)
+            : state.context.location,
+      },
+    }))
+  },
+  setPermissionsLoading: (loading) => set({ permissionsLoading: loading }),
+  clear: () => set(createInitialState()),
+  can: (permission) => evaluateCan(get().permissions, permission),
+  canAny: (permissions) => {
+    const requirements = Array.isArray(permissions) ? permissions : [permissions]
+    return requirements.some((permission) => evaluateCan(get().permissions, permission))
+  },
+  canAll: (permissions) => {
+    const requirements = Array.isArray(permissions) ? permissions : [permissions]
+    return requirements.every((permission) => evaluateCan(get().permissions, permission))
+  },
+}))

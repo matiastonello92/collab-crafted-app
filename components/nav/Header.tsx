@@ -1,5 +1,5 @@
 import { getActiveLocationServer } from '@/lib/server/activeLocation';
-import { setActiveLocationAction } from '@/app/actions/active-location';
+import { setActiveLocation } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +19,7 @@ export default async function Header() {
       activeLocationId={active?.id ?? null}
       persisted={persisted}
       errorMessage={errorMessage}
-      setActiveLocation={setActiveLocationAction}
+      setActiveLocation={setActiveLocation}
     />
   );
 }

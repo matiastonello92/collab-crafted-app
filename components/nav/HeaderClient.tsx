@@ -1,12 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useAppStore } from '@/lib/store';
-import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import type { AppBootstrap } from '@/types/app-bootstrap';
 
 export default function HeaderClient({
   locations,
@@ -19,43 +19,62 @@ export default function HeaderClient({
   activeLocationId: string | null;
   persisted: boolean;
   errorMessage?: string;
-  setActiveLocation: (id?: string | null) => Promise<void>;
+  setActiveLocation: (id?: string | null) => Promise<AppBootstrap>;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
-  const setContext = useAppStore(state => state.setContext);
-  useEffectivePermissions();
+  const setContext = useAppStore((state) => state.setContext);
+  const hydrate = useAppStore((state) => state.hydrate);
+  const setPermissionsLoading = useAppStore((state) => state.setPermissionsLoading);
 
   useEffect(() => {
-    const active = locations.find(l => l.id === activeLocationId) || null;
-    const prev = useAppStore.getState().context;
+    const active = locations.find((location) => location.id === activeLocationId) ?? null;
     setContext({
-      ...prev,
-      location_id: active?.id ?? null,
-      location_name: active?.name ?? null,
+      location: active
+        ? {
+            id: active.id,
+            name: active.name,
+            city: '',
+          }
+        : null,
     });
   }, [locations, activeLocationId, setContext]);
 
-  // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
+  const syncLocation = useCallback(
+    async (locationId?: string | null, navigate = false) => {
+      setPermissionsLoading(true);
+      try {
+        const payload = await setActiveLocation(locationId);
+        if (payload) {
+          hydrate(payload);
+        }
+        if (navigate) {
+          router.replace(pathname);
+        }
+      } finally {
+        setPermissionsLoading(false);
+      }
+    },
+    [hydrate, pathname, router, setActiveLocation, setPermissionsLoading],
+  );
+
   useEffect(() => {
     if (!didPersistRef.current && activeLocationId && !persisted) {
       didPersistRef.current = true;
-      startTransition(async () => {
-        await setActiveLocation(activeLocationId);
-        // No router.refresh() on auto-persist to avoid race conditions
+      startTransition(() => {
+        void syncLocation(activeLocationId, false);
       });
     }
-  }, [activeLocationId, persisted, setActiveLocation]);
+  }, [activeLocationId, persisted, syncLocation]);
 
   const onSelect = (id: string) => {
-    startTransition(async () => {
-      await setActiveLocation(id);
-      router.refresh();
+    startTransition(() => {
+      void syncLocation(id, true);
     });
   };
 
-  // --- RENDER ---
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-4">
       <div className="flex min-w-[200px] flex-1 items-center gap-3">
@@ -80,10 +99,10 @@ export default function HeaderClient({
             <select
               className="h-10 min-w-[180px] rounded-xl border border-border/60 bg-background px-4 text-sm font-medium text-foreground shadow-sm transition focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={activeLocationId ?? ''}
-              onChange={event => onSelect(event.target.value)}
+              onChange={(event) => onSelect(event.target.value)}
               aria-label="Seleziona sede attiva"
             >
-              {locations.map(location => (
+              {locations.map((location) => (
                 <option key={location.id} value={location.id} className="bg-background text-foreground">
                   {location.name}
                 </option>

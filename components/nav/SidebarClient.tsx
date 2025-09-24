@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { can } from '@/lib/permissions'
+import { usePermissions } from '@/hooks/use-permissions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { isAdminFromClaims } from '@/lib/admin/claims'
@@ -35,8 +35,8 @@ export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const pathname = usePathname()
-  const { permissions, context } = useAppStore()
-  const permissionsLoading = useAppStore(state => state.permissionsLoading)
+  const context = useAppStore((state) => state.context)
+  const { can, loading } = usePermissions()
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -77,16 +77,16 @@ export default function SidebarClient() {
         </Button>
       </div>
 
-      {!collapsed && context.location_name && (
+      {!collapsed && context.location?.name && (
         <div className="border-b border-border/60 px-4 py-3">
           <Badge variant="secondary" className="w-full justify-center rounded-full border border-border/60 bg-muted/60 text-[11px] font-semibold uppercase tracking-wide">
-            {context.location_name}
+            {context.location?.name}
           </Badge>
         </div>
       )}
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {permissionsLoading ? (
+        {loading ? (
           <ul className="space-y-2">
             {[...Array(5)].map((_, i) => (
               <li key={i}>
@@ -97,8 +97,8 @@ export default function SidebarClient() {
         ) : (
           <ul className="space-y-1">
             {navigation.map((item) => {
-              const isAdmin = isAdminClaims || can(permissions, '*')
-              const canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+              const isAdmin = isAdminClaims || can('*')
+              const canAccess = isAdmin || !item.permission || can(item.permission)
               const finalHref = item.name === 'Locations' && !isAdmin && canAccess
                 ? '/locations/manage'
                 : item.href

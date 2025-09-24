@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { hardLogout } from '@/lib/hardLogout'
 import {
   DropdownMenu,
@@ -15,38 +15,38 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useAppStore } from '@/lib/store'
+
+function computeDisplayName(metadata: Record<string, unknown> | null | undefined, email?: string) {
+  const meta = metadata ?? {}
+  const first = typeof meta['first_name'] === 'string' ? (meta['first_name'] as string) : undefined
+  const last = typeof meta['last_name'] === 'string' ? (meta['last_name'] as string) : undefined
+  const full = typeof meta['full_name'] === 'string' ? (meta['full_name'] as string) : undefined
+  if (full) return full
+  if (first && last) return `${first} ${last}`
+  if (first) return first
+  return email?.split('@')[0]
+}
 
 export function UserDropdown() {
-  const [user, setUser] = useState<{ email: string; name?: string } | null>(null)
+  const router = useRouter()
+  const user = useAppStore((state) => state.context.user)
 
-  useEffect(() => {
-    const supabase = createSupabaseBrowserClient()
-    
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (data.user) {
-        // Try to get profile data
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('first_name, last_name')
-          .eq('id', data.user.id)
-          .single()
-
-        const displayName = profile?.first_name && profile?.last_name
-          ? `${profile.first_name} ${profile.last_name}`
-          : profile?.first_name || data.user.email?.split('@')[0]
-
-        setUser({
-          email: data.user.email || '',
-          name: displayName
-        })
-      }
+  const profile = useMemo(() => {
+    if (!user) return null
+    const name = computeDisplayName(user.metadata as Record<string, unknown> | null, user.email)
+    return {
+      email: user.email ?? '',
+      name: name ?? user.email ?? '',
     }
+  }, [user])
 
-    getUser()
-  }, [])
+  const handleLogout = useCallback(async () => {
+    await hardLogout()
+    router.replace('/login')
+  }, [router])
 
-  if (!user) {
+  if (!profile) {
     return (
       <Button asChild variant="ghost" size="sm">
         <Link href="/login">Accedi</Link>
@@ -54,9 +54,15 @@ export function UserDropdown() {
     )
   }
 
-  const initials = user.name
-    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : user.email.slice(0, 2).toUpperCase()
+  const initials = profile.name
+    ? profile.name
+        .split(' ')
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : profile.email.slice(0, 2).toUpperCase()
 
   return (
     <DropdownMenu>
@@ -68,8 +74,8 @@ export function UserDropdown() {
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:flex flex-col items-start">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
+            <span className="text-sm font-medium">{profile.name}</span>
+            <span className="text-xs text-muted-foreground">{profile.email}</span>
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
@@ -77,9 +83,9 @@ export function UserDropdown() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-sm font-medium">{profile.name}</p>
             <p className="text-xs text-muted-foreground">
-              {user.email}
+              {profile.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -102,7 +108,7 @@ export function UserDropdown() {
         <DropdownMenuSeparator />
         
         <DropdownMenuItem 
-          onClick={hardLogout}
+          onClick={handleLogout}
           className="flex items-center gap-2 text-red-600 focus:text-red-600"
         >
           <LogOut className="h-4 w-4" />

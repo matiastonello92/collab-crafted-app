@@ -54,8 +54,7 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
 
         toast.success('Utente eliminato con successo')
         setIsOpen(false)
-        router.push('/admin/users')
-        router.refresh()
+        router.replace('/admin/users')
       } catch (error: any) {
         console.error('Error deleting user:', error)
         toast.error(error.message || 'Errore nella eliminazione dell\'utente')
