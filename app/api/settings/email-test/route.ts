@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { withRetry } from '@/lib/utils/retry'
 
 export const runtime = 'nodejs'
@@ -9,7 +9,7 @@ export const revalidate = 0
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

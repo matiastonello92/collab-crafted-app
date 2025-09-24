@@ -1,22 +1,25 @@
 'use client';
 import { useState } from 'react';
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+
+import { createSupabaseUserClient } from '@/lib/supabase/clients';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null); setLoading(true);
-    const supabase = createSupabaseBrowserClient();
+    const supabase = await createSupabaseUserClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) { setErr(error.message); return; }
     try { await fetch('/api/v1/admin/bootstrap', { method: 'POST' }); } catch {}
-    window.location.href = '/';
+    router.replace('/');
   };
 
   return (

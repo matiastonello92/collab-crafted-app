@@ -1,44 +1,38 @@
-'use server';
+'use server'
 
-import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers'
 
-async function userHasLocation(userId: string, locationId: string) {
-  const supabase = await createSupabaseServerClient();
-  // Tabella corretta: public.user_roles_locations
-  // Check di esistenza senza scaricare righe
-  const { count, error } = await supabase
-    .from('user_roles_locations')
-    .select('location_id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('location_id', locationId);
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
+import { getUserLocations } from '@/lib/server/activeLocation'
+import { loadAuthenticatedState } from '@/lib/server/session-context'
 
-  if (error) throw error;
-  return !!(count && count > 0);
-}
-
-export async function setActiveLocationAction(locationId?: string | null) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
-
-  const jar = await cookies();
-
-  if (!locationId) {
-    jar.delete('pn_loc'); // <-- fix: usare (await cookies()).delete
-    revalidatePath('/', 'layout');
-    revalidatePath('/dashboard');
-    return;
+export async function setActiveLocation(locationId?: string | null) {
+  const supabase = await createSupabaseUserClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('Unauthorized')
   }
 
-  const ok = await userHasLocation(user.id, locationId);
-  if (!ok) throw new Error('Forbidden');
+  const jar = await cookies()
+
+  if (!locationId) {
+    jar.delete('pn_loc')
+    return loadAuthenticatedState()
+  }
+
+  const { locations } = await getUserLocations()
+  const allowed = locations.some((loc) => loc.id === locationId)
+  if (!allowed) {
+    throw new Error('Forbidden')
+  }
 
   jar.set('pn_loc', locationId, {
-    httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 90
-  });
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 90
+  })
 
-  revalidatePath('/', 'layout');
-  revalidatePath('/dashboard');
+  return loadAuthenticatedState()
 }
+

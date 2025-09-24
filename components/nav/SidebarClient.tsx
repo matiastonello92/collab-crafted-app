@@ -17,10 +17,10 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { can } from '@/lib/permissions'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { isAdminFromClaims } from '@/lib/admin/claims'
+import { usePermissions } from '@/hooks/usePermissions'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
@@ -35,16 +35,26 @@ export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const pathname = usePathname()
-  const { permissions, context } = useAppStore()
-  const permissionsLoading = useAppStore(state => state.permissionsLoading)
+  const location = useAppStore((state) => state.location)
+  const { hydrated, can } = usePermissions()
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient()
-    supabase.auth.getUser()
-      .then(({ data: { user } }) => {
+    let mounted = true
+
+    void (async () => {
+      try {
+        const supabase = await createSupabaseUserClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!mounted) return
         setIsAdminClaims(isAdminFromClaims(user as any))
-      })
-      .catch(() => setIsAdminClaims(false))
+      } catch {
+        if (mounted) setIsAdminClaims(false)
+      }
+    })()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   return (
@@ -77,16 +87,16 @@ export default function SidebarClient() {
         </Button>
       </div>
 
-      {!collapsed && context.location_name && (
+      {!collapsed && location?.name && (
         <div className="border-b border-border/60 px-4 py-3">
           <Badge variant="secondary" className="w-full justify-center rounded-full border border-border/60 bg-muted/60 text-[11px] font-semibold uppercase tracking-wide">
-            {context.location_name}
+            {location.name}
           </Badge>
         </div>
       )}
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {permissionsLoading ? (
+        {!hydrated ? (
           <ul className="space-y-2">
             {[...Array(5)].map((_, i) => (
               <li key={i}>
@@ -97,8 +107,8 @@ export default function SidebarClient() {
         ) : (
           <ul className="space-y-1">
             {navigation.map((item) => {
-              const isAdmin = isAdminClaims || can(permissions, '*')
-              const canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+              const isAdmin = isAdminClaims || can('*')
+              const canAccess = isAdmin || !item.permission || can(item.permission)
               const finalHref = item.name === 'Locations' && !isAdmin && canAccess
                 ? '/locations/manage'
                 : item.href

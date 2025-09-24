@@ -1,14 +1,24 @@
 'use client';
 import { useEffect } from 'react';
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+
+import { createSupabaseUserClient } from '@/lib/supabase/clients';
 
 export function useRequireSession() {
+  const router = useRouter();
+
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (mounted && !data.session) window.location.href = '/login';
-    });
-    return () => { mounted = false; };
-  }, []);
+    void (async () => {
+      const supabase = await createSupabaseUserClient();
+      const { data } = await supabase.auth.getSession();
+      if (mounted && !data.session) {
+        router.replace('/login');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 }

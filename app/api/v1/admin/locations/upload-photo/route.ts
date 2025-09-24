@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { checkOrgAdmin } from "@/lib/admin/guards"
-import { createSupabaseServerClient } from "@/utils/supabase/server"
+import { createSupabaseUserClient } from "@/lib/supabase/clients"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Get user session for org context
     const { data: { user } } = await supabase.auth.getUser()

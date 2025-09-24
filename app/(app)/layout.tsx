@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { ErrorBoundary } from '@/components/error-boundary'
-import AppShell from '@/components/layouts/AppShell'
+import AuthenticatedLayout from '@/components/layouts/AuthenticatedLayout'
 import { Toaster } from '@/components/ui/sonner'
 import { getAppSetting } from '@/app/actions/app-settings'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -40,7 +40,7 @@ export default async function AppSectionLayout({
           </AlertDescription>
         </Alert>
       )}
-      <AppShell>{children}</AppShell>
+      <AuthenticatedLayout>{children}</AuthenticatedLayout>
       <Toaster richColors position="top-right" />
     </ErrorBoundary>
   )

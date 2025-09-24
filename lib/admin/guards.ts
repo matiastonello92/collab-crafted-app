@@ -1,13 +1,13 @@
 import "server-only";
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { cookies } from 'next/headers'
 
 /**
  * Platform admin guard - Global scope, no org required
  */
 export async function requirePlatformAdmin() {
-  const sb = await createSupabaseServerClient();
+  const sb = await createSupabaseUserClient();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) redirect('/login');
   
@@ -21,7 +21,7 @@ export async function requirePlatformAdmin() {
  * Org admin guard - Requires org context and admin role in that org
  */
 export async function requireOrgAdmin(orgId?: string | null): Promise<{ userId: string; orgId: string }> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
@@ -51,7 +51,7 @@ export async function requireOrgAdmin(orgId?: string | null): Promise<{ userId: 
  * Redirects to home page if not authorized
  */
 export async function requireAdmin(): Promise<string> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -74,7 +74,7 @@ export async function requireAdmin(): Promise<string> {
  * Platform admin check (API routes)
  */
 export async function checkPlatformAdmin(): Promise<{ userId: string | null; hasAccess: boolean }> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { userId: null, hasAccess: false }
@@ -87,7 +87,7 @@ export async function checkPlatformAdmin(): Promise<{ userId: string | null; has
  * Org admin check (API routes)
  */
 export async function checkOrgAdmin(orgId?: string): Promise<{ userId: string | null; orgId: string | null; hasAccess: boolean }> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { userId: null, orgId: null, hasAccess: false }
@@ -108,7 +108,7 @@ export async function checkOrgAdmin(orgId?: string): Promise<{ userId: string | 
  * Legacy admin check - DEPRECATED, use checkOrgAdmin instead
  */
 export async function checkAdminAccess(): Promise<{ userId: string | null; hasAccess: boolean }> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -134,7 +134,7 @@ async function getOrgIdFromContext(): Promise<string | null> {
     if (orgIdCookie) return orgIdCookie;
 
     // Try to resolve from user's first membership as fallback
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null;
 

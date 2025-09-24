@@ -16,7 +16,8 @@ import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } f
 import { PERMISSIONS } from '@/lib/permissions/registry'
 import { normalizePermission } from '@/lib/permissions'
 import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
+import type { Json } from '@/src/integrations/supabase/types'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -211,15 +212,30 @@ export function InviteUserForm() {
           }
         })
 
-        const supabase = createSupabaseBrowserClient()
+        const overridesPayload: Json | undefined = calculatedOverrides.length
+          ? (calculatedOverrides.map((override) => ({
+              location_id: override.location_id,
+              permission_name: override.permission_name,
+              granted: override.granted
+            })) as Json)
+          : undefined
+
+        const jobTagsPayload: Json | undefined = jobTagsForLocations.length
+          ? (jobTagsForLocations.map((item) => ({
+              location_id: item.location_id,
+              tag_name: item.tag_name
+            })) as Json)
+          : undefined
+
+        const supabase = await createSupabaseUserClient()
         const { data: result, error } = await supabase
           .rpc('invitation_create_v2', {
             p_email: data.email.toLowerCase(),
             p_role_id: selectedRoleId,
             p_location_ids: selectedLocationIds,
             p_days: data.days,
-            p_overrides: calculatedOverrides,
-            p_job_tags: jobTagsForLocations
+            p_overrides: overridesPayload,
+            p_job_tags: jobTagsPayload
           })
 
         if (error) throw error

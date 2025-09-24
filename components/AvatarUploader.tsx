@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { Upload, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { toast } from 'sonner'
 
 interface AvatarUploaderProps {
@@ -18,8 +18,6 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
   const [avatarUrl, setAvatarUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createSupabaseBrowserClient()
-
   const loadCurrentAvatar = async () => {
     try {
       const key = `${orgId}/${userId}/avatar.jpg`
@@ -62,6 +60,7 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
     try {
       const key = `${orgId}/${userId}/avatar.jpg`
       
+      const supabase = await createSupabaseUserClient()
       // Upload to storage with upsert to overwrite existing
       const { data, error } = await supabase.storage
         .from('avatars')

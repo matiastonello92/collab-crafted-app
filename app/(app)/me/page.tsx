@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,7 +30,7 @@ async function getUserData(): Promise<{
   roles: UserRole[]
   locations: Array<{ id: string; name: string }>
 }> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {

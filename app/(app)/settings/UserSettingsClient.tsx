@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { AvatarUploader } from '@/components/AvatarUploader'
 
 interface UserSettingsClientProps {
@@ -30,12 +30,11 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
-  const supabase = createSupabaseBrowserClient()
-
 
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      const supabase = await createSupabaseUserClient()
       const { error } = await supabase.rpc('profile_update_self', {
         p_full_name: profile.full_name || null,
         p_avatar_url: profile.avatar_url || null,

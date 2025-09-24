@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { XCircle, User } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { redirect } from 'next/navigation'
 
 interface Props {
@@ -16,7 +16,7 @@ export default async function CompleteProfilePage({ params }: Props) {
   const { token } = params
 
   // Check if user is authenticated
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   if (authError || !user) {

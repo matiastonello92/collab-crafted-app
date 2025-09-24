@@ -1,30 +1,21 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { requireSupabaseEnv } from '@/utils/supabase/config';
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-function initAdminClient(): SupabaseClient {
-  const { url } = requireSupabaseEnv();
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceRole) {
-    throw new Error('Supabase env missing: set SUPABASE_SERVICE_ROLE_KEY');
-  }
-  return createClient(url, serviceRole, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
+import type { Database } from '@/src/integrations/supabase/types'
 
-export function createSupabaseAdminClient() {
-  return initAdminClient();
-}
+import { createSupabaseAdminClient } from './clients'
 
-let cached: SupabaseClient | null = null;
-export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+export { createSupabaseAdminClient, createSupabaseUserClient } from './clients'
+
+let cachedAdmin: SupabaseClient<Database> | null = null
+
+export const supabaseAdmin = new Proxy({} as SupabaseClient<Database>, {
   get(_target, prop) {
-    if (!cached) cached = initAdminClient();
-    // @ts-ignore
-    return cached[prop];
-  },
-});
+    if (!cachedAdmin) {
+      cachedAdmin = createSupabaseAdminClient()
+    }
+
+    // @ts-ignore accessing dynamic property on client proxy
+    return cachedAdmin[prop]
+  }
+})
 

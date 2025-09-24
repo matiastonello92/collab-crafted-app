@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 export interface UserWithDetails {
   id: string
@@ -68,7 +68,7 @@ export interface UserPermissionOverride {
  */
 export async function checkIsAdmin(): Promise<boolean> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return false
 
@@ -92,7 +92,7 @@ export async function getUsersWithDetails(
   search: string = ''
 ): Promise<{ users: UserWithDetails[]; total: number; hasMore: boolean }> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -197,7 +197,7 @@ export async function getUsersWithDetails(
  */
 export async function getUserById(userId: string): Promise<UserWithDetails | null> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -241,7 +241,7 @@ export async function getUserById(userId: string): Promise<UserWithDetails | nul
  */
 export async function getUserRolesByLocation(userId: string): Promise<UserRolesByLocation[]> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
@@ -294,7 +294,7 @@ export async function getUserRolesByLocation(userId: string): Promise<UserRolesB
  */
 export async function getUserPermissionOverrides(userId: string): Promise<UserPermissionOverride[]> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()

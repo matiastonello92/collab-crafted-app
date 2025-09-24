@@ -1,11 +1,11 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { revalidatePath } from 'next/cache'
 
 export async function getAppSetting(key: string) {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   const { data, error } = await supabase
     .from('app_settings')
@@ -24,7 +24,7 @@ export async function setAppSetting(key: string, value: any) {
   // Admin guard
   await requireOrgAdmin()
   
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   const { error } = await supabase
     .from('app_settings')
@@ -42,7 +42,7 @@ export async function uploadLogo(formData: FormData) {
   // Admin guard
   await requireOrgAdmin()
   
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const file = formData.get('logo') as File
   
   if (!file) {

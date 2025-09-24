@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkOrgAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 export async function GET() {
   try {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 403 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
 
     // Use org-scoped RPC function
     const { data: dashboardStats, error } = await supabase.rpc('org_dashboard_stats', { p_org_id: orgId })

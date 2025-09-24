@@ -8,14 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Edit2, Save, X, Clock } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAppStore } from '@/lib/store'
-import { can } from '@/lib/permissions'
+import { usePermissions } from '@/hooks/usePermissions'
+import type { Tables } from '@/src/integrations/supabase/types'
 
-interface Location {
-  id: string
-  opening_hours?: any
-  open_days?: string[]
-}
+type Location = Pick<Tables<'locations'>, 'id' | 'opening_hours' | 'open_days'>
 
 interface Props {
   location: Location
@@ -36,10 +32,10 @@ export function LocationScheduleTab({ location }: Props) {
   const [openingHours, setOpeningHours] = useState(location.opening_hours || {})
   const [openDays, setOpenDays] = useState<string[]>(location.open_days || [])
   const [loading, setLoading] = useState(false)
-  const { permissions } = useAppStore()
+  const { can } = usePermissions()
 
-  const isAdmin = can(permissions, '*')
-  const canEdit = isAdmin || can(permissions, 'locations:manage')
+  const isAdmin = can('*')
+  const canEdit = isAdmin || can('locations:manage')
 
   useEffect(() => {
     setOpeningHours(location.opening_hours || {})

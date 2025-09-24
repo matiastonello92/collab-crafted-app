@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { requireOrgAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { LocationInfoTab } from './components/LocationInfoTab'
-import { LocationScheduleTab } from './components/LocationScheduleTab' 
+import { LocationScheduleTab } from './components/LocationScheduleTab'
 import { LocationManagersTab } from './components/LocationManagersTab'
+import type { Tables } from '@/src/integrations/supabase/types'
 
 interface Props {
   params: { id: string }
@@ -19,7 +20,7 @@ interface Props {
 export default async function LocationDetailPage({ params, searchParams }: Props) {
   await requireOrgAdmin()
 
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
 
   // Fetch location details
   const { data: location, error } = await supabase
@@ -33,7 +34,11 @@ export default async function LocationDetailPage({ params, searchParams }: Props
     redirect('/admin/locations')
   }
 
+  const typedLocation = location as Tables<'locations'>
   const activeTab = searchParams.tab || 'info'
+  const cityLabel = typedLocation.city ?? 'Non specificato'
+  const countryLabel = typedLocation.country ?? 'Non specificato'
+  const isActive = typedLocation.is_active ?? false
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -49,13 +54,13 @@ export default async function LocationDetailPage({ params, searchParams }: Props
           <div>
             <div className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              <h1 className="text-3xl font-bold tracking-tight">{location.name}</h1>
-              <Badge variant={location.is_active ? "default" : "secondary"}>
-                {location.is_active ? "Attivo" : "Archiviato"}
+              <h1 className="text-3xl font-bold tracking-tight">{typedLocation.name}</h1>
+              <Badge variant={isActive ? "default" : "secondary"}>
+                {isActive ? "Attivo" : "Archiviato"}
               </Badge>
             </div>
             <p className="text-muted-foreground">
-              {location.city}, {location.country}
+              {cityLabel}, {countryLabel}
             </p>
           </div>
         </div>
@@ -70,15 +75,15 @@ export default async function LocationDetailPage({ params, searchParams }: Props
         </TabsList>
 
         <TabsContent value="info" className="mt-6">
-          <LocationInfoTab location={location} />
+          <LocationInfoTab location={typedLocation} />
         </TabsContent>
 
         <TabsContent value="schedule" className="mt-6">
-          <LocationScheduleTab location={location} />
+          <LocationScheduleTab location={typedLocation} />
         </TabsContent>
 
         <TabsContent value="managers" className="mt-6">
-          <LocationManagersTab locationId={location.id} />
+          <LocationManagersTab locationId={typedLocation.id} />
         </TabsContent>
       </Tabs>
     </div>

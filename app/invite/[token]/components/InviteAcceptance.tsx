@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { UserPlus, Eye, EyeOff, CheckCircle, XCircle, Clock, Shield, LogIn, LogOut, User } from 'lucide-react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { withRetry } from '@/lib/utils/retry'
@@ -76,7 +76,7 @@ export function InviteAcceptance({ token }: Props) {
   useEffect(() => {
     const validateInvitation = async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseUserClient()
         const { data, error } = await supabase
           .rpc('invitation_validate_v2', { p_token: token })
 
@@ -134,7 +134,7 @@ export function InviteAcceptance({ token }: Props) {
     setUiState({ status: 'idle' })
 
     try {
-      const supabase = createSupabaseBrowserClient()
+      const supabase = await createSupabaseUserClient()
       console.log('Attempting signup for:', invitationData.email)
       
       // Step 1: Sign up the user
@@ -229,7 +229,7 @@ export function InviteAcceptance({ token }: Props) {
 
     setIsSubmitting(true)
     try {
-      const supabase = createSupabaseBrowserClient()
+      const supabase = await createSupabaseUserClient()
       // Get password from the current form
       const passwordElement = document.getElementById('password') as HTMLInputElement
       const password = passwordElement?.value || ''
@@ -277,7 +277,7 @@ export function InviteAcceptance({ token }: Props) {
 
     startTransition(async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseUserClient()
         console.log('Attempting login for:', data.email)
         
         const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
@@ -326,7 +326,7 @@ export function InviteAcceptance({ token }: Props) {
 
     startTransition(async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseUserClient()
         console.log('Accepting invitation directly')
         
         await withRetry(async () => {
@@ -358,7 +358,7 @@ export function InviteAcceptance({ token }: Props) {
 
   const handleLogout = async () => {
     try {
-      const supabase = createSupabaseBrowserClient()
+      const supabase = await createSupabaseUserClient()
       await supabase.auth.signOut()
       setCurrentUser(null)
       setEmailMismatch(false)

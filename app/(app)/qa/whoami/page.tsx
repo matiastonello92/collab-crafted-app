@@ -4,14 +4,14 @@ import { Badge } from '@/components/ui/badge'
 import { User, Shield, MapPin, Key, Clock } from 'lucide-react'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 export default async function QAWhoAmIPage() {
   // Guard: require admin permissions
   const { userId: currentUserId } = await requireOrgAdmin()
   
   // Get current user details
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   if (authError || !user) {

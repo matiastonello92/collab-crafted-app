@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { checkPlatformAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
