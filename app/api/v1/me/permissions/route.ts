@@ -5,7 +5,7 @@ import { normalizeSet } from '@/lib/permissions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 300; // 5min cache
 
 export async function GET(req: Request) {
   try {
@@ -96,7 +96,13 @@ export async function GET(req: Request) {
     const body: any = { permissions };
     if (isAdmin) body.is_admin = true;
 
-    return NextResponse.json(body, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json(body, { 
+      status: 200, 
+      headers: { 
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=600',
+        'CDN-Cache-Control': 'private, max-age=300',
+      } 
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'internal' }, { status: 500 });
   }
