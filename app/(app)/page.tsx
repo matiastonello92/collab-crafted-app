@@ -8,14 +8,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Users, Shield, Flag, Database, Settings, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { useAppStore } from '@/lib/store'
-import { useRequireSession } from '@/lib/useRequireSession'
-import { can } from '@/lib/permissions'
+import { usePermissions } from '@/hooks/use-permissions'
 
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
-  useRequireSession()
-  const { context, permissions } = useAppStore()
+  const context = useAppStore((state) => state.context)
+  const { can } = usePermissions()
 
   // Mock stats for demonstration
   const stats = [
@@ -95,10 +94,10 @@ export default function HomePage() {
           <p className="text-muted-foreground mt-2">
             Piattaforma avanzata per la gestione del personale multi-location
           </p>
-          {context.location_name && (
+          {context.location?.name && (
             <div className="flex gap-2 mt-4">
               <Badge variant="outline" className="border-klyra-primary/30 text-klyra-primary">
-                Location: {context.location_name}
+                Location: {context.location?.name}
               </Badge>
             </div>
           )}
@@ -150,7 +149,7 @@ export default function HomePage() {
           <TooltipProvider>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {quickActions.map((action, index) => {
-                const canAccess = can(permissions, action.permission)
+                const canAccess = can(action.permission)
                 
                 return (
                   <Card key={index} className={!canAccess ? 'opacity-50' : ''}>

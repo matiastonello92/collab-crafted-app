@@ -1,10 +1,17 @@
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+
 export async function hardLogout() {
-  const supabase = createSupabaseBrowserClient();
-  try { await supabase.auth.signOut(); } catch {}
+  const supabase = createSupabaseBrowserClient()
   try {
-    localStorage.clear(); sessionStorage.clear();
-    if ('indexedDB' in window) { try { indexedDB.deleteDatabase('supabase-auth'); } catch {} }
+    await supabase.auth.signOut()
   } catch {}
-  window.location.href = '/login';
+  try {
+    localStorage.clear()
+    sessionStorage.clear()
+    if ('indexedDB' in window) {
+      try {
+        indexedDB.deleteDatabase('supabase-auth')
+      } catch {}
+    }
+  } catch {}
 }

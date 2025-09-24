@@ -12,8 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Flag, Plus, Settings, MapPin, Globe } from 'lucide-react'
-import { useAppStore } from '@/lib/store'
-import { useRequireSession } from '@/lib/useRequireSession'
+import { usePermissions } from '@/hooks/use-permissions'
 
 // Mock data for demonstration
 const mockFlags = [
@@ -68,14 +67,13 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
-  useRequireSession()
-  const { hasPermission } = useAppStore()
+  const { can } = usePermissions()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   // Check if user can manage feature flags
-  const canManageFlags = hasPermission('locations.manage_flags')
+  const canManageFlags = can('locations.manage_flags')
 
   if (!canManageFlags) {
     return (

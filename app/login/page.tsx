@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState<string|null>(null);
@@ -16,7 +18,7 @@ export default function LoginPage() {
     setLoading(false);
     if (error) { setErr(error.message); return; }
     try { await fetch('/api/v1/admin/bootstrap', { method: 'POST' }); } catch {}
-    window.location.href = '/';
+    router.replace('/');
   };
 
   return (
