@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { requireOrgAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +19,7 @@ interface Props {
 export default async function LocationDetailPage({ params, searchParams }: Props) {
   await requireOrgAdmin()
 
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
 
   // Fetch location details
   const { data: location, error } = await supabase

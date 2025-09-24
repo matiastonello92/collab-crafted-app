@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { UserSettingsClient } from './UserSettingsClient'
 import { orgHasFeature } from '@/lib/server/features'
 
 export default async function SettingsPage() {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

@@ -16,7 +16,7 @@ import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } f
 import { PERMISSIONS } from '@/lib/permissions/registry'
 import { normalizePermission } from '@/lib/permissions'
 import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -211,7 +211,7 @@ export function InviteUserForm() {
           }
         })
 
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseUserClient()
         const { data: result, error } = await supabase
           .rpc('invitation_create_v2', {
             p_email: data.email.toLowerCase(),

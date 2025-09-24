@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkPlatformAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 export async function GET() {
   try {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 403 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseUserClient()
 
     // Use RPC functions for cross-tenant data
     const [

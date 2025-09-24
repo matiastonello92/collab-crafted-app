@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { requirePlatformAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Shield, Users, Building2, Mail, Activity, AlertTriangle } from 'lucide-react'
@@ -9,7 +9,7 @@ export default async function PlatformAdminPage() {
   // Platform admin guard
   await requirePlatformAdmin()
 
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
 
   // Gather statistics
   const [

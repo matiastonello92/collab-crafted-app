@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Flag, Plus, Settings, MapPin, Globe } from 'lucide-react'
-import { useAppStore } from '@/lib/store'
-import { useRequireSession } from '@/lib/useRequireSession'
+import { usePermissions } from '@/hooks/usePermissions'
+import { PermissionGate } from '@/components/access/PermissionGate'
 
 // Mock data for demonstration
 const mockFlags = [
@@ -68,33 +68,12 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
-  useRequireSession()
-  const { hasPermission } = useAppStore()
+  const { can } = usePermissions()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   // Check if user can manage feature flags
-  const canManageFlags = hasPermission('locations.manage_flags')
-
-  if (!canManageFlags) {
-    return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <Flag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Accesso Negato</h3>
-              <p className="text-muted-foreground">
-                Non hai i permessi necessari per gestire i feature flags.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   const filteredFlags = mockFlags.filter(flag => {
     if (selectedModule !== 'all' && flag.module_code !== selectedModule) return false
     if (selectedScope !== 'all') {
@@ -110,6 +89,24 @@ export default function FeatureFlagsPage() {
   }
 
   return (
+    <PermissionGate
+      required="locations.manage_flags"
+      fallback={(
+        <div className="container mx-auto py-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Flag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Accesso Negato</h3>
+                <p className="text-muted-foreground">
+                  Non hai i permessi necessari per gestire i feature flags.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    >
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
@@ -370,5 +367,6 @@ export default function FeatureFlagsPage() {
         </Card>
       </div>
     </div>
+    </PermissionGate>
   )
 }

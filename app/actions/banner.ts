@@ -1,13 +1,13 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { revalidatePath } from 'next/cache'
 
 export async function saveBanner(message: string, enabled: boolean) {
   await requireOrgAdmin()
   
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   // Save to app_settings
   const { error: settingsError } = await supabase
@@ -46,7 +46,7 @@ export async function saveBanner(message: string, enabled: boolean) {
 export async function getBannerHistory() {
   await requireOrgAdmin()
   
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   const { data, error } = await supabase
     .from('system_banners')
@@ -71,7 +71,7 @@ export async function getBannerHistory() {
 export async function republishBanner(id: string) {
   await requireOrgAdmin()
   
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   
   // Get the banner from history
   const { data: banner, error: fetchError } = await supabase

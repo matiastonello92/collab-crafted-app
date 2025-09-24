@@ -1,25 +1,21 @@
-import { getActiveLocationServer } from '@/lib/server/activeLocation';
-import { setActiveLocationAction } from '@/app/actions/active-location';
+import { cookies } from 'next/headers';
+
+import { setActiveLocation } from '@/app/actions/active-location';
+import type { HydrationPayload } from '@/lib/store';
 import HeaderClient from './HeaderClient';
 
-export const dynamic = 'force-dynamic';
-
-export default async function Header() {
-  const { active, locations, persisted, meta } = await getActiveLocationServer();
-
-  const errorMessage =
-    meta?.error === 'memberships' ? 'Impossibile leggere le assegnazioni.'
-    : meta?.error === 'locations' ? 'Impossibile leggere le sedi.'
-    : meta?.error === 'fatal' ? 'Errore inatteso.'
-    : undefined;
+export default async function Header({ state }: { state: HydrationPayload }) {
+  const jar = await cookies();
+  const persistedId = jar.get('pn_loc')?.value ?? null;
+  const activeLocationId = state.location?.id ?? null;
+  const persisted = !activeLocationId || activeLocationId === persistedId;
 
   return (
     <HeaderClient
-      locations={locations}
-      activeLocationId={active?.id ?? null}
+      locations={state.availableLocations}
+      activeLocationId={activeLocationId}
       persisted={persisted}
-      errorMessage={errorMessage}
-      setActiveLocation={setActiveLocationAction}
+      setActiveLocation={setActiveLocation}
     />
   );
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/utils/supabase/server"
+import { createSupabaseUserClient } from "@/lib/supabase/clients"
 
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseUserClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {

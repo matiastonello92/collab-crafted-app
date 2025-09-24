@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 import { hardLogout } from '@/lib/hardLogout'
 import {
   DropdownMenu,
@@ -20,30 +20,36 @@ export function UserDropdown() {
   const [user, setUser] = useState<{ email: string; name?: string } | null>(null)
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient()
-    
+    let mounted = true
+
     const getUser = async () => {
+      const supabase = await createSupabaseUserClient()
       const { data } = await supabase.auth.getUser()
-      if (data.user) {
-        // Try to get profile data
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('first_name, last_name')
-          .eq('id', data.user.id)
-          .single()
+      if (!mounted || !data.user) return
 
-        const displayName = profile?.first_name && profile?.last_name
-          ? `${profile.first_name} ${profile.last_name}`
-          : profile?.first_name || data.user.email?.split('@')[0]
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('first_name, last_name')
+        .eq('id', data.user.id)
+        .single()
 
-        setUser({
-          email: data.user.email || '',
-          name: displayName
-        })
-      }
+      if (!mounted) return
+
+      const displayName = profile?.first_name && profile?.last_name
+        ? `${profile.first_name} ${profile.last_name}`
+        : profile?.first_name || data.user.email?.split('@')[0]
+
+      setUser({
+        email: data.user.email || '',
+        name: displayName
+      })
     }
 
-    getUser()
+    void getUser()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   if (!user) {

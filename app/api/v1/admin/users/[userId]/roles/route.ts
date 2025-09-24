@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/utils/supabase/server"
+import { createSupabaseUserClient } from "@/lib/supabase/clients"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
 import { checkOrgAdmin } from "@/lib/admin/guards"
 

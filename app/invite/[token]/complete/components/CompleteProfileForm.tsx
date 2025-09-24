@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { User, Phone, Globe, ArrowRight, CheckCircle } from 'lucide-react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseUserClient } from '@/lib/supabase/clients'
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Nome completo è richiesto').max(100, 'Nome troppo lungo'),
@@ -59,7 +59,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
 
     startTransition(async () => {
       try {
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseUserClient()
         
         // Update or create profile using the RPC function
         const { error } = await supabase.rpc('profile_update_self', {

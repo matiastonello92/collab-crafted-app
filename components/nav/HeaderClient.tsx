@@ -1,57 +1,50 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useTransition } from 'react';
 import { UserDropdown } from '@/components/nav/UserDropdown';
-import { useAppStore } from '@/lib/store';
-import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
+import { useAppStore, type HydrationPayload, type LocationInfo } from '@/lib/store';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function HeaderClient({
   locations,
   activeLocationId,
   persisted,
-  errorMessage,
   setActiveLocation,
 }: {
   locations: { id: string; name: string }[];
   activeLocationId: string | null;
   persisted: boolean;
-  errorMessage?: string;
-  setActiveLocation: (id?: string | null) => Promise<void>;
+  setActiveLocation: (id?: string | null) => Promise<HydrationPayload>;
 }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
-  const setContext = useAppStore(state => state.setContext);
-  useEffectivePermissions();
+  const updateContext = useAppStore((state) => state.updateContext);
+  const availableLocations = useAppStore((state) => state.availableLocations);
+  const currentLocationId = useAppStore((state) => state.location?.id ?? null);
 
-  useEffect(() => {
-    const active = locations.find(l => l.id === activeLocationId) || null;
-    const prev = useAppStore.getState().context;
-    setContext({
-      ...prev,
-      location_id: active?.id ?? null,
-      location_name: active?.name ?? null,
-    });
-  }, [locations, activeLocationId, setContext]);
+  const fallbackLocations = useMemo<LocationInfo[]>(
+    () => locations.map((location) => ({ id: location.id, name: location.name })),
+    [locations]
+  );
+
+  const renderedLocations = availableLocations.length ? availableLocations : fallbackLocations;
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
   useEffect(() => {
     if (!didPersistRef.current && activeLocationId && !persisted) {
       didPersistRef.current = true;
       startTransition(async () => {
-        await setActiveLocation(activeLocationId);
-        // No router.refresh() on auto-persist to avoid race conditions
+        const next = await setActiveLocation(activeLocationId);
+        updateContext(next);
       });
     }
-  }, [activeLocationId, persisted, setActiveLocation]);
+  }, [activeLocationId, persisted, setActiveLocation, updateContext]);
 
   const onSelect = (id: string) => {
     startTransition(async () => {
-      await setActiveLocation(id);
-      router.refresh();
+      const next = await setActiveLocation(id);
+      updateContext(next);
     });
   };
 
@@ -63,11 +56,7 @@ export default function HeaderClient({
           <Image src="/brand/klyra-icon.svg" alt="Klyra" width={28} height={28} className="size-7" priority />
           <span className="text-lg font-semibold tracking-tight text-foreground">Klyra</span>
         </div>
-        {errorMessage ? (
-          <span className="inline-flex items-center rounded-full border border-klyra-warning/40 bg-klyra-warning/10 px-3 py-1 text-xs font-medium text-klyra-warning">
-            {errorMessage}
-          </span>
-        ) : !locations?.length ? (
+        {!renderedLocations?.length ? (
           <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
             Nessuna sede assegnata
           </span>
@@ -75,15 +64,15 @@ export default function HeaderClient({
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-2">
-        {locations?.length ? (
+        {renderedLocations?.length ? (
           <div className="relative">
             <select
               className="h-10 min-w-[180px] rounded-xl border border-border/60 bg-background px-4 text-sm font-medium text-foreground shadow-sm transition focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              value={activeLocationId ?? ''}
+              value={currentLocationId ?? activeLocationId ?? ''}
               onChange={event => onSelect(event.target.value)}
               aria-label="Seleziona sede attiva"
             >
-              {locations.map(location => (
+              {renderedLocations.map(location => (
                 <option key={location.id} value={location.id} className="bg-background text-foreground">
                   {location.name}
                 </option>
