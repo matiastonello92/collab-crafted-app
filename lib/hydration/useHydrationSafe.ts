@@ -50,10 +50,10 @@ export function usePerformanceMonitor() {
 }
 
 /**
- * Hook for safe timestamp management
+ * Hook for safe timestamp management - hydration-safe
  */
 export function useTimestamp(updateInterval?: number) {
-  const [timestamp, setTimestamp] = useState<string>('')
+  const [timestamp, setTimestamp] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -70,7 +70,11 @@ export function useTimestamp(updateInterval?: number) {
     }
   }, [updateInterval])
 
-  return { timestamp, isClient }
+  return { 
+    timestamp: timestamp || '', // Always return string for backward compatibility
+    isClient,
+    hasTimestamp: timestamp !== null
+  }
 }
 
 /**

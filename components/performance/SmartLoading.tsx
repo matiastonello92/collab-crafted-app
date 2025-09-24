@@ -189,15 +189,20 @@ export function ProgressiveLoading({
 
 /**
  * Delays showing fallback to prevent flash of loading state
- * Now hydration-safe with ClientOnly wrapper
+ * Hydration-safe: always starts with null on both server and client
  */
 function DelayedFallback({ children, delay }: { children: ReactNode, delay: number }) {
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState<boolean | null>(null)
   
   useEffect(() => {
+    // Start with false and set to true after delay
+    setShow(false)
     const timer = setTimeout(() => setShow(true), delay)
     return () => clearTimeout(timer)
   }, [delay])
   
-  return show ? <>{children}</> : null
+  // During SSR and initial hydration, show nothing
+  if (show === null || show === false) return null
+  
+  return <>{children}</>
 }

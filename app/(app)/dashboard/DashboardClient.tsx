@@ -91,7 +91,7 @@ function DashboardContent() {
   const { permissions } = usePermissions()
   const { location_name } = useLocationContext()
   const { env, isClient } = useEnvironment()
-  const { timestamp } = useTimestamp(60000) // Update every minute
+  const { timestamp, hasTimestamp } = useTimestamp(60000) // Update every minute
   
   const quickActions = [
     {
@@ -264,9 +264,11 @@ function DashboardContent() {
             </CardTitle>
             <CardDescription>
               <ClientOnly fallback="Monitoraggio aggregato dei servizi principali">
-                Monitoraggio aggregato dei servizi principali • 
-                Aggiornato: {TimestampProvider.formatForDisplay(data.metadata.lastUpdate)} • 
-                Tempo risposta: {data.metadata.healthResponseTime.toFixed(0)}ms
+                <span suppressHydrationWarning>
+                  Monitoraggio aggregato dei servizi principali • 
+                  Aggiornato: {TimestampProvider.formatForDisplay(data.metadata.lastUpdate)} • 
+                  Tempo risposta: {data.metadata.healthResponseTime.toFixed(0)}ms
+                </span>
               </ClientOnly>
             </CardDescription>
           </CardHeader>
@@ -300,12 +302,13 @@ function DashboardContent() {
               {isClient && env.NODE_ENV === 'development' && (
                 <details className="mt-4 text-xs text-muted-foreground">
                   <summary className="cursor-pointer hover:text-foreground">Debug Info</summary>
-                  <pre className="mt-2 p-2 bg-muted rounded overflow-auto">
+                  <pre className="mt-2 p-2 bg-muted rounded overflow-auto" suppressHydrationWarning>
                     {JSON.stringify({
                       sources: data.metadata.sources,
                       confidence: data.metadata.confidence,
                       responseTime: data.metadata.healthResponseTime,
-                      timestamp: timestamp
+                      timestamp: hasTimestamp ? timestamp : 'Loading...',
+                      hydrated: isClient
                     }, null, 2)}
                   </pre>
                 </details>
