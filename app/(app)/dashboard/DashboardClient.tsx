@@ -12,6 +12,9 @@ import { EnhancedErrorBoundary } from '@/components/error-boundary-enhanced'
 import { usePermissions } from '@/hooks/usePermissions'
 import { checkPermission } from '@/lib/permissions/unified'
 import { useLocationContext } from '@/lib/store/modernized'
+import { TimestampProvider } from '@/lib/hydration/TimestampProvider'
+import { ClientOnly } from '@/lib/hydration/ClientOnly'
+import { useEnvironment, useTimestamp } from '@/lib/hydration/useHydrationSafe'
 
 interface DashboardData {
   stats: {
@@ -27,7 +30,7 @@ interface DashboardData {
   }>
   metadata: {
     sources: string[]
-    lastUpdate: Date
+    lastUpdate: string // Changed to string for SSR safety
     confidence: number
     healthResponseTime: number
   }
@@ -44,7 +47,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
       console.warn('[Dashboard] Stats normalization failed:', error)
       return {
         stats: { activeUsers: 0, locations: 0, featureFlags: 0, permissions: 0 },
-        metadata: { sources: [], lastUpdate: new Date(), confidence: 0 }
+        metadata: { sources: [], lastUpdate: TimestampProvider.getConsistentTimestamp(), confidence: 0 }
       }
     }),
     ServiceHealthAggregator.aggregateHealth().catch(error => {
@@ -52,7 +55,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
       return {
         services: [{ service: 'System', status: 'error' as const, message: 'Health check failed' }],
         overallStatus: 'error' as const,
-        lastCheck: new Date(),
+        lastCheck: TimestampProvider.getConsistentTimestamp(),
         metadata: { endpoints: [], failedEndpoints: [], responseTime: 0 }
       }
     })
@@ -61,13 +64,13 @@ async function fetchDashboardData(): Promise<DashboardData> {
   // Extract results with type safety
   const statsResult = normalizedStats.status === 'fulfilled' ? normalizedStats.value : {
     stats: { activeUsers: 0, locations: 0, featureFlags: 0, permissions: 0 },
-    metadata: { sources: [], lastUpdate: new Date(), confidence: 0 }
+    metadata: { sources: [], lastUpdate: TimestampProvider.getConsistentTimestamp(), confidence: 0 }
   }
   
   const healthResult = aggregatedHealth.status === 'fulfilled' ? aggregatedHealth.value : {
     services: [{ service: 'System', status: 'error' as const, message: 'Health check failed' }],
     overallStatus: 'error' as const,
-    lastCheck: new Date(),
+    lastCheck: TimestampProvider.getConsistentTimestamp(),
     metadata: { endpoints: [], failedEndpoints: [], responseTime: 0 }
   }
 
@@ -76,10 +79,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
     systemStatus: healthResult.services,
     metadata: {
       sources: [...statsResult.metadata.sources, ...healthResult.metadata.endpoints],
-      lastUpdate: new Date(Math.max(
-        statsResult.metadata.lastUpdate.getTime(),
-        healthResult.lastCheck.getTime()
-      )),
+      lastUpdate: TimestampProvider.getConsistentTimestamp(),
       confidence: statsResult.metadata.confidence,
       healthResponseTime: healthResult.metadata.responseTime
     }
@@ -90,6 +90,8 @@ function DashboardContent() {
   const { data } = useDataContext<DashboardData>()
   const { permissions } = usePermissions()
   const { location_name } = useLocationContext()
+  const { env, isClient } = useEnvironment()
+  const { timestamp } = useTimestamp(60000) // Update every minute
   
   const quickActions = [
     {
@@ -261,9 +263,11 @@ function DashboardContent() {
               </div>
             </CardTitle>
             <CardDescription>
-              Monitoraggio aggregato dei servizi principali • 
-              Aggiornato: {data.metadata.lastUpdate.toLocaleTimeString()} • 
-              Tempo risposta: {data.metadata.healthResponseTime.toFixed(0)}ms
+              <ClientOnly fallback="Monitoraggio aggregato dei servizi principali">
+                Monitoraggio aggregato dei servizi principali • 
+                Aggiornato: {TimestampProvider.formatForDisplay(data.metadata.lastUpdate)} • 
+                Tempo risposta: {data.metadata.healthResponseTime.toFixed(0)}ms
+              </ClientOnly>
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -292,18 +296,21 @@ function DashboardContent() {
             </div>
             
             {/* Metadata for debugging in development */}
-            {process.env.NODE_ENV === 'development' && (
-              <details className="mt-4 text-xs text-muted-foreground">
-                <summary className="cursor-pointer hover:text-foreground">Debug Info</summary>
-                <pre className="mt-2 p-2 bg-muted rounded overflow-auto">
-                  {JSON.stringify({
-                    sources: data.metadata.sources,
-                    confidence: data.metadata.confidence,
-                    responseTime: data.metadata.healthResponseTime
-                  }, null, 2)}
-                </pre>
-              </details>
-            )}
+            <ClientOnly>
+              {isClient && env.NODE_ENV === 'development' && (
+                <details className="mt-4 text-xs text-muted-foreground">
+                  <summary className="cursor-pointer hover:text-foreground">Debug Info</summary>
+                  <pre className="mt-2 p-2 bg-muted rounded overflow-auto">
+                    {JSON.stringify({
+                      sources: data.metadata.sources,
+                      confidence: data.metadata.confidence,
+                      responseTime: data.metadata.healthResponseTime,
+                      timestamp: timestamp
+                    }, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </ClientOnly>
           </CardContent>
         </Card>
       </EnhancedErrorBoundary>
