@@ -1701,6 +1701,10 @@ export type Database = {
         Args: { p_user: string }
         Returns: boolean
       }
+      user_is_location_admin: {
+        Args: { p_location_id: string }
+        Returns: boolean
+      }
       user_is_org_admin: {
         Args: { p_org: string }
         Returns: boolean
