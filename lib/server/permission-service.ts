@@ -30,13 +30,15 @@ async function fetchRoleContext(
     .eq('user_id', userId)
     .eq('org_id', orgId)
 
-  const allowedAssignments = assignments.filter((assignment) => {
-    if (assignment?.is_active === false) return false
-    if (!assignment?.role_id) return false
-    if (!assignment?.location_id) return true
-    if (!locationId) return false
-    return assignment.location_id === locationId
-  })
+  const allowedAssignments = Array.isArray(assignments)
+    ? assignments.filter((assignment) => {
+        if (assignment?.is_active === false) return false
+        if (!assignment?.role_id) return false
+        if (!assignment?.location_id) return true
+        if (!locationId) return false
+        return assignment.location_id === locationId
+      })
+    : []
 
   const roleIds = Array.from(
     new Set(
