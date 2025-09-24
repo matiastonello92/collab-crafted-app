@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import { TimestampProvider } from '@/lib/hydration/TimestampProvider'
 
 interface AppContext {
   org_id: string | null
@@ -52,7 +53,7 @@ export const useModernStore = create<AppState>()(
         },
         
         metrics: {
-          lastUpdated: Date.now(),
+          lastUpdated: 0, // Will be set consistently on client
           loadTime: 0,
           cacheHits: 0,
           cacheMisses: 0,
@@ -61,14 +62,14 @@ export const useModernStore = create<AppState>()(
         setContext: (newContext) =>
           set((state) => {
             Object.assign(state.context, newContext)
-            state.metrics.lastUpdated = Date.now()
+            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         updateLocation: (locationId, locationName) =>
           set((state) => {
             state.context.location_id = locationId
             state.context.location_name = locationName
-            state.metrics.lastUpdated = Date.now()
+            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         clearContext: () =>
@@ -79,7 +80,7 @@ export const useModernStore = create<AppState>()(
               location_name: null,
               user_id: null,
             }
-            state.metrics.lastUpdated = Date.now()
+            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         recordCacheHit: () =>
@@ -135,6 +136,11 @@ export function usePerformanceMonitor() {
   const { recordCacheHit, recordCacheMiss, updateLoadTime } = useModernStore()
   
   const measureOperation = async <T>(operation: () => Promise<T>, name: string): Promise<T> => {
+    // Only measure performance on client-side
+    if (typeof window === 'undefined' || !('performance' in window)) {
+      return await operation()
+    }
+    
     const start = performance.now()
     try {
       const result = await operation()

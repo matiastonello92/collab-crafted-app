@@ -1,8 +1,9 @@
 'use client'
 
-import { Suspense, lazy, ReactNode, ComponentType } from 'react'
+import React, { Suspense, lazy, ReactNode, ComponentType, useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ClientOnly } from '@/lib/hydration/ClientOnly'
 
 /**
  * Smart lazy loading with optimized fallbacks
@@ -174,9 +175,11 @@ export function ProgressiveLoading({
   return (
     <Suspense 
       fallback={
-        <DelayedFallback delay={threshold}>
-          {placeholder || <SmartLoadingSkeleton />}
-        </DelayedFallback>
+        <ClientOnly fallback={placeholder || <SmartLoadingSkeleton />}>
+          <DelayedFallback delay={threshold}>
+            {placeholder || <SmartLoadingSkeleton />}
+          </DelayedFallback>
+        </ClientOnly>
       }
     >
       {children}
@@ -186,17 +189,15 @@ export function ProgressiveLoading({
 
 /**
  * Delays showing fallback to prevent flash of loading state
+ * Now hydration-safe with ClientOnly wrapper
  */
 function DelayedFallback({ children, delay }: { children: ReactNode, delay: number }) {
-  const [show, setShow] = React.useState(false)
+  const [show, setShow] = useState(false)
   
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => setShow(true), delay)
     return () => clearTimeout(timer)
   }, [delay])
   
   return show ? <>{children}</> : null
 }
-
-// React import for useEffect and useState
-import React from 'react'

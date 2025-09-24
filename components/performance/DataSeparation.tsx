@@ -1,8 +1,9 @@
 'use client'
 
-import { ReactNode, createContext, useContext } from 'react'
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react'
 import { useAdvancedData, useBatchData } from '@/hooks/useAdvancedData'
 import { usePerformanceMonitor } from '@/lib/store/modernized'
+import { useIsClient } from '@/lib/hydration/ClientOnly'
 
 interface DataContextType<T = any> {
   data: T
@@ -156,18 +157,24 @@ interface OptimizedComponentProps {
 }
 
 export function OptimizedComponent({ children, name }: OptimizedComponentProps) {
-  const { measureOperation } = usePerformanceMonitor()
+  const isClient = useIsClient()
+  const [performanceData, setPerformanceData] = useState<{ time: number } | null>(null)
   
-  // Measure render performance in development
-  if (process.env.NODE_ENV === 'development') {
-    const start = performance.now()
-    const result = children
-    const time = performance.now() - start
-    if (time > 16) { // Flag slow renders (>16ms = 60fps threshold)
-      console.warn(`[Performance] Slow render detected in ${name}: ${time.toFixed(2)}ms`)
+  // Measure render performance only on client-side and in development
+  useEffect(() => {
+    if (isClient && process.env.NODE_ENV === 'development') {
+      const start = performance.now()
+      // Measure on next tick to avoid hydration issues
+      const timer = setTimeout(() => {
+        const time = performance.now() - start
+        setPerformanceData({ time })
+        if (time > 16) { // Flag slow renders (>16ms = 60fps threshold)
+          console.warn(`[Performance] Slow render detected in ${name}: ${time.toFixed(2)}ms`)
+        }
+      }, 0)
+      return () => clearTimeout(timer)
     }
-    return <>{result}</>
-  }
+  }, [isClient, name])
   
   return <>{children}</>
 }
