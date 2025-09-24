@@ -49,9 +49,11 @@ export async function setActiveLocation(locationId?: string | null): Promise<App
     .eq('user_id', user.id)
     .eq('org_id', orgId);
 
-  const allowed = assignments.some(
-    assignment => assignment?.is_active !== false && assignment?.location_id === locationId,
-  );
+  const allowed = Array.isArray(assignments)
+    ? assignments.some(
+        assignment => assignment?.is_active !== false && assignment?.location_id === locationId,
+      )
+    : false;
 
   if (!allowed) {
     throw new Error('Forbidden');
