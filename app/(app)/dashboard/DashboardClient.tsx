@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { DataProvider, useDataContext } from '@/components/performance/DataSeparation'
 import { SmartLoadingSkeleton } from '@/components/performance/SmartLoading'
 import { RouteOptimizer } from '@/components/performance/RouteOptimization'
+import { EnhancedErrorBoundary } from '@/components/error-boundary-enhanced'
 import { usePermissions } from '@/hooks/usePermissions'
 import { checkPermission } from '@/lib/permissions/unified'
 import { useLocationContext } from '@/lib/store/modernized'
@@ -24,18 +25,65 @@ interface DashboardData {
     status: 'operational' | 'warning' | 'error'
     message: string
   }>
+  metadata: {
+    sources: string[]
+    lastUpdate: Date
+    confidence: number
+    healthResponseTime: number
+  }
 }
 
+// Enterprise-grade data fetcher with fallback chain and aggregation
 async function fetchDashboardData(): Promise<DashboardData> {
-  const [statsRes, statusRes] = await Promise.all([
-    fetch('/api/platform/dashboard'),
-    fetch('/api/health')
+  const { StatsNormalizer } = await import('@/lib/data/stats-normalizer')
+  const { ServiceHealthAggregator } = await import('@/lib/data/health-aggregator')
+  
+  // Parallel execution of normalized stats and health aggregation
+  const [normalizedStats, aggregatedHealth] = await Promise.allSettled([
+    StatsNormalizer.normalizeStats().catch(error => {
+      console.warn('[Dashboard] Stats normalization failed:', error)
+      return {
+        stats: { activeUsers: 0, locations: 0, featureFlags: 0, permissions: 0 },
+        metadata: { sources: [], lastUpdate: new Date(), confidence: 0 }
+      }
+    }),
+    ServiceHealthAggregator.aggregateHealth().catch(error => {
+      console.warn('[Dashboard] Health aggregation failed:', error)
+      return {
+        services: [{ service: 'System', status: 'error' as const, message: 'Health check failed' }],
+        overallStatus: 'error' as const,
+        lastCheck: new Date(),
+        metadata: { endpoints: [], failedEndpoints: [], responseTime: 0 }
+      }
+    })
   ])
+
+  // Extract results with type safety
+  const statsResult = normalizedStats.status === 'fulfilled' ? normalizedStats.value : {
+    stats: { activeUsers: 0, locations: 0, featureFlags: 0, permissions: 0 },
+    metadata: { sources: [], lastUpdate: new Date(), confidence: 0 }
+  }
   
-  const stats = await statsRes.json()
-  const systemStatus = await statusRes.json()
-  
-  return { stats, systemStatus }
+  const healthResult = aggregatedHealth.status === 'fulfilled' ? aggregatedHealth.value : {
+    services: [{ service: 'System', status: 'error' as const, message: 'Health check failed' }],
+    overallStatus: 'error' as const,
+    lastCheck: new Date(),
+    metadata: { endpoints: [], failedEndpoints: [], responseTime: 0 }
+  }
+
+  return {
+    stats: statsResult.stats,
+    systemStatus: healthResult.services,
+    metadata: {
+      sources: [...statsResult.metadata.sources, ...healthResult.metadata.endpoints],
+      lastUpdate: new Date(Math.max(
+        statsResult.metadata.lastUpdate.getTime(),
+        healthResult.lastCheck.getTime()
+      )),
+      confidence: statsResult.metadata.confidence,
+      healthResponseTime: healthResult.metadata.responseTime
+    }
+  }
 }
 
 function DashboardContent() {
@@ -196,43 +244,89 @@ function DashboardContent() {
         </CardContent>
       </Card>
 
-      {/* System Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Stato del Sistema</CardTitle>
-          <CardDescription>Monitoraggio dei servizi principali</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {data.systemStatus.map((service, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`h-2 w-2 rounded-full ${
-                    service.status === 'operational' ? 'bg-klyra-success' :
-                    service.status === 'warning' ? 'bg-klyra-warning' : 'bg-destructive'
-                  }`} />
-                  <span>{service.service}</span>
-                </div>
-                <Badge variant={service.status === 'operational' ? 'secondary' : 'outline'}>
-                  {service.message}
+      {/* System Status with Enhanced Error Handling */}
+      <EnhancedErrorBoundary level="section">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Stato del Sistema
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-3 rounded-full ${
+                  data.systemStatus.every(s => s.status === 'operational') ? 'bg-klyra-success' :
+                  data.systemStatus.some(s => s.status === 'error') ? 'bg-destructive' : 'bg-klyra-warning'
+                }`} />
+                <Badge variant="outline" className="text-xs">
+                  Confidence: {Math.round(data.metadata.confidence * 100)}%
                 </Badge>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardTitle>
+            <CardDescription>
+              Monitoraggio aggregato dei servizi principali • 
+              Aggiornato: {data.metadata.lastUpdate.toLocaleTimeString()} • 
+              Tempo risposta: {data.metadata.healthResponseTime.toFixed(0)}ms
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {data.systemStatus && data.systemStatus.length > 0 ? (
+                data.systemStatus.map((service, index) => (
+                  <div key={`${service.service}-${index}`} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-2 w-2 rounded-full ${
+                        service.status === 'operational' ? 'bg-klyra-success' :
+                        service.status === 'warning' ? 'bg-klyra-warning' : 'bg-destructive'
+                      }`} />
+                      <span className="font-medium">{service.service}</span>
+                    </div>
+                    <Badge variant={service.status === 'operational' ? 'secondary' : 'outline'}>
+                      {service.message}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                  <Activity className="h-8 w-8 mr-2" />
+                  <span>Nessun dato di sistema disponibile</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Metadata for debugging in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-4 text-xs text-muted-foreground">
+                <summary className="cursor-pointer hover:text-foreground">Debug Info</summary>
+                <pre className="mt-2 p-2 bg-muted rounded overflow-auto">
+                  {JSON.stringify({
+                    sources: data.metadata.sources,
+                    confidence: data.metadata.confidence,
+                    responseTime: data.metadata.healthResponseTime
+                  }, null, 2)}
+                </pre>
+              </details>
+            )}
+          </CardContent>
+        </Card>
+      </EnhancedErrorBoundary>
     </div>
   )
 }
 
 export default function DashboardClient() {
   return (
-    <DataProvider
-      cacheKey="dashboard-data"
-      fetcher={fetchDashboardData}
-      fallback={<SmartLoadingSkeleton variant="dashboard" />}
+    <EnhancedErrorBoundary 
+      level="page"
+      onError={(error, errorInfo) => {
+        // Send to monitoring service in production
+        console.error('[Dashboard] Page-level error:', { error, errorInfo })
+      }}
     >
-      <DashboardContent />
-    </DataProvider>
+      <DataProvider
+        cacheKey="dashboard-data-v2" // Updated cache key for new data structure
+        fetcher={fetchDashboardData}
+        fallback={<SmartLoadingSkeleton variant="dashboard" />}
+      >
+        <DashboardContent />
+      </DataProvider>
+    </EnhancedErrorBoundary>
   )
 }
