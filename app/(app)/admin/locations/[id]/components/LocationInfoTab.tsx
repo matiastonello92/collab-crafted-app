@@ -10,18 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Edit2, Save, X } from 'lucide-react'
 import { toast } from 'sonner'
+import type { Tables } from '@/src/integrations/supabase/types'
 
-interface Location {
-  id: string
-  name: string
-  city: string
-  country: string
-  is_active: boolean
-  phone?: string
-  email?: string
-  address?: string
-  [key: string]: any
-}
+type Location = Tables<'locations'>
 
 interface Props {
   location: Location
@@ -31,6 +22,13 @@ export function LocationInfoTab({ location }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState(location)
   const [loading, setLoading] = useState(false)
+
+  const isActive = location.is_active ?? false
+  const city = location.city ?? 'Non specificato'
+  const country = location.country ?? 'Non specificato'
+  const phone = location.phone ?? 'Non specificato'
+  const email = location.email ?? 'Non specificato'
+  const address = location.address ?? 'Non specificato'
 
   const handleSave = async () => {
     setLoading(true)
@@ -81,19 +79,19 @@ export function LocationInfoTab({ location }: Props) {
             
             <div>
               <Label className="text-sm font-medium">Città</Label>
-              <p className="text-sm text-muted-foreground">{location.city}</p>
+              <p className="text-sm text-muted-foreground">{city}</p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Paese</Label>
-              <p className="text-sm text-muted-foreground">{location.country}</p>
+              <p className="text-sm text-muted-foreground">{country}</p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Status</Label>
               <div>
-                <Badge variant={location.is_active ? "default" : "secondary"}>
-                  {location.is_active ? "Attivo" : "Archiviato"}
+                <Badge variant={isActive ? "default" : "secondary"}>
+                  {isActive ? "Attivo" : "Archiviato"}
                 </Badge>
               </div>
             </div>
@@ -102,23 +100,17 @@ export function LocationInfoTab({ location }: Props) {
           <div className="space-y-4">
             <div>
               <Label className="text-sm font-medium">Telefono</Label>
-              <p className="text-sm text-muted-foreground">
-                {location.phone || 'Non specificato'}
-              </p>
+              <p className="text-sm text-muted-foreground">{phone}</p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Email</Label>
-              <p className="text-sm text-muted-foreground">
-                {location.email || 'Non specificato'}
-              </p>
+              <p className="text-sm text-muted-foreground">{email}</p>
             </div>
 
             <div>
               <Label className="text-sm font-medium">Indirizzo</Label>
-              <p className="text-sm text-muted-foreground">
-                {location.address || 'Non specificato'}
-              </p>
+              <p className="text-sm text-muted-foreground">{address}</p>
             </div>
           </div>
         </CardContent>

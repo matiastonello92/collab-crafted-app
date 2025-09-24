@@ -9,12 +9,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Edit2, Save, X, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { usePermissions } from '@/hooks/usePermissions'
+import type { Tables } from '@/src/integrations/supabase/types'
 
-interface Location {
-  id: string
-  opening_hours?: any
-  open_days?: string[]
-}
+type Location = Pick<Tables<'locations'>, 'id' | 'opening_hours' | 'open_days'>
 
 interface Props {
   location: Location
