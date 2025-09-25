@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { useAppStore } from '@/lib/store'
+import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'
@@ -36,8 +36,7 @@ export default function SidebarClient() {
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const pathname = usePathname()
   const supabase = useSupabase()
-  const { permissions, context } = useAppStore()
-  const permissionsLoading = useAppStore(state => state.permissionsLoading)
+  const { permissions, context, permissionsLoading } = useHydratedStore()
 
   useEffect(() => {
     supabase.auth.getUser()

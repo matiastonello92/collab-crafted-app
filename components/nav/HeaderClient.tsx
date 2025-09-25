@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
-import { useAppStore } from '@/lib/store';
+import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -24,12 +24,12 @@ export default function HeaderClient({
   const router = useRouter();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
-  const setContext = useAppStore(state => state.setContext);
+  const { setContext } = useHydratedStore();
   useEffectivePermissions();
 
   useEffect(() => {
     const active = locations.find(l => l.id === activeLocationId) || null;
-    const prev = useAppStore.getState().context;
+    const prev = useHydratedContext();
     setContext({
       ...prev,
       location_id: active?.id ?? null,

@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useAppStore } from '@/lib/store'
+import { useHydratedStore } from '@/lib/store/useHydratedStore'
+import { useAppStore } from '@/lib/store/unified'
 import { getUserPermissions, normalizeSet } from '@/lib/permissions'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
 export function useEffectivePermissions() {
-  const { context, setPermissions } = useAppStore()
-  const setPermissionsLoading = useAppStore(state => state.setPermissionsLoading)
+  const { context, setPermissions, setPermissionsLoading } = useHydratedStore()
   const globalPerms = useRef<string[]>([])
 
   // load global permissions once
@@ -32,7 +32,8 @@ export function useEffectivePermissions() {
 
         const merged = normalizeSet([...perms, ...(claimStar ? ['*'] : [])])
         globalPerms.current = merged
-        const { context: ctx } = useAppStore.getState()
+        const store = useAppStore.getState()
+        const ctx = store.hasHydrated ? store.context : { location_id: null }
         if (!ctx.location_id) {
           setPermissions(merged)
         }
