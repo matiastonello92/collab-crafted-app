@@ -128,7 +128,7 @@ export const useAppStore = create<AppState>()(
           }),
       })),
       {
-        name: 'unified-app-store',
+        name: 'app-store',
         partialize: (state) => ({ 
           context: state.context,
           metrics: {
