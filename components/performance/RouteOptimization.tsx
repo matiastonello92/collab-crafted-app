@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePrefetch } from '@/hooks/useAdvancedData'
-import { usePerformanceMonitor } from '@/lib/store/modernized'
+import { usePerformanceMonitor } from '@/lib/store/unified'
 
 /**
  * Route prefetching and optimization component

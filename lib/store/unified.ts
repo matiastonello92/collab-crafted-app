@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import { can } from '../permissions'
 
 interface AppContext {
   org_id: string | null
@@ -22,25 +23,34 @@ interface AppState {
   // Core context
   context: AppContext
   
-  // Performance tracking
+  // Permissions (from old store)
+  permissions: string[]
+  permissionsLoading: boolean
+  
+  // Performance tracking (from modern store)
   metrics: PerformanceMetrics
   
-  // Actions
+  // Context actions
   setContext: (context: Partial<AppContext>) => void
   updateLocation: (locationId: string, locationName: string) => void
   clearContext: () => void
   
-  // Performance methods
+  // Permission actions (from old store)
+  setPermissions: (permissions: string[]) => void
+  setPermissionsLoading: (loading: boolean) => void
+  hasPermission: (permission: string) => boolean
+  
+  // Performance methods (from modern store)
   recordCacheHit: () => void
   recordCacheMiss: () => void
   updateLoadTime: (time: number) => void
 }
 
 /**
- * Modernized store with performance tracking and selective updates
- * Uses immer for immutable updates and subscribeWithSelector for granular subscriptions
+ * Unified store combining permissions management and performance tracking
+ * Maintains full compatibility with both old and modern store APIs
  */
-export const useModernStore = create<AppState>()(
+export const useAppStore = create<AppState>()(
   subscribeWithSelector(
     persist(
       immer((set, get) => ({
@@ -51,8 +61,11 @@ export const useModernStore = create<AppState>()(
           user_id: null,
         },
         
+        permissions: [],
+        permissionsLoading: false,
+        
         metrics: {
-          lastUpdated: 0, // Will be set consistently on client
+          lastUpdated: 0,
           loadTime: 0,
           cacheHits: 0,
           cacheMisses: 0,
@@ -79,8 +92,25 @@ export const useModernStore = create<AppState>()(
               location_name: null,
               user_id: null,
             }
+            state.permissions = []
+            state.permissionsLoading = false
             state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
+
+        setPermissions: (permissions) =>
+          set((state) => {
+            state.permissions = permissions
+          }),
+
+        setPermissionsLoading: (loading) =>
+          set((state) => {
+            state.permissionsLoading = loading
+          }),
+
+        hasPermission: (permission) => {
+          const { permissions } = get()
+          return can(permissions, permission)
+        },
 
         recordCacheHit: () =>
           set((state) => {
@@ -98,7 +128,7 @@ export const useModernStore = create<AppState>()(
           }),
       })),
       {
-        name: 'modern-app-store',
+        name: 'unified-app-store',
         partialize: (state) => ({ 
           context: state.context,
           metrics: {
@@ -112,30 +142,29 @@ export const useModernStore = create<AppState>()(
   )
 )
 
-// Selective hooks for performance
-export const useAppContext = () => useModernStore((state) => state.context)
-export const useLocationContext = () => useModernStore((state) => ({
+// Selective hooks for performance (modern store compatibility)
+export const useAppContext = () => useAppStore((state) => state.context)
+export const useLocationContext = () => useAppStore((state) => ({
   location_id: state.context.location_id,
   location_name: state.context.location_name,
 }))
-export const usePerformanceMetrics = () => useModernStore((state) => state.metrics)
+export const usePerformanceMetrics = () => useAppStore((state) => state.metrics)
 
-// Action hooks
-export const useContextActions = () => useModernStore((state) => ({
+// Action hooks (modern store compatibility)
+export const useContextActions = () => useAppStore((state) => ({
   setContext: state.setContext,
   updateLocation: state.updateLocation,
   clearContext: state.clearContext,
 }))
 
 /**
- * Performance monitoring hook
+ * Performance monitoring hook (modern store compatibility)
  */
 export function usePerformanceMonitor() {
   const metrics = usePerformanceMetrics()
-  const { recordCacheHit, recordCacheMiss, updateLoadTime } = useModernStore()
+  const { recordCacheHit, recordCacheMiss, updateLoadTime } = useAppStore()
   
   const measureOperation = async <T>(operation: () => Promise<T>, name: string): Promise<T> => {
-    // Only measure performance on client-side
     if (typeof window === 'undefined' || !('performance' in window)) {
       return await operation()
     }
@@ -167,3 +196,6 @@ export function usePerformanceMonitor() {
     recordCacheMiss,
   }
 }
+
+// Legacy compatibility - re-export the main store as useModernStore
+export const useModernStore = useAppStore

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useAppStore } from '@/lib/store'
+import { useAppStore } from '@/lib/store/unified'
 import { getUserPermissions, normalizeSet } from '@/lib/permissions'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 

@@ -3,7 +3,7 @@
 // Migration utilities for backwards compatibility during Phase 2 transition
 // Allows gradual migration from old patterns to new unified system
 
-import { useAppStore } from '@/lib/store'
+import { useAppStore } from '@/lib/store/unified'
 import { usePermissions } from '@/hooks/usePermissions'
 import { checkPermission } from '@/lib/permissions/unified'
 
