@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Flag, Plus, Settings, MapPin, Globe } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
+import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { useRequireSession } from '@/lib/useRequireSession'
 
 // Mock data for demonstration
@@ -68,7 +69,7 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
-  const { hasPermission } = useAppStore()
+  const { hasPermission } = useHydratedStore()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)

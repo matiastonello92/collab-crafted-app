@@ -37,10 +37,15 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
+    // Use crypto.randomUUID for hydration-safe ID generation
+    const errorId = typeof window !== 'undefined' && window.crypto?.randomUUID 
+      ? `error_${Date.now()}_${window.crypto.randomUUID().slice(0, 8)}`
+      : `error_ssr_${error.name?.slice(0, 3) || 'err'}_${error.message?.length || 0}`
+    
     return {
       hasError: true,
       error,
-      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      errorId
     }
   }
 

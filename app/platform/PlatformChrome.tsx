@@ -5,9 +5,12 @@ import { Clock, Activity } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function PlatformChrome() {
-  const [lastSync, setLastSync] = useState<Date>(new Date())
+  const [lastSync, setLastSync] = useState<Date | null>(null)
 
   useEffect(() => {
+    // Initialize timestamp on client
+    setLastSync(new Date())
+    
     const interval = setInterval(() => {
       setLastSync(new Date())
     }, 60000) // Update every minute
@@ -37,7 +40,7 @@ export function PlatformChrome() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <Clock size={14} />
-              <span>Last sync: {lastSync.toLocaleTimeString()}</span>
+              <span>Last sync: {lastSync ? lastSync.toLocaleTimeString() : '--:--:--'}</span>
             </div>
           </div>
         </div>
