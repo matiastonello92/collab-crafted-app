@@ -8,6 +8,8 @@ import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 
 export function useEffectivePermissions() {
   const { context, setPermissions, setPermissionsLoading } = useHydratedStore()
+  const hasHydrated = useAppStore(state => state.hasHydrated) // Use selector instead of getState()
+  const storeContext = useAppStore(state => state.context) // Use selector
   const globalPerms = useRef<string[]>([])
 
   // load global permissions once
@@ -32,8 +34,8 @@ export function useEffectivePermissions() {
 
         const merged = normalizeSet([...perms, ...(claimStar ? ['*'] : [])])
         globalPerms.current = merged
-        const store = useAppStore.getState()
-        const ctx = store.hasHydrated ? store.context : { location_id: null }
+        // Use captured values from selectors instead of getState()
+        const ctx = hasHydrated ? storeContext : { location_id: null }
         if (!ctx.location_id) {
           setPermissions(merged)
         }
@@ -45,7 +47,7 @@ export function useEffectivePermissions() {
     return () => {
       mounted = false
     }
-  }, [setPermissions, setPermissionsLoading])
+  }, [setPermissions, setPermissionsLoading, hasHydrated, storeContext])
 
   // load location scoped permissions when location changes
   useEffect(() => {

@@ -15,6 +15,7 @@ import { useAppStore } from './unified'
 export function useHydratedStore() {
   const [isHydrated, setIsHydrated] = useState(false)
   const store = useAppStore()
+  const storeHasHydrated = useAppStore(state => state.hasHydrated) // Use selector
   
   useEffect(() => {
     const unsubscribe = useAppStore.subscribe(
@@ -24,13 +25,13 @@ export function useHydratedStore() {
       }
     )
     
-    // Check initial state
-    if (useAppStore.getState().hasHydrated) {
+    // Use selector value instead of getState()
+    if (storeHasHydrated) {
       setIsHydrated(true)
     }
     
     return unsubscribe
-  }, [])
+  }, [storeHasHydrated])
 
   // Return fallback values during SSR/hydration
   if (!isHydrated) {
@@ -73,6 +74,7 @@ export function useHydratedStore() {
 export function useHydratedContext() {
   const [isHydrated, setIsHydrated] = useState(false)
   const context = useAppStore((state) => state.context)
+  const storeHasHydrated = useAppStore(state => state.hasHydrated) // Use selector
   
   useEffect(() => {
     const unsubscribe = useAppStore.subscribe(
@@ -82,12 +84,13 @@ export function useHydratedContext() {
       }
     )
     
-    if (useAppStore.getState().hasHydrated) {
+    // Use selector value instead of getState()
+    if (storeHasHydrated) {
       setIsHydrated(true)
     }
     
     return unsubscribe
-  }, [])
+  }, [storeHasHydrated])
 
   if (!isHydrated) {
     return {
