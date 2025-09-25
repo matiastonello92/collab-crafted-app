@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Flag, Plus, Settings, MapPin, Globe } from 'lucide-react'
-import { useAppStore } from '@/lib/store'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { useRequireSession } from '@/lib/useRequireSession'
 
