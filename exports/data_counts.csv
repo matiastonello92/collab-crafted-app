@@ -1,0 +1,11 @@
+table_name,record_count,schema
+organizations,2,public
+locations,4,public
+memberships,3,public
+profiles,3,public
+permissions,32,public
+permission_preset_items,44,public
+users,3,auth
+audit_log_entries,322,auth
+sessions,2,auth
+refresh_tokens,12,auth
