@@ -10,7 +10,11 @@ export default [
   reactPlugin.configs.flat.recommended,
   {
     plugins: { "react-hooks": reactHooks },
-    rules: { ...reactHooks.configs.recommended.rules },
+    rules: { 
+      ...reactHooks.configs.recommended.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
+    },
   },
   jsxA11y.flatConfigs.recommended,
   {
