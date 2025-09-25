@@ -2,7 +2,7 @@
 
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react'
 import { useAdvancedData, useBatchData } from '@/hooks/useAdvancedData'
-import { usePerformanceMonitor } from '@/lib/store/unified'
+import { usePerformanceMonitor } from '@/lib/store'
 import { useIsClient } from '@/lib/hydration/ClientOnly'
 
 interface DataContextType<T = any> {

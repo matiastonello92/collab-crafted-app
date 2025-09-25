@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
-import { useAppStore } from '@/lib/store/unified';
+import { useAppStore } from '@/lib/store';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 

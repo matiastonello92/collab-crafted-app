@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { useAppStore } from '@/lib/store/unified'
+import { useAppStore } from '@/lib/store'
 import { can } from '@/lib/permissions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'

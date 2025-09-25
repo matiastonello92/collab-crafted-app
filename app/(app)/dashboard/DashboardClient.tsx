@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Users, MapPin, Settings, UserPlus, Building2, Shield, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useLocationContext } from '@/lib/store/unified'
+import { useLocationContext } from '@/lib/store'
 import { checkPermission } from '@/lib/permissions/unified'
 
 export default function DashboardClient() {
