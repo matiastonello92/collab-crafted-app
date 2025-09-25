@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { User, Mail, MapPin, Shield, Settings, Building } from 'lucide-react'
 import Link from 'next/link'
+import ClientOnly from '@/components/ClientOnly'
 
 export const runtime = 'nodejs'
 
@@ -222,9 +223,11 @@ export default async function MePage() {
                   </div>
                   <div className="text-right">
                     <Badge variant="secondary">Attivo</Badge>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Dal {new Date(role.assigned_at).toLocaleDateString('it-IT')}
-                    </p>
+                    <ClientOnly fallback={<p className="text-xs text-muted-foreground mt-1">Dal {role.assigned_at}</p>}>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Dal {new Date(role.assigned_at).toLocaleDateString('it-IT')}
+                      </p>
+                    </ClientOnly>
                   </div>
                 </div>
               ))}

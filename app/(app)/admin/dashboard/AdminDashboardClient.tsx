@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useIsClient } from '@/lib/hydration/HydrationToolkit'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,7 @@ export function AdminDashboardClient({ orgId }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+  const isClient = useIsClient()
 
   const fetchData = async () => {
     try {
@@ -157,7 +159,7 @@ export function AdminDashboardClient({ orgId }: Props) {
               </p>
             </div>
           </div>
-          {lastUpdate && (
+          {isClient && lastUpdate && (
             <div className="flex flex-col items-start gap-2 text-sm text-muted-foreground lg:items-end">
               <span>
                 Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago
@@ -260,7 +262,7 @@ export function AdminDashboardClient({ orgId }: Props) {
                       )}
                     </div>
                     <span className="text-xs font-mono text-muted-foreground">
-                      {new Date(event.created_at).toLocaleString()}
+                      {isClient ? new Date(event.created_at).toLocaleString() : '—'}
                     </span>
                   </div>
                 ))

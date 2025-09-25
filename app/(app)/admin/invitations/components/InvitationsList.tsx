@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useIsClient } from '@/lib/hydration/HydrationToolkit'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
@@ -24,10 +25,13 @@ export function InvitationsList() {
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
+  const isClient = useIsClient()
 
   const loadInvitations = async () => {
     try {
       const supabase = createSupabaseBrowserClient()
+      const now = new Date()
       
       // Filter active invitations: pending, not revoked, not accepted, not expired
       const { data, error } = await supabase
@@ -49,7 +53,7 @@ export function InvitationsList() {
         .in('status', ['pending', 'sent'])
         .is('revoked_at', null)
         .is('accepted_at', null)
-        .gt('expires_at', new Date().toISOString())
+        .gt('expires_at', now.toISOString())
         .order('created_at', { ascending: false })
         .limit(20)
 
@@ -84,22 +88,42 @@ export function InvitationsList() {
   }
 
   useEffect(() => {
+    setCurrentTime(new Date())
     loadInvitations()
     
-    // Listen for invitation creation events
-    const handleInvitationCreated = () => loadInvitations()
-    window.addEventListener('invitation:created', handleInvitationCreated)
-    
-    return () => window.removeEventListener('invitation:created', handleInvitationCreated)
+    // Listen for invitation creation events - only on client
+    if (typeof window !== 'undefined') {
+      const handleInvitationCreated = () => loadInvitations()
+      window.addEventListener('invitation:created', handleInvitationCreated)
+      
+      return () => window.removeEventListener('invitation:created', handleInvitationCreated)
+    }
   }, [])
 
   const copyInviteLink = async (token: string) => {
-    try {
+    if (typeof window !== 'undefined') {
       const link = `${window.location.origin}/invite/${token}`
-      await navigator.clipboard.writeText(link)
-      toast.success('Link copiato negli appunti!')
-    } catch (error) {
-      toast.error('Errore nella copia del link')
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(link)
+          toast.success('Link copiato negli appunti!')
+        } catch (error) {
+          toast.error('Errore nella copia del link')
+        }
+      } else {
+        // Fallback for older browsers
+        try {
+          const textArea = document.createElement('textarea')
+          textArea.value = link
+          document.body.appendChild(textArea)
+          textArea.select()
+          document.execCommand('copy')
+          document.body.removeChild(textArea)
+          toast.success('Link copiato negli appunti!')
+        } catch (error) {
+          toast.error('Impossibile copiare il link automaticamente')
+        }
+      }
     }
   }
 
@@ -127,24 +151,24 @@ export function InvitationsList() {
   }
 
   const getStatusColor = (status: string, expiresAt: string) => {
-    const now = new Date()
+    if (!currentTime) return 'secondary'
     const expiryDate = new Date(expiresAt)
     
     if (status === 'accepted') return 'default'
     if (status === 'revoked') return 'destructive'
     if (status === 'sent') return 'default'
-    if (now > expiryDate) return 'secondary'
+    if (currentTime > expiryDate) return 'secondary'
     return 'secondary'
   }
 
   const getStatusLabel = (status: string, expiresAt: string) => {
-    const now = new Date()
+    if (!currentTime) return 'In attesa'
     const expiryDate = new Date(expiresAt)
     
     if (status === 'accepted') return 'Accettato'
     if (status === 'revoked') return 'Revocato'
     if (status === 'sent') return 'Email inviata'
-    if (now > expiryDate) return 'Scaduto'
+    if (currentTime > expiryDate) return 'Scaduto'
     return 'In attesa'
   }
 
@@ -217,18 +241,24 @@ export function InvitationsList() {
                   )}
                   
                   <p className="text-xs text-muted-foreground">
-                    Creato {formatDistanceToNow(new Date(invitation.created_at), {
-                      addSuffix: true,
-                      locale: it
-                    })} • Scade {formatDistanceToNow(new Date(invitation.expires_at), {
-                      addSuffix: true,
-                      locale: it
-                    })}
+                    {isClient ? (
+                      <>
+                        Creato {formatDistanceToNow(new Date(invitation.created_at), {
+                          addSuffix: true,
+                          locale: it
+                        })} • Scade {formatDistanceToNow(new Date(invitation.expires_at), {
+                          addSuffix: true,
+                          locale: it
+                        })}
+                      </>
+                    ) : (
+                      <>Creato: {invitation.created_at} • Scade: {invitation.expires_at}</>
+                    )}
                   </p>
                 </div>
               </div>
 
-              {(invitation.status === 'pending' || invitation.status === 'sent') && new Date() < new Date(invitation.expires_at) && (
+              {(invitation.status === 'pending' || invitation.status === 'sent') && currentTime && currentTime < new Date(invitation.expires_at) && (
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
