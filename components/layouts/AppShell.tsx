@@ -1,12 +1,16 @@
 import { Suspense } from 'react';
 import Header from '@/components/nav/Header';
 import SidebarClient from '@/components/nav/SidebarClient';
+import { ClientOnly } from '@/lib/hydration/ClientOnly';
+import { SmartLoadingSkeleton } from '@/components/performance/SmartLoading';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh bg-background text-foreground">
       <Suspense fallback={<aside className="hidden min-h-dvh w-64 border-r border-border/60 bg-card lg:block" />}> 
-        <SidebarClient />
+        <ClientOnly fallback={<aside className="hidden min-h-dvh w-64 border-r border-border/60 bg-card lg:block" />}>
+          <SidebarClient />
+        </ClientOnly>
       </Suspense>
       <div className="flex min-h-dvh flex-1 flex-col overflow-hidden">
         <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">

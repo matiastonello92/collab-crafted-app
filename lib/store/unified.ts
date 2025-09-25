@@ -20,6 +20,9 @@ interface PerformanceMetrics {
 }
 
 interface AppState {
+  // Hydration safety
+  hasHydrated: boolean
+  
   // Core context
   context: AppContext
   
@@ -29,6 +32,9 @@ interface AppState {
   
   // Performance tracking (from modern store)
   metrics: PerformanceMetrics
+  
+  // Hydration actions
+  setHasHydrated: (hydrated: boolean) => void
   
   // Context actions
   setContext: (context: Partial<AppContext>) => void
@@ -54,6 +60,8 @@ export const useAppStore = create<AppState>()(
   subscribeWithSelector(
     persist(
       immer((set, get) => ({
+        hasHydrated: false,
+        
         context: {
           org_id: null,
           location_id: null,
@@ -70,6 +78,11 @@ export const useAppStore = create<AppState>()(
           cacheHits: 0,
           cacheMisses: 0,
         },
+
+        setHasHydrated: (hydrated) =>
+          set((state) => {
+            state.hasHydrated = hydrated
+          }),
 
         setContext: (newContext) =>
           set((state) => {
@@ -134,6 +147,11 @@ export const useAppStore = create<AppState>()(
             cacheMisses: 0,
           }
         }),
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            state.setHasHydrated(true)
+          }
+        },
       }
     )
   )
@@ -171,11 +189,15 @@ export function usePerformanceMonitor() {
       const result = await operation()
       const time = performance.now() - start
       updateLoadTime(time)
-      console.log(`[Performance] ${name}: ${time.toFixed(2)}ms`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Performance] ${name}: ${time.toFixed(2)}ms`)
+      }
       return result
     } catch (error) {
       const time = performance.now() - start
-      console.warn(`[Performance] ${name} failed: ${time.toFixed(2)}ms`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[Performance] ${name} failed: ${time.toFixed(2)}ms`)
+      }
       throw error
     }
   }

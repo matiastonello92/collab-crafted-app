@@ -1,6 +1,7 @@
 import { getActiveLocationServer } from '@/lib/server/activeLocation';
 import { setActiveLocationAction } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
+import { ClientOnly } from '@/lib/hydration/ClientOnly';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,12 +15,14 @@ export default async function Header() {
     : undefined;
 
   return (
-    <HeaderClient
-      locations={locations}
-      activeLocationId={active?.id ?? null}
-      persisted={persisted}
-      errorMessage={errorMessage}
-      setActiveLocation={setActiveLocationAction}
-    />
+    <ClientOnly fallback={<div className="h-10 w-full" />}>
+      <HeaderClient
+        locations={locations}
+        activeLocationId={active?.id ?? null}
+        persisted={persisted}
+        errorMessage={errorMessage}
+        setActiveLocation={setActiveLocationAction}
+      />
+    </ClientOnly>
   );
 }
