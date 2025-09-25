@@ -74,14 +74,12 @@ export const useAppStore = create<AppState>()(
         setContext: (newContext) =>
           set((state) => {
             Object.assign(state.context, newContext)
-            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         updateLocation: (locationId, locationName) =>
           set((state) => {
             state.context.location_id = locationId
             state.context.location_name = locationName
-            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         clearContext: () =>
@@ -94,7 +92,6 @@ export const useAppStore = create<AppState>()(
             }
             state.permissions = []
             state.permissionsLoading = false
-            state.metrics.lastUpdated = typeof window !== 'undefined' ? Date.now() : 0
           }),
 
         setPermissions: (permissions) =>
