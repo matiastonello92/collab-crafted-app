@@ -164,7 +164,7 @@ export function UsersTable({
       tag: url.roles[0]?.code as PermissionTag,
       tagName: PERMISSION_TAGS[url.roles[0]?.code as PermissionTag]?.name || url.roles[0]?.name,
       orgName: url.organizations[0]?.name,
-      locationName: url.locations?.name || 'All Locations',
+      locationName: url.locations?.[0]?.name || 'All Locations',
       orgId: url.organization_id,
       locationId: url.location_id
     }))
