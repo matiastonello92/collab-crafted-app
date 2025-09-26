@@ -161,9 +161,9 @@ export function UsersTable({
   // Get user's current tags
   const getUserTags = (user: User) => {
     return user.user_roles_locations.map(url => ({
-      tag: url.roles.code as PermissionTag,
-      tagName: PERMISSION_TAGS[url.roles.code as PermissionTag]?.name || url.roles.name,
-      orgName: url.organizations.name,
+      tag: url.roles[0]?.code as PermissionTag,
+      tagName: PERMISSION_TAGS[url.roles[0]?.code as PermissionTag]?.name || url.roles[0]?.name,
+      orgName: url.organizations[0]?.name,
       locationName: url.locations?.name || 'All Locations',
       orgId: url.organization_id,
       locationId: url.location_id
