@@ -49,7 +49,7 @@ interface User {
     location_id: string | null
     roles: { id: string; code: string; name: string }
     organizations: { name: string }
-    locations?: { name: string }
+    locations?: { name: string } | null
   }>
 }
 
