@@ -67,7 +67,7 @@ export default function SidebarClient() {
             .eq('roles.code', 'platform_admin')
             .limit(1)
           
-          setIsPlatformAdmin(platformAdminCheck && platformAdminCheck.length > 0)
+          setIsPlatformAdmin(!!(platformAdminCheck && platformAdminCheck.length > 0))
         }
       } catch (error) {
         console.error('Failed to check admin status:', error)
