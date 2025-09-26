@@ -9,34 +9,30 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Initialize Supabase client on mount
+  // Check Supabase configuration on mount
   useEffect(() => {
-    const initSupabase = () => {
-      try {
-        const client = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
-        setSupabase(client);
-        setMounted(true);
-      } catch (err) {
-        console.error('Failed to initialize Supabase:', err);
-        setError('Errore di configurazione del sistema');
-        setMounted(true);
+    const checkConfig = () => {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!url || !key || url.includes('demo') || key.includes('demo')) {
+        setConfigError('Configurazione Supabase necessaria');
       }
+      
+      setMounted(true);
     };
 
-    initSupabase();
+    checkConfig();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!supabase) {
-      setError('Sistema non disponibile');
+    if (configError) {
+      setError('Configurare prima le credenziali Supabase');
       return;
     }
 
@@ -49,6 +45,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password
@@ -88,7 +89,7 @@ export default function LoginPage() {
     }
   };
 
-  // Show loading while initializing
+  // Show loading during mount
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -99,8 +100,61 @@ export default function LoginPage() {
                 <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Klyra</h2>
-              <p className="text-gray-600">Inizializzazione...</p>
+              <p className="text-gray-600">Caricamento sistema...</p>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show configuration error
+  if (configError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+        <div className="max-w-lg w-full mx-4">
+          <div className="bg-white rounded-lg shadow-xl p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-red-900 mb-2">Configurazione Richiesta</h2>
+              <p className="text-red-700 mb-6">Per utilizzare l'autenticazione, configura le credenziali Supabase nel file .env.local</p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold mb-2">Credenziali richieste:</h3>
+              <div className="text-sm text-gray-700 space-y-2">
+                <div><strong>NEXT_PUBLIC_SUPABASE_URL</strong><br />
+                <span className="text-xs text-gray-500">La URL del tuo progetto Supabase (es: https://abc123.supabase.co)</span></div>
+                
+                <div><strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong><br />
+                <span className="text-xs text-gray-500">La chiave pubblica/anon del progetto</span></div>
+                
+                <div><strong>SUPABASE_SERVICE_ROLE_KEY</strong><br />
+                <span className="text-xs text-gray-500">La chiave service_role (solo server-side)</span></div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold mb-2 text-blue-900">Come ottenere le credenziali:</h3>
+              <ol className="text-sm text-blue-800 space-y-1">
+                <li>1. Vai su <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" className="underline">supabase.com/dashboard</a></li>
+                <li>2. Seleziona il progetto <strong>jwchmdivuwgfjrwvgtia</strong></li>
+                <li>3. Vai su Settings → API</li>
+                <li>4. Copia Project URL e API Keys</li>
+                <li>5. Aggiorna il file <code className="bg-white px-1 rounded">.env.local</code></li>
+              </ol>
+            </div>
+
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Ricarica dopo aver configurato
+            </button>
           </div>
         </div>
       </div>
@@ -118,7 +172,7 @@ export default function LoginPage() {
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Klyra</h2>
-            <p className="text-gray-600">Accedi al tuo account</p>
+            <p className="text-gray-600">Accedi con il tuo account Supabase</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -167,7 +221,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || !supabase}
+              disabled={loading}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? (
@@ -183,7 +237,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Staff Management System
+              Staff Management System • Powered by Supabase
             </p>
           </div>
         </div>
