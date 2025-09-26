@@ -443,9 +443,15 @@ export async function getModulePermissionsMatrix() {
       throw new Error('Failed to fetch module permissions matrix')
     }
     
+    // Transform data to match expected format
+    const transformedData = (rolePermissions || []).map(rp => ({
+      roleCode: rp.roles?.code || '',
+      permissionName: rp.permissions?.name || ''
+    }))
+    
     return {
       success: true,
-      data: rolePermissions || []
+      data: transformedData
     }
     
   } catch (error) {
@@ -455,4 +461,4 @@ export async function getModulePermissionsMatrix() {
       error: error instanceof Error ? error.message : 'Failed to fetch permissions matrix'
     }
   }
-}
+}}
