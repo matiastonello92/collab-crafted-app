@@ -1,16 +1,21 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSupabaseSafe } from '@/utils/supabase/client-safe';
 import { useRouter } from '@/hooks/useRouter';
-import { ClientOnly } from '@/lib/hydration/ClientOnly';
 
-function LoginForm() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { client: supabase, isConfigured } = useSupabaseSafe();
   const { navigateTo } = useRouter();
+
+  // Handle hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,63 +50,92 @@ function LoginForm() {
     }
   };
 
-  if (!isConfigured) {
+  // Show loading state during hydration
+  if (!mounted) {
     return (
-      <main className="mx-auto max-w-sm p-6">
-        <h1 className="text-xl mb-4">Sistema Non Disponibile</h1>
-        <p className="text-muted-foreground">
-          Il sistema di autenticazione non è configurato correttamente.
-        </p>
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-sm w-full space-y-4 p-6 bg-white rounded-lg shadow">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Klyra</h1>
+            <p className="text-gray-600">Caricamento...</p>
+          </div>
+          <div className="animate-pulse space-y-3">
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+          </div>
+        </div>
       </main>
     );
   }
 
-  return (
-    <main className="mx-auto max-w-sm p-6">
-      <h1 className="text-xl mb-4">Accedi</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input 
-          type="email" 
-          required 
-          value={email} 
-          onChange={e=>setEmail(e.target.value)} 
-          placeholder="Email" 
-          className="border p-2 rounded"
-        />
-        <input 
-          type="password" 
-          required 
-          value={password} 
-          onChange={e=>setPassword(e.target.value)} 
-          placeholder="Password" 
-          className="border p-2 rounded"
-        />
-        {err && <p className="text-red-600 text-sm">{err}</p>}
-        <button 
-          type="submit" 
-          disabled={loading || !supabase} 
-          className="bg-black text-white rounded px-3 py-2 disabled:opacity-50"
-        >
-          {loading ? 'Attendere…' : 'Entra'}
-        </button>
-      </form>
-    </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <ClientOnly fallback={
-      <main className="mx-auto max-w-sm p-6">
-        <h1 className="text-xl mb-4">Caricamento...</h1>
-        <div className="animate-pulse">
-          <div className="h-10 bg-gray-200 rounded mb-3"></div>
-          <div className="h-10 bg-gray-200 rounded mb-3"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
+  // Show configuration error
+  if (!isConfigured) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-sm w-full space-y-4 p-6 bg-white rounded-lg shadow">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-2">Sistema Non Disponibile</h1>
+            <p className="text-gray-600">
+              Il sistema di autenticazione non è configurato correttamente.
+            </p>
+          </div>
         </div>
       </main>
-    }>
-      <LoginForm />
-    </ClientOnly>
+    );
+  }
+
+  // Show login form
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-sm w-full space-y-6 p-6 bg-white rounded-lg shadow">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Klyra</h1>
+          <p className="text-gray-600">Accedi al tuo account</p>
+        </div>
+        
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <input 
+              type="email" 
+              required 
+              value={email} 
+              onChange={e=>setEmail(e.target.value)} 
+              placeholder="Email" 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <input 
+              type="password" 
+              required 
+              value={password} 
+              onChange={e=>setPassword(e.target.value)} 
+              placeholder="Password" 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          {err && (
+            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md border border-red-200">
+              {err}
+            </div>
+          )}
+          
+          <button 
+            type="submit" 
+            disabled={loading || !supabase} 
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Attendere…' : 'Entra'}
+          </button>
+        </form>
+        
+        <div className="text-center text-sm text-gray-500">
+          Demo: test@example.com / demo123
+        </div>
+      </div>
+    </main>
   );
 }
