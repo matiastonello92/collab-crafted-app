@@ -445,8 +445,8 @@ export async function getModulePermissionsMatrix() {
     
     // Transform data to match expected format
     const transformedData = (rolePermissions || []).map(rp => ({
-      roleCode: rp.roles?.code || '',
-      permissionName: rp.permissions?.name || ''
+      roleCode: (rp as any).roles?.[0]?.code || '',
+      permissionName: (rp as any).permissions?.[0]?.name || ''
     }))
     
     return {
