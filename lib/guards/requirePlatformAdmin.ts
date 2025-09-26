@@ -81,7 +81,7 @@ export async function isPlatformAdmin(): Promise<boolean> {
       .eq('roles.code', 'platform_admin')
       .limit(1)
 
-    return adminCheck && adminCheck.length > 0
+    return !!(adminCheck && adminCheck.length > 0)
 
   } catch (error) {
     console.error('Platform admin check failed:', error)
