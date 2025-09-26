@@ -39,7 +39,7 @@ import {
   Wrench,
   AlertTriangle,
   CheckSquare,
-  Widget,
+  Grid3x3,
   Webhook
 } from 'lucide-react'
 import { 
@@ -72,7 +72,7 @@ const MODULE_ICONS: Record<ModuleKey, React.ComponentType<any>> = {
   technicians: Wrench,
   incidents: AlertTriangle,
   tasks: CheckSquare,
-  widgets: Widget,
+  widgets: Grid3x3,
   import_export: Upload,
   settings: Settings,
   webhooks: Webhook
