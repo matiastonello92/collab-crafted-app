@@ -40,16 +40,16 @@ import {
 import { PERMISSION_TAGS, PermissionTag } from '@/lib/permissions/modules'
 
 interface User {
-  id: string
-  email: string
-  full_name: string | null
-  created_at: string
+  id: any
+  email: any
+  full_name: any
+  created_at: any
   user_roles_locations: Array<{
-    organization_id: string
-    location_id: string | null
-    roles: { id: string; code: string; name: string }
-    organizations: { name: string }
-    locations?: { name: string } | null
+    organization_id: any
+    location_id: any | null
+    roles: { id: any; code: any; name: any }
+    organizations: { name: any }
+    locations?: { name: any } | null
   }>
 }
 
