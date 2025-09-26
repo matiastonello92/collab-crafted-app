@@ -15,6 +15,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -22,11 +23,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
 
-const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean }[] = [
+const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean; platformAdminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
+  { name: 'Permission Tags', href: '/permission-tags', icon: Shield, permission: null, platformAdminOnly: true },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
 ]
@@ -34,16 +36,47 @@ const navigation: { name: string; href: string; icon: any; permission: string | 
 export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
   const [isAdminClaims, setIsAdminClaims] = useState(false)
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const pathname = usePathname()
   const supabase = useSupabase()
   const { permissions, context, permissionsLoading } = useHydratedStore()
 
   useEffect(() => {
-    supabase.auth.getUser()
-      .then(({ data: { user } }) => {
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        // Check admin claims
         setIsAdminClaims(isAdminFromClaims(user as any))
-      })
-      .catch(() => setIsAdminClaims(false))
+        
+        // Check platform admin status
+        if (user) {
+          // Method 1: Check JWT claims for platform admin
+          if (user.app_metadata?.platform_admin === true) {
+            setIsPlatformAdmin(true)
+            return
+          }
+          
+          // Method 2: Check via database query
+          const { data: platformAdminCheck } = await supabase
+            .from('user_roles_locations')
+            .select(`
+              roles!inner(code)
+            `)
+            .eq('user_id', user.id)
+            .eq('roles.code', 'platform_admin')
+            .limit(1)
+          
+          setIsPlatformAdmin(platformAdminCheck && platformAdminCheck.length > 0)
+        }
+      } catch (error) {
+        console.error('Failed to check admin status:', error)
+        setIsAdminClaims(false)
+        setIsPlatformAdmin(false)
+      }
+    }
+
+    checkAdminStatus()
   }, [supabase])
 
   return (
@@ -97,7 +130,21 @@ export default function SidebarClient() {
           <ul className="space-y-1">
             {navigation.map((item) => {
               const isAdmin = isAdminClaims || can(permissions, '*')
-              const canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+              
+              // Check access permissions
+              let canAccess = false
+              
+              if (item.platformAdminOnly) {
+                // Platform admin only items
+                canAccess = isPlatformAdmin
+              } else if (item.adminOnly) {
+                // Regular admin only items
+                canAccess = isAdmin
+              } else {
+                // Regular permission-based items
+                canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+              }
+              
               const finalHref = item.name === 'Locations' && !isAdmin && canAccess
                 ? '/locations/manage'
                 : item.href
@@ -123,9 +170,17 @@ export default function SidebarClient() {
                       }
                     }}
                   >
-                    <item.icon className="size-4 shrink-0" />
+                    <item.icon className={cn(
+                      "size-4 shrink-0",
+                      item.platformAdminOnly && canAccess && "text-orange-600"
+                    )} />
                     {!collapsed && (
                       <span className="flex-1 truncate">{item.name}</span>
+                    )}
+                    {!collapsed && item.platformAdminOnly && canAccess && (
+                      <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700 border-orange-200">
+                        Platform
+                      </Badge>
                     )}
                     {!collapsed && !canAccess && (
                       <span className="rounded-full border border-border/60 bg-muted/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
