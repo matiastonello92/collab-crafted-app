@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSupabaseSafe } from '@/utils/supabase/client-safe';
-import { useRouter } from '@/hooks/useRouter';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,8 +9,7 @@ export default function LoginPage() {
   const [err, setErr] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { client: supabase, isConfigured } = useSupabaseSafe();
-  const { navigateTo } = useRouter();
+  const router = useRouter();
 
   // Handle hydration
   useEffect(() => {
@@ -20,28 +19,32 @@ export default function LoginPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!supabase || !isConfigured) {
-      setErr('Sistema di autenticazione non disponibile');
-      return;
-    }
-
     setErr(null); 
     setLoading(true);
     
     try {
+      // Create Supabase client
+      const supabase = createSupabaseBrowserClient();
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { 
         setErr(error.message); 
         return; 
       }
       
+      // Try bootstrap
       try { 
-        await fetch('/api/v1/admin/bootstrap', { method: 'POST' }); 
+        await fetch('/api/v1/admin/bootstrap', { 
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          }
+        }); 
       } catch (bootstrapError) {
         console.warn('Bootstrap failed:', bootstrapError);
       }
       
-      navigateTo('/');
+      router.push('/');
     } catch (authError) {
       setErr('Errore durante l\'autenticazione');
       console.error('Auth error:', authError);
@@ -63,22 +66,6 @@ export default function LoginPage() {
             <div className="h-10 bg-gray-200 rounded"></div>
             <div className="h-10 bg-gray-200 rounded"></div>
             <div className="h-10 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // Show configuration error
-  if (!isConfigured) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-sm w-full space-y-4 p-6 bg-white rounded-lg shadow">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-2">Sistema Non Disponibile</h1>
-            <p className="text-gray-600">
-              Il sistema di autenticazione non è configurato correttamente.
-            </p>
           </div>
         </div>
       </main>
@@ -125,7 +112,7 @@ export default function LoginPage() {
           
           <button 
             type="submit" 
-            disabled={loading || !supabase} 
+            disabled={loading} 
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Attendere…' : 'Entra'}
@@ -133,7 +120,9 @@ export default function LoginPage() {
         </form>
         
         <div className="text-center text-sm text-gray-500">
-          Demo: test@example.com / demo123
+          <p>Demo credentials:</p>
+          <p><strong>Email:</strong> test@example.com</p>
+          <p><strong>Password:</strong> demo123</p>
         </div>
       </div>
     </main>
