@@ -175,7 +175,7 @@ export function UsersTable({
     users.flatMap(u => 
       u.user_roles_locations.map(url => ({
         id: url.organization_id,
-        name: url.organizations.name
+        name: url.organizations[0]?.name
       }))
     )
   ))
