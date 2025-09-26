@@ -47,7 +47,7 @@ interface User {
   user_roles_locations: Array<{
     organization_id: any
     location_id: any
-    roles: { id: any; code: any; name: any }[]
+    roles: { id: any; code: any; name: any }
     organizations: { name: any }[]
     locations?: { name: any }[]
   }>
