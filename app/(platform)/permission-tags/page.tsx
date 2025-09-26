@@ -68,7 +68,7 @@ function ModulesMatrixSkeleton() {
 async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchParams }) {
   const result = await getUsersWithTags(searchParams)
   
-  if (!result.success) {
+  if (!result.success || !result.data) {
     return (
       <Card className="border-destructive">
         <CardHeader>
@@ -77,7 +77,7 @@ async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchPara
             Error Loading Users
           </CardTitle>
           <CardDescription>
-            {result.error}
+            {result.error || 'Unknown error occurred'}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -100,7 +100,7 @@ async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchPara
 async function ModulesMatrixWrapper() {
   const result = await getModulePermissionsMatrix()
   
-  if (!result.success) {
+  if (!result.success || !result.data) {
     return (
       <Card className="border-destructive">
         <CardHeader>
@@ -109,7 +109,7 @@ async function ModulesMatrixWrapper() {
             Error Loading Permissions Matrix
           </CardTitle>
           <CardDescription>
-            {result.error}
+            {result.error || 'Unknown error occurred'}
           </CardDescription>
         </CardHeader>
       </Card>
