@@ -461,4 +461,4 @@ export async function getModulePermissionsMatrix() {
       error: error instanceof Error ? error.message : 'Failed to fetch permissions matrix'
     }
   }
-}}
+}
