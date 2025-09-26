@@ -18,7 +18,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { toast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { 
   Settings, 
   ChevronDown, 
@@ -159,16 +159,9 @@ export function ModulesMatrix({ initialPermissions }: ModulesMatrixProps) {
           ])
         }
 
-        toast({
-          title: 'Success',
-          description: result.message
-        })
+        toast.success(result.message)
       } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive'
-        })
+        toast.error(result.error)
       }
     })
   }

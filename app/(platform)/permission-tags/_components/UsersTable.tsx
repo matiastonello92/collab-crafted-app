@@ -21,7 +21,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { toast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { 
   Search, 
   Filter, 
@@ -107,16 +107,9 @@ export function UsersTable({
       const result = await assignTagToUser(formData)
       
       if (result.success) {
-        toast({
-          title: 'Success',
-          description: result.message
-        })
+        toast.success(result.message)
       } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive'
-        })
+        toast.error(result.error)
       }
     })
   }
@@ -133,16 +126,9 @@ export function UsersTable({
       const result = await removeTagFromUser(formData)
       
       if (result.success) {
-        toast({
-          title: 'Success',
-          description: result.message
-        })
+        toast.success(result.message)
       } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive'
-        })
+        toast.error(result.error)
       }
     })
   }
@@ -150,11 +136,7 @@ export function UsersTable({
   // Handle bulk assign
   const handleBulkAssign = async (tag: PermissionTag, orgId: string, locationId?: string) => {
     if (selectedUsers.size === 0) {
-      toast({
-        title: 'Warning',
-        description: 'Please select users first',
-        variant: 'destructive'
-      })
+      toast.warning('Please select users first')
       return
     }
 
@@ -168,17 +150,10 @@ export function UsersTable({
       const result = await bulkAssignTagToUsers(formData)
       
       if (result.success) {
-        toast({
-          title: 'Success',
-          description: result.message
-        })
+        toast.success(result.message)
         setSelectedUsers(new Set())
       } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive'
-        })
+        toast.error(result.error)
       }
     })
   }
