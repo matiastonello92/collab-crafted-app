@@ -23,15 +23,11 @@ export async function requirePlatformAdmin() {
       return { user, isPlatformAdmin: true }
     }
 
-    // Method 2: Check via database (fallback)
+    // Method 2: Check via database (platform_admins table)
     const { data: adminCheck, error: adminError } = await supabase
-      .from('user_roles_locations')
-      .select(`
-        *,
-        roles!inner(code)
-      `)
+      .from('platform_admins')
+      .select('user_id')
       .eq('user_id', user.id)
-      .eq('roles.code', 'platform_admin')
       .limit(1)
 
     if (adminError) {
@@ -70,15 +66,11 @@ export async function isPlatformAdmin(): Promise<boolean> {
       return true
     }
 
-    // Check database
+    // Check database (platform_admins table)
     const { data: adminCheck } = await supabase
-      .from('user_roles_locations')
-      .select(`
-        *,
-        roles!inner(code)
-      `)
+      .from('platform_admins')
+      .select('user_id')
       .eq('user_id', user.id)
-      .eq('roles.code', 'platform_admin')
       .limit(1)
 
     return !!(adminCheck && adminCheck.length > 0)

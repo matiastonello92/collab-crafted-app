@@ -57,14 +57,11 @@ export default function SidebarClient() {
             return
           }
           
-          // Method 2: Check via database query
+          // Method 2: Check via database query (platform_admins table)
           const { data: platformAdminCheck } = await supabase
-            .from('user_roles_locations')
-            .select(`
-              roles!inner(code)
-            `)
+            .from('platform_admins')
+            .select('user_id')
             .eq('user_id', user.id)
-            .eq('roles.code', 'platform_admin')
             .limit(1)
           
           setIsPlatformAdmin(!!(platformAdminCheck && platformAdminCheck.length > 0))
