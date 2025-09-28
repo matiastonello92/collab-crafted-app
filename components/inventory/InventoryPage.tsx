@@ -60,15 +60,24 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
+  // Load user profile once on mount
   useEffect(() => {
     loadUserProfile();
-    loadCurrentInventory();
-    
-    // Update presence when component mounts
+  }, []);
+
+  // Load current inventory when org/location are available
+  useEffect(() => {
+    if (orgId && locationId && !loading) {
+      loadCurrentInventory();
+    }
+  }, [orgId, locationId, category]);
+
+  // Update presence when header is available
+  useEffect(() => {
     if (header?.id) {
       updatePresence(header.id);
     }
-  }, [category, header?.id]);
+  }, [header?.id, updatePresence]);
 
   const loadUserProfile = async () => {
     try {

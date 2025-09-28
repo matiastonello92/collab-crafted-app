@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Home,
   Users,
@@ -15,11 +16,13 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Shield,
   ChefHat,
   Wine,
   Sparkles,
   History,
+  Package,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -27,12 +30,19 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
 
-const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean; platformAdminOnly?: boolean }[] = [
+const navigation: any[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
-  { name: 'Inventario Cucina', href: '/inventory/kitchen', icon: ChefHat, permission: null },
-  { name: 'Inventario Bar', href: '/inventory/bar', icon: Wine, permission: null },
-  { name: 'Inventario Pulizie', href: '/inventory/cleaning', icon: Sparkles, permission: null },
-  { name: 'Storico Inventari', href: '/inventory/history', icon: History, permission: null },
+  { 
+    name: 'Inventari', 
+    icon: Package, 
+    permission: null,
+    children: [
+      { name: 'Cucina', href: '/inventory/kitchen', icon: ChefHat },
+      { name: 'Bar', href: '/inventory/bar', icon: Wine },
+      { name: 'Pulizie', href: '/inventory/cleaning', icon: Sparkles },
+      { name: 'Storico', href: '/inventory/history', icon: History }
+    ]
+  },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
@@ -43,11 +53,26 @@ const navigation: { name: string; href: string; icon: any; permission: string | 
 
 export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
+  const [openGroups, setOpenGroups] = useState<string[]>(['Inventari'])
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const pathname = usePathname()
   const supabase = useSupabase()
   const { permissions, context, permissionsLoading } = useHydratedStore()
+
+  const toggleGroup = (groupName: string) => {
+    setOpenGroups(prev => 
+      prev.includes(groupName) 
+        ? prev.filter(name => name !== groupName)
+        : [...prev, groupName]
+    );
+  };
+
+  const isGroupOpen = (groupName: string) => openGroups.includes(groupName);
+
+  const isActiveInGroup = (children: any[]) => {
+    return children?.some(child => pathname === child.href) || false;
+  };
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -149,7 +174,62 @@ export default function SidebarClient() {
                 // Regular permission-based items
                 canAccess = isAdmin || !item.permission || can(permissions, item.permission)
               }
+
+              // Handle group items with children
+              if (item.children) {
+                const isOpen = isGroupOpen(item.name);
+                const hasActiveChild = isActiveInGroup(item.children);
+
+                return (
+                  <li key={item.name}>
+                    <Collapsible open={isOpen} onOpenChange={() => toggleGroup(item.name)}>
+                      <CollapsibleTrigger className={cn(
+                        'group flex w-full items-center gap-3 rounded-xl px-3 py-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                        canAccess
+                          ? 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground'
+                          : 'cursor-not-allowed text-muted-foreground/50',
+                        hasActiveChild && 'bg-accent text-accent-foreground shadow-sm'
+                      )}>
+                        <item.icon className="size-4 shrink-0" />
+                        {!collapsed && (
+                          <>
+                            <span className="flex-1 truncate text-left">{item.name}</span>
+                            <ChevronDown className={cn(
+                              "size-4 transition-transform",
+                              isOpen ? "rotate-180" : "rotate-0"
+                            )} />
+                          </>
+                        )}
+                      </CollapsibleTrigger>
+                      
+                      {!collapsed && (
+                        <CollapsibleContent className="space-y-1 mt-1">
+                          {item.children.map((child: any) => {
+                            const isChildActive = pathname === child.href;
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className={cn(
+                                  'group flex w-full items-center gap-3 rounded-xl px-3 py-2 pl-10 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                                  isChildActive
+                                    ? 'bg-accent text-accent-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground'
+                                )}
+                              >
+                                <child.icon className="size-4 shrink-0" />
+                                <span className="flex-1 truncate">{child.name}</span>
+                              </Link>
+                            );
+                          })}
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
+                  </li>
+                );
+              }
               
+              // Handle regular nav items
               const finalHref = item.name === 'Locations' && !isAdmin && canAccess
                 ? '/locations/manage'
                 : item.href
