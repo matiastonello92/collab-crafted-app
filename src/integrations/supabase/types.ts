@@ -1861,6 +1861,10 @@ export type Database = {
         Args: { p_name: string }
         Returns: string
       }
+      user_can_manage_inventory: {
+        Args: { p_location_id: string; p_org_id: string }
+        Returns: boolean
+      }
       user_has_permission: {
         Args: { p_permission: string; p_user: string }
         Returns: boolean
