@@ -112,6 +112,182 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_catalog_items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          default_unit_price: number
+          id: string
+          is_active: boolean
+          location_id: string
+          name: string
+          org_id: string
+          photo_url: string | null
+          supplier_id: string | null
+          uom: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string
+          default_unit_price?: number
+          id?: string
+          is_active?: boolean
+          location_id: string
+          name: string
+          org_id: string
+          photo_url?: string | null
+          supplier_id?: string | null
+          uom: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          default_unit_price?: number
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          name?: string
+          org_id?: string
+          photo_url?: string | null
+          supplier_id?: string | null
+          uom?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inventory_headers: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          started_at: string
+          started_by: string
+          status: string
+          total_value: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          started_at?: string
+          started_by: string
+          status?: string
+          total_value?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          started_at?: string
+          started_by?: string
+          status?: string
+          total_value?: number
+        }
+        Relationships: []
+      }
+      inventory_lines: {
+        Row: {
+          catalog_item_id: string
+          header_id: string
+          id: string
+          line_value: number
+          location_id: string
+          name_snapshot: string
+          org_id: string
+          qty: number
+          unit_price_snapshot: number
+          uom_snapshot: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          catalog_item_id: string
+          header_id: string
+          id?: string
+          line_value?: number
+          location_id: string
+          name_snapshot: string
+          org_id: string
+          qty?: number
+          unit_price_snapshot: number
+          uom_snapshot: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          catalog_item_id?: string
+          header_id?: string
+          id?: string
+          line_value?: number
+          location_id?: string
+          name_snapshot?: string
+          org_id?: string
+          qty?: number
+          unit_price_snapshot?: number
+          uom_snapshot?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_lines_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_lines_header_id_fkey"
+            columns: ["header_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_headers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_presence: {
+        Row: {
+          header_id: string
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          header_id: string
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          header_id?: string
+          last_seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_presence_header_id_fkey"
+            columns: ["header_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_headers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitation_job_tags: {
         Row: {
           created_at: string
