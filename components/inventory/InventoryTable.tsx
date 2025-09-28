@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface InventoryLine {
   id: string;
@@ -28,7 +28,6 @@ interface InventoryTableProps {
 export function InventoryTable({ headerId, canManage, canEdit }: InventoryTableProps) {
   const [lines, setLines] = useState<InventoryLine[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadLines();
@@ -64,11 +63,7 @@ export function InventoryTable({ headerId, canManage, canEdit }: InventoryTableP
       }
     } catch (error) {
       console.error('Error updating quantity:', error);
-      toast({
-        title: "Errore",
-        description: "Errore durante l'aggiornamento",
-        variant: "destructive",
-      });
+      toast.error("Errore durante l'aggiornamento");
     }
   };
 

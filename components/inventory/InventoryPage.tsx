@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,7 +56,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
   const [userRole, setUserRole] = useState<'base' | 'manager' | 'admin'>('base');
   const [orgId, setOrgId] = useState<string>('');
   const [locationId, setLocationId] = useState<string>('');
-  const { toast } = { toast };
+  const supabase = useSupabase();
 
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
@@ -144,25 +144,14 @@ export function InventoryPage({ category }: InventoryPageProps) {
       if (response.ok) {
         const data = await response.json();
         setHeader(data.header);
-        toast({
-          title: "Successo",
-          description: "Nuovo inventario creato",
-        });
+        toast.success("Nuovo inventario creato");
       } else {
         const error = await response.json();
-        toast({
-          title: "Errore",
-          description: error.error || "Errore durante la creazione",
-          variant: "destructive",
-        });
+        toast.error(error.error || "Errore durante la creazione");
       }
     } catch (error) {
       console.error('Error creating inventory:', error);
-      toast({
-        title: "Errore",
-        description: "Errore durante la creazione dell'inventario",
-        variant: "destructive",
-      });
+      toast.error("Errore durante la creazione dell'inventario");
     } finally {
       setSaving(false);
     }
@@ -182,18 +171,11 @@ export function InventoryPage({ category }: InventoryPageProps) {
       if (response.ok) {
         const data = await response.json();
         setHeader(data.header);
-        toast({
-          title: "Successo",
-          description: `Inventario ${statusLabels[newStatus].toLowerCase()}`,
-        });
+        toast.success(`Inventario ${statusLabels[newStatus].toLowerCase()}`);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      toast({
-        title: "Errore",
-        description: "Errore durante l'aggiornamento",
-        variant: "destructive",
-      });
+      toast.error("Errore durante l'aggiornamento");
     } finally {
       setSaving(false);
     }

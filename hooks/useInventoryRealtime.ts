@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabase } from '@/hooks/useSupabase';
 
 interface PresenceUser {
   user_id: string;
@@ -10,6 +10,7 @@ interface PresenceUser {
 
 export function useInventoryRealtime(headerId?: string) {
   const [presenceUsers, setPresenceUsers] = useState<PresenceUser[]>([]);
+  const supabase = useSupabase();
 
   const updatePresence = async (headerIdToUpdate: string) => {
     if (!headerIdToUpdate) return;

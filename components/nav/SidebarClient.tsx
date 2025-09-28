@@ -16,6 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  ChefHat,
+  Wine,
+  Sparkles,
+  History,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -25,6 +29,10 @@ import { isAdminFromClaims } from '@/lib/admin/claims'
 
 const navigation: { name: string; href: string; icon: any; permission: string | null; adminOnly?: boolean; platformAdminOnly?: boolean }[] = [
   { name: 'Dashboard', href: '/', icon: Home, permission: null },
+  { name: 'Inventario Cucina', href: '/inventory/kitchen', icon: ChefHat, permission: null },
+  { name: 'Inventario Bar', href: '/inventory/bar', icon: Wine, permission: null },
+  { name: 'Inventario Pulizie', href: '/inventory/cleaning', icon: Sparkles, permission: null },
+  { name: 'Storico Inventari', href: '/inventory/history', icon: History, permission: null },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
