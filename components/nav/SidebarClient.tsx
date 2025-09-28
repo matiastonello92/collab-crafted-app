@@ -53,7 +53,7 @@ const navigation: any[] = [
 
 export default function SidebarClient() {
   const [collapsed, setCollapsed] = useState(false)
-  const [openGroups, setOpenGroups] = useState<string[]>(['Inventari'])
+  const [openGroups, setOpenGroups] = useState<string[]>([])
   const [isAdminClaims, setIsAdminClaims] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const pathname = usePathname()

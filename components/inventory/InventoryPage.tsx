@@ -67,7 +67,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
   // Load current inventory when org/location are available
   useEffect(() => {
-    if (orgId && locationId && !loading) {
+    if (orgId && locationId) {
       loadCurrentInventory();
     }
   }, [orgId, locationId, category]);
