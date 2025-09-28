@@ -46,7 +46,7 @@ async function getRoleIdByCode(supabase: any, roleCode: string): Promise<string 
   const { data: role } = await supabase
     .from('roles')
     .select('id')
-    .eq('code', roleCode)
+    .eq('name', roleCode)  // Changed from 'code' to 'name'
     .single()
   
   return role?.id || null
@@ -95,7 +95,7 @@ export async function assignTagToUser(formData: FormData) {
       .upsert({
         user_id: userId,
         role_id: roleId,
-        organization_id: orgId,
+        org_id: orgId,  // Changed from organization_id to org_id
         location_id: locationId || null
       })
     
@@ -146,7 +146,7 @@ export async function removeTagFromUser(formData: FormData) {
       .delete()
       .eq('user_id', userId)
       .eq('role_id', roleId)
-      .eq('organization_id', orgId)
+      .eq('org_id', orgId)  // Changed from organization_id to org_id
     
     if (locationId) {
       query = query.eq('location_id', locationId)
@@ -201,7 +201,7 @@ export async function bulkAssignTagToUsers(formData: FormData) {
     const assignments = userIds.map(userId => ({
       user_id: userId,
       role_id: roleId,
-      organization_id: orgId,
+      org_id: orgId,  // Changed from organization_id to org_id
       location_id: locationId || null
     }))
     
@@ -350,18 +350,17 @@ export async function getUsersWithTags(searchParams: URLSearchParams) {
     const supabase = await createSupabaseServerClient()
     const offset = (filters.page - 1) * filters.pageSize
     
-    // Build query for users with their roles/tags
+    // Build query for users with their roles/tags from profiles table
     let query = supabase
-      .from('users')
+      .from('profiles')
       .select(`
         id,
-        email,
         full_name,
         created_at,
-        user_roles_locations!inner(
-          organization_id,
+        user_roles_locations(
+          org_id,
           location_id,
-          roles(id, code, name),
+          roles(id, name, display_name),
           organizations(name),
           locations(name)
         )
@@ -369,9 +368,10 @@ export async function getUsersWithTags(searchParams: URLSearchParams) {
       .range(offset, offset + filters.pageSize - 1)
       .order('created_at', { ascending: false })
     
-    // Apply filters
+    // For platform admin, get all users across all orgs
+    // Apply filters only if specified
     if (filters.orgId) {
-      query = query.eq('user_roles_locations.organization_id', filters.orgId)
+      query = query.eq('user_roles_locations.org_id', filters.orgId)
     }
     
     if (filters.locationId) {
@@ -379,24 +379,34 @@ export async function getUsersWithTags(searchParams: URLSearchParams) {
     }
     
     if (filters.q) {
-      query = query.or(`email.ilike.%${filters.q}%,full_name.ilike.%${filters.q}%`)
+      query = query.ilike('full_name', `%${filters.q}%`)
     }
     
-    const { data: users, error } = await query
+    const { data: profiles, error } = await query
     
     if (error) {
       console.error('Failed to fetch users:', error)
       throw new Error('Failed to fetch users with tags')
     }
     
+    // Get email from auth.users for each profile (platform admin can see all)
+    const userIds = profiles?.map(p => p.id) || []
+    let usersWithEmails: any[] = []
+    
+    if (userIds.length > 0) {
+      const { data: authUsers } = await supabase.auth.admin.listUsers()
+      const emailMap = new Map(authUsers.users.map(u => [u.id, u.email]))
+      
+      usersWithEmails = profiles?.map(profile => ({
+        ...profile,
+        email: emailMap.get(profile.id) || 'No email'
+      })) || []
+    }
+    
     // Get total count for pagination
     let countQuery = supabase
-      .from('users')
+      .from('profiles')
       .select('id', { count: 'exact', head: true })
-    
-    if (filters.orgId) {
-      countQuery = countQuery.eq('user_roles_locations.organization_id', filters.orgId)
-    }
     
     const { count, error: countError } = await countQuery
     
@@ -407,7 +417,7 @@ export async function getUsersWithTags(searchParams: URLSearchParams) {
     return {
       success: true,
       data: {
-        users: users || [],
+        users: usersWithEmails,
         totalCount: count || 0,
         page: filters.page,
         pageSize: filters.pageSize,
@@ -434,8 +444,8 @@ export async function getModulePermissionsMatrix() {
     const { data: rolePermissions, error } = await supabase
       .from('role_permissions')
       .select(`
-        roles(code),
-        permissions(name)
+        roles(name, display_name),
+        permissions(name, display_name)
       `)
     
     if (error) {
@@ -445,8 +455,10 @@ export async function getModulePermissionsMatrix() {
     
     // Transform data to match expected format
     const transformedData = (rolePermissions || []).map(rp => ({
-      roleCode: (rp as any).roles?.[0]?.code || '',
-      permissionName: (rp as any).permissions?.[0]?.name || ''
+      roleCode: (rp as any).roles?.name || '',
+      roleName: (rp as any).roles?.display_name || '',
+      permissionName: (rp as any).permissions?.name || '',
+      permissionDisplayName: (rp as any).permissions?.display_name || ''
     }))
     
     return {
