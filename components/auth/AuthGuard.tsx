@@ -20,28 +20,37 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   useEffect(() => {
     let mounted = true;
+    console.log('🔍 AuthGuard: Initializing auth state listener');
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔍 AuthGuard: Auth state change:', { event, hasSession: !!session, userEmail: session?.user?.email });
       if (mounted) {
         setSession(session);
         setLoading(false);
         
         // Redirect to login if no session
         if (!session) {
+          console.log('❌ AuthGuard: No session, redirecting to login');
           replaceTo('/login');
+        } else {
+          console.log('✅ AuthGuard: Session found, user authenticated');
         }
       }
     });
 
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('🔍 AuthGuard: Initial session check:', { hasSession: !!session, userEmail: session?.user?.email, error });
       if (mounted) {
         setSession(session);
         setLoading(false);
         
         if (!session) {
+          console.log('❌ AuthGuard: No initial session, redirecting to login');
           replaceTo('/login');
+        } else {
+          console.log('✅ AuthGuard: Initial session found');
         }
       }
     });

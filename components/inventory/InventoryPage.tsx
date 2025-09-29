@@ -9,6 +9,7 @@ import { Loader2, Users, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import { InventoryTable } from './InventoryTable';
 import { CreateInventoryModal } from './CreateInventoryModal';
 import { TemplateWizard } from './TemplateWizard';
+import { AuthDebug } from '@/components/debug/AuthDebug';
 import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
@@ -84,34 +85,50 @@ export function InventoryPage({ category }: InventoryPageProps) {
   }, [orgId, locationId, category]);
 
   const loadUserProfile = async () => {
+    console.log('🔍 loadUserProfile: Starting user profile load');
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('🔍 Auth getUser result:', { user: user?.email, error: userError });
+      
+      if (!user) {
+        console.error('❌ No authenticated user found');
+        return;
+      }
 
-      const { data: profile } = await supabase
+      console.log('✅ User authenticated:', user.email);
+
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('org_id, default_location_id')
         .eq('id', user.id)
         .single();
 
+      console.log('🔍 Profile query result:', { profile, error: profileError });
+
       if (profile) {
+        console.log('✅ Profile found:', profile);
         setOrgId(profile.org_id);
         setLocationId(profile.default_location_id || '');
         
-        const { data: membership } = await supabase
+        const { data: membership, error: membershipError } = await supabase
           .from('memberships')
           .select('role')
           .eq('user_id', user.id)
           .eq('org_id', profile.org_id)
           .single();
 
+        console.log('🔍 Membership query result:', { membership, error: membershipError });
+
         if (membership) {
+          console.log('✅ Membership found:', membership);
           setUserRole(membership.role === 'admin' ? 'admin' : 
                      membership.role === 'manager' ? 'manager' : 'base');
         }
+      } else {
+        console.error('❌ No profile found for user or error:', profileError);
       }
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error('❌ Error loading user profile:', error);
     }
   };
 
@@ -204,6 +221,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
   if (!header) {
     return (
       <div className="container mx-auto py-6 space-y-6">
+        <AuthDebug />
         {!hasTemplates && canCreateInventory && (
           <Card className="border-orange-200 bg-orange-50">
             <CardHeader>
@@ -267,6 +285,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
+      <AuthDebug />
       {/* Header */}
       <Card>
         <CardHeader>
