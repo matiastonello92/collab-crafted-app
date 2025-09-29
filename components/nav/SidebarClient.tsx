@@ -40,7 +40,8 @@ const navigation: any[] = [
       { name: 'Cucina', href: '/inventory/kitchen', icon: ChefHat },
       { name: 'Bar', href: '/inventory/bar', icon: Wine },
       { name: 'Pulizie', href: '/inventory/cleaning', icon: Sparkles },
-      { name: 'Storico', href: '/inventory/history', icon: History }
+      { name: 'Storico', href: '/inventory/history', icon: History },
+      { name: 'Gestione Template', href: '/admin/templates', icon: Package }
     ]
   },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const createCatalogItemSchema = z.object({
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: items, error } = await supabase
       .from('inventory_catalog_items')
       .select('*')
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createCatalogItemSchema.parse(body);
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     // Get user's org_id from session or context
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validated = updateCatalogItemSchema.parse(body);
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: item, error } = await supabase
       .from('inventory_catalog_items')
       .update(validated)
@@ -141,7 +141,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Item ID is required' }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { error } = await supabase
       .from('inventory_catalog_items')
       .update({ is_active: false })

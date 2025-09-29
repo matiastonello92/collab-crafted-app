@@ -70,6 +70,12 @@ export function InventoryPage({ category }: InventoryPageProps) {
   }, []);
 
   useEffect(() => {
+    if (header?.id) {
+      updatePresence(header.id);
+    }
+  }, [header?.id, updatePresence]);
+
+  useEffect(() => {
     if (orgId && locationId) {
       loadCurrentInventory();
       checkForTemplates();
