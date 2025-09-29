@@ -51,9 +51,29 @@ export async function PUT(request: NextRequest) {
     const validated = updateLineSchema.parse(body);
 
     const supabase = await createSupabaseServerClient();
+    
+    // Get current line to get unit_price_snapshot
+    const { data: currentLine, error: fetchError } = await supabase
+      .from('inventory_lines')
+      .select('header_id, unit_price_snapshot')
+      .eq('id', lineId)
+      .single();
+
+    if (fetchError || !currentLine) {
+      console.error('Error fetching current line:', fetchError);
+      return NextResponse.json({ error: 'Line not found' }, { status: 404 });
+    }
+
+    // Calculate line_value manually
+    const unitPrice = validated.unit_price_snapshot ?? currentLine.unit_price_snapshot;
+    const lineValue = validated.qty * unitPrice;
+
     const { data: line, error } = await supabase
       .from('inventory_lines')
-      .update(validated)
+      .update({
+        ...validated,
+        line_value: lineValue,
+      })
       .eq('id', lineId)
       .select()
       .single();
@@ -61,6 +81,19 @@ export async function PUT(request: NextRequest) {
     if (error) {
       console.error('Error updating inventory line:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Recalculate header total_value
+    const { error: totalError } = await supabase
+      .from('inventory_headers')
+      .update({
+        total_value: supabase.rpc('calculate_header_total', { p_header_id: currentLine.header_id })
+      })
+      .eq('id', currentLine.header_id);
+
+    if (totalError) {
+      console.error('Error updating header total:', totalError);
+      // Non blocchiamo la risposta per questo errore
     }
 
     return NextResponse.json({ line });
