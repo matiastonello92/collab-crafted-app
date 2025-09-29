@@ -13,6 +13,7 @@ import { AuthDebug } from '@/components/debug/AuthDebug';
 import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
+import { useHydratedStore } from '@/lib/store/useHydratedStore';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -58,18 +59,16 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userRole, setUserRole] = useState<'base' | 'manager' | 'admin'>('base');
-  const [orgId, setOrgId] = useState<string>('');
-  const [locationId, setLocationId] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
   const [hasTemplates, setHasTemplates] = useState(false);
 
   const supabase = useSupabase();
+  const { context } = useHydratedStore();
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
-
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
+  
+  const orgId = context.org_id || '';
+  const locationId = context.location_id || '';
 
   useEffect(() => {
     if (header?.id) {
@@ -79,7 +78,8 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
 
   useEffect(() => {
     if (orgId && locationId) {
-      console.log('Loading inventory for:', { orgId, locationId, category, inventoryId });
+      console.log('📍 Location context updated, loading inventory:', { orgId, locationId, category, inventoryId });
+      checkUserPermissions();
       if (inventoryId) {
         loadSpecificInventory(inventoryId);
       } else {
@@ -89,51 +89,24 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
   }, [orgId, locationId, category, inventoryId]);
 
-  const loadUserProfile = async () => {
-    console.log('🔍 loadUserProfile: Starting user profile load');
+  const checkUserPermissions = async () => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      console.log('🔍 Auth getUser result:', { user: user?.email, error: userError });
-      
-      if (!user) {
-        console.error('❌ No authenticated user found');
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !orgId) return;
 
-      console.log('✅ User authenticated:', user.email);
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('org_id, default_location_id')
-        .eq('id', user.id)
+      const { data: membership } = await supabase
+        .from('memberships')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('org_id', orgId)
         .single();
 
-      console.log('🔍 Profile query result:', { profile, error: profileError });
-
-      if (profile) {
-        console.log('✅ Profile found:', profile);
-        setOrgId(profile.org_id);
-        setLocationId(profile.default_location_id || '');
-        
-        const { data: membership, error: membershipError } = await supabase
-          .from('memberships')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('org_id', profile.org_id)
-          .single();
-
-        console.log('🔍 Membership query result:', { membership, error: membershipError });
-
-        if (membership) {
-          console.log('✅ Membership found:', membership);
-          setUserRole(membership.role === 'admin' ? 'admin' : 
-                     membership.role === 'manager' ? 'manager' : 'base');
-        }
-      } else {
-        console.error('❌ No profile found for user or error:', profileError);
+      if (membership) {
+        setUserRole(membership.role === 'admin' ? 'admin' : 
+                   membership.role === 'manager' ? 'manager' : 'base');
       }
     } catch (error) {
-      console.error('❌ Error loading user profile:', error);
+      console.error('Error checking permissions:', error);
     }
   };
 

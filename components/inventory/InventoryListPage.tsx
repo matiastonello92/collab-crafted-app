@@ -13,6 +13,7 @@ import { CreateInventoryModal } from './CreateInventoryModal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useHydratedStore } from '@/lib/store/useHydratedStore';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -59,60 +60,41 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const [inventories, setInventories] = useState<InventoryHeader[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
-  const [orgId, setOrgId] = useState<string>('');
-  const [locationId, setLocationId] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [canManage, setCanManage] = useState(false);
 
   const supabase = useSupabase();
   const router = useRouter();
-
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
+  const { context } = useHydratedStore();
+  
+  const orgId = context.org_id || '';
+  const locationId = context.location_id || '';
 
   useEffect(() => {
     if (orgId && locationId) {
+      console.log('📍 Location changed, loading inventories:', { orgId, locationId, category });
       loadInventories();
+      checkUserPermissions();
     }
   }, [orgId, locationId, category, statusFilter]);
 
-  const loadUserProfile = async () => {
+  const checkUserPermissions = async () => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error('No authenticated user found');
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !orgId) return;
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('org_id, default_location_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError || !profile) {
-        console.error('Error loading profile:', profileError);
-        toast.error('Errore nel caricamento del profilo');
-        return;
-      }
-
-      setOrgId(profile.org_id);
-      setLocationId(profile.default_location_id);
-
-      // Check permissions
       const { data: membership } = await supabase
         .from('memberships')
         .select('role')
         .eq('user_id', user.id)
-        .eq('org_id', profile.org_id)
+        .eq('org_id', orgId)
         .single();
 
-      setCanManage(membership?.role === 'admin' || membership?.role === 'manager');
+      if (membership) {
+        setCanManage(membership.role === 'admin' || membership.role === 'manager');
+      }
     } catch (error) {
-      console.error('Error in loadUserProfile:', error);
-      setLoading(false);
+      console.error('Error checking permissions:', error);
     }
   };
 
