@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       .from('inventory_headers')
       .select(`
         *,
-        profiles:started_by(full_name),
-        approver:approved_by(full_name)
+        started_by_profile:profiles!started_by(full_name),
+        approved_by_profile:profiles!approved_by(full_name)
       `)
       .order('started_at', { ascending: false })
       .limit(parseInt(limit));
