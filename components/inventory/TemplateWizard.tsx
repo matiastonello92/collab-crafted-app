@@ -16,6 +16,25 @@ interface TemplateWizardProps {
   locationId: string;
   orgId: string;
   preselectedCategory?: 'kitchen' | 'bar' | 'cleaning';
+  editingTemplate?: {
+    id: string;
+    name: string;
+    category: 'kitchen' | 'bar' | 'cleaning';
+    inventory_template_items: Array<{
+      id: string;
+      catalog_item_id: string;
+      sort_order: number;
+      uom_override?: string;
+      unit_price_override?: number;
+      catalog_item: {
+        id: string;
+        name: string;
+        uom: string;
+        default_unit_price: number;
+        category: string;
+      };
+    }>;
+  };
 }
 
 interface CatalogItem {
@@ -40,7 +59,8 @@ export function TemplateWizard({
   onSuccess,
   locationId,
   orgId,
-  preselectedCategory
+  preselectedCategory,
+  editingTemplate
 }: TemplateWizardProps) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -53,10 +73,24 @@ export function TemplateWizard({
   const [items, setItems] = useState<TemplateItem[]>([]);
 
   useEffect(() => {
-    if (isOpen && preselectedCategory) {
-      setCategory(preselectedCategory);
+    if (isOpen) {
+      if (editingTemplate) {
+        // Load template data for editing
+        setCategory(editingTemplate.category);
+        setTemplateName(editingTemplate.name);
+        setItems(editingTemplate.inventory_template_items.map(item => ({
+          catalog_item_id: item.catalog_item_id,
+          catalog_item: item.catalog_item,
+          sort_order: item.sort_order,
+          uom_override: item.uom_override,
+          unit_price_override: item.unit_price_override
+        })));
+        setStep(2); // Go directly to items if editing
+      } else if (preselectedCategory) {
+        setCategory(preselectedCategory);
+      }
     }
-  }, [isOpen, preselectedCategory]);
+  }, [isOpen, preselectedCategory, editingTemplate]);
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
@@ -83,8 +117,14 @@ export function TemplateWizard({
         }))
       };
 
-      const response = await fetch('/api/v1/inventory/templates', {
-        method: 'POST',
+      const url = editingTemplate 
+        ? `/api/v1/inventory/templates/${editingTemplate.id}`
+        : '/api/v1/inventory/templates';
+      
+      const method = editingTemplate ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -92,17 +132,17 @@ export function TemplateWizard({
       });
 
       if (response.ok) {
-        toast.success('Template creato con successo');
+        toast.success(editingTemplate ? 'Template aggiornato con successo' : 'Template creato con successo');
         onSuccess();
         onClose();
         resetWizard();
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Errore durante la creazione del template');
+        toast.error(error.error || `Errore durante ${editingTemplate ? 'l\'aggiornamento' : 'la creazione'} del template`);
       }
     } catch (error) {
       console.error('Error saving template:', error);
-      toast.error('Errore durante la creazione del template');
+      toast.error(`Errore durante ${editingTemplate ? 'l\'aggiornamento' : 'la creazione'} del template`);
     } finally {
       setLoading(false);
     }
@@ -134,7 +174,7 @@ export function TemplateWizard({
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Crea Template - Passo {step} di 2
+            {editingTemplate ? 'Modifica Template' : `Crea Template - Passo ${step} di 2`}
           </DialogTitle>
         </DialogHeader>
 
@@ -200,7 +240,7 @@ export function TemplateWizard({
             <Button onClick={() => setStep(2)}>Avanti</Button>
           ) : (
             <Button onClick={handleSaveTemplate} disabled={loading}>
-              {loading ? 'Salvataggio...' : 'Salva Template'}
+              {loading ? 'Salvataggio...' : editingTemplate ? 'Aggiorna Template' : 'Salva Template'}
             </Button>
           )}
         </div>

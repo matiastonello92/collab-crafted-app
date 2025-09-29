@@ -25,9 +25,10 @@ interface InventoryTableProps {
   orgId: string;
   locationId: string;
   category: string;
+  onHeaderUpdate?: () => void;
 }
 
-export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId, category }: InventoryTableProps) {
+export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId, category, onHeaderUpdate }: InventoryTableProps) {
   const [lines, setLines] = useState<InventoryLine[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingItems, setSavingItems] = useState<Set<string>>(new Set());
@@ -48,6 +49,29 @@ export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId
       console.error('Error loading lines:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteLine = async (lineId: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questo prodotto dall\'inventario?')) return;
+    
+    try {
+      const response = await fetch(`/api/v1/inventory/lines?id=${lineId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success('Prodotto eliminato');
+        loadLines();
+        if (onHeaderUpdate) {
+          onHeaderUpdate();
+        }
+      } else {
+        toast.error('Errore durante l\'eliminazione');
+      }
+    } catch (error) {
+      console.error('Error deleting line:', error);
+      toast.error('Errore durante l\'eliminazione');
     }
   };
 
@@ -83,6 +107,10 @@ export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId
               setLines(prev => prev.map(line => 
                 line.id === lineId ? data.line : line
               ));
+              // Reload header to update total value
+              if (onHeaderUpdate) {
+                onHeaderUpdate();
+              }
             } else {
               toast.error("Errore durante il salvataggio");
             }
@@ -102,7 +130,7 @@ export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId
         timeouts.set(lineId, timeout);
       };
     })(),
-    []
+    [onHeaderUpdate]
   );
 
   if (loading) {
@@ -161,8 +189,13 @@ export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId
                 <TableCell>€{Number(line.line_value).toFixed(2)}</TableCell>
                 {canManage && (
                   <TableCell>
-                    <Button variant="ghost" size="sm">
-                      <Trash2 className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteLine(line.id)}
+                      title="Elimina prodotto"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
                 )}

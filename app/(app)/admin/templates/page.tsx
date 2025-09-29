@@ -31,6 +31,7 @@ export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const supabase = useSupabase();
 
@@ -104,8 +105,25 @@ export default function TemplatesPage() {
     }
   };
 
+  const handleEditTemplate = async (template: Template) => {
+    // Load full template details including all item fields
+    try {
+      const response = await fetch(`/api/v1/inventory/templates/${template.id}`);
+      if (response.ok) {
+        const fullTemplate = await response.json();
+        setEditingTemplate(fullTemplate);
+        setShowWizard(true);
+      } else {
+        toast.error('Errore nel caricamento del template');
+      }
+    } catch (error) {
+      console.error('Error loading template:', error);
+      toast.error('Errore nel caricamento del template');
+    }
+  };
+
   const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo template?')) return;
+    if (!confirm('Sei sicuro di voler eliminare questo template? Questa azione eliminerà anche tutti gli elementi associati.')) return;
 
     try {
       const response = await fetch(`/api/v1/inventory/templates/${templateId}`, {
@@ -116,11 +134,18 @@ export default function TemplatesPage() {
         toast.success('Template eliminato');
         loadTemplates();
       } else {
-        throw new Error('Failed to delete template');
+        const error = await response.json();
+        toast.error(error.error || 'Errore nell\'eliminazione del template');
       }
     } catch (error) {
+      console.error('Delete template error:', error);
       toast.error('Errore nell\'eliminazione del template');
     }
+  };
+
+  const handleCloseWizard = () => {
+    setShowWizard(false);
+    setEditingTemplate(null);
   };
 
   const categoryLabels = {
@@ -214,6 +239,14 @@ export default function TemplatesPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleEditTemplate(template)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Modifica
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleToggleActive(template.id, template.is_active)}
                   >
                     {template.is_active ? 'Disattiva' : 'Attiva'}
@@ -234,13 +267,14 @@ export default function TemplatesPage() {
 
       <TemplateWizard
         isOpen={showWizard}
-        onClose={() => setShowWizard(false)}
+        onClose={handleCloseWizard}
         onSuccess={() => {
           loadTemplates();
-          setShowWizard(false);
+          handleCloseWizard();
         }}
         locationId={userProfile?.default_location_id || ''}
         orgId={userProfile?.org_id || ''}
+        editingTemplate={editingTemplate || undefined}
       />
     </div>
   );

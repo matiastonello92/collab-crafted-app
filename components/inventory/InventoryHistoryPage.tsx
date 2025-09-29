@@ -103,12 +103,7 @@ export function InventoryHistoryPage() {
     try {
       const { data, error } = await supabase
         .from('inventory_headers')
-        .select(`
-          *,
-          started_by_profile:profiles!started_by(full_name),
-          approved_by_profile:profiles!approved_by(full_name),
-          location:locations(name)
-        `)
+        .select('*')
         .eq('org_id', orgId)
         .order('started_at', { ascending: false });
 
@@ -121,9 +116,9 @@ export function InventoryHistoryPage() {
         started_at: item.started_at,
         approved_at: item.approved_at,
         total_value: item.total_value || 0,
-        started_by_name: item.started_by_profile?.full_name || 'N/A',
-        approved_by_name: item.approved_by_profile?.full_name || 'N/A',
-        location_name: item.location?.name || 'N/A'
+        started_by_name: 'N/A',
+        approved_by_name: 'N/A',
+        location_name: 'N/A'
       })) || [];
 
       setInventories(formattedData);

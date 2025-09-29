@@ -108,22 +108,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User org not found' }, { status: 403 });
     }
 
-    // Check if there's already an in_progress inventory for this location/category
-    const { data: existing } = await supabase
-      .from('inventory_headers')
-      .select('id')
-      .eq('org_id', profile.org_id)
-      .eq('location_id', validated.location_id)
-      .eq('category', validated.category)
-      .eq('status', 'in_progress')
-      .single();
-
-    if (existing) {
-      return NextResponse.json(
-        { error: 'There is already an in-progress inventory for this location and category' },
-        { status: 409 }
-      );
-    }
+    // Allow multiple in-progress inventories (removed blocking check)
 
     const { data: header, error } = await supabase
       .from('inventory_headers')

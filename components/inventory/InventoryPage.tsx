@@ -142,7 +142,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
     setLoading(true);
     
     try {
-      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&status=in_progress&limit=1`;
+      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&limit=100`;
       console.log('🔍 [LOAD] Fetching from URL:', url);
       
       // Check if we have session cookies
@@ -176,8 +176,11 @@ export function InventoryPage({ category }: InventoryPageProps) {
       }
       
       if (data && Array.isArray(data) && data.length > 0) {
-        console.log('✅ [LOAD] Found inventory header:', data[0]);
-        setHeader(data[0]);
+        // Show the most recent in_progress inventory, or the most recent overall
+        const inProgress = data.find(inv => inv.status === 'in_progress');
+        const mostRecent = inProgress || data[0];
+        console.log('✅ [LOAD] Found inventory header:', mostRecent);
+        setHeader(mostRecent);
       } else {
         console.log('📝 [LOAD] No inventory found, data:', data);
         setHeader(null);
@@ -398,6 +401,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
         orgId={orgId}
         locationId={locationId}
         category={category}
+        onHeaderUpdate={loadCurrentInventory}
       />
     </div>
   );
