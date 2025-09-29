@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
+  inventoryId?: string;
 }
 
 type InventoryStatus = 'in_progress' | 'completed' | 'approved';
@@ -52,7 +53,7 @@ const statusColors = {
   approved: 'bg-green-500'
 };
 
-export function InventoryPage({ category }: InventoryPageProps) {
+export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [header, setHeader] = useState<InventoryHeader | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,11 +79,15 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
   useEffect(() => {
     if (orgId && locationId) {
-      console.log('Loading inventory for:', { orgId, locationId, category });
-      loadCurrentInventory();
+      console.log('Loading inventory for:', { orgId, locationId, category, inventoryId });
+      if (inventoryId) {
+        loadSpecificInventory(inventoryId);
+      } else {
+        loadCurrentInventory();
+      }
       checkForTemplates();
     }
-  }, [orgId, locationId, category]);
+  }, [orgId, locationId, category, inventoryId]);
 
   const loadUserProfile = async () => {
     console.log('🔍 loadUserProfile: Starting user profile load');
@@ -129,6 +134,62 @@ export function InventoryPage({ category }: InventoryPageProps) {
       }
     } catch (error) {
       console.error('❌ Error loading user profile:', error);
+    }
+  };
+
+  const loadSpecificInventory = async (id: string) => {
+    if (!orgId || !locationId) {
+      console.log('🔍 [LOAD_SPECIFIC] Missing orgId or locationId:', { orgId, locationId });
+      return;
+    }
+
+    console.log('🔍 [LOAD_SPECIFIC] Loading specific inventory...', { id, orgId, locationId, category });
+    setLoading(true);
+    
+    try {
+      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&header_id=${id}`;
+      console.log('🔍 [LOAD_SPECIFIC] Fetching from URL:', url);
+      
+      const response = await fetch(url, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('🔍 [LOAD_SPECIFIC] Response status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('🔍 [LOAD_SPECIFIC] Raw response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('🔍 [LOAD_SPECIFIC] Parsed JSON data:', data);
+      } catch (parseError) {
+        console.error('❌ [LOAD_SPECIFIC] JSON parse error:', parseError);
+        throw new Error('Invalid JSON response');
+      }
+      
+      if (!response.ok) {
+        console.error('❌ [LOAD_SPECIFIC] HTTP error:', response.status, data);
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        console.log('✅ [LOAD_SPECIFIC] Found inventory header:', data[0]);
+        setHeader(data[0]);
+      } else {
+        console.log('📝 [LOAD_SPECIFIC] Inventory not found, data:', data);
+        setHeader(null);
+        toast.error('Inventario non trovato');
+      }
+    } catch (error) {
+      console.error('❌ [LOAD_SPECIFIC] Error loading inventory:', error);
+      setHeader(null);
+      toast.error('Errore nel caricamento dell\'inventario');
+    } finally {
+      setLoading(false);
     }
   };
 

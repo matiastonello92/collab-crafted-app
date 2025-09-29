@@ -1,7 +1,7 @@
 'use client';
 
-import { InventoryPage } from '@/components/inventory/InventoryPage';
+import { InventoryListPage } from '@/components/inventory/InventoryListPage';
 
 export default function BarInventoryPage() {
-  return <InventoryPage category="bar" />;
+  return <InventoryListPage category="bar" />;
 }
