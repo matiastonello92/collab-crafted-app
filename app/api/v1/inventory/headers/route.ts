@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const createHeaderSchema = z.object({
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const limit = searchParams.get('limit') || '50';
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     let query = supabase
       .from('inventory_headers')
       .select(`
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createHeaderSchema.parse(body);
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -151,7 +151,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validated = updateHeaderSchema.parse(body);
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
