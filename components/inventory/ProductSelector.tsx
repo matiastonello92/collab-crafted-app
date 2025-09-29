@@ -65,7 +65,7 @@ export function ProductSelector({
   };
 
   const filteredItems = catalogItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (item?.name || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   );
 
   const selectedItemIds = new Set(selectedItems.map(item => item.catalog_item_id));

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 interface CatalogItem {
@@ -28,7 +29,8 @@ export function NewProductForm({
   const [formData, setFormData] = useState({
     name: '',
     uom: '',
-    default_unit_price: ''
+    default_unit_price: '',
+    showCustomUom: false
   });
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +62,7 @@ export function NewProductForm({
         const newProduct = await response.json();
         toast.success('Prodotto creato con successo');
         onProductCreated(newProduct);
-        setFormData({ name: '', uom: '', default_unit_price: '' });
+        setFormData({ name: '', uom: '', default_unit_price: '', showCustomUom: false });
       } else {
         const error = await response.json();
         toast.error(error.error || 'Errore durante la creazione del prodotto');
@@ -87,12 +89,36 @@ export function NewProductForm({
 
       <div className="space-y-2">
         <Label htmlFor="uom">Unità di Misura *</Label>
-        <Input
-          id="uom"
-          placeholder="Es. L, Kg, Pz"
+        <Select
           value={formData.uom}
-          onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
-        />
+          onValueChange={(value) => {
+            if (value === 'custom') {
+              setFormData(prev => ({ ...prev, uom: '', showCustomUom: true }));
+            } else {
+              setFormData(prev => ({ ...prev, uom: value, showCustomUom: false }));
+            }
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleziona unità di misura" />
+          </SelectTrigger>
+          <SelectContent className="bg-white dark:bg-slate-900 z-50">
+            <SelectItem value="Kg">Kg</SelectItem>
+            <SelectItem value="g">g</SelectItem>
+            <SelectItem value="Lt">Lt</SelectItem>
+            <SelectItem value="ml">ml</SelectItem>
+            <SelectItem value="cl">cl</SelectItem>
+            <SelectItem value="Pce">Pce</SelectItem>
+            <SelectItem value="custom">Altro...</SelectItem>
+          </SelectContent>
+        </Select>
+        {(formData as any).showCustomUom && (
+          <Input
+            placeholder="Inserisci unità personalizzata"
+            value={formData.uom}
+            onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
+          />
+        )}
       </div>
 
       <div className="space-y-2">
