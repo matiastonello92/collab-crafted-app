@@ -133,28 +133,58 @@ export function InventoryPage({ category }: InventoryPageProps) {
   };
 
   const loadCurrentInventory = async () => {
-    if (!orgId || !locationId) return;
-    
-    console.log('loadCurrentInventory called with:', { orgId, locationId, category });
+    if (!orgId || !locationId) {
+      console.log('🔍 [LOAD] Missing orgId or locationId:', { orgId, locationId });
+      return;
+    }
+
+    console.log('🔍 [LOAD] Loading current inventory...', { orgId, locationId, category });
     setLoading(true);
+    
     try {
-      const response = await fetch(
-        `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&status=in_progress&limit=1`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        console.log('API response:', data);
-        setHeader(data?.[0] || null);
-        if (data?.[0]) {
-          console.log('Setting header:', data[0]);
-        } else {
-          console.log('No inventory found, setting header to null');
+      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&status=in_progress&limit=1`;
+      console.log('🔍 [LOAD] Fetching from URL:', url);
+      
+      // Check if we have session cookies
+      console.log('🔍 [LOAD] Document cookies:', document.cookie);
+      
+      const response = await fetch(url, {
+        credentials: 'include', // Ensure cookies are sent
+        headers: {
+          'Content-Type': 'application/json',
         }
+      });
+      
+      console.log('🔍 [LOAD] Response status:', response.status);
+      console.log('🔍 [LOAD] Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      const responseText = await response.text();
+      console.log('🔍 [LOAD] Raw response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('🔍 [LOAD] Parsed JSON data:', data);
+      } catch (parseError) {
+        console.error('❌ [LOAD] JSON parse error:', parseError);
+        throw new Error('Invalid JSON response');
+      }
+      
+      if (!response.ok) {
+        console.error('❌ [LOAD] HTTP error:', response.status, data);
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        console.log('✅ [LOAD] Found inventory header:', data[0]);
+        setHeader(data[0]);
       } else {
-        console.error('API response not ok:', response.status, response.statusText);
+        console.log('📝 [LOAD] No inventory found, data:', data);
+        setHeader(null);
       }
     } catch (error) {
-      console.error('Error loading inventory:', error);
+      console.error('❌ [LOAD] Error loading inventory:', error);
+      setHeader(null);
     } finally {
       setLoading(false);
     }
@@ -176,9 +206,11 @@ export function InventoryPage({ category }: InventoryPageProps) {
     }
   };
 
-  const handleInventoryCreated = (headerId: string) => {
-    console.log('Inventory created with ID:', headerId);
-    loadCurrentInventory();
+  const handleInventoryCreated = async (headerId: string) => {
+    console.log('✅ [CREATE] Inventory created successfully with ID:', headerId);
+    console.log('🔍 [CREATE] Refreshing inventory list...');
+    await loadCurrentInventory();
+    console.log('✅ [CREATE] Inventory refresh completed');
   };
 
   const updateInventoryStatus = async (newStatus: InventoryStatus) => {

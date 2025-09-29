@@ -15,6 +15,8 @@ const updateHeaderSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 [API DEBUG] Headers GET route called');
+    
     const { searchParams } = new URL(request.url);
     const locationId = searchParams.get('location_id');
     const category = searchParams.get('category');
@@ -22,7 +24,30 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const limit = searchParams.get('limit') || '50';
 
+    console.log('🔍 [API DEBUG] Query params:', {
+      locationId,
+      category,
+      orgId,
+      status,
+      limit
+    });
+
     const supabase = await createSupabaseServerClient();
+    console.log('🔍 [API DEBUG] Supabase client created');
+
+    // Check user authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('🔍 [API DEBUG] Auth check:', {
+      userId: user?.id,
+      userEmail: user?.email,
+      authError: authError?.message
+    });
+
+    if (!user) {
+      console.error('❌ [API DEBUG] No authenticated user found');
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     let query = supabase
       .from('inventory_headers')
       .select(`
@@ -38,16 +63,30 @@ export async function GET(request: NextRequest) {
     if (category) query = query.eq('category', category);
     if (status) query = query.eq('status', status);
 
+    console.log('🔍 [API DEBUG] About to execute query...');
     const { data: headers, error } = await query;
 
+    console.log('🔍 [API DEBUG] Query result:', {
+      headersCount: headers?.length || 0,
+      error: error?.message,
+      firstHeader: headers?.[0] ? {
+        id: headers[0].id,
+        category: headers[0].category,
+        status: headers[0].status,
+        org_id: headers[0].org_id,
+        location_id: headers[0].location_id
+      } : null
+    });
+
     if (error) {
-      console.error('Error fetching inventory headers:', error);
+      console.error('❌ [API DEBUG] Database error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('✅ [API DEBUG] Returning headers:', headers?.length || 0, 'items');
     return NextResponse.json(headers);
   } catch (error) {
-    console.error('Error in headers GET:', error);
+    console.error('❌ [API DEBUG] Exception in headers GET:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
