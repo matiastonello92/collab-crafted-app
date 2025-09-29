@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,35 +76,12 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
   }, [header?.id]);
 
-  useEffect(() => {
-    if (!hasHydrated) {
-      console.log('⏳ [PAGE] Waiting for store hydration...');
-      setLoading(false);
-      return;
-    }
-
-    if (!orgId || !locationId) {
-      console.log('⏳ [PAGE] Missing context:', { hasHydrated, orgId, locationId });
-      setLoading(false);
-      return;
-    }
-
-    console.log('📍 [PAGE] Location context ready:', { hasHydrated, orgId, locationId, category, inventoryId });
-    checkUserPermissions();
-    
-    if (inventoryId) {
-      loadSpecificInventory(inventoryId);
-    } else {
-      loadCurrentInventory();
-    }
-    
-    checkForTemplates();
-  }, [hasHydrated, orgId, locationId, category, inventoryId]);
-
-  const checkUserPermissions = async () => {
+  const checkUserPermissions = useCallback(async () => {
+    if (!orgId) return;
     try {
+      console.log('🔐 [PAGE] Checking permissions for orgId:', orgId);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !orgId) return;
+      if (!user) return;
 
       const { data: membership } = await supabase
         .from('memberships')
@@ -114,146 +91,144 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         .single();
 
       if (membership) {
-        setUserRole(membership.role === 'admin' ? 'admin' : 
-                   membership.role === 'manager' ? 'manager' : 'base');
+        const role = membership.role === 'admin' ? 'admin' : 
+                   membership.role === 'manager' ? 'manager' : 'base';
+        console.log('🔐 [PAGE] User role:', role);
+        setUserRole(role);
       }
     } catch (error) {
-      console.error('Error checking permissions:', error);
+      console.error('❌ [PAGE] Error checking permissions:', error);
     }
-  };
+  }, [orgId, supabase]);
 
-  const loadSpecificInventory = async (id: string) => {
+  const loadSpecificInventory = useCallback(async (id: string) => {
     if (!orgId || !locationId) {
-      console.log('🔍 [LOAD_SPECIFIC] Missing orgId or locationId:', { orgId, locationId });
+      console.log('⚠️ [PAGE] Cannot load specific inventory without context');
       return;
     }
 
-    console.log('🔍 [LOAD_SPECIFIC] Loading specific inventory...', { id, orgId, locationId, category });
+    console.log('📥 [PAGE] Loading specific inventory:', { id, orgId, locationId, category });
     setLoading(true);
     
     try {
       const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&header_id=${id}`;
-      console.log('🔍 [LOAD_SPECIFIC] Fetching from URL:', url);
+      console.log('📥 [PAGE] Fetching from:', url);
       
       const response = await fetch(url, {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      console.log('🔍 [LOAD_SPECIFIC] Response status:', response.status);
-      
-      const responseText = await response.text();
-      console.log('🔍 [LOAD_SPECIFIC] Raw response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('🔍 [LOAD_SPECIFIC] Parsed JSON data:', data);
-      } catch (parseError) {
-        console.error('❌ [LOAD_SPECIFIC] JSON parse error:', parseError);
-        throw new Error('Invalid JSON response');
-      }
+      const data = await response.json();
       
       if (!response.ok) {
-        console.error('❌ [LOAD_SPECIFIC] HTTP error:', response.status, data);
+        console.error('❌ [PAGE] HTTP error:', response.status, data);
         throw new Error(data.error || `HTTP ${response.status}`);
       }
       
       if (data && Array.isArray(data) && data.length > 0) {
-        console.log('✅ [LOAD_SPECIFIC] Found inventory header:', data[0]);
+        console.log('✅ [PAGE] Loaded specific inventory');
         setHeader(data[0]);
       } else {
-        console.log('📝 [LOAD_SPECIFIC] Inventory not found, data:', data);
+        console.log('⚠️ [PAGE] Inventory not found');
         setHeader(null);
         toast.error('Inventario non trovato');
       }
     } catch (error) {
-      console.error('❌ [LOAD_SPECIFIC] Error loading inventory:', error);
+      console.error('❌ [PAGE] Error loading inventory:', error);
       setHeader(null);
       toast.error('Errore nel caricamento dell\'inventario');
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId, locationId, category]);
 
-  const loadCurrentInventory = async () => {
+  const loadCurrentInventory = useCallback(async () => {
     if (!orgId || !locationId) {
-      console.log('🔍 [LOAD] Missing orgId or locationId:', { orgId, locationId });
+      console.log('⚠️ [PAGE] Cannot load inventory without context');
       return;
     }
 
-    console.log('🔍 [LOAD] Loading current inventory...', { orgId, locationId, category });
+    console.log('📥 [PAGE] Loading current inventory:', { orgId, locationId, category });
     setLoading(true);
     
     try {
       const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&limit=100`;
-      console.log('🔍 [LOAD] Fetching from URL:', url);
-      
-      // Check if we have session cookies
-      console.log('🔍 [LOAD] Document cookies:', document.cookie);
+      console.log('📥 [PAGE] Fetching from:', url);
       
       const response = await fetch(url, {
-        credentials: 'include', // Ensure cookies are sent
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      console.log('🔍 [LOAD] Response status:', response.status);
-      console.log('🔍 [LOAD] Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      const responseText = await response.text();
-      console.log('🔍 [LOAD] Raw response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('🔍 [LOAD] Parsed JSON data:', data);
-      } catch (parseError) {
-        console.error('❌ [LOAD] JSON parse error:', parseError);
-        throw new Error('Invalid JSON response');
-      }
+      const data = await response.json();
       
       if (!response.ok) {
-        console.error('❌ [LOAD] HTTP error:', response.status, data);
+        console.error('❌ [PAGE] HTTP error:', response.status, data);
         throw new Error(data.error || `HTTP ${response.status}`);
       }
       
       if (data && Array.isArray(data) && data.length > 0) {
-        // Show the most recent in_progress inventory, or the most recent overall
         const inProgress = data.find(inv => inv.status === 'in_progress');
         const mostRecent = inProgress || data[0];
-        console.log('✅ [LOAD] Found inventory header:', mostRecent);
+        console.log('✅ [PAGE] Loaded current inventory');
         setHeader(mostRecent);
       } else {
-        console.log('📝 [LOAD] No inventory found, data:', data);
+        console.log('ℹ️ [PAGE] No inventory found');
         setHeader(null);
       }
     } catch (error) {
-      console.error('❌ [LOAD] Error loading inventory:', error);
+      console.error('❌ [PAGE] Error loading inventory:', error);
       setHeader(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId, locationId, category]);
 
-  const checkForTemplates = async () => {
+  const checkForTemplates = useCallback(async () => {
     if (!orgId || !locationId) return;
     
     try {
+      console.log('📋 [PAGE] Checking for templates');
       const response = await fetch(
         `/api/v1/inventory/templates?org_id=${orgId}&location_id=${locationId}&category=${category}&is_active=true`
       );
       if (response.ok) {
         const data = await response.json();
-        setHasTemplates(data && data.length > 0);
+        const hasTemplatesValue = data && data.length > 0;
+        console.log('📋 [PAGE] Templates found:', hasTemplatesValue);
+        setHasTemplates(hasTemplatesValue);
       }
     } catch (error) {
-      console.error('Error checking templates:', error);
+      console.error('❌ [PAGE] Error checking templates:', error);
     }
-  };
+  }, [orgId, locationId, category]);
+
+  // Load data after hydration
+  useEffect(() => {
+    if (!hasHydrated) {
+      console.log('⏳ [PAGE] Waiting for store hydration...');
+      // Keep loading = true, don't set to false
+      return;
+    }
+
+    if (!orgId || !locationId) {
+      console.log('⚠️ [PAGE] Store hydrated but missing context:', { hasHydrated, orgId, locationId });
+      setLoading(false);
+      return;
+    }
+
+    console.log('✅ [PAGE] Store hydrated with context, loading data:', { hasHydrated, orgId, locationId, category, inventoryId });
+    checkUserPermissions();
+    
+    if (inventoryId) {
+      loadSpecificInventory(inventoryId);
+    } else {
+      loadCurrentInventory();
+    }
+    
+    checkForTemplates();
+  }, [hasHydrated, orgId, locationId, category, inventoryId, checkUserPermissions, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
 
   const handleInventoryCreated = async (headerId: string) => {
     console.log('✅ [CREATE] Inventory created successfully with ID:', headerId);

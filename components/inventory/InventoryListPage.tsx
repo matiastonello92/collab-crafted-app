@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,39 +70,12 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const orgId = store.context.org_id;
   const locationId = store.context.location_id;
 
-  // First useEffect: Load when location/category changes (only after hydration)
-  useEffect(() => {
-    if (!hasHydrated) {
-      console.log('⏳ [LIST] Waiting for store hydration...');
-      setLoading(false);
-      return;
-    }
-
-    if (!orgId || !locationId) {
-      console.log('⏳ [LIST] Missing context:', { hasHydrated, orgId, locationId });
-      setLoading(false);
-      return;
-    }
-
-    console.log('📍 [LIST] Location context ready:', { hasHydrated, orgId, locationId, category });
-    loadInventories();
-    checkUserPermissions();
-  }, [hasHydrated, orgId, locationId, category]);
-
-  // Second useEffect: Reload when status filter changes (only if already loaded)
-  useEffect(() => {
-    if (!hasHydrated || !orgId || !locationId) {
-      return;
-    }
-    
-    console.log('🔄 [LIST] Status filter changed:', statusFilter);
-    loadInventories();
-  }, [statusFilter]);
-
-  const checkUserPermissions = async () => {
+  const checkUserPermissions = useCallback(async () => {
+    if (!orgId) return;
     try {
+      console.log('🔐 [LIST] Checking permissions for orgId:', orgId);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !orgId) return;
+      if (!user) return;
 
       const { data: membership } = await supabase
         .from('memberships')
@@ -112,14 +85,22 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
         .single();
 
       if (membership) {
-        setCanManage(membership.role === 'admin' || membership.role === 'manager');
+        const canManageValue = membership.role === 'admin' || membership.role === 'manager';
+        console.log('🔐 [LIST] User permissions:', { role: membership.role, canManage: canManageValue });
+        setCanManage(canManageValue);
       }
     } catch (error) {
-      console.error('Error checking permissions:', error);
+      console.error('❌ [LIST] Error checking permissions:', error);
     }
-  };
+  }, [orgId, supabase]);
 
-  const loadInventories = async () => {
+  const loadInventories = useCallback(async () => {
+    if (!orgId || !locationId) {
+      console.log('⚠️ [LIST] Cannot load inventories without context');
+      return;
+    }
+
+    console.log('📥 [LIST] Loading inventories:', { orgId, locationId, category, statusFilter });
     setLoading(true);
     try {
       let query = supabase
@@ -140,19 +121,39 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error loading inventories:', error);
+        console.error('❌ [LIST] Error loading inventories:', error);
         toast.error('Errore nel caricamento degli inventari');
         return;
       }
 
+      console.log('✅ [LIST] Loaded inventories:', data?.length || 0);
       setInventories(data || []);
     } catch (error) {
-      console.error('Error in loadInventories:', error);
+      console.error('❌ [LIST] Error in loadInventories:', error);
       toast.error('Errore nel caricamento degli inventari');
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId, locationId, category, statusFilter, supabase]);
+
+  // Load data after hydration
+  useEffect(() => {
+    if (!hasHydrated) {
+      console.log('⏳ [LIST] Waiting for store hydration...');
+      // Keep loading = true, don't set to false
+      return;
+    }
+
+    if (!orgId || !locationId) {
+      console.log('⚠️ [LIST] Store hydrated but missing context:', { hasHydrated, orgId, locationId });
+      setLoading(false);
+      return;
+    }
+
+    console.log('✅ [LIST] Store hydrated with context, loading data:', { hasHydrated, orgId, locationId, category });
+    loadInventories();
+    checkUserPermissions();
+  }, [hasHydrated, orgId, locationId, category, loadInventories, checkUserPermissions]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);
