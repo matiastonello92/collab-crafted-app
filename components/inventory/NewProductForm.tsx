@@ -18,9 +18,15 @@ interface CatalogItem {
 interface NewProductFormProps {
   locationId: string;
   orgId: string;
-  category: string;
+  category: 'kitchen' | 'bar' | 'cleaning';
   onProductCreated: (product: CatalogItem) => void;
 }
+
+const categoryOptions = {
+  kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
+  bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
+  cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
+};
 
 export function NewProductForm({
   locationId,
@@ -32,6 +38,7 @@ export function NewProductForm({
     name: '',
     uom: '',
     default_unit_price: '',
+    product_category: '',
     showCustomUom: false
   });
   const [loading, setLoading] = useState(false);
@@ -39,8 +46,8 @@ export function NewProductForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.uom.trim() || !formData.default_unit_price) {
-      toast.error('Compila tutti i campi obbligatori');
+    if (!formData.name.trim() || !formData.uom.trim() || !formData.default_unit_price || !formData.product_category) {
+      toast.error('Compila tutti i campi obbligatori (inclusa categoria)');
       return;
     }
 
@@ -57,7 +64,8 @@ export function NewProductForm({
           category,
           name: formData.name.trim(),
           uom: formData.uom.trim(),
-          default_unit_price: parseFloat(formData.default_unit_price)
+          default_unit_price: parseFloat(formData.default_unit_price),
+          product_category: formData.product_category
         }),
       });
 
@@ -65,7 +73,7 @@ export function NewProductForm({
         const newProduct = await response.json();
         toast.success('Prodotto creato con successo');
         onProductCreated(newProduct);
-        setFormData({ name: '', uom: '', default_unit_price: '', showCustomUom: false });
+        setFormData({ name: '', uom: '', default_unit_price: '', product_category: '', showCustomUom: false });
       } else {
         const error = await response.json();
         toast.error(error.error || 'Errore durante la creazione del prodotto');
@@ -88,6 +96,25 @@ export function NewProductForm({
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Categoria Prodotto *</Label>
+        <Select
+          value={formData.product_category}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleziona categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            {categoryOptions[category].map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

@@ -124,6 +124,7 @@ export type Database = {
           name: string
           org_id: string
           photo_url: string | null
+          product_category: string | null
           supplier_id: string | null
           uom: string
           updated_at: string
@@ -139,6 +140,7 @@ export type Database = {
           name: string
           org_id: string
           photo_url?: string | null
+          product_category?: string | null
           supplier_id?: string | null
           uom: string
           updated_at?: string
@@ -154,6 +156,7 @@ export type Database = {
           name?: string
           org_id?: string
           photo_url?: string | null
+          product_category?: string | null
           supplier_id?: string | null
           uom?: string
           updated_at?: string

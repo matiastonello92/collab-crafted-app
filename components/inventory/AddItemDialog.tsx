@@ -49,8 +49,16 @@ export function AddItemDialog({
     name: '',
     uom: '',
     default_unit_price: '',
+    product_category: '',
     showCustomUom: false
   });
+
+  // Category options per department
+  const categoryOptions = {
+    kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
+    bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
+    cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
+  };
 
   useEffect(() => {
     if (open) {
@@ -112,8 +120,8 @@ export function AddItemDialog({
   };
 
   const handleCreateAndAdd = async () => {
-    if (!newProduct.name.trim() || !newProduct.uom.trim() || !newProduct.default_unit_price) {
-      toast.error('Compila tutti i campi obbligatori');
+    if (!newProduct.name.trim() || !newProduct.uom.trim() || !newProduct.default_unit_price || !newProduct.product_category) {
+      toast.error('Compila tutti i campi obbligatori (inclusa categoria)');
       return;
     }
 
@@ -129,7 +137,8 @@ export function AddItemDialog({
           category,
           name: newProduct.name.trim(),
           uom: newProduct.uom.trim(),
-          default_unit_price: parseFloat(newProduct.default_unit_price)
+          default_unit_price: parseFloat(newProduct.default_unit_price),
+          product_category: newProduct.product_category
         }),
       });
 
@@ -178,6 +187,7 @@ export function AddItemDialog({
       name: '',
       uom: '',
       default_unit_price: '',
+      product_category: '',
       showCustomUom: false
     });
     setActiveTab('existing');
@@ -248,6 +258,25 @@ export function AddItemDialog({
           </TabsContent>
 
           <TabsContent value="new" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-category">Categoria Prodotto *</Label>
+              <Select
+                value={newProduct.product_category}
+                onValueChange={(value) => setNewProduct(prev => ({ ...prev, product_category: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(categoryOptions[category as keyof typeof categoryOptions] || []).map((cat: string) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="new-name">Nome Prodotto *</Label>
               <Input
