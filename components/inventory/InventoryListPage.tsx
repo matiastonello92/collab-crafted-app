@@ -65,18 +65,39 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
 
   const supabase = useSupabase();
   const router = useRouter();
-  const { context } = useHydratedStore();
-  
-  const orgId = context.org_id || '';
-  const locationId = context.location_id || '';
+  const store = useHydratedStore();
+  const hasHydrated = store.hasHydrated;
+  const orgId = store.context.org_id;
+  const locationId = store.context.location_id;
 
+  // First useEffect: Load when location/category changes (only after hydration)
   useEffect(() => {
-    if (orgId && locationId) {
-      console.log('📍 Location changed, loading inventories:', { orgId, locationId, category });
-      loadInventories();
-      checkUserPermissions();
+    if (!hasHydrated) {
+      console.log('⏳ [LIST] Waiting for store hydration...');
+      setLoading(false);
+      return;
     }
-  }, [orgId, locationId, category, statusFilter]);
+
+    if (!orgId || !locationId) {
+      console.log('⏳ [LIST] Missing context:', { hasHydrated, orgId, locationId });
+      setLoading(false);
+      return;
+    }
+
+    console.log('📍 [LIST] Location context ready:', { hasHydrated, orgId, locationId, category });
+    loadInventories();
+    checkUserPermissions();
+  }, [hasHydrated, orgId, locationId, category]);
+
+  // Second useEffect: Reload when status filter changes (only if already loaded)
+  useEffect(() => {
+    if (!hasHydrated || !orgId || !locationId) {
+      return;
+    }
+    
+    console.log('🔄 [LIST] Status filter changed:', statusFilter);
+    loadInventories();
+  }, [statusFilter]);
 
   const checkUserPermissions = async () => {
     try {
@@ -258,8 +279,8 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           category={category}
-          locationId={locationId}
-          orgId={orgId}
+          locationId={locationId || ''}
+          orgId={orgId || ''}
           onSuccess={handleInventoryCreated}
         />
       )}

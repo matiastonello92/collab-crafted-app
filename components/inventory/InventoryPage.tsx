@@ -64,11 +64,11 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [hasTemplates, setHasTemplates] = useState(false);
 
   const supabase = useSupabase();
-  const { context } = useHydratedStore();
+  const store = useHydratedStore();
+  const hasHydrated = store.hasHydrated;
+  const orgId = store.context.org_id;
+  const locationId = store.context.location_id;
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
-  
-  const orgId = context.org_id || '';
-  const locationId = context.location_id || '';
 
   useEffect(() => {
     if (header?.id) {
@@ -77,17 +77,29 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [header?.id]);
 
   useEffect(() => {
-    if (orgId && locationId) {
-      console.log('📍 Location context updated, loading inventory:', { orgId, locationId, category, inventoryId });
-      checkUserPermissions();
-      if (inventoryId) {
-        loadSpecificInventory(inventoryId);
-      } else {
-        loadCurrentInventory();
-      }
-      checkForTemplates();
+    if (!hasHydrated) {
+      console.log('⏳ [PAGE] Waiting for store hydration...');
+      setLoading(false);
+      return;
     }
-  }, [orgId, locationId, category, inventoryId]);
+
+    if (!orgId || !locationId) {
+      console.log('⏳ [PAGE] Missing context:', { hasHydrated, orgId, locationId });
+      setLoading(false);
+      return;
+    }
+
+    console.log('📍 [PAGE] Location context ready:', { hasHydrated, orgId, locationId, category, inventoryId });
+    checkUserPermissions();
+    
+    if (inventoryId) {
+      loadSpecificInventory(inventoryId);
+    } else {
+      loadCurrentInventory();
+    }
+    
+    checkForTemplates();
+  }, [hasHydrated, orgId, locationId, category, inventoryId]);
 
   const checkUserPermissions = async () => {
     try {
@@ -332,9 +344,9 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSuccess={handleInventoryCreated}
-          locationId={locationId}
+          locationId={locationId || ''}
           category={category}
-          orgId={orgId}
+          orgId={orgId || ''}
         />
 
         <TemplateWizard
@@ -344,8 +356,8 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
             checkForTemplates();
             setShowTemplateWizard(false);
           }}
-          locationId={locationId}
-          orgId={orgId}
+          locationId={locationId || ''}
+          orgId={orgId || ''}
           preselectedCategory={category}
         />
       </div>
@@ -432,8 +444,8 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         headerId={header.id}
         canManage={canApprove}
         canEdit={header.status !== 'approved' || canApprove}
-        orgId={orgId}
-        locationId={locationId}
+        orgId={orgId || ''}
+        locationId={locationId || ''}
         category={category}
         onHeaderUpdate={loadCurrentInventory}
       />
