@@ -165,6 +165,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           category: string
+          creation_mode: string | null
           id: string
           location_id: string
           notes: string | null
@@ -172,12 +173,15 @@ export type Database = {
           started_at: string
           started_by: string
           status: string
+          template_id: string | null
+          template_version: number | null
           total_value: number
         }
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
           category: string
+          creation_mode?: string | null
           id?: string
           location_id: string
           notes?: string | null
@@ -185,12 +189,15 @@ export type Database = {
           started_at?: string
           started_by: string
           status?: string
+          template_id?: string | null
+          template_version?: number | null
           total_value?: number
         }
         Update: {
           approved_at?: string | null
           approved_by?: string | null
           category?: string
+          creation_mode?: string | null
           id?: string
           location_id?: string
           notes?: string | null
@@ -198,9 +205,19 @@ export type Database = {
           started_at?: string
           started_by?: string
           status?: string
+          template_id?: string | null
+          template_version?: number | null
           total_value?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inventory_headers_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inventory_lines: {
         Row: {
@@ -287,6 +304,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_template_items: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          id: string
+          location_id: string
+          org_id: string
+          section: string | null
+          sort_order: number
+          template_id: string
+          unit_price_override: number | null
+          uom_override: string | null
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          id?: string
+          location_id: string
+          org_id: string
+          section?: string | null
+          sort_order?: number
+          template_id: string
+          unit_price_override?: number | null
+          uom_override?: string | null
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          id?: string
+          location_id?: string
+          org_id?: string
+          section?: string | null
+          sort_order?: number
+          template_id?: string
+          unit_price_override?: number | null
+          uom_override?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_template_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_templates: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          location_id: string
+          name: string
+          org_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          name: string
+          org_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
       }
       invitation_job_tags: {
         Row: {

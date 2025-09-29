@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { useSupabase } from '@/hooks/useSupabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Users, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import { InventoryTable } from './InventoryTable';
-import { CreateInventoryModal } from './CreateInventoryModal';
-import { TemplateWizard } from './TemplateWizard';
 import { InventoryPresence } from './InventoryPresence';
+import { AddItemDialog } from './AddItemDialog';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
 
@@ -29,8 +29,6 @@ interface InventoryHeader {
   approved_at?: string;
   total_value: number;
   notes?: string;
-  template_id?: string;
-  creation_mode?: 'template' | 'last' | 'empty';
 }
 
 const categoryLabels = {
@@ -58,24 +56,28 @@ export function InventoryPage({ category }: InventoryPageProps) {
   const [userRole, setUserRole] = useState<'base' | 'manager' | 'admin'>('base');
   const [orgId, setOrgId] = useState<string>('');
   const [locationId, setLocationId] = useState<string>('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showTemplateWizard, setShowTemplateWizard] = useState(false);
-  const [hasTemplates, setHasTemplates] = useState(false);
-
   const supabase = useSupabase();
+
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
+  // Load user profile once on mount
   useEffect(() => {
     loadUserProfile();
   }, []);
 
+  // Load current inventory when org/location are available
   useEffect(() => {
     if (orgId && locationId) {
       loadCurrentInventory();
-      checkForTemplates();
-      updatePresence(header?.id || '');
     }
-  }, [orgId, locationId, category, header?.id, updatePresence]);
+  }, [orgId, locationId, category]);
+
+  // Update presence when header is available
+  useEffect(() => {
+    if (header?.id) {
+      updatePresence(header.id);
+    }
+  }, [header?.id, updatePresence]);
 
   const loadUserProfile = async () => {
     try {
@@ -92,6 +94,8 @@ export function InventoryPage({ category }: InventoryPageProps) {
         setOrgId(profile.org_id);
         setLocationId(profile.default_location_id || '');
         
+        // Check user role - simplified for now
+        // In a real implementation, you'd check user_roles_locations
         const { data: membership } = await supabase
           .from('memberships')
           .select('role')
@@ -117,35 +121,49 @@ export function InventoryPage({ category }: InventoryPageProps) {
       const response = await fetch(
         `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&status=in_progress&limit=1`
       );
+      
       if (response.ok) {
         const data = await response.json();
-        setHeader(data?.[0] || null);
+        if (data.headers && data.headers.length > 0) {
+          setHeader(data.headers[0]);
+        }
       }
     } catch (error) {
       console.error('Error loading inventory:', error);
+        toast.error("Impossibile caricare l'inventario");
     } finally {
       setLoading(false);
     }
   };
 
-  const checkForTemplates = async () => {
-    if (!orgId || !locationId) return;
+  const createNewInventory = async () => {
+    if (!locationId) return;
     
+    setSaving(true);
     try {
-      const response = await fetch(
-        `/api/v1/inventory/templates?org_id=${orgId}&location_id=${locationId}&category=${category}&is_active=true`
-      );
+      const response = await fetch('/api/v1/inventory/headers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_id: locationId,
+          category,
+        }),
+      });
+
       if (response.ok) {
         const data = await response.json();
-        setHasTemplates(data && data.length > 0);
+        setHeader(data.header);
+        toast.success("Nuovo inventario creato");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Errore durante la creazione");
       }
     } catch (error) {
-      console.error('Error checking templates:', error);
+      console.error('Error creating inventory:', error);
+      toast.error("Errore durante la creazione dell'inventario");
+    } finally {
+      setSaving(false);
     }
-  };
-
-  const handleInventoryCreated = (headerId: string) => {
-    loadCurrentInventory();
   };
 
   const updateInventoryStatus = async (newStatus: InventoryStatus) => {
@@ -161,7 +179,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
       if (response.ok) {
         const data = await response.json();
-        setHeader(data);
+        setHeader(data.header);
         toast.success(`Inventario ${statusLabels[newStatus].toLowerCase()}`);
       }
     } catch (error) {
@@ -174,7 +192,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
 
   const canCreateInventory = userRole === 'admin' || userRole === 'manager';
   const canApprove = userRole === 'admin' || userRole === 'manager';
-  const canComplete = true;
+  const canComplete = true; // All users can mark as completed
 
   if (loading) {
     return (
@@ -184,67 +202,40 @@ export function InventoryPage({ category }: InventoryPageProps) {
     );
   }
 
-  // No current inventory, show create card
   if (!header) {
     return (
-      <div className="container mx-auto py-6 space-y-6">
-        {!hasTemplates && canCreateInventory && (
-          <Card className="border-orange-200 bg-orange-50">
-            <CardHeader>
-              <CardTitle className="text-orange-800">Nessun template disponibile</CardTitle>
-              <CardDescription className="text-orange-700">
-                Prima di creare il tuo primo inventario, ti consigliamo di creare un template
-                per velocizzare le operazioni future.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => setShowTemplateWizard(true)} variant="outline">
-                Crea Template {categoryLabels[category]}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-        
+      <div className="container mx-auto py-8">
         <Card>
           <CardHeader>
             <CardTitle>Inventario {categoryLabels[category]}</CardTitle>
             <CardDescription>
-              Nessun inventario in corso per questa categoria
+              Nessun inventario in corso per questa categoria.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {canCreateInventory ? (
-              <Button onClick={() => setShowCreateModal(true)}>
-                Crea Inventario {categoryLabels[category]}
+          <CardContent className="space-y-4">
+            {canCreateInventory && (
+              <Button 
+                onClick={createNewInventory} 
+                disabled={saving}
+                className="w-full"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creazione...
+                  </>
+                ) : (
+                  'Inizia Nuovo Inventario'
+                )}
               </Button>
-            ) : (
-              <div className="text-muted-foreground">
-                Non hai i permessi per creare un inventario
-              </div>
+            )}
+            {!canCreateInventory && (
+              <p className="text-muted-foreground text-center">
+                Solo i manager e amministratori possono iniziare un nuovo inventario.
+              </p>
             )}
           </CardContent>
         </Card>
-
-        <CreateInventoryModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={handleInventoryCreated}
-          locationId={locationId}
-          category={category}
-          orgId={orgId}
-        />
-
-        <TemplateWizard
-          isOpen={showTemplateWizard}
-          onClose={() => setShowTemplateWizard(false)}
-          onSuccess={() => {
-            checkForTemplates();
-            setShowTemplateWizard(false);
-          }}
-          locationId={locationId}
-          orgId={orgId}
-          preselectedCategory={category}
-        />
       </div>
     );
   }
@@ -261,12 +252,6 @@ export function InventoryPage({ category }: InventoryPageProps) {
                 <Badge className={`${statusColors[header.status]} text-white`}>
                   {statusLabels[header.status]}
                 </Badge>
-                {header.creation_mode && (
-                  <Badge variant="outline">
-                    {header.creation_mode === 'template' ? 'Da Template' : 
-                     header.creation_mode === 'last' ? 'Da Ultimo' : 'Vuoto'}
-                  </Badge>
-                )}
               </CardTitle>
               <CardDescription>
                 Iniziato il {new Date(header.started_at).toLocaleDateString('it-IT')}
@@ -274,6 +259,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
               </CardDescription>
             </div>
             
+            {/* Presence */}
             <InventoryPresence users={presenceUsers} />
           </div>
         </CardHeader>

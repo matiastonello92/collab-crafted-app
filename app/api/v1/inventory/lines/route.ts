@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const updateLineSchema = z.object({
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'header_id is required' }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: lines, error } = await supabase
       .from('inventory_lines')
       .select(`
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validated = updateLineSchema.parse(body);
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { data: line, error } = await supabase
       .from('inventory_lines')
       .update(validated)
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     // Get catalog item details
     const { data: catalogItem, error: catalogError } = await supabase
       .from('inventory_catalog_items')
@@ -144,7 +144,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Line ID is required' }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerClient();
     const { error } = await supabase
       .from('inventory_lines')
       .delete()
