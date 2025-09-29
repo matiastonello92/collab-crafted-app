@@ -50,11 +50,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('inventory_headers')
-      .select(`
-        *,
-        started_by_profile:profiles!started_by(full_name),
-        approved_by_profile:profiles!approved_by(full_name)
-      `)
+      .select('*')
       .order('started_at', { ascending: false })
       .limit(parseInt(limit));
 
