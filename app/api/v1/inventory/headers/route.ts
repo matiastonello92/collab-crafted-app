@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ headers });
+    return NextResponse.json(headers);
   } catch (error) {
     console.error('Error in headers GET:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -73,15 +73,15 @@ export function InventoryPage({ category }: InventoryPageProps) {
     if (header?.id) {
       updatePresence(header.id);
     }
-  }, [header?.id, updatePresence]);
+  }, [header?.id]);
 
   useEffect(() => {
     if (orgId && locationId) {
+      console.log('Loading inventory for:', { orgId, locationId, category });
       loadCurrentInventory();
       checkForTemplates();
-      updatePresence(header?.id || '');
     }
-  }, [orgId, locationId, category, header?.id, updatePresence]);
+  }, [orgId, locationId, category]);
 
   const loadUserProfile = async () => {
     try {
@@ -118,6 +118,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
   const loadCurrentInventory = async () => {
     if (!orgId || !locationId) return;
     
+    console.log('loadCurrentInventory called with:', { orgId, locationId, category });
     setLoading(true);
     try {
       const response = await fetch(
@@ -125,7 +126,15 @@ export function InventoryPage({ category }: InventoryPageProps) {
       );
       if (response.ok) {
         const data = await response.json();
+        console.log('API response:', data);
         setHeader(data?.[0] || null);
+        if (data?.[0]) {
+          console.log('Setting header:', data[0]);
+        } else {
+          console.log('No inventory found, setting header to null');
+        }
+      } else {
+        console.error('API response not ok:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error loading inventory:', error);
@@ -151,6 +160,7 @@ export function InventoryPage({ category }: InventoryPageProps) {
   };
 
   const handleInventoryCreated = (headerId: string) => {
+    console.log('Inventory created with ID:', headerId);
     loadCurrentInventory();
   };
 
