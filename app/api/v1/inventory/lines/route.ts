@@ -52,10 +52,10 @@ export async function PUT(request: NextRequest) {
 
     const supabase = await createSupabaseServerClient();
     
-    // Get current line to get unit_price_snapshot
+    // Get current line to get unit_price_snapshot if not provided
     const { data: currentLine, error: fetchError } = await supabase
       .from('inventory_lines')
-      .select('header_id, unit_price_snapshot')
+      .select('unit_price_snapshot')
       .eq('id', lineId)
       .single();
 
@@ -68,6 +68,8 @@ export async function PUT(request: NextRequest) {
     const unitPrice = validated.unit_price_snapshot ?? currentLine.unit_price_snapshot;
     const lineValue = validated.qty * unitPrice;
 
+    // Update line with calculated line_value
+    // The database trigger will automatically update header total_value
     const { data: line, error } = await supabase
       .from('inventory_lines')
       .update({
@@ -81,19 +83,6 @@ export async function PUT(request: NextRequest) {
     if (error) {
       console.error('Error updating inventory line:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    // Recalculate header total_value
-    const { error: totalError } = await supabase
-      .from('inventory_headers')
-      .update({
-        total_value: supabase.rpc('calculate_header_total', { p_header_id: currentLine.header_id })
-      })
-      .eq('id', currentLine.header_id);
-
-    if (totalError) {
-      console.error('Error updating header total:', totalError);
-      // Non blocchiamo la risposta per questo errore
     }
 
     return NextResponse.json({ line });
@@ -141,6 +130,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Header not found' }, { status: 404 });
     }
 
+    // Calculate initial line_value
+    const initialQty = 0;
+    const initialLineValue = initialQty * catalogItem.default_unit_price;
+
     const { data: line, error } = await supabase
       .from('inventory_lines')
       .insert({
@@ -151,7 +144,8 @@ export async function POST(request: NextRequest) {
         name_snapshot: catalogItem.name,
         uom_snapshot: catalogItem.uom,
         unit_price_snapshot: catalogItem.default_unit_price,
-        qty: 0,
+        qty: initialQty,
+        line_value: initialLineValue,
       })
       .select()
       .single();

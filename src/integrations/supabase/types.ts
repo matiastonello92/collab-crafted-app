@@ -1764,6 +1764,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      calculate_header_total: {
+        Args: { p_header_id: string }
+        Returns: number
+      }
       citext: {
         Args: { "": boolean } | { "": string } | { "": unknown }
         Returns: string
