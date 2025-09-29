@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ProductSelector } from './ProductSelector';
-import { TemplateItemsManager } from './TemplateItemsManager';
 
 interface TemplateWizardProps {
   isOpen: boolean;
@@ -30,7 +29,6 @@ interface CatalogItem {
 interface TemplateItem {
   catalog_item_id: string;
   catalog_item: CatalogItem;
-  section?: 'pantry' | 'fridge' | 'freezer';
   sort_order: number;
   uom_override?: string;
   unit_price_override?: number;
@@ -53,9 +51,6 @@ export function TemplateWizard({
   
   // Step 2: Items
   const [items, setItems] = useState<TemplateItem[]>([]);
-  
-  // Step 3: Organization
-  const [finalItems, setFinalItems] = useState<TemplateItem[]>([]);
 
   useEffect(() => {
     if (isOpen && preselectedCategory) {
@@ -63,30 +58,16 @@ export function TemplateWizard({
     }
   }, [isOpen, preselectedCategory]);
 
-  const handleNext = () => {
-    if (step === 1) {
-      if (!templateName.trim()) {
-        toast.error('Inserisci un nome per il template');
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
-      if (items.length === 0) {
-        toast.error('Aggiungi almeno un prodotto al template');
-        return;
-      }
-      setFinalItems([...items]);
-      setStep(3);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
   const handleSaveTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error('Inserisci un nome per il template');
+      return;
+    }
+    if (items.length === 0) {
+      toast.error('Aggiungi almeno un prodotto al template');
+      return;
+    }
+
     setLoading(true);
     try {
       const templateData = {
@@ -94,9 +75,8 @@ export function TemplateWizard({
         location_id: locationId,
         category,
         name: templateName,
-        items: finalItems.map((item, index) => ({
+        items: items.map((item, index) => ({
           catalog_item_id: item.catalog_item_id,
-          section: item.section,
           sort_order: item.sort_order || index,
           uom_override: item.uom_override,
           unit_price_override: item.unit_price_override
@@ -128,11 +108,14 @@ export function TemplateWizard({
     }
   };
 
+  const handleBack = () => {
+    setStep(1);
+  };
+
   const resetWizard = () => {
     setStep(1);
     setTemplateName('');
     setItems([]);
-    setFinalItems([]);
   };
 
   const handleClose = () => {
@@ -151,7 +134,7 @@ export function TemplateWizard({
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Crea Template - Passo {step} di 3
+            Crea Template - Passo {step} di 2
           </DialogTitle>
         </DialogHeader>
 
@@ -184,19 +167,28 @@ export function TemplateWizard({
         )}
 
         {step === 2 && (
-          <ProductSelector
-            locationId={locationId}
-            category={category}
-            selectedItems={items}
-            onItemsChange={setItems}
-          />
-        )}
-
-        {step === 3 && (
-          <TemplateItemsManager
-            items={finalItems}
-            onItemsChange={setFinalItems}
-          />
+          <div className="space-y-4">
+            <ProductSelector
+              locationId={locationId}
+              orgId={orgId}
+              category={category}
+              selectedItems={items}
+              onItemsChange={setItems}
+            />
+            {items.length > 0 && (
+              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">Anteprima prodotti selezionati:</h4>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {items.map((item) => (
+                    <div key={item.catalog_item_id} className="text-sm flex justify-between">
+                      <span>{item.catalog_item.name}</span>
+                      <span className="text-muted-foreground">{item.catalog_item.uom} • €{item.catalog_item.default_unit_price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         <div className="flex justify-between pt-4">
@@ -204,8 +196,8 @@ export function TemplateWizard({
             {step === 1 ? 'Annulla' : 'Indietro'}
           </Button>
           
-          {step < 3 ? (
-            <Button onClick={handleNext}>Avanti</Button>
+          {step === 1 ? (
+            <Button onClick={() => setStep(2)}>Avanti</Button>
           ) : (
             <Button onClick={handleSaveTemplate} disabled={loading}>
               {loading ? 'Salvataggio...' : 'Salva Template'}

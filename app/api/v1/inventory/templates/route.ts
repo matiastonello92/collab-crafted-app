@@ -9,7 +9,6 @@ const createTemplateSchema = z.object({
   name: z.string().min(1).max(100),
   items: z.array(z.object({
     catalog_item_id: z.string().uuid(),
-    section: z.enum(['pantry', 'fridge', 'freezer']).optional(),
     sort_order: z.number().default(0),
     uom_override: z.string().optional(),
     unit_price_override: z.number().optional()

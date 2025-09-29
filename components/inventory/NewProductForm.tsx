@@ -17,12 +17,14 @@ interface CatalogItem {
 
 interface NewProductFormProps {
   locationId: string;
+  orgId: string;
   category: string;
   onProductCreated: (product: CatalogItem) => void;
 }
 
 export function NewProductForm({
   locationId,
+  orgId,
   category,
   onProductCreated
 }: NewProductFormProps) {
@@ -51,6 +53,7 @@ export function NewProductForm({
         },
         body: JSON.stringify({
           location_id: locationId,
+          org_id: orgId,
           category,
           name: formData.name.trim(),
           uom: formData.uom.trim(),

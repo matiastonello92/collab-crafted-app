@@ -19,7 +19,6 @@ interface CatalogItem {
 interface TemplateItem {
   catalog_item_id: string;
   catalog_item: CatalogItem;
-  section?: 'pantry' | 'fridge' | 'freezer';
   sort_order: number;
   uom_override?: string;
   unit_price_override?: number;
@@ -27,6 +26,7 @@ interface TemplateItem {
 
 interface ProductSelectorProps {
   locationId: string;
+  orgId: string;
   category: string;
   selectedItems: TemplateItem[];
   onItemsChange: (items: TemplateItem[]) => void;
@@ -34,6 +34,7 @@ interface ProductSelectorProps {
 
 export function ProductSelector({
   locationId,
+  orgId,
   category,
   selectedItems,
   onItemsChange
@@ -45,17 +46,19 @@ export function ProductSelector({
 
   useEffect(() => {
     loadCatalogItems();
-  }, [locationId, category]);
+  }, [locationId, orgId, category]);
 
   const loadCatalogItems = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/v1/inventory/catalog?location_id=${locationId}&category=${category}`
+        `/api/v1/inventory/catalog?location_id=${locationId}&org_id=${orgId}&category=${category}`
       );
       if (response.ok) {
         const data = await response.json();
-        setCatalogItems(data || []);
+        // Handle both array response and {items: []} response format
+        const items = Array.isArray(data) ? data : (data.items || []);
+        setCatalogItems(items);
       }
     } catch (error) {
       console.error('Error loading catalog items:', error);
@@ -157,6 +160,7 @@ export function ProductSelector({
         <TabsContent value="new">
           <NewProductForm
             locationId={locationId}
+            orgId={orgId}
             category={category}
             onProductCreated={handleNewProductCreated}
           />
