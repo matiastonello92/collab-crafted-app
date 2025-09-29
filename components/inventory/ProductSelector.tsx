@@ -13,7 +13,7 @@ interface CatalogItem {
   name: string;
   uom: string;
   default_unit_price: number;
-  category: string;
+  category: 'kitchen' | 'bar' | 'cleaning';
 }
 
 interface TemplateItem {
@@ -27,7 +27,7 @@ interface TemplateItem {
 interface ProductSelectorProps {
   locationId: string;
   orgId: string;
-  category: string;
+  category: 'kitchen' | 'bar' | 'cleaning';
   selectedItems: TemplateItem[];
   onItemsChange: (items: TemplateItem[]) => void;
 }
