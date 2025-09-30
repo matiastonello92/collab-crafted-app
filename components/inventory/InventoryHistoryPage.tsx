@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Download, Mail, Eye, Edit, Filter, Search } from 'lucide-react';
@@ -60,28 +60,12 @@ export function InventoryHistoryPage() {
   
   const supabase = useSupabase();
 
-  // Step 1: React to location changes
-  useEffect(() => {
-    if (!hasHydrated) {
-      console.log('⏳ [HISTORY] Waiting for hydration...');
-      return;
-    }
+  const loadUserRole = useCallback(async () => {
+    if (!orgId) return;
     
-    if (!orgId || !locationId) {
-      console.log('⚠️ [HISTORY] Missing context:', { orgId, locationId });
-      setLoading(false);
-      return;
-    }
-    
-    console.log('📍 [HISTORY] Loading inventories for location:', { orgId, locationId });
-    loadInventories();
-    loadUserRole();
-  }, [hasHydrated, orgId, locationId]);
-
-  const loadUserRole = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !orgId) return;
+      if (!user) return;
 
       const { data: membership } = await supabase
         .from('memberships')
@@ -94,9 +78,9 @@ export function InventoryHistoryPage() {
     } catch (error) {
       console.error('❌ [HISTORY] Error loading user role:', error);
     }
-  };
+  }, [orgId, supabase]);
 
-  const loadInventories = async () => {
+  const loadInventories = useCallback(async () => {
     // Step 2: Guards to prevent invalid UUID errors
     if (!orgId || !locationId) {
       console.log('⚠️ [HISTORY] Missing context, skipping load');
@@ -133,14 +117,33 @@ export function InventoryHistoryPage() {
         location_name: 'N/A'
       })) || [];
 
+      console.log('✅ [HISTORY] Loaded inventories:', formattedData.length);
       setInventories(formattedData);
     } catch (error) {
-      console.error('Error loading inventories:', error);
+      console.error('❌ [HISTORY] Error loading inventories:', error);
       toast.error('Errore nel caricamento dello storico');
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId, locationId, supabase]);
+
+  // Step 1: React to location changes
+  useEffect(() => {
+    if (!hasHydrated) {
+      console.log('⏳ [HISTORY] Waiting for hydration...');
+      return;
+    }
+    
+    if (!orgId || !locationId) {
+      console.log('⚠️ [HISTORY] Missing context:', { orgId, locationId });
+      setLoading(false);
+      return;
+    }
+    
+    console.log('📍 [HISTORY] Loading inventories for location:', { orgId, locationId });
+    loadInventories();
+    loadUserRole();
+  }, [hasHydrated, orgId, locationId, loadInventories, loadUserRole]);
 
   const filteredInventories = inventories.filter(item => {
     const matchesSearch = !searchTerm || 
