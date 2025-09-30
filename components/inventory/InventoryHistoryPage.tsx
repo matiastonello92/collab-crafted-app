@@ -98,7 +98,7 @@ export function InventoryHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [locationId]);
+  }, [locationId, supabase]);
 
   useEffect(() => {
     if (!hasHydrated) {

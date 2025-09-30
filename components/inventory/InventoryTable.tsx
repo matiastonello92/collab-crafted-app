@@ -22,13 +22,12 @@ interface InventoryTableProps {
   headerId: string;
   canManage: boolean;
   canEdit: boolean;
-  orgId: string;
   locationId: string;
   category: string;
   onHeaderUpdate?: () => void;
 }
 
-export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId, category, onHeaderUpdate }: InventoryTableProps) {
+export function InventoryTable({ headerId, canManage, canEdit, locationId, category, onHeaderUpdate }: InventoryTableProps) {
   const [lines, setLines] = useState<InventoryLine[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingItems, setSavingItems] = useState<Set<string>>(new Set());
@@ -210,7 +209,6 @@ export function InventoryTable({ headerId, canManage, canEdit, orgId, locationId
         onClose={() => setShowAddDialog(false)}
         onSuccess={loadLines}
         headerId={headerId}
-        orgId={orgId}
         locationId={locationId}
         category={category}
       />

@@ -66,7 +66,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const supabase = useSupabase();
   
   // Use Zustand selectors for proper reactivity
-  const orgId = useAppStore(state => state.context.org_id);
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
   const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
@@ -80,160 +79,98 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [header?.id]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
-    // Step 3: Add guards for UUID validation
-    if (!id) {
-      console.log('⚠️ [PAGE] No inventory ID provided');
-      return;
-    }
-    
-    if (!orgId || !locationId) {
-      console.log('⚠️ [PAGE] Missing context for specific inventory');
-      return;
-    }
-    
-    if (orgId === 'null' || locationId === 'null' || id === 'null') {
-      console.error('❌ [PAGE] Invalid UUID values:', { orgId, locationId, id });
+    if (!locationId || locationId === 'null') {
+      console.log('Invalid location ID, skipping specific inventory load');
       return;
     }
 
-    console.log('📥 [PAGE] Loading specific inventory:', { id, orgId, locationId, category });
+    console.log('Loading specific inventory:', id);
     setLoading(true);
-    
     try {
-      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&header_id=${id}`;
-      console.log('📥 [PAGE] Fetching from:', url);
-      
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const data = await response.json();
-      
+      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&id=${id}`;
+      console.log('Fetching:', url);
+      const response = await fetch(url, { credentials: 'include' });
+
       if (!response.ok) {
-        console.error('❌ [PAGE] HTTP error:', response.status, data);
-        throw new Error(data.error || `HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}`);
       }
-      
+
+      const data = await response.json();
       if (data && Array.isArray(data) && data.length > 0) {
-        console.log('✅ [PAGE] Loaded specific inventory');
         setHeader(data[0]);
       } else {
-        console.log('⚠️ [PAGE] Inventory not found');
         setHeader(null);
         toast.error('Inventario non trovato');
       }
     } catch (error) {
-      console.error('❌ [PAGE] Error loading inventory:', error);
+      console.error('Error loading inventory:', error);
       setHeader(null);
       toast.error('Errore nel caricamento dell\'inventario');
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, category]);
+  }, [locationId, category, supabase]);
 
   const loadCurrentInventory = useCallback(async () => {
-    // Step 3: Add UUID validation guards
-    if (!orgId || !locationId) {
-      console.log('⚠️ [PAGE] Missing context, skipping load');
-      return;
-    }
-    
-    if (orgId === 'null' || locationId === 'null') {
-      console.error('❌ [PAGE] Invalid UUID values:', { orgId, locationId });
+    if (!locationId || locationId === 'null') {
+      console.log('Invalid location ID, skipping current inventory load');
       return;
     }
 
-    console.log('📥 [PAGE] Loading current inventory:', { orgId, locationId, category });
+    console.log('Loading current inventory for location:', locationId);
     setLoading(true);
-    
     try {
-      const url = `/api/v1/inventory/headers?org_id=${orgId}&location_id=${locationId}&category=${category}&limit=100`;
-      console.log('📥 [PAGE] Fetching from:', url);
-      
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const data = await response.json();
-      
+      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&status=in_progress`;
+      console.log('Fetching:', url);
+      const response = await fetch(url, { credentials: 'include' });
+
       if (!response.ok) {
-        console.error('❌ [PAGE] HTTP error:', response.status, data);
-        throw new Error(data.error || `HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}`);
       }
-      
+
+      const data = await response.json();
       if (data && Array.isArray(data) && data.length > 0) {
-        const inProgress = data.find(inv => inv.status === 'in_progress');
-        const mostRecent = inProgress || data[0];
-        console.log('✅ [PAGE] Loaded current inventory');
-        setHeader(mostRecent);
+        setHeader(data[0]);
       } else {
-        console.log('ℹ️ [PAGE] No inventory found');
         setHeader(null);
       }
     } catch (error) {
-      console.error('❌ [PAGE] Error loading inventory:', error);
+      console.error('Error loading inventory:', error);
       setHeader(null);
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, category]);
+  }, [locationId, category, supabase]);
 
   const checkForTemplates = useCallback(async () => {
-    // Step 3: Add UUID validation
-    if (!orgId || !locationId) return;
-    
-    if (orgId === 'null' || locationId === 'null') {
-      console.error('❌ [PAGE] Invalid UUID for templates:', { orgId, locationId });
-      return;
-    }
-    
+    if (!locationId || locationId === 'null') return;
+
     try {
-      console.log('📋 [PAGE] Checking for templates');
       const response = await fetch(
-        `/api/v1/inventory/templates?org_id=${orgId}&location_id=${locationId}&category=${category}&is_active=true`
+        `/api/v1/inventory/templates?location_id=${locationId}&category=${category}&is_active=true`
       );
       if (response.ok) {
         const data = await response.json();
-        const hasTemplatesValue = data && data.length > 0;
-        console.log('📋 [PAGE] Templates found:', hasTemplatesValue);
-        setHasTemplates(hasTemplatesValue);
+        setHasTemplates(data && data.length > 0);
       }
     } catch (error) {
-      console.error('❌ [PAGE] Error checking templates:', error);
+      console.error('Error checking templates:', error);
     }
-  }, [orgId, locationId, category]);
+  }, [locationId, category]);
 
-  // Load data after hydration
   useEffect(() => {
-    if (!hasHydrated) {
-      console.log('⏳ [PAGE] Waiting for store hydration...');
-      return;
-    }
+    if (!hasHydrated) return;
 
-    if (!orgId || !locationId) {
-      console.log('⚠️ [PAGE] Store hydrated but missing context:', { hasHydrated, orgId, locationId });
-      setLoading(false);
-      return;
-    }
-
-    console.log('✅ [PAGE] Context changed, reloading:', { inventoryId, category, orgId, locationId });
-    
     if (inventoryId) {
       loadSpecificInventory(inventoryId);
     } else {
       loadCurrentInventory();
+      checkForTemplates();
     }
-    
-    checkForTemplates();
-  }, [hasHydrated, orgId, locationId, category, inventoryId]);
+  }, [hasHydrated, locationId, category, inventoryId, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
 
   const handleInventoryCreated = async (headerId: string) => {
-    console.log('✅ [CREATE] Inventory created successfully with ID:', headerId);
-    console.log('🔍 [CREATE] Refreshing inventory list...');
     await loadCurrentInventory();
-    console.log('✅ [CREATE] Inventory refresh completed');
   };
 
   const updateInventoryStatus = async (newStatus: InventoryStatus) => {
@@ -320,7 +257,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           onSuccess={handleInventoryCreated}
           locationId={locationId || ''}
           category={category}
-          orgId={orgId || ''}
         />
 
         <TemplateWizard
@@ -331,7 +267,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
             setShowTemplateWizard(false);
           }}
           locationId={locationId || ''}
-          orgId={orgId || ''}
           preselectedCategory={category}
         />
       </div>
@@ -418,7 +353,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         headerId={header.id}
         canManage={canApprove}
         canEdit={header.status !== 'approved' || canApprove}
-        orgId={orgId || ''}
         locationId={locationId || ''}
         category={category}
         onHeaderUpdate={loadCurrentInventory}

@@ -20,15 +20,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const locationId = searchParams.get('location_id');
     const category = searchParams.get('category');
-    const orgId = searchParams.get('org_id');
     const status = searchParams.get('status');
+    const id = searchParams.get('id');
     const limit = searchParams.get('limit') || '50';
 
     console.log('🔍 [API DEBUG] Query params:', {
       locationId,
       category,
-      orgId,
       status,
+      id,
       limit
     });
 
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       .order('started_at', { ascending: false })
       .limit(parseInt(limit));
 
-    if (orgId) query = query.eq('org_id', orgId);
+    if (id) query = query.eq('id', id);
     if (locationId) query = query.eq('location_id', locationId);
     if (category) query = query.eq('category', category);
     if (status) query = query.eq('status', status);
@@ -98,14 +98,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Get org_id from location
+    const { data: location, error: locationError } = await supabase
+      .from('locations')
       .select('org_id')
-      .eq('id', user.id)
+      .eq('id', validated.location_id)
       .single();
 
-    if (!profile?.org_id) {
-      return NextResponse.json({ error: 'User org not found' }, { status: 403 });
+    if (locationError || !location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     // Allow multiple in-progress inventories (removed blocking check)
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       .from('inventory_headers')
       .insert({
         ...validated,
-        org_id: profile.org_id,
+        org_id: location.org_id,
         started_by: user.id,
       })
       .select()
@@ -129,14 +130,14 @@ export async function POST(request: NextRequest) {
     const { data: catalogItems } = await supabase
       .from('inventory_catalog_items')
       .select('*')
-      .eq('org_id', profile.org_id)
+      .eq('org_id', location.org_id)
       .eq('location_id', validated.location_id)
       .eq('category', validated.category)
       .eq('is_active', true);
 
     if (catalogItems && catalogItems.length > 0) {
       const lines = catalogItems.map((item: any) => ({
-        org_id: profile.org_id,
+        org_id: location.org_id,
         location_id: validated.location_id,
         header_id: header.id,
         catalog_item_id: item.id,

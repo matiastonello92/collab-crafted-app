@@ -294,7 +294,6 @@ export function CatalogPage({ category }: CatalogPageProps) {
           </DialogHeader>
           <NewProductForm
             locationId={locationId}
-            orgId={orgId}
             category={category}
             onProductCreated={() => {
               setShowNewProductDialog(false);

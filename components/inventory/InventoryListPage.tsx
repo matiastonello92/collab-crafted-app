@@ -67,7 +67,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const router = useRouter();
   
   // Use Zustand selectors for proper reactivity
-  const orgId = useAppStore(state => state.context.org_id);
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
   const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
@@ -263,7 +262,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           onClose={() => setShowCreateModal(false)}
           category={category}
           locationId={locationId || ''}
-          orgId={orgId || ''}
           onSuccess={handleInventoryCreated}
         />
       )}

@@ -3,7 +3,6 @@ import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const createTemplateSchema = z.object({
-  org_id: z.string().uuid(),
   location_id: z.string().uuid(),
   category: z.enum(['kitchen', 'bar', 'cleaning']),
   name: z.string().min(1).max(100),
@@ -23,7 +22,6 @@ const updateTemplateSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const org_id = searchParams.get('org_id');
     const location_id = searchParams.get('location_id');
     const category = searchParams.get('category');
     const is_active = searchParams.get('is_active');
@@ -45,7 +43,6 @@ export async function GET(request: NextRequest) {
       `)
       .order('created_at', { ascending: false });
 
-    if (org_id) query = query.eq('org_id', org_id);
     if (location_id) query = query.eq('location_id', location_id);
     if (category) query = query.eq('category', category);
     if (is_active !== null) query = query.eq('is_active', is_active === 'true');
@@ -73,11 +70,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get org_id from location
+    const { data: location, error: locationError } = await supabase
+      .from('locations')
+      .select('org_id')
+      .eq('id', validated.location_id)
+      .single();
+
+    if (locationError || !location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
+    }
+
     // Create template
     const { data: template, error: templateError } = await supabase
       .from('inventory_templates')
       .insert({
-        org_id: validated.org_id,
+        org_id: location.org_id,
         location_id: validated.location_id,
         category: validated.category,
         name: validated.name,
@@ -95,7 +103,7 @@ export async function POST(request: NextRequest) {
       const items = validated.items.map(item => ({
         ...item,
         template_id: template.id,
-        org_id: validated.org_id,
+        org_id: location.org_id,
         location_id: validated.location_id
       }));
 

@@ -26,7 +26,6 @@ interface TemplateItem {
 
 interface ProductSelectorProps {
   locationId: string;
-  orgId: string;
   category: 'kitchen' | 'bar' | 'cleaning';
   selectedItems: TemplateItem[];
   onItemsChange: (items: TemplateItem[]) => void;
@@ -34,7 +33,6 @@ interface ProductSelectorProps {
 
 export function ProductSelector({
   locationId,
-  orgId,
   category,
   selectedItems,
   onItemsChange
@@ -46,13 +44,13 @@ export function ProductSelector({
 
   useEffect(() => {
     loadCatalogItems();
-  }, [locationId, orgId, category]);
+  }, [locationId, category]);
 
   const loadCatalogItems = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/v1/inventory/catalog?location_id=${locationId}&org_id=${orgId}&category=${category}`
+        `/api/v1/inventory/catalog?location_id=${locationId}&category=${category}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -160,7 +158,6 @@ export function ProductSelector({
         <TabsContent value="new">
           <NewProductForm
             locationId={locationId}
-            orgId={orgId}
             category={category}
             onProductCreated={handleNewProductCreated}
           />

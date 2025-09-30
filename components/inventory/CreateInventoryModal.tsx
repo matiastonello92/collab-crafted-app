@@ -16,7 +16,6 @@ interface CreateInventoryModalProps {
   onSuccess: (headerId: string) => void;
   locationId: string;
   category: 'kitchen' | 'bar' | 'cleaning';
-  orgId: string;
 }
 
 interface Template {
@@ -31,8 +30,7 @@ export function CreateInventoryModal({
   onClose,
   onSuccess,
   locationId,
-  category,
-  orgId
+  category
 }: CreateInventoryModalProps) {
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -51,7 +49,7 @@ export function CreateInventoryModal({
   const loadTemplates = async () => {
     try {
       const response = await fetch(
-        `/api/v1/inventory/templates?org_id=${orgId}&location_id=${locationId}&category=${category}&is_active=true`
+        `/api/v1/inventory/templates?location_id=${locationId}&category=${category}&is_active=true`
       );
       if (response.ok) {
         const data = await response.json();

@@ -314,7 +314,6 @@ export function InventoryPage({ category }: InventoryPageProps) {
         headerId={header.id}
         canManage={canApprove}
         canEdit={header.status !== 'approved' || canApprove}
-        orgId={orgId}
         locationId={locationId}
         category={category}
       />

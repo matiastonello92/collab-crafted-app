@@ -23,7 +23,6 @@ interface AddItemDialogProps {
   onClose: () => void;
   onSuccess: () => void;
   headerId: string;
-  orgId: string;
   locationId: string;
   category: string;
 }
@@ -33,7 +32,6 @@ export function AddItemDialog({
   onClose,
   onSuccess,
   headerId,
-  orgId,
   locationId,
   category
 }: AddItemDialogProps) {
@@ -64,11 +62,11 @@ export function AddItemDialog({
     if (open) {
       loadCatalogItems();
     }
-  }, [open, orgId, locationId, category]);
+  }, [open, locationId, category]);
 
   const loadCatalogItems = async () => {
     try {
-      const response = await fetch(`/api/v1/inventory/catalog?org_id=${orgId}&location_id=${locationId}&category=${category}`);
+      const response = await fetch(`/api/v1/inventory/catalog?location_id=${locationId}&category=${category}`);
       if (response.ok) {
         const data = await response.json();
         setCatalogItems(data.items || []);
@@ -133,7 +131,6 @@ export function AddItemDialog({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location_id: locationId,
-          org_id: orgId,
           category,
           name: newProduct.name.trim(),
           uom: newProduct.uom.trim(),

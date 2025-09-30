@@ -14,7 +14,6 @@ interface TemplateWizardProps {
   onClose: () => void;
   onSuccess: () => void;
   locationId: string;
-  orgId: string;
   preselectedCategory?: 'kitchen' | 'bar' | 'cleaning';
   editingTemplate?: {
     id: string;
@@ -58,7 +57,6 @@ export function TemplateWizard({
   onClose,
   onSuccess,
   locationId,
-  orgId,
   preselectedCategory,
   editingTemplate
 }: TemplateWizardProps) {
@@ -105,7 +103,6 @@ export function TemplateWizard({
     setLoading(true);
     try {
       const templateData = {
-        org_id: orgId,
         location_id: locationId,
         category,
         name: templateName,
@@ -210,7 +207,6 @@ export function TemplateWizard({
           <div className="space-y-4">
             <ProductSelector
               locationId={locationId}
-              orgId={orgId}
               category={category}
               selectedItems={items}
               onItemsChange={setItems}

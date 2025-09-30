@@ -273,7 +273,6 @@ export default function TemplatesPage() {
           handleCloseWizard();
         }}
         locationId={userProfile?.default_location_id || ''}
-        orgId={userProfile?.org_id || ''}
         editingTemplate={editingTemplate || undefined}
       />
     </div>
