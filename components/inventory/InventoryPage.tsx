@@ -66,9 +66,10 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const supabase = useSupabase();
   
   // Use Zustand selectors for proper reactivity
-  const locationId = useAppStore(state => state.context.location_id);
+  const rawLocationId = useAppStore(state => state.context.location_id);
+  const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId;
   const hasHydrated = useAppStore(state => state.hasHydrated);
-  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId);
   
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
