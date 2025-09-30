@@ -180,3 +180,46 @@ export interface ApiError {
   message?: string
   details?: any
 }
+
+// Planner UI Types
+
+export interface WeekView {
+  weekStart: string // ISO date (lunedì)
+  weekEnd: string // domenica
+  days: DayColumn[]
+}
+
+export interface DayColumn {
+  date: string // ISO date
+  dayName: string // 'Lun', 'Mar', etc.
+  shifts: ShiftWithAssignments[]
+  leaves: LeaveRequest[]
+  availability: Availability[]
+}
+
+export interface ShiftWithAssignments extends Shift {
+  assignments?: (ShiftAssignment & { user?: UserProfile })[]
+  job_tag?: JobTag
+  rota?: Rota
+}
+
+export interface UserProfile {
+  id: string
+  full_name: string | null
+  avatar_url?: string | null
+  email?: string
+}
+
+export interface JobTag {
+  id: string
+  name: string
+  label: string
+  color?: string | null
+}
+
+export interface Location {
+  id: string
+  org_id: string
+  name: string
+  status: string
+}

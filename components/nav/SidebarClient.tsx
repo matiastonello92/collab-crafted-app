@@ -23,6 +23,7 @@ import {
   Sparkles,
   History,
   Package,
+  CalendarClock,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -46,6 +47,7 @@ const navigation: any[] = [
       { name: 'Catalogo Prodotti', href: '/inventory/catalog', icon: Package },
     ]
   },
+  { name: 'Planner Turni', href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },

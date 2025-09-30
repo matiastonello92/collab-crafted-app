@@ -1,0 +1,172 @@
+'use client'
+
+import { useState, useMemo, memo } from 'react'
+import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, DragStartEvent } from '@dnd-kit/core'
+import { ShiftCard } from './ShiftCard'
+import { DayColumn } from './DayColumn'
+import { getWeekBounds } from '@/lib/shifts/week-utils'
+import type { Rota, ShiftWithAssignments } from '@/types/shifts'
+import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
+
+interface Props {
+  rota?: Rota
+  shifts: ShiftWithAssignments[]
+  weekStart: string
+  locationId: string
+  onRefresh: () => void
+  loading: boolean
+}
+
+export const PlannerGrid = memo(function PlannerGrid({ 
+  rota, 
+  shifts, 
+  weekStart, 
+  locationId,
+  onRefresh,
+  loading
+}: Props) {
+  const { days } = getWeekBounds(weekStart)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }
+    })
+  )
+  
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }
+  
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveId(null)
+    
+    if (!over || active.id === over.id) return
+    if (rota?.status === 'locked') {
+      toast.error('Impossibile modificare una rota bloccata')
+      return
+    }
+    
+    // over.id formato: 'day-2025-01-20-tag-uuid' oppure 'day-2025-01-20-tag-unassigned'
+    const overId = over.id as string
+    const parts = overId.split('-')
+    
+    if (parts.length < 5 || parts[0] !== 'day') {
+      toast.error('Drop target non valido')
+      return
+    }
+    
+    const date = `${parts[1]}-${parts[2]}-${parts[3]}`
+    const shiftId = active.id as string
+    
+    // Calcola nuovo start_at mantenendo ora originale
+    const shift = shifts.find(s => s.id === shiftId)
+    if (!shift) return
+    
+    const originalTime = shift.start_at.split('T')[1] // Keep time part
+    const newStart = `${date}T${originalTime}`
+    
+    // Calculate new end_at maintaining same duration
+    const duration = new Date(shift.end_at).getTime() - new Date(shift.start_at).getTime()
+    const newEnd = new Date(new Date(newStart).getTime() + duration).toISOString()
+    
+    try {
+      const response = await fetch(`/api/v1/shifts/${shiftId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          start_at: newStart,
+          end_at: newEnd
+        })
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        toast.error(error.message || 'Errore durante lo spostamento')
+        return
+      }
+      
+      toast.success('Turno spostato con successo')
+      onRefresh()
+    } catch (error) {
+      console.error('Error moving shift:', error)
+      toast.error('Errore durante lo spostamento')
+    }
+  }
+  
+  // Raggruppa shift per giorno e job_tag
+  const shiftsByDayAndTag = useMemo(() => {
+    const grouped: Record<string, Record<string, ShiftWithAssignments[]>> = {}
+    
+    days.forEach(day => {
+      grouped[day] = {}
+    })
+    
+    shifts.forEach(shift => {
+      const day = shift.start_at.split('T')[0]
+      const tagId = shift.job_tag_id || 'unassigned'
+      
+      if (!grouped[day]) grouped[day] = {}
+      if (!grouped[day][tagId]) grouped[day][tagId] = []
+      grouped[day][tagId].push(shift)
+    })
+    
+    return grouped
+  }, [shifts, days])
+
+  // Get all unique job tags
+  const allJobTags = useMemo(() => {
+    const tags = new Set<string>()
+    shifts.forEach(shift => {
+      if (shift.job_tag_id) {
+        tags.add(shift.job_tag_id)
+      }
+    })
+    return ['unassigned', ...Array.from(tags)]
+  }, [shifts])
+  
+  if (loading) {
+    return (
+      <div className="flex-1 overflow-auto p-4">
+        <div className="grid grid-cols-7 gap-2">
+          {[...Array(7)].map((_, i) => (
+            <Skeleton key={i} className="h-96 w-full" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+  
+  return (
+    <DndContext 
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex-1 overflow-auto">
+        <div className="grid grid-cols-7 gap-px bg-border min-h-full">
+          {days.map(day => (
+            <DayColumn 
+              key={day}
+              date={day}
+              shifts={shiftsByDayAndTag[day] || {}}
+              rota={rota}
+              allJobTags={allJobTags}
+            />
+          ))}
+        </div>
+      </div>
+      
+      <DragOverlay>
+        {activeId && (
+          <ShiftCard 
+            shift={shifts.find(s => s.id === activeId)!}
+            isDragging
+          />
+        )}
+      </DragOverlay>
+    </DndContext>
+  )
+})
