@@ -14,6 +14,7 @@ import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store/unified';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -58,7 +59,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [header, setHeader] = useState<InventoryHeader | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [userRole, setUserRole] = useState<'base' | 'manager' | 'admin'>('base');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
   const [hasTemplates, setHasTemplates] = useState(false);
@@ -69,6 +69,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const orgId = useAppStore(state => state.context.org_id);
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
   
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
@@ -77,41 +78,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       updatePresence(header.id);
     }
   }, [header?.id]);
-
-  const checkUserPermissions = useCallback(async () => {
-    // Step 3: Add UUID validation
-    if (!orgId) {
-      console.log('⚠️ [PAGE] Missing org context for permissions');
-      return;
-    }
-    
-    if (orgId === 'null') {
-      console.error('❌ [PAGE] Invalid org UUID:', orgId);
-      return;
-    }
-    
-    try {
-      console.log('🔐 [PAGE] Checking permissions for orgId:', orgId);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: membership } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('org_id', orgId)
-        .single();
-
-      if (membership) {
-        const role = membership.role === 'admin' ? 'admin' : 
-                   membership.role === 'manager' ? 'manager' : 'base';
-        console.log('🔐 [PAGE] User role:', role);
-        setUserRole(role);
-      }
-    } catch (error) {
-      console.error('❌ [PAGE] Error checking permissions:', error);
-    }
-  }, [orgId]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
     // Step 3: Add guards for UUID validation
@@ -253,7 +219,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
 
     console.log('✅ [PAGE] Context changed, reloading:', { inventoryId, category, orgId, locationId });
-    checkUserPermissions();
     
     if (inventoryId) {
       loadSpecificInventory(inventoryId);
@@ -295,11 +260,11 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
   };
 
-  const canCreateInventory = userRole === 'admin' || userRole === 'manager';
-  const canApprove = userRole === 'admin' || userRole === 'manager';
+  const canCreateInventory = isAdmin;
+  const canApprove = isAdmin;
   const canComplete = true;
 
-  if (loading) {
+  if (loading || permissionsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />

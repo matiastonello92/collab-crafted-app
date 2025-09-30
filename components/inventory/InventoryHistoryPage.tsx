@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useAppStore } from '@/lib/store/unified';
+import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
 
 interface InventoryHistoryItem {
@@ -51,7 +52,6 @@ export function InventoryHistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [userRole, setUserRole] = useState<string>('');
   
   // Step 1: Use global store instead of local state
   const orgId = useAppStore(state => state.context.org_id);
@@ -59,35 +59,7 @@ export function InventoryHistoryPage() {
   const hasHydrated = useAppStore(state => state.hasHydrated);
   
   const supabase = useSupabase();
-
-  const loadUserRole = useCallback(async () => {
-    if (!locationId) return;
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get org_id from location
-      const { data: location } = await supabase
-        .from('locations')
-        .select('org_id')
-        .eq('id', locationId)
-        .single();
-
-      if (!location) return;
-
-      const { data: membership } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('org_id', location.org_id)
-        .single();
-
-      setUserRole(membership?.role || 'user');
-    } catch (error) {
-      console.error('❌ [HISTORY] Error loading user role:', error);
-    }
-  }, [locationId]);
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
 
   const loadInventories = useCallback(async () => {
     if (!locationId || locationId === 'null') {
@@ -142,8 +114,7 @@ export function InventoryHistoryPage() {
     
     console.log('📍 [HISTORY] Loading data for location:', locationId);
     loadInventories();
-    loadUserRole();
-  }, [hasHydrated, locationId, loadInventories, loadUserRole]);
+  }, [hasHydrated, locationId, loadInventories]);
 
   const filteredInventories = inventories.filter(item => {
     const matchesSearch = !searchTerm || 
@@ -178,7 +149,9 @@ export function InventoryHistoryPage() {
   };
 
   const canEdit = (status: string) => {
-    return status === 'approved' && ['admin', 'manager'].includes(userRole);
+    if (isAdmin) return true;
+    if (status === 'in_progress' || status === 'completed') return true;
+    return false;
   };
 
   return (
@@ -229,7 +202,7 @@ export function InventoryHistoryPage() {
         </CardHeader>
         
         <CardContent>
-          {loading ? (
+          {loading || permissionsLoading ? (
             <div className="text-center py-8">Caricamento storico inventari...</div>
           ) : (
             <Table>

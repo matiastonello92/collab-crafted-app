@@ -21,15 +21,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user profile to determine org
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+    // Get org_id from location instead of user profile for consistency
+    const { data: location, error: locationError } = await supabase
+      .from('locations')
       .select('org_id')
-      .eq('id', user.id)
+      .eq('id', validated.location_id)
       .single();
 
-    if (profileError || !profile) {
-      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    if (locationError || !location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     // Check for existing in-progress inventory
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const { data: header, error: headerError } = await supabase
       .from('inventory_headers')
       .insert({
-        org_id: profile.org_id,
+        org_id: location.org_id,
         location_id: validated.location_id,
         category: validated.category,
         started_by: user.id,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       if (templateItems && templateItems.length > 0) {
         const lines = templateItems.map(item => ({
           header_id: header.id,
-          org_id: profile.org_id,
+          org_id: location.org_id,
           location_id: validated.location_id,
           catalog_item_id: item.catalog_item_id,
           name_snapshot: item.catalog_item.name,
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
         if (lastLines && lastLines.length > 0) {
           const lines = lastLines.map(line => ({
             header_id: header.id,
-            org_id: profile.org_id,
+            org_id: location.org_id,
             location_id: validated.location_id,
             catalog_item_id: line.catalog_item_id,
             name_snapshot: line.name_snapshot,

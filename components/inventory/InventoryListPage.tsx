@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store/unified';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -61,7 +62,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [canManage, setCanManage] = useState(false);
 
   const supabase = useSupabase();
   const router = useRouter();
@@ -70,43 +70,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const orgId = useAppStore(state => state.context.org_id);
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
-
-  const checkUserPermissions = useCallback(async () => {
-    if (!locationId) {
-      console.log('⚠️ [LIST] Missing location context for permissions check');
-      return;
-    }
-    
-    try {
-      console.log('🔐 [LIST] Checking permissions for locationId:', locationId);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get org_id from location
-      const { data: location } = await supabase
-        .from('locations')
-        .select('org_id')
-        .eq('id', locationId)
-        .single();
-
-      if (!location) return;
-
-      const { data: membership } = await supabase
-        .from('memberships')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('org_id', location.org_id)
-        .single();
-
-      if (membership) {
-        const canManageValue = membership.role === 'admin' || membership.role === 'manager';
-        console.log('🔐 [LIST] User permissions:', { role: membership.role, canManage: canManageValue });
-        setCanManage(canManageValue);
-      }
-    } catch (error) {
-      console.error('❌ [LIST] Error checking permissions:', error);
-    }
-  }, [locationId]);
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
 
   const loadInventories = useCallback(async () => {
     if (!locationId || locationId === 'null') {
@@ -163,8 +127,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
 
     console.log('✅ [LIST] Loading data for location:', locationId);
     loadInventories();
-    checkUserPermissions();
-  }, [hasHydrated, locationId, loadInventories, checkUserPermissions]);
+  }, [hasHydrated, locationId, loadInventories]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);
@@ -186,6 +149,14 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
+  if (loading || permissionsLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -193,7 +164,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           <h1 className="text-3xl font-bold">Inventario {categoryLabels[category]}</h1>
           <p className="text-muted-foreground">Gestisci gli inventari per questa categoria</p>
         </div>
-        {canManage && (
+        {isAdmin && (
           <Button onClick={() => setShowCreateModal(true)} size="lg">
             <Plus className="mr-2 h-5 w-5" />
             Nuovo Inventario
@@ -227,7 +198,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nessun inventario trovato</p>
-              {canManage && (
+              {isAdmin && (
                 <Button 
                   variant="outline" 
                   className="mt-4"
