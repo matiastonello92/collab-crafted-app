@@ -88,8 +88,31 @@ export async function GET(req: Request) {
       else permSet.delete(name);
     });
 
-    // check if user is admin - CRITICAL FIX: correct parameter name
-    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id });
+    // Get user's org_id from profile
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single();
+
+    const orgId = profile?.org_id;
+
+    // Check platform admin
+    const { data: isPlatformAdmin } = await supabaseAdmin.rpc('is_platform_admin');
+    let isAdmin = isPlatformAdmin || false;
+
+    // If not platform admin, check org admin via membership
+    if (!isAdmin && orgId) {
+      const { data: membership } = await supabaseAdmin
+        .from('memberships')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('org_id', orgId)
+        .single();
+      
+      isAdmin = membership?.role === 'admin';
+    }
+
     if (isAdmin) permSet.add('*');
 
     const permissions = normalizeSet(Array.from(permSet));
