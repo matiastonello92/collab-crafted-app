@@ -78,7 +78,7 @@ export function InventoryHistoryPage() {
     } catch (error) {
       console.error('❌ [HISTORY] Error loading user role:', error);
     }
-  }, [orgId, supabase]);
+  }, [orgId]);
 
   const loadInventories = useCallback(async () => {
     // Step 2: Guards to prevent invalid UUID errors
@@ -125,7 +125,7 @@ export function InventoryHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, supabase]);
+  }, [orgId, locationId]);
 
   // Step 1: React to location changes
   useEffect(() => {
