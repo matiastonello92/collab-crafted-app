@@ -10,6 +10,14 @@ const RATE_LIMITS = {
   'POST:/api/settings/email-test': { limit: 5, window: 600 },
   'POST:/api/v1/admin/invitations': { limit: 20, window: 600 },
   'POST:/api/public/invite/accept': { limit: 20, window: 600 },
+  // Klyra Shifts - Rate Limits
+  'POST:/api/v1/rotas': { limit: 20, window: 60 },
+  'POST:/api/v1/shifts': { limit: 50, window: 60 },
+  'POST:/api/v1/shifts/[id]/assign': { limit: 30, window: 60 },
+  'POST:/api/v1/assignments/[id]/accept': { limit: 20, window: 60 },
+  'POST:/api/v1/availability': { limit: 30, window: 60 },
+  'POST:/api/v1/leave/requests': { limit: 10, window: 60 },
+  'POST:/api/v1/timeclock/punch': { limit: 10, window: 60 },
 } as const;
 
 const FALLBACK_LIMIT = { limit: 120, window: 60 };

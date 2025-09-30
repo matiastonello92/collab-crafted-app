@@ -1,0 +1,182 @@
+// Klyra Shifts - Core TypeScript Types
+
+export interface Rota {
+  id: string
+  org_id: string
+  location_id: string
+  week_start_date: string // ISO date (YYYY-MM-DD)
+  status: 'draft' | 'published' | 'locked'
+  labor_budget_eur?: number | null
+  notes?: string | null
+  created_by?: string | null
+  updated_by?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Shift {
+  id: string
+  org_id: string
+  location_id: string
+  rota_id: string
+  job_tag_id?: string | null
+  start_at: string // ISO datetime (timestamptz)
+  end_at: string
+  break_minutes: number
+  notes?: string | null
+  created_by?: string | null
+  updated_by?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ShiftAssignment {
+  id: string
+  shift_id: string
+  user_id: string
+  status: 'proposed' | 'assigned' | 'accepted' | 'declined'
+  proposed_at?: string | null
+  assigned_at?: string | null
+  responded_at?: string | null
+  created_at: string
+}
+
+export interface Availability {
+  id: string
+  org_id: string
+  user_id: string
+  weekday: number // 0=Sunday, 6=Saturday
+  time_range: string // tstzrange format
+  preference: 'preferred' | 'ok' | 'unavailable'
+  created_at: string
+  updated_at: string
+}
+
+export interface LeaveType {
+  id: string
+  org_id: string
+  key: string
+  label: string
+  color?: string | null
+  is_active: boolean
+  requires_approval: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface LeaveRequest {
+  id: string
+  org_id: string
+  user_id: string
+  type_id: string
+  start_at: string
+  end_at: string
+  reason?: string | null
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  approver_id?: string | null
+  approved_at?: string | null
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TimeClockEvent {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  kind: 'clock_in' | 'clock_out' | 'break_start' | 'break_end'
+  occurred_at: string
+  source: 'kiosk' | 'mobile' | 'manual'
+  notes?: string | null
+  created_at: string
+}
+
+export interface Timesheet {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  shift_id?: string | null
+  date: string // ISO date
+  clock_in?: string | null
+  clock_out?: string | null
+  break_minutes: number
+  regular_minutes: number
+  overtime_minutes: number
+  status: 'draft' | 'submitted' | 'approved'
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
+// API Request/Response Types
+
+export interface CreateRotaRequest {
+  location_id: string
+  week_start_date: string
+  labor_budget_eur?: number
+}
+
+export interface UpdateRotaStatusRequest {
+  status: 'draft' | 'published' | 'locked'
+}
+
+export interface CreateShiftRequest {
+  rota_id: string
+  job_tag_id?: string
+  start_at: string
+  end_at: string
+  break_minutes?: number
+  notes?: string
+}
+
+export interface UpdateShiftRequest {
+  start_at?: string
+  end_at?: string
+  break_minutes?: number
+  job_tag_id?: string
+  notes?: string
+}
+
+export interface AssignShiftRequest {
+  user_id: string
+  status?: 'proposed' | 'assigned'
+}
+
+export interface AcceptAssignmentRequest {
+  accept: boolean // true=accept, false=decline
+}
+
+export interface CreateAvailabilityRequest {
+  weekday: number
+  start_time: string // HH:mm format
+  end_time: string // HH:mm format
+  preference: 'preferred' | 'ok' | 'unavailable'
+}
+
+export interface CreateLeaveRequest {
+  type_id: string
+  start_at: string
+  end_at: string
+  reason?: string
+}
+
+export interface DecideLeaveRequest {
+  decision: 'approve' | 'reject'
+  notes?: string
+}
+
+export interface PunchClockRequest {
+  location_id: string
+  kind: 'clock_in' | 'clock_out' | 'break_start' | 'break_end'
+  occurred_at?: string // Optional, defaults to now()
+  source?: 'kiosk' | 'mobile'
+}
+
+// API Error Response
+export interface ApiError {
+  error: string
+  message?: string
+  details?: any
+}
