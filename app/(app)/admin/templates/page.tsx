@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { TemplateWizard } from '@/components/inventory/TemplateWizard';
 import { toast } from 'sonner';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
 
 interface Template {

@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useSupabase } from '@/hooks/useSupabase';
 
 interface CreateInventoryModalProps {
   isOpen: boolean;
@@ -37,7 +36,6 @@ export function CreateInventoryModal({
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [mode, setMode] = useState<'template' | 'last' | 'empty'>('template');
-  const supabase = useSupabase();
 
   // Load templates when modal opens
   useEffect(() => {

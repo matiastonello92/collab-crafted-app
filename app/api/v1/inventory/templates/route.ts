@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     if (location_id) query = query.eq('location_id', location_id);
     if (category) query = query.eq('category', category);
-    if (is_active !== null) query = query.eq('is_active', is_active === 'true');
+    if (is_active) query = query.eq('is_active', is_active === 'true');
 
     const { data, error } = await query;
 
