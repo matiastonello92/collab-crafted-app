@@ -93,13 +93,18 @@ export async function GET(req: Request) {
       .from('profiles')
       .select('org_id')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     const orgId = profile?.org_id;
 
-    // Check platform admin
-    const { data: isPlatformAdmin } = await supabaseAdmin.rpc('is_platform_admin');
-    let isAdmin = isPlatformAdmin || false;
+    // Check platform admin - direct query instead of RPC to avoid auth.uid() issue
+    const { data: platformAdminRecord } = await supabaseAdmin
+      .from('platform_admins')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    let isAdmin = !!platformAdminRecord;
 
     // If not platform admin, check org admin via membership
     if (!isAdmin && orgId) {
@@ -108,7 +113,7 @@ export async function GET(req: Request) {
         .select('role')
         .eq('user_id', user.id)
         .eq('org_id', orgId)
-        .single();
+        .maybeSingle();
       
       isAdmin = membership?.role === 'admin';
     }
