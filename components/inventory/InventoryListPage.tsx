@@ -82,9 +82,10 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   // Use Zustand selectors for proper reactivity
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
-  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
+  const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
   
-  const canDelete = isAdmin;
+  // User can delete if they are admin OR have wildcard permission (org admin or manager)
+  const canDelete = isAdmin || permissions.includes('*');
 
   const loadInventories = useCallback(async () => {
     if (!locationId || locationId === 'null') {
