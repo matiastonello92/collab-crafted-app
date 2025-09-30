@@ -72,27 +72,30 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const hasHydrated = useAppStore(state => state.hasHydrated);
 
   const checkUserPermissions = useCallback(async () => {
-    // Step 2: Add UUID validation
-    if (!orgId) {
-      console.log('⚠️ [LIST] Missing org context for permissions check');
-      return;
-    }
-    
-    if (orgId === 'null') {
-      console.error('❌ [LIST] Invalid org UUID for permissions:', orgId);
+    if (!locationId) {
+      console.log('⚠️ [LIST] Missing location context for permissions check');
       return;
     }
     
     try {
-      console.log('🔐 [LIST] Checking permissions for orgId:', orgId);
+      console.log('🔐 [LIST] Checking permissions for locationId:', locationId);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Get org_id from location
+      const { data: location } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', locationId)
+        .single();
+
+      if (!location) return;
 
       const { data: membership } = await supabase
         .from('memberships')
         .select('role')
         .eq('user_id', user.id)
-        .eq('org_id', orgId)
+        .eq('org_id', location.org_id)
         .single();
 
       if (membership) {
@@ -103,21 +106,15 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } catch (error) {
       console.error('❌ [LIST] Error checking permissions:', error);
     }
-  }, [orgId]);
+  }, [locationId]);
 
   const loadInventories = useCallback(async () => {
-    // Step 2: Robust guards to prevent UUID errors
-    if (!orgId || !locationId) {
-      console.log('⚠️ [LIST] Missing context, skipping load');
-      return;
-    }
-    
-    if (orgId === 'null' || locationId === 'null') {
-      console.error('❌ [LIST] Invalid UUID values:', { orgId, locationId });
+    if (!locationId || locationId === 'null') {
+      console.log('⚠️ [LIST] Invalid location, skipping load');
       return;
     }
 
-    console.log('📥 [LIST] Loading inventories:', { orgId, locationId, category, statusFilter });
+    console.log('📥 [LIST] Loading inventories for location:', locationId, 'category:', category);
     setLoading(true);
     try {
       let query = supabase
@@ -150,25 +147,24 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, category, statusFilter]);
+  }, [locationId, category, statusFilter]);
 
-  // Load data after hydration
   useEffect(() => {
     if (!hasHydrated) {
       console.log('⏳ [LIST] Waiting for store hydration...');
       return;
     }
 
-    if (!orgId || !locationId) {
-      console.log('⚠️ [LIST] Store hydrated but missing context:', { hasHydrated, orgId, locationId });
+    if (!locationId) {
+      console.log('⚠️ [LIST] Missing location context');
       setLoading(false);
       return;
     }
 
-    console.log('✅ [LIST] Context changed, reloading:', { orgId, locationId, category, statusFilter });
+    console.log('✅ [LIST] Loading data for location:', locationId);
     loadInventories();
     checkUserPermissions();
-  }, [hasHydrated, orgId, locationId, category, statusFilter]);
+  }, [hasHydrated, locationId, loadInventories, checkUserPermissions]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);

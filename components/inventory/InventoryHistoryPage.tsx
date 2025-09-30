@@ -61,41 +61,43 @@ export function InventoryHistoryPage() {
   const supabase = useSupabase();
 
   const loadUserRole = useCallback(async () => {
-    if (!orgId) return;
+    if (!locationId) return;
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Get org_id from location
+      const { data: location } = await supabase
+        .from('locations')
+        .select('org_id')
+        .eq('id', locationId)
+        .single();
+
+      if (!location) return;
+
       const { data: membership } = await supabase
         .from('memberships')
         .select('role')
         .eq('user_id', user.id)
-        .eq('org_id', orgId)
+        .eq('org_id', location.org_id)
         .single();
 
       setUserRole(membership?.role || 'user');
     } catch (error) {
       console.error('❌ [HISTORY] Error loading user role:', error);
     }
-  }, [orgId]);
+  }, [locationId]);
 
   const loadInventories = useCallback(async () => {
-    // Step 2: Guards to prevent invalid UUID errors
-    if (!orgId || !locationId) {
-      console.log('⚠️ [HISTORY] Missing context, skipping load');
+    if (!locationId || locationId === 'null') {
+      console.log('⚠️ [HISTORY] Invalid location, skipping load');
       return;
     }
     
-    if (orgId === 'null' || locationId === 'null') {
-      console.error('❌ [HISTORY] Invalid UUID values:', { orgId, locationId });
-      return;
-    }
-    
-    console.log('📥 [HISTORY] Loading inventories:', { orgId, locationId });
+    console.log('📥 [HISTORY] Loading inventories for location:', locationId);
     setLoading(true);
     try {
-      // Step 1: Add location_id filter
       const { data, error } = await supabase
         .from('inventory_headers')
         .select('*')
@@ -124,25 +126,24 @@ export function InventoryHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId]);
+  }, [locationId]);
 
-  // Step 1: React to location changes
   useEffect(() => {
     if (!hasHydrated) {
       console.log('⏳ [HISTORY] Waiting for hydration...');
       return;
     }
     
-    if (!orgId || !locationId) {
-      console.log('⚠️ [HISTORY] Missing context:', { orgId, locationId });
+    if (!locationId) {
+      console.log('⚠️ [HISTORY] Missing location context');
       setLoading(false);
       return;
     }
     
-    console.log('📍 [HISTORY] Loading inventories for location:', { orgId, locationId });
+    console.log('📍 [HISTORY] Loading data for location:', locationId);
     loadInventories();
     loadUserRole();
-  }, [hasHydrated, orgId, locationId, loadInventories, loadUserRole]);
+  }, [hasHydrated, locationId, loadInventories, loadUserRole]);
 
   const filteredInventories = inventories.filter(item => {
     const matchesSearch = !searchTerm || 
