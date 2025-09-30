@@ -99,7 +99,6 @@ export function InventoryHistoryPage() {
       const { data, error } = await supabase
         .from('inventory_headers')
         .select('*')
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .order('started_at', { ascending: false });
 

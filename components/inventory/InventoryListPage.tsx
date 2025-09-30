@@ -126,7 +126,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           *,
           profiles:started_by (full_name)
         `)
-        .eq('org_id', orgId)
         .eq('location_id', locationId)
         .eq('category', category)
         .order('started_at', { ascending: false });
