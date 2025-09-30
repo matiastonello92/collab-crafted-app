@@ -142,6 +142,24 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
   }, [locationId, category]);
 
+  const updateHeaderTotal = useCallback(async () => {
+    if (!header?.id || !locationId || locationId === 'null') return;
+    
+    try {
+      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&id=${header.id}`;
+      const response = await fetch(url, { credentials: 'include' });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data) && data.length > 0) {
+          setHeader(prev => prev ? { ...prev, total_value: data[0].total_value } : null);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating header total:', error);
+    }
+  }, [header?.id, locationId, category]);
+
   const checkForTemplates = useCallback(async () => {
     if (!locationId || locationId === 'null') return;
 
@@ -351,11 +369,11 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       {/* Inventory Table */}
       <InventoryTable 
         headerId={header.id}
-        canManage={canApprove}
+        canManage={header.status !== 'approved'}
         canEdit={header.status !== 'approved' || canApprove}
         locationId={locationId || ''}
         category={category}
-        onHeaderUpdate={loadCurrentInventory}
+        onHeaderUpdate={updateHeaderTotal}
       />
     </div>
   );

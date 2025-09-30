@@ -160,12 +160,10 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           <h1 className="text-3xl font-bold">Inventario {categoryLabels[category]}</h1>
           <p className="text-muted-foreground">Gestisci gli inventari per questa categoria</p>
         </div>
-        {isAdmin && (
-          <Button onClick={() => setShowCreateModal(true)} size="lg">
-            <Plus className="mr-2 h-5 w-5" />
-            Nuovo Inventario
-          </Button>
-        )}
+        <Button onClick={() => setShowCreateModal(true)} size="lg">
+          <Plus className="mr-2 h-5 w-5" />
+          Inizia Nuovo Inventario
+        </Button>
       </div>
 
       <Card>
@@ -194,16 +192,14 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nessun inventario trovato</p>
-              {isAdmin && (
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Crea il primo inventario
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Crea il primo inventario
+              </Button>
             </div>
           ) : (
             <Table>
