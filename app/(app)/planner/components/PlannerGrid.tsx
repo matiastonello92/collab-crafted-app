@@ -5,13 +5,27 @@ import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSe
 import { ShiftCard } from './ShiftCard'
 import { DayColumn } from './DayColumn'
 import { getWeekBounds } from '@/lib/shifts/week-utils'
-import type { Rota, ShiftWithAssignments } from '@/types/shifts'
+import type { Rota, ShiftWithAssignments, LeaveRequest } from '@/types/shifts'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
+
+interface LeaveRequestWithType extends LeaveRequest {
+  leave_types: {
+    id: string
+    key: string
+    label: string
+    color: string | null
+  }
+  profiles: {
+    id: string
+    full_name: string | null
+  }
+}
 
 interface Props {
   rota?: Rota
   shifts: ShiftWithAssignments[]
+  leaves: LeaveRequestWithType[]
   weekStart: string
   locationId: string
   onRefresh: () => void
@@ -20,7 +34,8 @@ interface Props {
 
 export const PlannerGrid = memo(function PlannerGrid({ 
   rota, 
-  shifts, 
+  shifts,
+  leaves,
   weekStart, 
   locationId,
   onRefresh,
@@ -152,6 +167,7 @@ export const PlannerGrid = memo(function PlannerGrid({
               key={day}
               date={day}
               shifts={shiftsByDayAndTag[day] || {}}
+              leaves={leaves}
               rota={rota}
               allJobTags={allJobTags}
             />

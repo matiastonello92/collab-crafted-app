@@ -64,6 +64,19 @@ export async function POST(request: Request) {
       )
     }
 
+    // Soft validation: warn if overlapping with assigned shifts
+    const { checkShiftCollision } = await import('@/lib/shifts/collision-checker')
+    const hasShiftOverlap = await checkShiftCollision(
+      user.id,
+      validated.start_at,
+      validated.end_at
+    )
+
+    let warning = null
+    if (hasShiftOverlap) {
+      warning = 'This leave request overlaps with one or more assigned shifts. Please coordinate with your manager.'
+    }
+
     // Create leave request
     const { data: leaveRequest, error } = await supabase
       .from('leave_requests')
@@ -84,7 +97,10 @@ export async function POST(request: Request) {
       throw error
     }
 
-    return NextResponse.json({ leave_request: leaveRequest }, { status: 201 })
+    return NextResponse.json({ 
+      leave_request: leaveRequest,
+      warning 
+    }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/v1/leave/requests:', error)
     

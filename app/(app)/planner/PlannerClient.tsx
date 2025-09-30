@@ -19,7 +19,7 @@ export function PlannerClient() {
   const [locationsLoading, setLocationsLoading] = useState(true)
   
   const { permissions, isLoading: permLoading } = usePermissions(selectedLocation || undefined)
-  const { rota, shifts, loading, error, mutate } = useRotaData(selectedLocation, currentWeek)
+  const { rota, shifts, leaves, loading, error, mutate } = useRotaData(selectedLocation, currentWeek)
 
   // Load accessible locations
   useEffect(() => {
@@ -103,6 +103,7 @@ export function PlannerClient() {
           <PlannerGrid 
             rota={rota}
             shifts={shifts}
+            leaves={leaves}
             weekStart={currentWeek}
             locationId={selectedLocation}
             onRefresh={mutate}

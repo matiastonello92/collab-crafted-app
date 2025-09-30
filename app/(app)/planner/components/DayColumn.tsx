@@ -3,19 +3,42 @@
 import { useDroppable } from '@dnd-kit/core'
 import { ShiftCard } from './ShiftCard'
 import { formatDayHeader, isToday as checkIsToday } from '@/lib/shifts/week-utils'
-import type { ShiftWithAssignments, Rota } from '@/types/shifts'
+import type { ShiftWithAssignments, Rota, LeaveRequest } from '@/types/shifts'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Calendar } from 'lucide-react'
+
+interface LeaveRequestWithType extends LeaveRequest {
+  leave_types: {
+    id: string
+    key: string
+    label: string
+    color: string | null
+  }
+  profiles: {
+    id: string
+    full_name: string | null
+  }
+}
 
 interface Props {
   date: string // ISO date
   shifts: Record<string, ShiftWithAssignments[]> // grouped by job_tag_id
+  leaves: LeaveRequestWithType[] // approved leaves for this day
   rota?: Rota
   allJobTags: string[] // All possible job tags to show consistent rows
 }
 
-export function DayColumn({ date, shifts, rota, allJobTags }: Props) {
+export function DayColumn({ date, shifts, leaves, rota, allJobTags }: Props) {
   const dayName = formatDayHeader(date)
   const isToday = checkIsToday(date)
+  
+  // Filter leaves for this specific date
+  const dayLeaves = leaves.filter(leave => {
+    const leaveStart = new Date(leave.start_at).toISOString().split('T')[0]
+    const leaveEnd = new Date(leave.end_at).toISOString().split('T')[0]
+    return date >= leaveStart && date <= leaveEnd
+  })
   
   return (
     <div className={cn(
@@ -29,6 +52,26 @@ export function DayColumn({ date, shifts, rota, allJobTags }: Props) {
       )}>
         <div className="capitalize">{dayName}</div>
       </div>
+
+      {/* Leave badges (se presenti) */}
+      {dayLeaves.length > 0 && (
+        <div className="p-2 space-y-1 bg-muted/30 border-b">
+          {dayLeaves.map(leave => (
+            <Badge
+              key={leave.id}
+              variant="outline"
+              className="text-xs"
+              style={{ 
+                backgroundColor: `${leave.leave_types.color}20`,
+                borderColor: leave.leave_types.color || '#6b7280'
+              }}
+            >
+              <Calendar className="h-3 w-3 mr-1" />
+              {leave.profiles.full_name?.split(' ')[0] || 'User'}: {leave.leave_types.label}
+            </Badge>
+          ))}
+        </div>
+      )}
       
       {/* Righe per job tag */}
       <div className="divide-y">

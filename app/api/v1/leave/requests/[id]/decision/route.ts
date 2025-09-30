@@ -76,7 +76,13 @@ export async function PUT(
       throw error
     }
 
-    return NextResponse.json({ leave_request: updated })
+    // TODO: Send notification to user (email/push)
+    // This would be implemented via Supabase Edge Function or email service
+
+    return NextResponse.json({ 
+      leave_request: updated,
+      message: `Leave request ${newStatus} successfully`
+    })
   } catch (error) {
     console.error('Error in PUT /api/v1/leave/requests/[id]/decision:', error)
     
