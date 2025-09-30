@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { EditProductDialog } from './EditProductDialog';
@@ -50,6 +51,8 @@ export function CatalogPage({ category }: CatalogPageProps) {
   const [showActiveOnly, setShowActiveOnly] = useState(true);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Use global store and permissions hook
   const locationId = useAppStore(state => state.context.location_id);
@@ -87,9 +90,12 @@ export function CatalogPage({ category }: CatalogPageProps) {
   }, [hasHydrated, loadCatalog]);
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo prodotto? Questa azione non può essere annullata.')) {
+    if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) {
       return;
     }
+
+    // Ottimistic update: rimuovi subito dalla UI
+    setItems(prevItems => prevItems.filter(item => item.id !== productId));
 
     try {
       const response = await fetch(`/api/v1/inventory/catalog?id=${productId}`, {
@@ -98,14 +104,49 @@ export function CatalogPage({ category }: CatalogPageProps) {
 
       if (response.ok) {
         toast.success('Prodotto eliminato');
-        loadCatalog();
       } else {
+        // Rollback in caso di errore
+        loadCatalog();
         const error = await response.json();
         toast.error(error.error || 'Errore durante l\'eliminazione');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
+      // Rollback in caso di errore
+      loadCatalog();
       toast.error('Errore durante l\'eliminazione');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Eliminare ${selectedIds.size} prodotti selezionati?`)) return;
+
+    const idsToDelete = Array.from(selectedIds);
+    
+    // Aggiornamento ottimistico
+    setItems(prevItems => prevItems.filter(item => !selectedIds.has(item.id)));
+    setSelectedIds(new Set());
+    setIsDeleting(true);
+
+    try {
+      const results = await Promise.allSettled(
+        idsToDelete.map(id => 
+          fetch(`/api/v1/inventory/catalog?id=${id}`, { method: 'DELETE' })
+        )
+      );
+
+      const failed = results.filter(r => r.status === 'rejected').length;
+      if (failed > 0) {
+        toast.error(`${failed} prodotti non eliminati. Ricarico...`);
+        loadCatalog(); // Rollback
+      } else {
+        toast.success(`${idsToDelete.length} prodotti eliminati`);
+      }
+    } catch (error) {
+      toast.error('Errore durante l\'eliminazione multipla');
+      loadCatalog(); // Rollback
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -132,10 +173,22 @@ export function CatalogPage({ category }: CatalogPageProps) {
           </p>
         </div>
         {canManage && (
-          <Button onClick={() => setShowNewProductDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuovo Prodotto
-          </Button>
+          <div className="flex gap-2">
+            {selectedIds.size > 0 && (
+              <Button 
+                variant="destructive"
+                onClick={handleBulkDelete}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Elimina {selectedIds.size} prodotti
+              </Button>
+            )}
+            <Button onClick={() => setShowNewProductDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuovo Prodotto
+            </Button>
+          </div>
         )}
       </div>
 
@@ -190,6 +243,20 @@ export function CatalogPage({ category }: CatalogPageProps) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  {canManage && (
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedIds.size === filteredItems.length && filteredItems.length > 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedIds(new Set(filteredItems.map(i => i.id)));
+                          } else {
+                            setSelectedIds(new Set());
+                          }
+                        }}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>Nome Prodotto</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>U.M.</TableHead>
@@ -201,6 +268,22 @@ export function CatalogPage({ category }: CatalogPageProps) {
               <TableBody>
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
+                    {canManage && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(item.id)}
+                          onCheckedChange={(checked) => {
+                            const newSelected = new Set(selectedIds);
+                            if (checked) {
+                              newSelected.add(item.id);
+                            } else {
+                              newSelected.delete(item.id);
+                            }
+                            setSelectedIds(newSelected);
+                          }}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>
                       {item.product_category && (
@@ -221,6 +304,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => setEditingProduct(item)}
+                            disabled={isDeleting}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -228,6 +312,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteProduct(item.id)}
+                            disabled={isDeleting}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
