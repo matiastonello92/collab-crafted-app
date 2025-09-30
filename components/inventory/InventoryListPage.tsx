@@ -89,7 +89,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const canDelete = isAdmin || permissions.includes('*');
 
   const loadInventories = useCallback(async () => {
-    if (!locationId || locationId === 'null') {
+    if (!locationId) {
       console.log('⚠️ [LIST] Invalid location, skipping load');
       return;
     }

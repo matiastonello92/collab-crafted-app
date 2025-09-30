@@ -80,7 +80,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [header?.id]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
-    if (!locationId || locationId === 'null') {
+    if (!locationId) {
       console.log('Invalid location ID, skipping specific inventory load');
       return;
     }
@@ -113,7 +113,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [locationId, category]);
 
   const loadCurrentInventory = useCallback(async () => {
-    if (!locationId || locationId === 'null') {
+    if (!locationId) {
       console.log('Invalid location ID, skipping current inventory load');
       return;
     }
@@ -144,7 +144,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [locationId, category]);
 
   const updateHeaderTotal = useCallback(async () => {
-    if (!header?.id || !locationId || locationId === 'null') return;
+    if (!header?.id || !locationId) return;
     
     try {
       const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&id=${header.id}`;
@@ -162,7 +162,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [header?.id, locationId, category]);
 
   const checkForTemplates = useCallback(async () => {
-    if (!locationId || locationId === 'null') return;
+    if (!locationId) return;
 
     try {
       const response = await fetch(
