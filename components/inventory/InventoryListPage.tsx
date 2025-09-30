@@ -110,7 +110,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, statusFilter]);
+  }, [locationId, category, statusFilter, supabase]);
 
   useEffect(() => {
     if (!hasHydrated) {

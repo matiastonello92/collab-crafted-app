@@ -33,11 +33,7 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
   const [savingItems, setSavingItems] = useState<Set<string>>(new Set());
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  useEffect(() => {
-    loadLines();
-  }, [headerId]);
-
-  const loadLines = async () => {
+  const loadLines = useCallback(async () => {
     try {
       const response = await fetch(`/api/v1/inventory/lines?header_id=${headerId}`);
       if (response.ok) {
@@ -49,7 +45,11 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
     } finally {
       setLoading(false);
     }
-  };
+  }, [headerId]);
+
+  useEffect(() => {
+    loadLines();
+  }, [loadLines]);
 
   const handleDeleteLine = async (lineId: string) => {
     if (!confirm('Sei sicuro di voler eliminare questo prodotto dall\'inventario?')) return;

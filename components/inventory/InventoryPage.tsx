@@ -109,7 +109,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, supabase]);
+  }, [locationId, category]);
 
   const loadCurrentInventory = useCallback(async () => {
     if (!locationId || locationId === 'null') {
@@ -140,7 +140,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, supabase]);
+  }, [locationId, category]);
 
   const checkForTemplates = useCallback(async () => {
     if (!locationId || locationId === 'null') return;

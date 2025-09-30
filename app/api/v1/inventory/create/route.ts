@@ -32,21 +32,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
-    // Check for existing in-progress inventory
-    const { data: existing } = await supabase
-      .from('inventory_headers')
-      .select('id')
-      .eq('location_id', validated.location_id)
-      .eq('category', validated.category)
-      .eq('status', 'in_progress')
-      .maybeSingle();
-
-    if (existing) {
-      return NextResponse.json({ 
-        error: 'An inventory is already in progress for this category' 
-      }, { status: 409 });
-    }
-
     let template_id = validated.template_id;
     let template_version = null;
 

@@ -54,7 +54,6 @@ export function InventoryHistoryPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   
   // Step 1: Use global store instead of local state
-  const orgId = useAppStore(state => state.context.org_id);
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
   
