@@ -35,10 +35,10 @@ export async function GET(req: Request) {
       .eq('user_id', user.id)
       .eq('is_active', true);
 
+    // Se locationId è fornito, filtra per quella location specifica
+    // Altrimenti recupera TUTTI i roles dell'utente (non solo location_id NULL)
     if (locationId) {
-      assignmentsQuery = assignmentsQuery.in('location_id', [locationId, null]);
-    } else {
-      assignmentsQuery = assignmentsQuery.is('location_id', null);
+      assignmentsQuery = assignmentsQuery.eq('location_id', locationId);
     }
 
     const { data: assignments, error: assignErr } = await assignmentsQuery;
@@ -75,10 +75,10 @@ export async function GET(req: Request) {
       .select('granted, location_id, permissions!inner(name)')
       .eq('user_id', user.id);
 
+    // Se locationId è fornito, filtra per quella location specifica
+    // Altrimenti recupera TUTTI gli overrides (non solo location_id NULL)
     if (locationId) {
-      overridesQuery = overridesQuery.in('location_id', [locationId, null]);
-    } else {
-      overridesQuery = overridesQuery.is('location_id', null);
+      overridesQuery = overridesQuery.eq('location_id', locationId);
     }
 
     const { data: overrides } = await overridesQuery;
