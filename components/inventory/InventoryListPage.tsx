@@ -8,13 +8,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Plus, Eye, FileText } from 'lucide-react';
+import { Loader2, Plus, Eye, FileText, Trash } from 'lucide-react';
 import { CreateInventoryModal } from './CreateInventoryModal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -62,6 +72,9 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [inventoryToDelete, setInventoryToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const supabase = useSupabase();
   const router = useRouter();
@@ -70,6 +83,8 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
   const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId || undefined);
+  
+  const canDelete = isAdmin;
 
   const loadInventories = useCallback(async () => {
     if (!locationId || locationId === 'null') {
@@ -133,6 +148,37 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     setShowCreateModal(false);
     router.push(`/inventory/${category}/${inventoryId}`);
   };
+
+  const handleDeleteClick = useCallback((inventoryId: string) => {
+    setInventoryToDelete(inventoryId);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!inventoryToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/v1/inventory/headers?id=${inventoryToDelete}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore durante l\'eliminazione');
+      }
+
+      toast.success('Inventario eliminato con successo');
+      await loadInventories();
+    } catch (error) {
+      console.error('Error deleting inventory:', error);
+      toast.error('Impossibile eliminare l\'inventario');
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setInventoryToDelete(null);
+    }
+  }, [inventoryToDelete, loadInventories]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -232,14 +278,26 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                       {inventory.notes || '-'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewInventory(inventory.id)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Visualizza
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewInventory(inventory.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Visualizza
+                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(inventory.id)}
+                          >
+                            <Trash className="h-4 w-4 mr-1" />
+                            Elimina
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -258,6 +316,34 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           onSuccess={handleInventoryCreated}
         />
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Elimina inventario</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler eliminare questo inventario? Questa azione è irreversibile e verranno eliminati anche tutti i dati associati.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Eliminazione...
+                </>
+              ) : (
+                'Elimina'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -207,3 +207,53 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const headerId = searchParams.get('id');
+
+    if (!headerId) {
+      return NextResponse.json({ error: 'Header ID is required' }, { status: 400 });
+    }
+
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get header to verify it exists
+    const { data: header, error: fetchError } = await supabase
+      .from('inventory_headers')
+      .select('*')
+      .eq('id', headerId)
+      .single();
+
+    if (fetchError || !header) {
+      return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
+    }
+
+    // Delete associated inventory_lines first
+    await supabase
+      .from('inventory_lines')
+      .delete()
+      .eq('header_id', headerId);
+
+    // Delete the header
+    const { error: deleteError } = await supabase
+      .from('inventory_headers')
+      .delete()
+      .eq('id', headerId);
+
+    if (deleteError) {
+      console.error('Error deleting inventory header:', deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error('Error in headers DELETE:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
