@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,7 +80,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     console.log('📥 [LIST] Loading inventories for location:', locationId, 'category:', category);
     setLoading(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('inventory_headers')
         .select(`
           *,
@@ -89,12 +89,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
         .eq('location_id', locationId)
         .eq('category', category)
         .order('started_at', { ascending: false });
-
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('❌ [LIST] Error loading inventories:', error);
@@ -110,7 +104,13 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, statusFilter, supabase]);
+  }, [locationId, category, supabase]);
+
+  // Client-side filtering for better performance
+  const filteredInventories = useMemo(() => {
+    if (statusFilter === 'all') return inventories;
+    return inventories.filter(inv => inv.status === statusFilter);
+  }, [inventories, statusFilter]);
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -193,7 +193,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
-          ) : inventories.length === 0 ? (
+          ) : filteredInventories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nessun inventario trovato</p>
@@ -221,7 +221,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inventories.map((inventory) => (
+                {filteredInventories.map((inventory) => (
                   <TableRow key={inventory.id}>
                     <TableCell>{formatDate(inventory.started_at)}</TableCell>
                     <TableCell>
