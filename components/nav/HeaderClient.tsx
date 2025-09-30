@@ -24,19 +24,25 @@ export default function HeaderClient({
   const router = useRouter();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
-  const prevContext = useHydratedContext(); // TOP-LEVEL hook call
+  const context = useHydratedContext();
   const { setContext } = useHydratedStore();
   useEffectivePermissions();
 
   useEffect(() => {
     const active = locations.find(l => l.id === activeLocationId) || null;
-    // Use captured context, don't call hook inside effect
     setContext({
-      ...prevContext,
+      org_id: context.org_id,
+      user_id: context.user_id,
       location_id: active?.id ?? null,
       location_name: active?.name ?? null,
     });
-  }, [locations, activeLocationId, setContext, prevContext]);
+    
+    console.log('📍 [HEADER] Location changed:', {
+      old: context.location_id,
+      new: active?.id,
+      orgId: context.org_id
+    });
+  }, [locations, activeLocationId, setContext, context.org_id, context.user_id]);
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
   useEffect(() => {

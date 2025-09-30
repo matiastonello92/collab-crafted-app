@@ -13,7 +13,7 @@ import { AuthDebug } from '@/components/debug/AuthDebug';
 import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
-import { useHydratedStore } from '@/lib/store/useHydratedStore';
+import { useAppStore } from '@/lib/store/unified';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -64,10 +64,12 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [hasTemplates, setHasTemplates] = useState(false);
 
   const supabase = useSupabase();
-  const store = useHydratedStore();
-  const hasHydrated = store.hasHydrated;
-  const orgId = store.context.org_id;
-  const locationId = store.context.location_id;
+  
+  // Use Zustand selectors for proper reactivity
+  const orgId = useAppStore(state => state.context.org_id);
+  const locationId = useAppStore(state => state.context.location_id);
+  const hasHydrated = useAppStore(state => state.hasHydrated);
+  
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } catch (error) {
       console.error('❌ [PAGE] Error checking permissions:', error);
     }
-  }, [orgId, supabase]);
+  }, [orgId]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
     if (!orgId || !locationId) {
@@ -208,7 +210,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   useEffect(() => {
     if (!hasHydrated) {
       console.log('⏳ [PAGE] Waiting for store hydration...');
-      // Keep loading = true, don't set to false
       return;
     }
 
@@ -218,7 +219,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       return;
     }
 
-    console.log('✅ [PAGE] Store hydrated with context, loading data:', { hasHydrated, orgId, locationId, category, inventoryId });
+    console.log('✅ [PAGE] Context changed, reloading:', { inventoryId, category, orgId, locationId });
     checkUserPermissions();
     
     if (inventoryId) {
@@ -228,7 +229,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
     
     checkForTemplates();
-  }, [hasHydrated, orgId, locationId, category, inventoryId, checkUserPermissions, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
+  }, [hasHydrated, orgId, locationId, category, inventoryId]);
 
   const handleInventoryCreated = async (headerId: string) => {
     console.log('✅ [CREATE] Inventory created successfully with ID:', headerId);

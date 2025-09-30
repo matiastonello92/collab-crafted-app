@@ -13,7 +13,7 @@ import { CreateInventoryModal } from './CreateInventoryModal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { useHydratedStore } from '@/lib/store/useHydratedStore';
+import { useAppStore } from '@/lib/store/unified';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -65,10 +65,11 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
 
   const supabase = useSupabase();
   const router = useRouter();
-  const store = useHydratedStore();
-  const hasHydrated = store.hasHydrated;
-  const orgId = store.context.org_id;
-  const locationId = store.context.location_id;
+  
+  // Use Zustand selectors for proper reactivity
+  const orgId = useAppStore(state => state.context.org_id);
+  const locationId = useAppStore(state => state.context.location_id);
+  const hasHydrated = useAppStore(state => state.hasHydrated);
 
   const checkUserPermissions = useCallback(async () => {
     if (!orgId) return;
@@ -92,7 +93,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } catch (error) {
       console.error('❌ [LIST] Error checking permissions:', error);
     }
-  }, [orgId, supabase]);
+  }, [orgId]);
 
   const loadInventories = useCallback(async () => {
     if (!orgId || !locationId) {
@@ -134,13 +135,12 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [orgId, locationId, category, statusFilter, supabase]);
+  }, [orgId, locationId, category, statusFilter]);
 
   // Load data after hydration
   useEffect(() => {
     if (!hasHydrated) {
       console.log('⏳ [LIST] Waiting for store hydration...');
-      // Keep loading = true, don't set to false
       return;
     }
 
@@ -150,10 +150,10 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       return;
     }
 
-    console.log('✅ [LIST] Store hydrated with context, loading data:', { hasHydrated, orgId, locationId, category });
+    console.log('✅ [LIST] Context changed, reloading:', { orgId, locationId, category, statusFilter });
     loadInventories();
     checkUserPermissions();
-  }, [hasHydrated, orgId, locationId, category, loadInventories, checkUserPermissions]);
+  }, [hasHydrated, orgId, locationId, category, statusFilter]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);
