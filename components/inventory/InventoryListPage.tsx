@@ -82,10 +82,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     try {
       const { data, error } = await supabase
         .from('inventory_headers')
-        .select(`
-          *,
-          profiles:started_by (full_name)
-        `)
+        .select('*')
         .eq('location_id', locationId)
         .eq('category', category)
         .order('started_at', { ascending: false });
@@ -230,7 +227,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {inventory.profiles?.full_name || 'Utente sconosciuto'}
+                      Utente
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(inventory.total_value)}
