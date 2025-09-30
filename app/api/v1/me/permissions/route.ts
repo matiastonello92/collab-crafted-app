@@ -10,7 +10,8 @@ export const revalidate = 300; // 5min cache
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const locationId = url.searchParams.get('locationId') || undefined;
+    const rawLocationId = url.searchParams.get('locationId');
+    const locationId = (rawLocationId === 'null' || !rawLocationId) ? undefined : rawLocationId;
 
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
