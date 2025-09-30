@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Copy, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { TemplateWizard } from '@/components/inventory/TemplateWizard';
 import { toast } from 'sonner';
-import { useSupabase } from '@/hooks/useSupabase';
+import { useAppStore } from '@/lib/store';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Template {
   id: string;
@@ -32,43 +33,18 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const supabase = useSupabase();
+  
+  const { context, hasHydrated } = useAppStore();
+  const locationId = context.location_id;
+  const { isAdmin } = usePermissions(locationId || undefined);
 
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  useEffect(() => {
-    if (userProfile) {
-      loadTemplates();
-    }
-  }, [userProfile]);
-
-  const loadUserProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('org_id, default_location_id')
-        .eq('id', user.id)
-        .single();
-
-      setUserProfile(profile);
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-    }
-  };
-
-  const loadTemplates = async () => {
-    if (!userProfile?.org_id) return;
+  const loadTemplates = useCallback(async () => {
+    if (!locationId) return;
     
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/v1/inventory/templates?org_id=${userProfile.org_id}`
+        `/api/v1/inventory/templates?location_id=${locationId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -80,7 +56,13 @@ export default function TemplatesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locationId]);
+
+  useEffect(() => {
+    if (hasHydrated && locationId) {
+      loadTemplates();
+    }
+  }, [hasHydrated, locationId, loadTemplates]);
 
   const handleToggleActive = async (templateId: string, currentActive: boolean) => {
     try {
@@ -160,7 +142,7 @@ export default function TemplatesPage() {
     cleaning: 'bg-green-100 text-green-800'
   };
 
-  if (loading) {
+  if (!hasHydrated || loading) {
     return (
       <div className="container mx-auto py-6">
         <div className="text-center">Caricamento template...</div>
@@ -272,7 +254,7 @@ export default function TemplatesPage() {
           loadTemplates();
           handleCloseWizard();
         }}
-        locationId={userProfile?.default_location_id || ''}
+        locationId={locationId || ''}
         editingTemplate={editingTemplate || undefined}
       />
     </div>
