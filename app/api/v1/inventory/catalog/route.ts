@@ -19,11 +19,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const locationId = searchParams.get('location_id');
     const category = searchParams.get('category');
-    const orgId = searchParams.get('org_id');
 
-    if (!locationId || !category || !orgId) {
+    if (!locationId || !category) {
       return NextResponse.json(
-        { error: 'location_id, category, and org_id are required' },
+        { error: 'location_id and category are required' },
         { status: 400 }
       );
     }
@@ -32,7 +31,6 @@ export async function GET(request: NextRequest) {
     const { data: items, error } = await supabase
       .from('inventory_catalog_items')
       .select('*')
-      .eq('org_id', orgId)
       .eq('location_id', locationId)
       .eq('category', category)
       .eq('is_active', true)
@@ -56,28 +54,27 @@ export async function POST(request: NextRequest) {
     const validated = createCatalogItemSchema.parse(body);
 
     const supabase = await createSupabaseServerClient();
-    // Get user's org_id from session or context
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get org_id from user's profile or membership
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Get org_id from location instead of profile
+    const { data: location, error: locationError } = await supabase
+      .from('locations')
       .select('org_id')
-      .eq('id', user.id)
+      .eq('id', validated.location_id)
       .single();
 
-    if (!profile?.org_id) {
-      return NextResponse.json({ error: 'User org not found' }, { status: 403 });
+    if (locationError || !location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 });
     }
 
     const { data: item, error } = await supabase
       .from('inventory_catalog_items')
       .insert({
         ...validated,
-        org_id: profile.org_id,
+        org_id: location.org_id,
       })
       .select()
       .single();

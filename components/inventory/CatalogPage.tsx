@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
-import { useSupabase } from '@/hooks/useSupabase';
 import { toast } from 'sonner';
 import { EditProductDialog } from './EditProductDialog';
 import { NewProductForm } from './NewProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useAppStore } from '@/lib/store/unified';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface CatalogPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -47,61 +48,21 @@ export function CatalogPage({ category }: CatalogPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showActiveOnly, setShowActiveOnly] = useState(true);
-  const [userRole, setUserRole] = useState<string>('');
-  const [orgId, setOrgId] = useState<string>('');
-  const [locationId, setLocationId] = useState<string>('');
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [showNewProductDialog, setShowNewProductDialog] = useState(false);
   
-  const supabase = useSupabase();
+  // Use global store and permissions hook
+  const locationId = useAppStore(state => state.context.location_id);
+  const hasHydrated = useAppStore(state => state.hasHydrated);
+  const { isAdmin } = usePermissions(locationId || undefined);
 
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  useEffect(() => {
-    if (orgId && locationId) {
-      loadCatalog();
-    }
-  }, [orgId, locationId, category, showActiveOnly]);
-
-  const loadUserProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('org_id, default_location_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profile) {
-        setOrgId(profile.org_id);
-        setLocationId(profile.default_location_id || '');
-
-        const { data: membership } = await supabase
-          .from('memberships')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('org_id', profile.org_id)
-          .single();
-
-        setUserRole(membership?.role || 'base');
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      toast.error('Errore nel caricamento del profilo');
-    }
-  };
-
-  const loadCatalog = async () => {
-    if (!orgId || !locationId) return;
+  const loadCatalog = useCallback(async () => {
+    if (!locationId) return;
     
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/v1/inventory/catalog?org_id=${orgId}&location_id=${locationId}&category=${category}${showActiveOnly ? '&is_active=true' : ''}`
+        `/api/v1/inventory/catalog?location_id=${locationId}&category=${category}${showActiveOnly ? '&is_active=true' : ''}`
       );
       
       if (response.ok) {
@@ -118,7 +79,12 @@ export function CatalogPage({ category }: CatalogPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locationId, category, showActiveOnly]);
+
+  useEffect(() => {
+    if (!hasHydrated || !locationId) return;
+    loadCatalog();
+  }, [hasHydrated, loadCatalog]);
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Sei sicuro di voler eliminare questo prodotto? Questa azione non può essere annullata.')) {
@@ -153,7 +119,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
     return matchesSearch && matchesCategory;
   });
 
-  const canManage = userRole === 'admin' || userRole === 'manager';
+  const canManage = isAdmin;
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -293,7 +259,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
             <DialogTitle>Nuovo Prodotto - {categoryLabels[category]}</DialogTitle>
           </DialogHeader>
           <NewProductForm
-            locationId={locationId}
+            locationId={locationId || ''}
             category={category}
             onProductCreated={() => {
               setShowNewProductDialog(false);
