@@ -28,8 +28,18 @@ export default function HeaderClient({
   const { setContext } = useHydratedStore();
   useEffectivePermissions();
 
+  // Step 4: Verify timing and add detailed logging
   useEffect(() => {
     const active = locations.find(l => l.id === activeLocationId) || null;
+    
+    console.log('📍 [HEADER] Setting context:', {
+      org_id: context.org_id,
+      user_id: context.user_id,
+      old_location_id: context.location_id,
+      new_location_id: active?.id ?? null,
+      location_name: active?.name ?? null
+    });
+    
     setContext({
       org_id: context.org_id,
       user_id: context.user_id,
@@ -37,11 +47,7 @@ export default function HeaderClient({
       location_name: active?.name ?? null,
     });
     
-    console.log('📍 [HEADER] Location changed:', {
-      old: context.location_id,
-      new: active?.id,
-      orgId: context.org_id
-    });
+    console.log('✅ [HEADER] Context updated successfully');
   }, [locations, activeLocationId, setContext, context.org_id, context.user_id]);
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è

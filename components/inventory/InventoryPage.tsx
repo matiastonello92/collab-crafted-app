@@ -79,7 +79,17 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [header?.id]);
 
   const checkUserPermissions = useCallback(async () => {
-    if (!orgId) return;
+    // Step 3: Add UUID validation
+    if (!orgId) {
+      console.log('⚠️ [PAGE] Missing org context for permissions');
+      return;
+    }
+    
+    if (orgId === 'null') {
+      console.error('❌ [PAGE] Invalid org UUID:', orgId);
+      return;
+    }
+    
     try {
       console.log('🔐 [PAGE] Checking permissions for orgId:', orgId);
       const { data: { user } } = await supabase.auth.getUser();
@@ -104,8 +114,19 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [orgId]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
+    // Step 3: Add guards for UUID validation
+    if (!id) {
+      console.log('⚠️ [PAGE] No inventory ID provided');
+      return;
+    }
+    
     if (!orgId || !locationId) {
-      console.log('⚠️ [PAGE] Cannot load specific inventory without context');
+      console.log('⚠️ [PAGE] Missing context for specific inventory');
+      return;
+    }
+    
+    if (orgId === 'null' || locationId === 'null' || id === 'null') {
+      console.error('❌ [PAGE] Invalid UUID values:', { orgId, locationId, id });
       return;
     }
 
@@ -146,8 +167,14 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [orgId, locationId, category]);
 
   const loadCurrentInventory = useCallback(async () => {
+    // Step 3: Add UUID validation guards
     if (!orgId || !locationId) {
-      console.log('⚠️ [PAGE] Cannot load inventory without context');
+      console.log('⚠️ [PAGE] Missing context, skipping load');
+      return;
+    }
+    
+    if (orgId === 'null' || locationId === 'null') {
+      console.error('❌ [PAGE] Invalid UUID values:', { orgId, locationId });
       return;
     }
 
@@ -188,7 +215,13 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [orgId, locationId, category]);
 
   const checkForTemplates = useCallback(async () => {
+    // Step 3: Add UUID validation
     if (!orgId || !locationId) return;
+    
+    if (orgId === 'null' || locationId === 'null') {
+      console.error('❌ [PAGE] Invalid UUID for templates:', { orgId, locationId });
+      return;
+    }
     
     try {
       console.log('📋 [PAGE] Checking for templates');

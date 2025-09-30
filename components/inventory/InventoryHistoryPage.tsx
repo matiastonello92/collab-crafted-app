@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useSupabase } from '@/hooks/useSupabase';
+import { useAppStore } from '@/lib/store/unified';
 import { toast } from 'sonner';
 
 interface InventoryHistoryItem {
@@ -50,61 +51,72 @@ export function InventoryHistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [orgId, setOrgId] = useState<string>('');
   const [userRole, setUserRole] = useState<string>('');
+  
+  // Step 1: Use global store instead of local state
+  const orgId = useAppStore(state => state.context.org_id);
+  const locationId = useAppStore(state => state.context.location_id);
+  const hasHydrated = useAppStore(state => state.hasHydrated);
   
   const supabase = useSupabase();
 
-  // Load user profile and inventories
+  // Step 1: React to location changes
   useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  useEffect(() => {
-    if (orgId) {
-      loadInventories();
+    if (!hasHydrated) {
+      console.log('⏳ [HISTORY] Waiting for hydration...');
+      return;
     }
-  }, [orgId]);
+    
+    if (!orgId || !locationId) {
+      console.log('⚠️ [HISTORY] Missing context:', { orgId, locationId });
+      setLoading(false);
+      return;
+    }
+    
+    console.log('📍 [HISTORY] Loading inventories for location:', { orgId, locationId });
+    loadInventories();
+    loadUserRole();
+  }, [hasHydrated, orgId, locationId]);
 
-  const loadUserProfile = async () => {
+  const loadUserRole = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || !orgId) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('org_id')
-        .eq('id', user.id)
+      const { data: membership } = await supabase
+        .from('memberships')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('org_id', orgId)
         .single();
 
-      if (profile?.org_id) {
-        setOrgId(profile.org_id);
-        
-        // Check user role
-        const { data: membership } = await supabase
-          .from('memberships')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('org_id', profile.org_id)
-          .single();
-
-        setUserRole(membership?.role || 'user');
-      }
+      setUserRole(membership?.role || 'user');
     } catch (error) {
-      console.error('Error loading profile:', error);
-      toast.error('Errore nel caricamento del profilo');
+      console.error('❌ [HISTORY] Error loading user role:', error);
     }
   };
 
   const loadInventories = async () => {
-    if (!orgId) return;
+    // Step 2: Guards to prevent invalid UUID errors
+    if (!orgId || !locationId) {
+      console.log('⚠️ [HISTORY] Missing context, skipping load');
+      return;
+    }
     
+    if (orgId === 'null' || locationId === 'null') {
+      console.error('❌ [HISTORY] Invalid UUID values:', { orgId, locationId });
+      return;
+    }
+    
+    console.log('📥 [HISTORY] Loading inventories:', { orgId, locationId });
     setLoading(true);
     try {
+      // Step 1: Add location_id filter
       const { data, error } = await supabase
         .from('inventory_headers')
         .select('*')
         .eq('org_id', orgId)
+        .eq('location_id', locationId)
         .order('started_at', { ascending: false });
 
       if (error) throw error;

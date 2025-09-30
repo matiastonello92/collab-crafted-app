@@ -72,7 +72,17 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const hasHydrated = useAppStore(state => state.hasHydrated);
 
   const checkUserPermissions = useCallback(async () => {
-    if (!orgId) return;
+    // Step 2: Add UUID validation
+    if (!orgId) {
+      console.log('⚠️ [LIST] Missing org context for permissions check');
+      return;
+    }
+    
+    if (orgId === 'null') {
+      console.error('❌ [LIST] Invalid org UUID for permissions:', orgId);
+      return;
+    }
+    
     try {
       console.log('🔐 [LIST] Checking permissions for orgId:', orgId);
       const { data: { user } } = await supabase.auth.getUser();
@@ -96,8 +106,14 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   }, [orgId]);
 
   const loadInventories = useCallback(async () => {
+    // Step 2: Robust guards to prevent UUID errors
     if (!orgId || !locationId) {
-      console.log('⚠️ [LIST] Cannot load inventories without context');
+      console.log('⚠️ [LIST] Missing context, skipping load');
+      return;
+    }
+    
+    if (orgId === 'null' || locationId === 'null') {
+      console.error('❌ [LIST] Invalid UUID values:', { orgId, locationId });
       return;
     }
 
