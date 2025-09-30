@@ -91,6 +91,54 @@ export type Database = {
         }
         Relationships: []
       }
+      availability: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          preference: string
+          time_range: unknown
+          updated_at: string
+          user_id: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          preference?: string
+          time_range: unknown
+          updated_at?: string
+          user_id: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          preference?: string
+          time_range?: unknown
+          updated_at?: string
+          user_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       features: {
         Row: {
           description: string | null
@@ -677,6 +725,127 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "job_tags_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          approved_at: string | null
+          approver_id: string | null
+          created_at: string
+          end_at: string
+          id: string
+          notes: string | null
+          org_id: string
+          reason: string | null
+          start_at: string
+          status: string
+          type_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          end_at: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          reason?: string | null
+          start_at: string
+          status?: string
+          type_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string | null
+          created_at?: string
+          end_at?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          reason?: string | null
+          start_at?: string
+          status?: string
+          type_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "leave_requests_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_types: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          org_id: string
+          requires_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          org_id: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          org_id?: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_types_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -1378,6 +1547,207 @@ export type Database = {
           },
         ]
       }
+      rotas: {
+        Row: {
+          created_at: string
+          id: string
+          labor_budget_eur: number | null
+          location_id: string
+          org_id: string
+          status: string
+          updated_at: string
+          week_start_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          labor_budget_eur?: number | null
+          location_id: string
+          org_id: string
+          status?: string
+          updated_at?: string
+          week_start_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          labor_budget_eur?: number | null
+          location_id?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rotas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rotas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rotas_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      shift_assignments: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          id: string
+          published_at: string | null
+          shift_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          shift_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          shift_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_assignments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          break_minutes: number
+          created_at: string
+          created_by: string | null
+          end_at: string
+          id: string
+          job_tag_id: string | null
+          location_id: string
+          notes: string | null
+          org_id: string
+          rota_id: string
+          start_at: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          break_minutes?: number
+          created_at?: string
+          created_by?: string | null
+          end_at: string
+          id?: string
+          job_tag_id?: string | null
+          location_id: string
+          notes?: string | null
+          org_id: string
+          rota_id: string
+          start_at: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          break_minutes?: number
+          created_at?: string
+          created_by?: string | null
+          end_at?: string
+          id?: string
+          job_tag_id?: string | null
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          rota_id?: string
+          start_at?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_job_tag_id_fkey"
+            columns: ["job_tag_id"]
+            isOneToOne: false
+            referencedRelation: "job_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "shifts_rota_id_fkey"
+            columns: ["rota_id"]
+            isOneToOne: false
+            referencedRelation: "rotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_banners: {
         Row: {
           created_at: string
@@ -1413,6 +1783,132 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      time_clock_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          location_id: string
+          meta: Json
+          occurred_at: string
+          org_id: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          location_id: string
+          meta?: Json
+          occurred_at: string
+          org_id: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          location_id?: string
+          meta?: Json
+          occurred_at?: string
+          org_id?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_clock_events_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_events_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "time_clock_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          org_id: string
+          period_end: string
+          period_start: string
+          totals: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          org_id: string
+          period_end: string
+          period_start: string
+          totals?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          org_id?: string
+          period_end?: string
+          period_start?: string
+          totals?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheets_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheets_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "timesheets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
