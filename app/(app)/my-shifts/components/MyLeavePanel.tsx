@@ -43,9 +43,24 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
         body: JSON.stringify(newRequest)
       })
 
-      if (!res.ok) throw new Error(await res.text())
+      if (!res.ok) {
+        const error = await res.json()
+        if (error.error === 'LEAVE_COLLISION') {
+          toast.error('Hai già una richiesta di permesso per questo periodo')
+        } else {
+          throw new Error(error.message || 'Failed to create request')
+        }
+        return
+      }
 
-      toast.success('Richiesta permesso inviata')
+      const data = await res.json()
+      
+      if (data.warning) {
+        toast.warning(data.warning, { duration: 5000 })
+      } else {
+        toast.success('Richiesta permesso inviata')
+      }
+      
       setIsAdding(false)
       setNewRequest({ start_at: '', end_at: '', reason: '', type_id: '' })
       onUpdate()
