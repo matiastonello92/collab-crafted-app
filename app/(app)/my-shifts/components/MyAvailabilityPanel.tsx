@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, Trash2 } from 'lucide-react'
 import type { Availability } from '@/types/shifts'
 import { toast } from 'sonner'
+import { formatTimeRangeDisplay } from '@/lib/shifts/time-utils'
 
 interface Props {
   availability: Availability[]
@@ -102,9 +103,8 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
                   return (
                     <div key={avail.id} className="flex items-center justify-between p-2 border rounded-md">
                       <div className="flex items-center gap-3">
-                        <span className="text-sm">
-                          {/* Extract time from time_range - simplified */}
-                          Tutto il giorno
+                        <span className="text-sm font-medium">
+                          {formatTimeRangeDisplay(avail.time_range)}
                         </span>
                         <Badge variant={pref?.variant || 'secondary'}>
                           {pref?.label || avail.preference}

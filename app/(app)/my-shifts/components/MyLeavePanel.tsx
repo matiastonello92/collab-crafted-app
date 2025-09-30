@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Calendar } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import type { LeaveRequest } from '@/types/shifts'
 import { toast } from 'sonner'
+import { useLeaveTypes } from '../hooks/useLeaveTypes'
 
 interface Props {
   leaveRequests: LeaveRequest[]
@@ -20,14 +22,20 @@ interface Props {
 
 export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
   const [isAdding, setIsAdding] = useState(false)
+  const { leaveTypes, loading: typesLoading } = useLeaveTypes()
   const [newRequest, setNewRequest] = useState({
     start_at: '',
     end_at: '',
     reason: '',
-    type_id: '' // TODO: fetch leave types
+    type_id: ''
   })
 
   const handleSubmit = async () => {
+    if (!newRequest.type_id || !newRequest.start_at || !newRequest.end_at) {
+      toast.error('Compila tutti i campi obbligatori')
+      return
+    }
+
     try {
       const res = await fetch('/api/v1/leave/requests', {
         method: 'POST',
@@ -137,6 +145,26 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <Label>Tipo Permesso</Label>
+              <Select
+                value={newRequest.type_id}
+                onValueChange={(value) => setNewRequest(prev => ({ ...prev, type_id: value }))}
+                disabled={typesLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona tipo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {leaveTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Data inizio</Label>
@@ -179,7 +207,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
               <Button 
                 onClick={handleSubmit} 
                 className="flex-1"
-                disabled={!newRequest.start_at || !newRequest.end_at}
+                disabled={!newRequest.type_id || !newRequest.start_at || !newRequest.end_at || typesLoading}
               >
                 Invia Richiesta
               </Button>
