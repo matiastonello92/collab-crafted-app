@@ -13,7 +13,7 @@ import { EditProductDialog } from './EditProductDialog';
 import { NewProductForm } from './NewProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store/unified';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 
 interface CatalogPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -54,7 +54,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
   // Use global store and permissions hook
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
-  const { isAdmin } = usePermissions(locationId || undefined);
+  const { isAdmin, permissions } = usePermissions(locationId || undefined);
 
   const loadCatalog = useCallback(async () => {
     if (!locationId) return;
@@ -119,7 +119,8 @@ export function CatalogPage({ category }: CatalogPageProps) {
     return matchesSearch && matchesCategory;
   });
 
-  const canManage = isAdmin;
+  // Admin or users with inventory:edit permission can manage products
+  const canManage = isAdmin || hasPermission(permissions, ['inventory:edit', 'inventory:create']);
 
   return (
     <div className="container mx-auto py-8 space-y-6">

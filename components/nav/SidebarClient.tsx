@@ -41,7 +41,9 @@ const navigation: any[] = [
       { name: 'Bar', href: '/inventory/bar', icon: Wine },
       { name: 'Pulizie', href: '/inventory/cleaning', icon: Sparkles },
       { name: 'Storico', href: '/inventory/history', icon: History },
-      { name: 'Gestione Template', href: '/admin/templates', icon: Package }
+      { name: 'Gestione Template', href: '/admin/templates', icon: Package },
+      { name: '--- Prodotti ---', disabled: true },
+      { name: 'Catalogo Prodotti', href: '/inventory/catalog', icon: Package },
     ]
   },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
@@ -206,6 +208,18 @@ export default function SidebarClient() {
                       {!collapsed && (
                         <CollapsibleContent className="space-y-1 mt-1">
                           {item.children.map((child: any) => {
+                            // Handle disabled separator items
+                            if (child.disabled) {
+                              return (
+                                <div
+                                  key={child.name}
+                                  className="px-3 py-2 pl-10 text-xs font-semibold uppercase tracking-wide text-muted-foreground/60"
+                                >
+                                  {child.name.replace(/^---\s*/, '').replace(/\s*---$/, '')}
+                                </div>
+                              );
+                            }
+                            
                             const isChildActive = pathname === child.href;
                             return (
                               <Link
