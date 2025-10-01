@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         is_primary,
         note,
         assigned_by,
-        created_at,
+        assigned_at,
         job_tag:job_tags(id, label_it, key, categoria, color, is_active)
       `)
       .eq('org_id', orgId)
