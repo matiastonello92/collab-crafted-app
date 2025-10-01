@@ -19,6 +19,8 @@ export async function requirePlatformAdmin() {
 
 /**
  * Org admin guard - Requires org context and admin role in that org
+ * 
+ * @see checkOrgAdmin for API routes (returns boolean instead of throwing)
  */
 export async function requireOrgAdmin(orgId?: string | null): Promise<{ userId: string; orgId: string }> {
   const supabase = await createSupabaseServerClient()
@@ -85,6 +87,31 @@ export async function checkPlatformAdmin(): Promise<{ userId: string | null; has
 
 /**
  * Org admin check (API routes)
+ * 
+ * @deprecated DEPRECATED: This function relies on org_id cookie that is never populated.
+ * Use the "Inventory Pattern" instead:
+ * 1. Use createSupabaseServerClient() with RLS
+ * 2. Authenticate user with supabase.auth.getUser()
+ * 3. Derive org_id from the entity being accessed (location, invitation, etc.)
+ * 4. Rely on RLS policies for access control
+ * 
+ * @example
+ * // ❌ OLD (DEPRECATED):
+ * const { hasAccess, orgId } = await checkOrgAdmin();
+ * 
+ * // ✅ NEW (Inventory Pattern):
+ * const supabase = await createSupabaseServerClient();
+ * const { data: { user } } = await supabase.auth.getUser();
+ * if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+ * 
+ * // Derive org_id from location
+ * const { data: location } = await supabase
+ *   .from('locations')
+ *   .select('org_id')
+ *   .eq('id', location_id)
+ *   .single();
+ * 
+ * // RLS handles the rest!
  */
 export async function checkOrgAdmin(orgId?: string): Promise<{ userId: string | null; orgId: string | null; hasAccess: boolean }> {
   const supabase = await createSupabaseServerClient()
@@ -125,6 +152,11 @@ export async function checkAdminAccess(): Promise<{ userId: string | null; hasAc
 
 /**
  * Org context resolver (cookies, subdomain, etc.)
+ * 
+ * @deprecated DEPRECATED: The org_id cookie is never populated, causing this to fail 100% of the time.
+ * Use the "Inventory Pattern" instead - derive org_id from the entity being accessed.
+ * 
+ * @see checkOrgAdmin for detailed migration guide
  */
 async function getOrgIdFromContext(): Promise<string | null> {
   try {

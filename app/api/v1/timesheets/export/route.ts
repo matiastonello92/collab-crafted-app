@@ -1,22 +1,38 @@
 // POST /api/v1/timesheets/export - Export timesheets as CSV
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { exportTimesheetsSchema } from '@/lib/shifts/timesheet-validations'
 import { generateTimesheetsCsv, generateCsvFilename } from '@/lib/exports/csv-generator'
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    console.log('🔍 [TIMESHEETS EXPORT] Starting export request');
+    
+    // Use server client with RLS (Inventory pattern)
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      console.error('❌ [TIMESHEETS EXPORT] Unauthorized - no user');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    console.log('✅ [TIMESHEETS EXPORT] User authenticated:', user.id);
+    
     const body = await req.json()
     const payload = exportTimesheetsSchema.parse(body)
+    
+    console.log('📥 [TIMESHEETS EXPORT] Export params:', { 
+      location_id: payload.location_id, 
+      period_start: payload.period_start,
+      period_end: payload.period_end,
+      status: payload.status
+    });
 
     const { location_id, period_start, period_end, status, fields } = payload
 
-    // Build query
+    // Build query (RLS will filter based on user's org and locations)
     let query = supabase
       .from('timesheets')
       .select(`
@@ -30,12 +46,23 @@ export async function POST(req: NextRequest) {
       .lte('period_end', period_end)
       .order('period_start', { ascending: false })
 
-    if (location_id) query = query.eq('location_id', location_id)
-    if (status) query = query.eq('status', status)
+    if (location_id) {
+      console.log('🔍 [TIMESHEETS EXPORT] Filtering by location_id:', location_id);
+      query = query.eq('location_id', location_id)
+    }
+    if (status) {
+      console.log('🔍 [TIMESHEETS EXPORT] Filtering by status:', status);
+      query = query.eq('status', status)
+    }
 
     const { data, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error('❌ [TIMESHEETS EXPORT] Query error:', error);
+      throw error
+    }
+    
+    console.log('✅ [TIMESHEETS EXPORT] Found timesheets:', data?.length || 0);
 
     // Transform data for CSV
     const timesheets = data.map((ts: any) => ({
