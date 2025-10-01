@@ -9,12 +9,25 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    console.log('🔍 [API DEBUG] GET /api/v1/inventory/[headerId]/export called', { headerId: params.headerId })
+    
     const { searchParams } = new URL(request.url);
     const format = searchParams.get('format') || 'csv';
     const { headerId } = params;
 
-    const supabase = createSupabaseAdminClient();
-    // Get inventory header with details
+    // Use server client with RLS
+    const { createSupabaseServerClient } = await import('@/utils/supabase/server');
+    const supabase = await createSupabaseServerClient();
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('✅ [API DEBUG] User authenticated:', user.id, 'format:', format)
+
+    // Get inventory header with details (RLS will enforce access)
     const { data: header, error: headerError } = await supabase
       .from('inventory_headers')
       .select(`
@@ -27,8 +40,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (headerError || !header) {
+      console.log('❌ [API DEBUG] Inventory not found or access denied')
       return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
+
+    console.log('✅ [API DEBUG] Inventory found:', header.id)
 
     // Get inventory lines
     const { data: lines, error: linesError } = await supabase
@@ -38,9 +54,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .order('name_snapshot');
 
     if (linesError) {
-      console.error('Error fetching inventory lines:', linesError);
+      console.error('❌ [API DEBUG] Error fetching inventory lines:', linesError);
       return NextResponse.json({ error: linesError.message }, { status: 500 });
     }
+
+    console.log('✅ [API DEBUG] Lines fetched:', lines?.length || 0)
 
     if (format === 'csv') {
       // Generate CSV

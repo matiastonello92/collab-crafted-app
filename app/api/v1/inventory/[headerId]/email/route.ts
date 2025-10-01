@@ -17,12 +17,25 @@ interface RouteParams {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
+    console.log('🔍 [API DEBUG] POST /api/v1/inventory/[headerId]/email called', { headerId: params.headerId })
+    
     const body = await request.json();
     const validated = emailSchema.parse(body);
     const { headerId } = params;
 
-    const supabase = createSupabaseAdminClient();
-    // Get inventory header
+    // Use server client with RLS
+    const { createSupabaseServerClient } = await import('@/utils/supabase/server');
+    const supabase = await createSupabaseServerClient();
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
+    // Get inventory header (RLS will enforce access)
     const { data: header, error: headerError } = await supabase
       .from('inventory_headers')
       .select(`
@@ -34,8 +47,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (headerError || !header) {
+      console.log('❌ [API DEBUG] Inventory not found or access denied')
       return NextResponse.json({ error: 'Inventory not found' }, { status: 404 });
     }
+
+    console.log('✅ [API DEBUG] Inventory found:', header.id)
 
     // Check if email provider is configured
     // For now, we'll return a success response but note that email isn't actually sent

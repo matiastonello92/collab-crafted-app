@@ -53,24 +53,8 @@ export async function GET() {
       return NextResponse.json({ error: 'FEATURE_NOT_ENABLED' }, { status: 403 })
     }
 
-    // Check if user can manage users
-    const supabaseAdmin = createSupabaseAdminClient()
-    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
-    
-    if (!isAdmin) {
-      // Check if user has users:manage permission
-      const { data: hasPermission } = await supabaseAdmin.rpc('user_has_permission', { 
-        p_user: user.id, 
-        p_permission: 'manage_users' 
-      })
-      
-      if (!hasPermission) {
-        return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
-      }
-    }
-
-    // Get invitations with their roles and permissions (filtered by org)
-    const { data: invitations, error } = await supabaseAdmin
+    // Get invitations with their roles and permissions (RLS will filter by org)
+    const { data: invitations, error } = await supabase
       .from('invitations')
       .select(`
         *,
@@ -132,26 +116,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'FEATURE_NOT_ENABLED' }, { status: 403 })
     }
 
-    // Check permissions
-    const supabaseAdmin = createSupabaseAdminClient()
-    const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
-    
-    if (!isAdmin) {
-      const { data: hasPermission } = await supabaseAdmin.rpc('user_has_permission', { 
-        p_user: user.id, 
-        p_permission: 'manage_users' 
-      })
-      
-      if (!hasPermission) {
-        return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
-      }
-    }
-
     const body = await request.json()
     const validatedData = inviteSchema.parse(body)
 
-    // Check for duplicate active invitation
-    const { data: existingInvite, error: checkError } = await supabaseAdmin
+    // Check for duplicate active invitation (RLS will filter by org)
+    const { data: existingInvite, error: checkError } = await supabase
       .from('invitations')
       .select('id, token')
       .eq('email', validatedData.email.toLowerCase())
@@ -178,8 +147,8 @@ export async function POST(request: Request) {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // 7 days from now
 
-    // Create invitation (force org_id from authenticated user)
-    const { data: invitation, error: inviteError } = await supabaseAdmin
+    // Create invitation (RLS will enforce org_id)
+    const { data: invitation, error: inviteError } = await supabase
       .from('invitations')
       .insert({
         email: validatedData.email,
@@ -209,9 +178,10 @@ export async function POST(request: Request) {
         invitation_id: invitation.id,
         location_id: lr.locationId,
         role_id: lr.roleId,
+        org_id: orgId,
       }))
 
-      const { error: rolesError } = await supabaseAdmin
+      const { error: rolesError } = await supabase
         .from('invitation_roles_locations')
         .insert(locationRoleInserts)
 
@@ -223,12 +193,13 @@ export async function POST(request: Request) {
 
     // Add global role if provided
     if (validatedData.globalRoleId) {
-      const { error: globalRoleError } = await supabaseAdmin
+      const { error: globalRoleError } = await supabase
         .from('invitation_roles_locations')
         .insert({
           invitation_id: invitation.id,
           location_id: null, // null means global
           role_id: validatedData.globalRoleId,
+          org_id: orgId,
         })
 
       if (globalRoleError) {
@@ -252,13 +223,13 @@ export async function POST(request: Request) {
         
         if (validatedData.locationRoles && validatedData.locationRoles.length > 0) {
           for (const lr of validatedData.locationRoles) {
-            const { data: role } = await supabaseAdmin
+            const { data: role } = await supabase
               .from('roles')
               .select('display_name')
               .eq('id', lr.roleId)
               .single()
             
-            const { data: location } = await supabaseAdmin
+            const { data: location } = await supabase
               .from('locations')
               .select('name')
               .eq('id', lr.locationId)
@@ -270,7 +241,7 @@ export async function POST(request: Request) {
         }
 
         if (validatedData.globalRoleId) {
-          const { data: globalRole } = await supabaseAdmin
+          const { data: globalRole } = await supabase
             .from('roles')
             .select('display_name')
             .eq('id', validatedData.globalRoleId)
@@ -350,7 +321,7 @@ export async function POST(request: Request) {
 
     // Update invitation status based on email result
     if (emailStatus !== 'pending') {
-      await supabaseAdmin
+      await supabase
         .from('invitations')
         .update({ 
           status: emailStatus === 'sent' ? 'sent' : 'pending',
@@ -361,33 +332,24 @@ export async function POST(request: Request) {
 
     // Log audit event
     try {
-      // Get user's org_id for audit log
-      const { data: membership } = await supabaseAdmin
-        .from('memberships')
-        .select('org_id')
-        .eq('user_id', user.id)
-        .single()
-
-      if (membership?.org_id) {
-        await supabaseAdmin
-          .from('audit_events')
-          .insert({
-            event_key: 'user.invited',
-            payload: {
-              invitation_id: invitation.id,
-              email: validatedData.email,
-              role_ids: [
-                ...(validatedData.locationRoles?.map(lr => lr.roleId) || []),
-                ...(validatedData.globalRoleId ? [validatedData.globalRoleId] : [])
-              ],
-              location_ids: validatedData.locationRoles?.map(lr => lr.locationId) || [],
-              email_status: emailStatus,
-              message_id: emailMessageId
-            },
-            org_id: membership.org_id,
-            user_id: user.id
-          })
-      }
+      await supabase
+        .from('audit_events')
+        .insert({
+          event_key: 'user.invited',
+          payload: {
+            invitation_id: invitation.id,
+            email: validatedData.email,
+            role_ids: [
+              ...(validatedData.locationRoles?.map(lr => lr.roleId) || []),
+              ...(validatedData.globalRoleId ? [validatedData.globalRoleId] : [])
+            ],
+            location_ids: validatedData.locationRoles?.map(lr => lr.locationId) || [],
+            email_status: emailStatus,
+            message_id: emailMessageId
+          },
+          org_id: orgId,
+          user_id: user.id
+        })
     } catch (auditError) {
       console.error('Failed to log audit event:', auditError)
       // Don't fail the invitation creation if audit logging fails

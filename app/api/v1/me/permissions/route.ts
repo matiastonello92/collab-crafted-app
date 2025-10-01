@@ -9,6 +9,8 @@ export const revalidate = 300; // 5min cache
 
 export async function GET(req: Request) {
   try {
+    console.log('🔍 [API DEBUG] GET /api/v1/me/permissions called')
+    
     const url = new URL(req.url);
     const rawLocationId = url.searchParams.get('locationId');
     const locationId = (rawLocationId === 'null' || !rawLocationId) ? undefined : rawLocationId;
@@ -16,10 +18,11 @@ export async function GET(req: Request) {
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
       return NextResponse.json({ permissions: [] }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
     }
 
-    const supabaseAdmin = createSupabaseAdminClient();
+    console.log('✅ [API DEBUG] User authenticated:', user.id, 'locationId:', locationId);
 
     // Initialize permission set from JWT claims (app_metadata)
     const permSet = new Set<string>();
@@ -29,7 +32,7 @@ export async function GET(req: Request) {
     const roleLevel = Number(meta.role_level ?? meta.roleLevel ?? 0);
     if (Number.isFinite(roleLevel) && roleLevel >= 90) permSet.add('*');
 
-    let assignmentsQuery = supabaseAdmin
+    let assignmentsQuery = supabase
       .from('user_roles_locations')
       .select('role_id, location_id')
       .eq('user_id', user.id)
@@ -43,14 +46,17 @@ export async function GET(req: Request) {
 
     const { data: assignments, error: assignErr } = await assignmentsQuery;
     if (assignErr) {
+      console.log('❌ [API DEBUG] Error fetching assignments:', assignErr)
       return NextResponse.json({ permissions: [] }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
     }
+
+    console.log('✅ [API DEBUG] Found assignments:', assignments?.length || 0)
 
     const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean);
 
     // Robust permission fetching from roles - two-step query to avoid nested select issues
     if (roleIds.length > 0) {
-      const { data: rolePermissions } = await supabaseAdmin
+      const { data: rolePermissions } = await supabase
         .from('role_permissions')
         .select('permission_id')
         .in('role_id', roleIds);
@@ -58,7 +64,7 @@ export async function GET(req: Request) {
       if (rolePermissions && rolePermissions.length > 0) {
         const permissionIds = rolePermissions.map(rp => rp.permission_id).filter(Boolean);
         if (permissionIds.length > 0) {
-          const { data: permissions } = await supabaseAdmin
+          const { data: permissions } = await supabase
             .from('permissions')
             .select('name')
             .in('id', permissionIds);
@@ -70,7 +76,7 @@ export async function GET(req: Request) {
       }
     }
 
-    let overridesQuery = supabaseAdmin
+    let overridesQuery = supabase
       .from('user_permissions')
       .select('granted, location_id, permissions!inner(name)')
       .eq('user_id', user.id);
@@ -90,15 +96,17 @@ export async function GET(req: Request) {
     });
 
     // Get user's org_id from profile
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await supabase
       .from('profiles')
       .select('org_id')
       .eq('id', user.id)
       .maybeSingle();
 
     const orgId = profile?.org_id;
+    console.log('✅ [API DEBUG] User org_id:', orgId)
 
-    // Check platform admin - direct query instead of RPC to avoid auth.uid() issue
+    // Check platform admin using supabaseAdmin for platform_admins table (no RLS)
+    const supabaseAdmin = createSupabaseAdminClient();
     const { data: platformAdminRecord } = await supabaseAdmin
       .from('platform_admins')
       .select('user_id')
@@ -109,7 +117,7 @@ export async function GET(req: Request) {
 
     // If not platform admin, check org admin via membership
     if (!isAdmin && orgId) {
-      const { data: membership } = await supabaseAdmin
+      const { data: membership } = await supabase
         .from('memberships')
         .select('role')
         .eq('user_id', user.id)
@@ -125,6 +133,8 @@ export async function GET(req: Request) {
     const body: any = { permissions };
     if (isAdmin) body.is_admin = true;
 
+    console.log('✅ [API DEBUG] Final permissions:', permissions.length, 'isAdmin:', isAdmin)
+
     return NextResponse.json(body, { 
       status: 200, 
       headers: { 
@@ -133,6 +143,7 @@ export async function GET(req: Request) {
       } 
     });
   } catch (e: any) {
+    console.error('❌ [API DEBUG] Unexpected error:', e)
     return NextResponse.json({ error: e?.message ?? 'internal' }, { status: 500 });
   }
 }

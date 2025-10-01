@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 /**
@@ -8,12 +7,32 @@ import { createSupabaseServerClient } from '@/utils/supabase/server'
  */
 export async function POST(request: NextRequest) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
+    console.log('🔍 [API DEBUG] POST /api/v1/admin/job-tags/preset called')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
+    // Derive org_id from user's membership
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership?.org_id) {
+      console.log('❌ [API DEBUG] No membership found')
+      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    }
+
+    const orgId = membership.org_id
+    console.log('✅ [API DEBUG] Derived org_id:', orgId)
 
     // Call RPC function
     const { data, error } = await supabase.rpc('insert_preset_ristorazione_tags', {

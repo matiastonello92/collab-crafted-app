@@ -7,9 +7,14 @@ import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
   try {
+    console.log('🔍 [API DEBUG] POST /api/v1/timeclock/lookup called')
+    
     const body = await request.json()
     const validated = userLookupSchema.parse(body)
 
+    console.log('✅ [API DEBUG] Lookup request:', { pin: '***', location_id: validated.location_id })
+
+    // Use admin client for PIN lookup (no RLS on profiles.pin_code)
     const supabase = createSupabaseAdminClient()
 
     // Lookup user by PIN code
@@ -20,11 +25,14 @@ export async function POST(request: Request) {
       .single()
 
     if (error || !profile) {
+      console.log('❌ [API DEBUG] Invalid PIN')
       return NextResponse.json(
         { error: 'PIN non valido' },
         { status: 404 }
       )
     }
+
+    console.log('✅ [API DEBUG] User found:', profile.id)
 
     // Verify location belongs to user's organization
     const { data: location, error: locationError } = await supabase
@@ -34,6 +42,7 @@ export async function POST(request: Request) {
       .single()
 
     if (locationError || !location) {
+      console.log('❌ [API DEBUG] Location not found')
       return NextResponse.json(
         { error: 'Location not found' },
         { status: 404 }
@@ -41,11 +50,14 @@ export async function POST(request: Request) {
     }
 
     if (location.org_id !== profile.org_id) {
+      console.log('❌ [API DEBUG] Org mismatch:', { location_org: location.org_id, user_org: profile.org_id })
       return NextResponse.json(
         { error: 'Unauthorized: location mismatch' },
         { status: 403 }
       )
     }
+
+    console.log('✅ [API DEBUG] Lookup successful')
 
     return NextResponse.json({
       user_id: profile.id,
