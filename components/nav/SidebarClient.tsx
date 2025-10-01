@@ -180,7 +180,7 @@ export default function SidebarClient() {
         ) : (
           <ul className="space-y-1">
             {navigation.map((item) => {
-              const isAdmin = isAdminClaims || can(permissions, '*')
+              const isAdmin = isAdminClaims || isAdminPerm
               
               // Check access permissions
               let canAccess = false
@@ -193,7 +193,7 @@ export default function SidebarClient() {
                 canAccess = isAdmin
               } else {
                 // Regular permission-based items
-                canAccess = isAdmin || !item.permission || can(permissions, item.permission)
+                canAccess = isAdmin || !item.permission || can(item.permission)
               }
 
               // Handle group items with children
