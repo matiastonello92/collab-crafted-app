@@ -68,13 +68,13 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
-  const { hasPermission } = useHydratedStore()
+  const { can } = usePermissions()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   // Check if user can manage feature flags
-  const canManageFlags = hasPermission('locations.manage_flags')
+  const canManageFlags = can('locations:manage') || can('flags:manage')
 
   if (!canManageFlags) {
     return (
