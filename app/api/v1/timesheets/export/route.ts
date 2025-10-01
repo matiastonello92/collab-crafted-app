@@ -5,13 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 import { exportTimesheetsSchema } from '@/lib/shifts/timesheet-validations'
 import { generateTimesheetsCsv, generateCsvFilename } from '@/lib/exports/csv-generator'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(req: NextRequest) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     const body = await req.json()
     const payload = exportTimesheetsSchema.parse(body)
 
