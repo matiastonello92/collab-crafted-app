@@ -1,53 +1,17 @@
-import type { Permission } from './permissions/registry';
-export type { Permission } from './permissions/registry';
+/**
+ * Legacy permission file - Re-exports from new location
+ * 
+ * @deprecated Import from '@/lib/permissions/index' or just '@/lib/permissions' instead
+ * This file exists for backward compatibility only
+ */
 
-export type AnyPermission = string;
+// Re-export everything from the new unified location
+export * from './permissions/index'
 
-export type PermBag = ReadonlyArray<AnyPermission> | Set<AnyPermission>;
-export type PermReq = AnyPermission | ReadonlyArray<AnyPermission>;
-
-type Dict = Record<string, string>
-
-const synonymMap: Dict = {
-  // existenti...
-  'manage:users': 'users:manage',
-  'view:users': 'users:view',
-  'assign:roles': 'users:manage',
-  'invite:users': 'users:invite',
-  'manage_users': 'users:manage',
-  'view_users': 'users:view',
-  'invite_users': 'users:invite',
-  'assign_roles': 'users:manage',
-  'flags:view': 'flags:view',
-  'flags.view': 'flags:view',
-  'view_flags': 'flags:view',
-  'locations:view': 'locations:view',
-  'locations.view': 'locations:view',
-  'view_locations': 'locations:view',
-  'manage:inventory': 'inventory:manage',
-  'view:inventory': 'inventory:view',
-  'manage:orders': 'orders:manage',
-  'view:orders': 'orders:view',
-  'manage:haccp': 'haccp:manage',
-  'view:haccp': 'haccp:view',
-  'manage:maintenance': 'maintenance:manage',
-  'view:maintenance': 'maintenance:view',
-  'manage:financial': 'financial:manage',
-  'view:financial': 'financial:view',
-  'manage:settings': 'settings:manage',
-  'view:settings': 'settings:view',
-  'manage_settings': 'settings:manage',
-  'view_settings': 'settings:view',
-  // nuovi esempi granulari
-  'locations:edit_opening_hours': 'locations:edit',
-  'locations:edit_open_days': 'locations:edit',
-  'approve_orders': 'orders:approve',
-  'orders:send_order': 'orders:send_order',
-  'users:invite': 'users:invite',
-};
-
-const groupRules: Array<{ test: RegExp; to: string | ((m: RegExpExecArray) => string) }> = [
-  // module:edit_*  -> module:edit
+// Legacy type aliases for backward compatibility
+export type AnyPermission = string
+export type PermBag = ReadonlyArray<string> | Set<string>
+export type PermReq = string | ReadonlyArray<string>
   { test: /^([a-z0-9]+):edit_[a-z0-9:_-]+$/i, to: (m) => `${m[1]}:edit` },
   // module:view_*  -> module:view
   { test: /^([a-z0-9]+):view_[a-z0-9:_-]+$/i, to: (m) => `${m[1]}:view` },
