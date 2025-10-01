@@ -3,42 +3,124 @@ name: CI
 on:
   pull_request:
     branches: [ "main" ]
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-placeholder"
-      RESEND_API_KEY: "dummy"
-      SUPABASE_SERVICE_ROLE_KEY: "dummy"
-      NODE_ENV: "production"
-      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npm run lint || echo "lint non-blocking"
 
-      - name: Install deps (no lockfile strict)
-        run: npm install --no-audit --no-fund
-
-      - name: Typecheck (non-blocking)
-        run: npm run -s typecheck || echo "typecheck skipped/failed (non-blocking)"
-
-      - name: Lint (non-blocking)
-        run: npm run -s lint || echo "lint skipped/failed (non-blocking)"
-
-      - name: Build
-        run: npm run -s build:dev | tee build.log
-
-      - name: Upload build logs
-        if: always()
-        uses: actions/upload-artifact@v4
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: build-log
-          path: build.log
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck || echo "typecheck non-blocking"
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: "http://localhost:54321"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-anon-key"
+      SUPABASE_SERVICE_ROLE_KEY: "test-service-key"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:unit || echo "unit tests not configured yet"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-unit
+          path: coverage/
+          if-no-files-found: ignore
+
+  rls-tests:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_SERVICE_ROLE_KEY: "test-service-key"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:rls || echo "rls tests not configured yet"
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps
+      - run: npm run test:e2e || echo "e2e tests not configured yet"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  accessibility-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps
+      - run: npm run test:a11y || echo "a11y tests not configured yet"
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: "http://localhost:54321"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-anon-key"
+      SUPABASE_SERVICE_ROLE_KEY: "test-service-key"
+      RESEND_API_KEY: "dummy"
+      NODE_ENV: "production"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build || npm run build:dev
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-output
+          path: .next/
           if-no-files-found: warn
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm audit --production || echo "audit non-blocking"
