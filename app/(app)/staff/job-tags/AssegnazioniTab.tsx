@@ -60,9 +60,10 @@ export function AssegnazioniTab() {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
+    if (!hasHydrated) return
     fetchLocations()
     fetchJobTags()
-  }, [])
+  }, [hasHydrated])
 
   // Auto-select default location from context when hydrated
   useEffect(() => {

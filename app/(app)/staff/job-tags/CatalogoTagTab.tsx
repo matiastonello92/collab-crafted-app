@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAppStore } from '@/lib/store/unified'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ const DEFAULT_COLORS: Record<string, string> = {
 }
 
 export function CatalogoTagTab() {
+  const hasHydrated = useAppStore(state => state.hasHydrated)
   const [tags, setTags] = useState<JobTag[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -40,8 +42,9 @@ export function CatalogoTagTab() {
   })
 
   useEffect(() => {
+    if (!hasHydrated) return
     fetchTags()
-  }, [])
+  }, [hasHydrated])
 
   const fetchTags = async () => {
     try {
