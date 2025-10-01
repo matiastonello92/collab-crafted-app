@@ -49,6 +49,12 @@ export function Step2SelectWeek({
 
   const handleCreateRota = async () => {
     if (!selectedDate) return
+    
+    // Validate context before API call
+    if (!locationId || !orgId) {
+      toast.error('Location o organizzazione mancante')
+      return
+    }
 
     const monday = startOfWeek(selectedDate, { weekStartsOn: 1 })
     const weekStart = format(monday, 'yyyy-MM-dd')
@@ -60,6 +66,7 @@ export function Step2SelectWeek({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location_id: locationId,
+          org_id: orgId,
           week_start_date: weekStart,
         }),
       })

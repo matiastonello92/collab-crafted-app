@@ -31,8 +31,8 @@ export async function GET() {
       ),
       job_tag:job_tags(
         id,
-        name,
-        label
+        key,
+        label_it
       )
     `)
     .eq('assignments.user_id', user.id)

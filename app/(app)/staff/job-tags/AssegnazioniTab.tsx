@@ -69,13 +69,14 @@ export function AssegnazioniTab() {
     if (hasHydrated && defaultLocationId && !selectedLocation) {
       setSelectedLocation(defaultLocationId)
     }
-  }, [hasHydrated, defaultLocationId, selectedLocation])
+  }, [hasHydrated, defaultLocationId])
 
+  // Wait for hydration before fetching data
   useEffect(() => {
-    if (selectedLocation) {
+    if (hasHydrated && selectedLocation) {
       fetchUsersAndAssignments()
     }
-  }, [selectedLocation])
+  }, [hasHydrated, selectedLocation])
 
   const fetchLocations = async () => {
     try {

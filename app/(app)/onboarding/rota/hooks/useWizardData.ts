@@ -108,6 +108,13 @@ export function useWizardData() {
     }
   }, [])
 
+  // Wait for hydration before fetching locations
+  useEffect(() => {
+    if (hasHydrated && !locations.length) {
+      fetchLocations()
+    }
+  }, [hasHydrated, locations.length, fetchLocations])
+
   return {
     locationId,
     orgId,

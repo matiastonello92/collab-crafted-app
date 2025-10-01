@@ -78,14 +78,31 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    
+    // Early validation for required fields
+    if (!body.location_id || !body.org_id) {
+      return NextResponse.json(
+        { error: 'location_id and org_id are required' },
+        { status: 400 }
+      )
+    }
+    
     const validated = createRotaSchema.parse(body)
 
-    // Get org_id from location
-    const { data: location } = await supabase
+    // Get org_id from location (use maybeSingle to avoid errors when not found)
+    const { data: location, error: locationError } = await supabase
       .from('locations')
       .select('org_id')
       .eq('id', validated.location_id)
-      .single()
+      .maybeSingle()
+    
+    if (locationError) {
+      console.error('Error fetching location:', locationError)
+      return NextResponse.json(
+        { error: locationError.message },
+        { status: 500 }
+      )
+    }
     
     if (!location) {
       return NextResponse.json(
