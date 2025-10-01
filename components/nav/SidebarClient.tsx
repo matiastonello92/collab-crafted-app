@@ -28,8 +28,8 @@ import {
   Mail,
   Tag,
 } from 'lucide-react'
-import { useHydratedStore } from '@/lib/store/useHydratedStore'
-import { can } from '@/lib/permissions'
+import { useAppStore } from '@/lib/store/unified'
+import { usePermissions } from '@/hooks/usePermissions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
