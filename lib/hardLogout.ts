@@ -1,13 +1,30 @@
-import { createSupabaseBrowserClient } from '@/lib/supabase';
+/**
+ * Hard Logout Utility
+ * 
+ * Forces a complete logout by clearing all auth state and redirecting.
+ * Use this when you need to ensure the user is completely logged out.
+ */
+
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export async function hardLogout() {
-  const supabase = createSupabaseBrowserClient();
-  try { await supabase.auth.signOut(); } catch {}
   try {
-    localStorage.clear(); sessionStorage.clear();
-    if ('indexedDB' in window) { try { indexedDB.deleteDatabase('supabase-auth'); } catch {} }
-  } catch {}
-  // Using window.location for hard logout is intentional - we want a full page refresh
-  // to clear any remaining state after clearing storage
-  window.location.href = '/login';
+    const supabase = createSupabaseBrowserClient()
+    
+    // Sign out from Supabase
+    await supabase.auth.signOut()
+    
+    // Clear all local storage
+    if (typeof window !== 'undefined') {
+      localStorage.clear()
+      sessionStorage.clear()
+    }
+    
+    // Redirect to login
+    window.location.href = '/login'
+  } catch (error) {
+    console.error('Hard logout error:', error)
+    // Force redirect even on error
+    window.location.href = '/login'
+  }
 }

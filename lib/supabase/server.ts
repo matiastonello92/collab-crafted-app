@@ -38,4 +38,20 @@ export function createSupabaseAdminClient(): SupabaseClient {
   })
 }
 
+/**
+ * Legacy export for backward compatibility
+ * @deprecated Use createSupabaseAdminClient() instead
+ */
+let _cachedAdminClient: SupabaseClient | null = null
+
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    if (!_cachedAdminClient) {
+      _cachedAdminClient = createSupabaseAdminClient()
+    }
+    // @ts-ignore
+    return _cachedAdminClient[prop]
+  },
+})
+
 export type { SupabaseClient }
