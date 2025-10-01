@@ -17,14 +17,16 @@ import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 ```
 
-### ✅ After (Centralized imports)
+### ✅ After (Environment-specific imports)
 ```typescript
-// DO - Single import source
+// DO - Client Components
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+
+// DO - Server Components / API Routes
 import { 
-  createSupabaseBrowserClient,
   createSupabaseServerClient,
   createSupabaseAdminClient 
-} from '@/lib/supabase'
+} from '@/lib/supabase/server'
 ```
 
 ---
