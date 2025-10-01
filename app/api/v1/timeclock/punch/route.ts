@@ -3,6 +3,8 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { punchClockSchema } from '@/lib/shifts/validations'
+import { validatePunchSequence, checkDoublePunch } from '@/lib/shifts/time-clock-logic'
+import { verifyKioskToken } from '@/lib/kiosk/token'
 import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
@@ -16,6 +18,24 @@ export async function POST(request: Request) {
 
     const body = await request.json()
     const validated = punchClockSchema.parse(body)
+
+    // Verify kiosk token (anti-spoofing)
+    const kioskToken = body.kiosk_token
+    if (kioskToken) {
+      const tokenVerification = verifyKioskToken(kioskToken)
+      if (!tokenVerification.valid) {
+        return NextResponse.json(
+          { error: 'Invalid kiosk token' },
+          { status: 403 }
+        )
+      }
+      if (tokenVerification.locationId !== validated.location_id) {
+        return NextResponse.json(
+          { error: 'Kiosk token location mismatch' },
+          { status: 403 }
+        )
+      }
+    }
 
     // Get user's org_id
     const { data: profile } = await supabase
@@ -52,8 +72,35 @@ export async function POST(request: Request) {
       )
     }
 
-    // Business logic: validate punch sequence (e.g., can't clock_out without clock_in)
-    // For MVP, we skip this validation - can be added later
+    // Check for double-punch (anti-double-tap)
+    const isDoublePunch = await checkDoublePunch(
+      user.id,
+      validated.location_id,
+      validated.kind,
+      profile.org_id
+    )
+
+    if (isDoublePunch) {
+      return NextResponse.json(
+        { error: 'Duplicate punch detected - please wait a few seconds' },
+        { status: 429 }
+      )
+    }
+
+    // Validate punch sequence
+    const sequenceValidation = await validatePunchSequence(
+      user.id,
+      validated.location_id,
+      validated.kind,
+      profile.org_id
+    )
+
+    if (!sequenceValidation.valid) {
+      return NextResponse.json(
+        { error: sequenceValidation.error },
+        { status: 400 }
+      )
+    }
 
     // Create time clock event
     const occurredAt = validated.occurred_at || new Date().toISOString()
@@ -67,6 +114,7 @@ export async function POST(request: Request) {
         kind: validated.kind,
         occurred_at: occurredAt,
         source: validated.source,
+        kiosk_token: kioskToken || null
       })
       .select()
       .single()

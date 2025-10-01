@@ -1359,6 +1359,7 @@ export type Database = {
           notif_prefs: Json | null
           org_id: string
           phone: string | null
+          pin_code: string | null
           timezone: string | null
           updated_at: string | null
         }
@@ -1373,6 +1374,7 @@ export type Database = {
           notif_prefs?: Json | null
           org_id: string
           phone?: string | null
+          pin_code?: string | null
           timezone?: string | null
           updated_at?: string | null
         }
@@ -1387,6 +1389,7 @@ export type Database = {
           notif_prefs?: Json | null
           org_id?: string
           phone?: string | null
+          pin_code?: string | null
           timezone?: string | null
           updated_at?: string | null
         }
@@ -1791,6 +1794,7 @@ export type Database = {
           created_at: string
           id: string
           kind: string
+          kiosk_token: string | null
           location_id: string
           meta: Json
           occurred_at: string
@@ -1802,6 +1806,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind: string
+          kiosk_token?: string | null
           location_id: string
           meta?: Json
           occurred_at: string
@@ -1813,6 +1818,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: string
+          kiosk_token?: string | null
           location_id?: string
           meta?: Json
           occurred_at?: string
@@ -1848,6 +1854,86 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_correction_requests: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          location_id: string
+          org_id: string
+          original_time: string | null
+          reason: string
+          requested_time: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          location_id: string
+          org_id: string
+          original_time?: string | null
+          reason: string
+          requested_time: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          location_id?: string
+          org_id?: string
+          original_time?: string | null
+          reason?: string
+          requested_time?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_correction_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_correction_requests_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_correction_requests_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_correction_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
           },
         ]
       }
@@ -2441,6 +2527,7 @@ export type Database = {
           notif_prefs: Json | null
           org_id: string
           phone: string | null
+          pin_code: string | null
           timezone: string | null
           updated_at: string | null
         }
