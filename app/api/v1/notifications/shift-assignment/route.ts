@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerClient } from '@/lib/supabase';
 import { getEmailService } from '@/lib/email/email-service';
 import { shiftAssignmentTemplate } from '@/lib/email/templates/shift-assignment';
 import { format } from 'date-fns';

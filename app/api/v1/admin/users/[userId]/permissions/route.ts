@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { normalizeSet } from '@/lib/permissions'
 

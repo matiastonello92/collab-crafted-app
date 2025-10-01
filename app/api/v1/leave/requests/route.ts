@@ -1,7 +1,7 @@
 // Klyra Shifts API - Leave Requests (Create)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createLeaveRequestSchema } from '@/lib/shifts/validations'
 import { checkLeaveCollision } from '@/lib/shifts/collision-checker'
 import { ZodError } from 'zod'

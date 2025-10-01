@@ -1,7 +1,7 @@
 // Klyra Shifts API - Time Correction Decision (Manager Approve/Reject)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { decideCorrectionSchema } from '@/lib/shifts/timeclock-validations'
 import { ZodError } from 'zod'

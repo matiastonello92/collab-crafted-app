@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkOrgAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createJobTagSchema, updateJobTagSchema } from '@/lib/admin/validations'
 
 /**

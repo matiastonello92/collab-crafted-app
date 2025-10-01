@@ -1,7 +1,7 @@
 // Klyra Shifts API - Update Rota Status (draft→published→locked)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { updateRotaStatusSchema } from '@/lib/shifts/validations'
 import { ZodError } from 'zod'
 

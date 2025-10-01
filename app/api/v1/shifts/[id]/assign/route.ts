@@ -1,7 +1,7 @@
 // Klyra Shifts API - Assign Shift to User
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { assignShiftSchema } from '@/lib/shifts/validations'
 import { checkShiftCollision } from '@/lib/shifts/collision-checker'
 import { ZodError } from 'zod'

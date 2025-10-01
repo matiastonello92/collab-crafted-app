@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkOrgAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { assignJobTagSchema } from '@/lib/admin/validations'
 
 export async function GET(request: NextRequest) {

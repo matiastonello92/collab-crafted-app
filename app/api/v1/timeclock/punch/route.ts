@@ -1,7 +1,7 @@
 // Klyra Shifts API - Time Clock Punch (Kiosk/Mobile)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { punchClockSchema } from '@/lib/shifts/validations'
 import { validatePunchSequence, checkDoublePunch } from '@/lib/shifts/time-clock-logic'
 import { verifyKioskToken } from '@/lib/kiosk/token'

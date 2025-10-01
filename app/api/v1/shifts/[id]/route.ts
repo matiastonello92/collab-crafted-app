@@ -1,7 +1,7 @@
 // Klyra Shifts API - Shift Update & Delete
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { updateShiftSchema } from '@/lib/shifts/validations'
 import { ZodError } from 'zod'
 

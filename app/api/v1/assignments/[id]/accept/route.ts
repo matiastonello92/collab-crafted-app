@@ -1,7 +1,7 @@
 // Klyra Shifts API - Accept/Decline Shift Assignment (Self-Service)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { acceptAssignmentSchema } from '@/lib/shifts/validations'
 import { checkShiftCollision } from '@/lib/shifts/collision-checker'
 import { ZodError } from 'zod'

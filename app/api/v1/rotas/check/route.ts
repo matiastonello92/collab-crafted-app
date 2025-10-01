@@ -1,6 +1,6 @@
 // Check if rota exists for location and week
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {

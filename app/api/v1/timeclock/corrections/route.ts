@@ -1,7 +1,7 @@
 // Klyra Shifts API - Time Correction Requests (Employee Create)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createCorrectionSchema } from '@/lib/shifts/timeclock-validations'
 import { ZodError } from 'zod'
 

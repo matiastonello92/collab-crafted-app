@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerClient } from '@/lib/supabase';
 import { getEmailService } from '@/lib/email/email-service';
 import { leaveDecisionTemplate } from '@/lib/email/templates/leave-decision';
 import { format } from 'date-fns';

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerClient } from '@/lib/supabase';
 import { z } from 'zod';
 
 const syncItemsSchema = z.object({

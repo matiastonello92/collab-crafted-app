@@ -1,7 +1,7 @@
 // Klyra Shifts API - Availability (Self-Service)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { createAvailabilitySchema } from '@/lib/shifts/validations'
 import { ZodError } from 'zod'
 

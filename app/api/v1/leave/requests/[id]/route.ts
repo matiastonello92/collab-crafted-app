@@ -1,7 +1,7 @@
 // Klyra Shifts API - Cancel Leave Request (Self-Service)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 
 export async function PUT(
   request: Request,

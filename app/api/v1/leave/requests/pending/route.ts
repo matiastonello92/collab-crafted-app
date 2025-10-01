@@ -1,7 +1,7 @@
 // Klyra Shifts API - Manager: Fetch Pending Leave Requests
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   try {

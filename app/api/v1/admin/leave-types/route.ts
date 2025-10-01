@@ -1,7 +1,7 @@
 // Klyra Shifts API - Admin: CRUD Leave Types
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { z } from 'zod'
 
 const createLeaveTypeSchema = z.object({

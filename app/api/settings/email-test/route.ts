@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
 import { withRetry } from '@/lib/utils/retry'
 
 export const runtime = 'nodejs'
