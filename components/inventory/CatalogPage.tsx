@@ -161,7 +161,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
   });
 
   // Admin or users with inventory:edit permission can manage products
-  const canManage = isAdmin || hasPermission(permissions, ['inventory:edit', 'inventory:create']);
+  const canManage = isAdmin || can(['inventory:edit', 'inventory:create']);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
