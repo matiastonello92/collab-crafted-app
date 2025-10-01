@@ -10,6 +10,9 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  let assignment: any
+  let shift: any
+  
   try {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -32,18 +35,20 @@ export async function POST(
     const validated = assignShiftSchema.parse(body)
 
     // Fetch shift to get time range and org_id
-    const { data: shift, error: shiftError } = await supabase
+    const { data: shiftData, error: shiftError } = await supabase
       .from('shifts')
-      .select('start_at, end_at, org_id')
+      .select('start_at, end_at, org_id, location_id')
       .eq('id', params.id)
       .single()
 
-    if (shiftError || !shift) {
+    if (shiftError || !shiftData) {
       return NextResponse.json(
         { error: 'Shift not found' },
         { status: 404 }
       )
     }
+    
+    shift = shiftData
 
     // Check collision (only for assigned/accepted status)
     if (validated.status === 'assigned') {
@@ -71,8 +76,6 @@ export async function POST(
       .eq('shift_id', params.id)
       .eq('user_id', validated.user_id)
       .single()
-
-    let assignment
 
     if (existingAssignment) {
       // Update existing assignment
@@ -122,5 +125,25 @@ export async function POST(
       { error: 'Internal server error' },
       { status: 500 }
     )
+  } finally {
+    // Async compliance check (fire-and-forget)
+    // Don't await to avoid blocking the response
+    if (assignment?.user_id && shift) {
+      const shiftDate = new Date(shift.start_at).toISOString().split('T')[0]
+      const periodStart = shiftDate
+      const periodEnd = new Date(new Date(shiftDate).setDate(new Date(shiftDate).getDate() + 7))
+        .toISOString().split('T')[0]
+      
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('supabase.co', 'lovable.app') || 'http://localhost:3000'}/api/v1/compliance/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: assignment.user_id,
+          location_id: shift.location_id,
+          period_start: periodStart,
+          period_end: periodEnd
+        })
+      }).catch(err => console.error('Background compliance check failed:', err))
+    }
   }
 }

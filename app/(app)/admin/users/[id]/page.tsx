@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, User, Shield, Activity, Settings, Mail, Tag } from 'lucide-react'
+import { ArrowLeft, User, Shield, Activity, Settings, Mail, Tag, AlertTriangle } from 'lucide-react'
 import RolesByLocationPanel from './components/RolesByLocationPanel'
 import PermissionOverridesPanel from './components/PermissionOverridesPanel'
 import ActivityPanel from './components/ActivityPanel'
 import JobTagsPanel from './components/JobTagsPanel'
+import { CompliancePanel } from './components/CompliancePanel'
 import { UserOverview } from './components/UserOverview'
 import { EffectivePermissions } from './components/EffectivePermissions'
 import { DeleteUserDialog } from './components/DeleteUserDialog'
@@ -105,11 +106,12 @@ export default async function UserDetailPage({ params }: Props) {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="roles">Ruoli & Location</TabsTrigger>
           <TabsTrigger value="job-tags">Job Tags</TabsTrigger>
           <TabsTrigger value="permissions">Permessi Effettivi</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
           <TabsTrigger value="activity">Attività</TabsTrigger>
           <TabsTrigger value="security">Sicurezza</TabsTrigger>
         </TabsList>
@@ -154,6 +156,10 @@ export default async function UserDetailPage({ params }: Props) {
 
         <TabsContent value="permissions" className="mt-6">
           <EffectivePermissions userId={params.id} />
+        </TabsContent>
+
+        <TabsContent value="compliance" className="mt-6">
+          <CompliancePanel userId={params.id} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">

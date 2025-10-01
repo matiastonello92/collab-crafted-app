@@ -2,18 +2,13 @@
 // POST /api/v1/timesheets - Generate/update timesheet
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { generateTimesheetSchema } from '@/lib/shifts/timesheet-validations'
 import {
   calculateWorkedHoursFromClockEvents,
   calculatePlannedHoursFromShifts,
   generateTimesheetTotals
 } from '@/lib/shifts/timesheet-calculator'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,7 +19,7 @@ export async function GET(req: NextRequest) {
     const period_start = searchParams.get('period_start')
     const period_end = searchParams.get('period_end')
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('timesheets')
       .select(`
         *,
@@ -60,7 +55,7 @@ export async function POST(req: NextRequest) {
     const { user_id, location_id, period_start, period_end, force } = payload
 
     // Check if timesheet already exists
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseAdmin
       .from('timesheets')
       .select('id, status, approved_at')
       .eq('user_id', user_id)
@@ -78,7 +73,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch time_clock_events for period
-    const { data: events } = await supabase
+    const { data: events } = await supabaseAdmin
       .from('time_clock_events')
       .select('*')
       .eq('user_id', user_id)
@@ -88,7 +83,7 @@ export async function POST(req: NextRequest) {
       .order('occurred_at', { ascending: true })
 
     // Fetch assigned shifts for period
-    const { data: assignments } = await supabase
+    const { data: assignments } = await supabaseAdmin
       .from('shift_assignments')
       .select('shift_id, shifts!inner(*)')
       .eq('user_id', user_id)
@@ -110,7 +105,7 @@ export async function POST(req: NextRequest) {
     const timesheetData = {
       user_id,
       location_id,
-      org_id: (await supabase.from('locations').select('org_id').eq('id', location_id).single()).data?.org_id,
+      org_id: (await supabaseAdmin.from('locations').select('org_id').eq('id', location_id).single()).data?.org_id,
       period_start,
       period_end,
       totals,
@@ -120,7 +115,7 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       // Update existing
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('timesheets')
         .update(timesheetData)
         .eq('id', existing.id)
@@ -131,7 +126,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ timesheet: data })
     } else {
       // Insert new
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('timesheets')
         .insert(timesheetData)
         .select()

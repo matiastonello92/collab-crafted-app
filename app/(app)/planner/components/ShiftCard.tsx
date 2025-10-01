@@ -1,13 +1,15 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState, useEffect } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { format, parseISO, differenceInHours } from 'date-fns'
 import { Clock, AlertTriangle, User } from 'lucide-react'
 import type { ShiftWithAssignments } from '@/types/shifts'
+import type { ViolationWithUser } from '@/types/compliance'
 import { cn } from '@/lib/utils'
+import { ViolationBadge } from '@/components/compliance/ViolationBadge'
 
 interface Props {
   shift: ShiftWithAssignments
@@ -16,10 +18,29 @@ interface Props {
 }
 
 export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }: Props) {
+  const [violation, setViolation] = useState<ViolationWithUser | null>(null)
+  
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: shift.id,
     disabled: isLocked || shift.rota?.status === 'locked'
   })
+  
+  useEffect(() => {
+    // Fetch violations for this shift's date and user if assigned
+    if (shift.assignments?.[0]?.user_id) {
+      const shiftDate = new Date(shift.start_at).toISOString().split('T')[0]
+      fetch(`/api/v1/compliance/violations?user_id=${shift.assignments[0].user_id}&is_silenced=false`)
+        .then(res => res.json())
+        .then(data => {
+          const relevantViolation = data.violations?.find((v: ViolationWithUser) => 
+            v.violation_date === shiftDate || 
+            v.details.shift_ids?.includes(shift.id)
+          )
+          if (relevantViolation) setViolation(relevantViolation)
+        })
+        .catch(err => console.error('Error fetching violations:', err))
+    }
+  }, [shift.id, shift.assignments])
   
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -28,9 +49,6 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }
   const startTime = format(parseISO(shift.start_at), 'HH:mm')
   const endTime = format(parseISO(shift.end_at), 'HH:mm')
   const assignment = shift.assignments?.[0]
-  
-  // Check for potential rest violation (< 11h between shifts - simplified)
-  const hasWarning = false // TODO: implement proper rest violation check
   
   // Calculate shift duration
   const duration = differenceInHours(parseISO(shift.end_at), parseISO(shift.start_at))
@@ -45,7 +63,7 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }
         'bg-card border rounded-lg p-3 shadow-sm transition-all',
         !isLocked && 'cursor-move hover:shadow-md',
         isDragging && 'opacity-50 rotate-2',
-        hasWarning && 'border-yellow-500 bg-yellow-50/50',
+        violation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
         isLocked && 'cursor-not-allowed opacity-60'
       )}
     >
@@ -56,11 +74,14 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }
           <span>{startTime} - {endTime}</span>
           <span className="text-muted-foreground">({duration}h)</span>
         </div>
-        {shift.job_tag && (
-          <Badge variant="outline" className="text-xs">
-            {shift.job_tag.label}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {violation && <ViolationBadge violation={violation} compact />}
+          {shift.job_tag && (
+            <Badge variant="outline" className="text-xs">
+              {shift.job_tag.label}
+            </Badge>
+          )}
+        </div>
       </div>
       
       {/* Assegnazione utente */}
@@ -93,14 +114,6 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }
       {shift.break_minutes > 0 && (
         <div className="text-xs text-muted-foreground mt-1">
           Pausa: {shift.break_minutes} min
-        </div>
-      )}
-      
-      {/* Warning icon */}
-      {hasWarning && (
-        <div className="flex items-center gap-1 mt-2 text-yellow-600 text-xs">
-          <AlertTriangle className="h-3 w-3" />
-          <span>Riposo &lt; 11h</span>
         </div>
       )}
 

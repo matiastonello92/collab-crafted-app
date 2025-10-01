@@ -1,13 +1,8 @@
 // POST /api/v1/timesheets/[id]/approve - Approve and lock timesheet
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { approveTimesheetSchema } from '@/lib/shifts/timesheet-validations'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 export async function POST(
   req: NextRequest,
@@ -25,13 +20,13 @@ export async function POST(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
     if (authError || !user) {
       return NextResponse.json({ error: 'Non autenticato' }, { status: 401 })
     }
 
     // Check if timesheet exists
-    const { data: timesheet, error: fetchError } = await supabase
+    const { data: timesheet, error: fetchError } = await supabaseAdmin
       .from('timesheets')
       .select('*')
       .eq('id', timesheetId)
@@ -47,7 +42,7 @@ export async function POST(
     }
 
     // Approve and lock
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('timesheets')
       .update({
         status: 'approved',

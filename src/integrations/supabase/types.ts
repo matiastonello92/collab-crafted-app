@@ -139,6 +139,127 @@ export type Database = {
           },
         ]
       }
+      compliance_rules: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          org_id: string
+          rule_key: string
+          threshold_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          org_id: string
+          rule_key: string
+          threshold_value?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          rule_key?: string
+          threshold_value?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_rules_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      compliance_violations: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          is_silenced: boolean
+          location_id: string
+          org_id: string
+          rule_id: string
+          severity: string
+          silence_reason: string | null
+          silenced_at: string | null
+          silenced_by: string | null
+          user_id: string
+          violation_date: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          is_silenced?: boolean
+          location_id: string
+          org_id: string
+          rule_id: string
+          severity?: string
+          silence_reason?: string | null
+          silenced_at?: string | null
+          silenced_by?: string | null
+          user_id: string
+          violation_date: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          is_silenced?: boolean
+          location_id?: string
+          org_id?: string
+          rule_id?: string
+          severity?: string
+          silence_reason?: string | null
+          silenced_at?: string | null
+          silenced_by?: string | null
+          user_id?: string
+          violation_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_violations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_violations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_violations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "compliance_violations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       features: {
         Row: {
           description: string | null
