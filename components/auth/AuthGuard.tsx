@@ -2,7 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useRouter } from '@/hooks/useRouter';
+import { createLogger } from '@/lib/logger';
 import type { Session } from '@supabase/supabase-js';
+
+const logger = createLogger('AuthGuard');
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,7 +13,15 @@ interface AuthGuardProps {
 }
 
 /**
- * Centralized authentication guard - replaces scattered useRequireSession usage
+ * Centralized authentication guard
+ * 
+ * Protects client components by ensuring user is authenticated.
+ * Automatically redirects to /login if session is not found.
+ * 
+ * @example
+ * <AuthGuard fallback={<LoadingSpinner />}>
+ *   <ProtectedContent />
+ * </AuthGuard>
  */
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const [session, setSession] = useState<Session | null>(null);
@@ -20,37 +31,39 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   useEffect(() => {
     let mounted = true;
-    console.log('🔍 AuthGuard: Initializing auth state listener');
+    logger.debug('Initializing auth state listener');
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔍 AuthGuard: Auth state change:', { event, hasSession: !!session, userEmail: session?.user?.email });
+      logger.debug('Auth state changed', { event, hasSession: !!session });
+      
       if (mounted) {
         setSession(session);
         setLoading(false);
         
         // Redirect to login if no session
         if (!session) {
-          console.log('❌ AuthGuard: No session, redirecting to login');
+          logger.debug('No session found, redirecting to login');
           replaceTo('/login');
-        } else {
-          console.log('✅ AuthGuard: Session found, user authenticated');
         }
       }
     });
 
     // Check initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('🔍 AuthGuard: Initial session check:', { hasSession: !!session, userEmail: session?.user?.email, error });
+      if (error) {
+        logger.error('Failed to get initial session', error);
+      }
+      
       if (mounted) {
         setSession(session);
         setLoading(false);
         
         if (!session) {
-          console.log('❌ AuthGuard: No initial session, redirecting to login');
+          logger.debug('No initial session, redirecting to login');
           replaceTo('/login');
         } else {
-          console.log('✅ AuthGuard: Initial session found');
+          logger.debug('Initial session found');
         }
       }
     });
