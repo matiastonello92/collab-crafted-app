@@ -55,6 +55,21 @@ export async function POST(request: NextRequest) {
     const { location_id, user_id, job_tag_id, is_primary, note } = validation.data
     const supabase = await createSupabaseServerClient()
 
+    // Get current user BEFORE building insert object
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    console.log('Attempting to assign job tag:', {
+      org_id: orgId,
+      location_id,
+      user_id,
+      job_tag_id,
+      assigned_by: user.id
+    })
+
     const { data, error } = await supabase
       .from('user_job_tags')
       .insert({
@@ -64,16 +79,26 @@ export async function POST(request: NextRequest) {
         job_tag_id,
         is_primary: is_primary || false,
         note: note || null,
-        assigned_by: (await supabase.auth.getUser()).data.user?.id,
+        assigned_by: user.id,
       })
       .select(`*, job_tag:job_tags(*)`)
       .single()
 
     if (error) {
+      console.error('DB Insert Error:', error)
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Tag già assegnato' }, { status: 409 })
       }
-      throw error
+      if (error.code === '23503') {
+        return NextResponse.json({ error: 'ID non valido (user, location o tag)' }, { status: 400 })
+      }
+      if (error.code === '42501') {
+        return NextResponse.json({ error: 'Permessi insufficienti per questa location' }, { status: 403 })
+      }
+      return NextResponse.json({ 
+        error: 'Errore di salvataggio', 
+        details: error.message 
+      }, { status: 500 })
     }
 
     return NextResponse.json({ assignment: data }, { status: 201 })
