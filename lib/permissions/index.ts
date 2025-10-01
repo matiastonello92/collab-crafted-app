@@ -100,5 +100,51 @@ export function normalizePermissions(list: string[]): string[] {
   return Array.from(normalized)
 }
 
+/**
+ * Legacy function - Normalize and deduplicate a list of permissions
+ * @deprecated Use normalizePermissions() instead
+ */
+export function normalizeSet(list: Array<string | Permission>): Permission[] {
+  const normalized = new Set<Permission>()
+  
+  for (const raw of list) {
+    const norm = normalizePermission(String(raw)) as Permission
+    if (norm) normalized.add(norm)
+  }
+  
+  return Array.from(normalized)
+}
+
+/**
+ * Legacy function - Check if permissions array contains required permission(s)
+ * @deprecated Use checkPermission() instead
+ */
+export function can(perms: string[] | Set<string> | readonly string[], required: string | string[]): boolean {
+  const permsArray = Array.isArray(perms) ? perms : Array.from(perms)
+  return checkPermission(permsArray, required)
+}
+
+/**
+ * Legacy function - Get user permissions from API
+ * @deprecated Use usePermissions() hook instead
+ */
+export async function getUserPermissions(locationId?: string): Promise<Permission[]> {
+  const qs = new URLSearchParams()
+  if (locationId) qs.set('locationId', locationId)
+  
+  const res = await fetch(`/api/v1/me/permissions?${qs.toString()}`, {
+    credentials: 'include',
+  })
+  
+  if (!res.ok) return []
+  
+  const json = await res.json()
+  const perms = Array.isArray(json?.permissions)
+    ? (json.permissions as Array<string | Permission>)
+    : []
+  
+  return normalizeSet(perms)
+}
+
 // Re-export permission types
 export type { Permission } from './registry'
