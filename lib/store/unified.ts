@@ -3,7 +3,6 @@
 import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import { can } from '../permissions'
 
 interface AppContext {
   org_id: string | null
@@ -26,11 +25,7 @@ interface AppState {
   // Core context
   context: AppContext
   
-  // Permissions (from old store)
-  permissions: string[]
-  permissionsLoading: boolean
-  
-  // Performance tracking (from modern store)
+  // Performance tracking
   metrics: PerformanceMetrics
   
   // Hydration actions
@@ -41,20 +36,27 @@ interface AppState {
   updateLocation: (locationId: string, locationName: string) => void
   clearContext: () => void
   
-  // Permission actions (from old store)
-  setPermissions: (permissions: string[]) => void
-  setPermissionsLoading: (loading: boolean) => void
-  hasPermission: (permission: string) => boolean
-  
-  // Performance methods (from modern store)
+  // Performance methods
   recordCacheHit: () => void
   recordCacheMiss: () => void
   updateLoadTime: (time: number) => void
 }
 
 /**
- * Unified store combining permissions management and performance tracking
- * Maintains full compatibility with both old and modern store APIs
+ * Unified App Store - UI State Only
+ * 
+ * This store manages UI-related state (context, location, performance metrics).
+ * Server data (permissions, users, etc.) should use SWR hooks instead.
+ * 
+ * @example
+ * // Get context
+ * const { context } = useAppStore()
+ * 
+ * // Update location
+ * const { updateLocation } = useAppStore()
+ * updateLocation(locationId, locationName)
+ * 
+ * // For permissions, use usePermissions() hook instead
  */
 export const useAppStore = create<AppState>()(
   subscribeWithSelector(
@@ -68,9 +70,6 @@ export const useAppStore = create<AppState>()(
           location_name: null,
           user_id: null,
         },
-        
-        permissions: [],
-        permissionsLoading: false,
         
         metrics: {
           lastUpdated: 0,
@@ -103,24 +102,7 @@ export const useAppStore = create<AppState>()(
               location_name: null,
               user_id: null,
             }
-            state.permissions = []
-            state.permissionsLoading = false
           }),
-
-        setPermissions: (permissions) =>
-          set((state) => {
-            state.permissions = permissions
-          }),
-
-        setPermissionsLoading: (loading) =>
-          set((state) => {
-            state.permissionsLoading = loading
-          }),
-
-        hasPermission: (permission) => {
-          const { permissions } = get()
-          return can(permissions, permission)
-        },
 
         recordCacheHit: () =>
           set((state) => {
