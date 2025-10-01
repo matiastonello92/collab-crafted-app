@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { supabase } from '@/integrations/supabase/client'
+import { supabase } from '@/src/integrations/supabase/client'
 
 describe('Shifts CRUD Operations', () => {
   beforeEach(() => {
