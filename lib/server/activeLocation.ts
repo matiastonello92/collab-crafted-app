@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { createSupabaseServerClient } from '@/utils/supabase/server';
 
-type Loc = { id: string; name: string };
+type Loc = { id: string; name: string; org_id: string };
 type Meta = { error?: string };
 
 export async function getUserLocations(): Promise<{ user: { id: string } | null; locations: Loc[]; meta: Meta }> {
@@ -25,7 +25,7 @@ export async function getUserLocations(): Promise<{ user: { id: string } | null;
 
     const { data: locs, error: e2 } = await supabase
       .from('locations')
-      .select('id,name')
+      .select('id,name,org_id')
       .in('id', ids);
 
     if (e2) {

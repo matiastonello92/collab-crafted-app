@@ -67,9 +67,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    
+    console.log('📥 [SHIFTS POST] Request body:', body);
+    
     const validated = createShiftSchema.parse(body)
 
-    // Fetch rota to get org_id, location_id, and validate week range
+    // Derive org_id and location_id from rota (like inventory modules)
+    console.log('🔍 [SHIFTS POST] Deriving org_id from rota_id:', validated.rota_id);
+    
     const { data: rota, error: rotaError } = await supabase
       .from('rotas')
       .select('org_id, location_id, week_start_date')
@@ -77,11 +82,14 @@ export async function POST(request: Request) {
       .single()
 
     if (rotaError || !rota) {
+      console.error('❌ [SHIFTS POST] Rota not found:', rotaError);
       return NextResponse.json(
         { error: 'Rota not found' },
         { status: 404 }
       )
     }
+    
+    console.log('✅ [SHIFTS POST] Derived org_id:', rota.org_id, 'location_id:', rota.location_id);
 
     // Validate shift is within rota week
     if (!isDateInWeek(validated.start_at, rota.week_start_date)) {

@@ -9,6 +9,7 @@ import { Step3AddShifts } from './Step3AddShifts'
 import { Step4Review } from './Step4Review'
 import { useWizardData } from '../hooks/useWizardData'
 import { useRotaCheck } from '../hooks/useRotaCheck'
+import { useAppStore } from '@/lib/store/unified'
 
 const STEPS = [
   { id: 1, title: 'Location', description: 'Seleziona location' },
@@ -47,6 +48,17 @@ export function OnboardingWizard() {
     const location = locations.find((l) => l.id === locationId) as any
     if (location) {
       setSelectedOrgId(location.org_id)
+      
+      // CRITICAL: Synchronize with global context (like inventory modules)
+      console.log('🔄 [WIZARD] Syncing location to global context:', {
+        location_id: locationId,
+        location_name: location.name,
+        org_id: location.org_id
+      });
+      
+      useAppStore.getState().updateLocation(locationId, location.name);
+      useAppStore.getState().setContext({ org_id: location.org_id });
+      
       fetchJobTags(location.org_id)
       fetchUsers(locationId)
     }

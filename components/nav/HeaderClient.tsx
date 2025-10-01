@@ -15,7 +15,7 @@ export default function HeaderClient({
   errorMessage,
   setActiveLocation,
 }: {
-  locations: { id: string; name: string }[];
+  locations: { id: string; name: string; org_id: string }[];
   activeLocationId: string | null;
   persisted: boolean;
   errorMessage?: string;
@@ -28,27 +28,39 @@ export default function HeaderClient({
   const { setContext } = useHydratedStore();
   useEffectivePermissions();
 
-  // Step 4: Verify timing and add detailed logging
+  // Initialize user_id and org_id from active location
   useEffect(() => {
     const active = locations.find(l => l.id === activeLocationId) || null;
     
-    console.log('📍 [HEADER] Setting context:', {
-      org_id: context.org_id,
-      user_id: context.user_id,
-      old_location_id: context.location_id,
-      new_location_id: active?.id ?? null,
-      location_name: active?.name ?? null
-    });
+    // Get user_id from session (will be available after auth)
+    const getUserId = async () => {
+      try {
+        const response = await fetch('/api/qa/session');
+        const data = await response.json();
+        return data.user?.id || null;
+      } catch {
+        return null;
+      }
+    };
     
-    setContext({
-      org_id: context.org_id,
-      user_id: context.user_id,
-      location_id: active?.id ?? null,
-      location_name: active?.name ?? null,
+    getUserId().then(userId => {
+      console.log('📍 [HEADER] Setting full context:', {
+        org_id: active?.org_id ?? null,
+        user_id: userId,
+        location_id: active?.id ?? null,
+        location_name: active?.name ?? null
+      });
+      
+      setContext({
+        org_id: active?.org_id ?? null,
+        user_id: userId,
+        location_id: active?.id ?? null,
+        location_name: active?.name ?? null,
+      });
+      
+      console.log('✅ [HEADER] Context updated successfully');
     });
-    
-    console.log('✅ [HEADER] Context updated successfully');
-  }, [locations, activeLocationId, setContext, context.org_id, context.user_id]);
+  }, [locations, activeLocationId, setContext]);
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
   useEffect(() => {
