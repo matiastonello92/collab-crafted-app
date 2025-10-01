@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkPlatformAdmin } from '@/lib/admin/guards'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export async function GET() {
   try {

@@ -1,7 +1,7 @@
 // Klyra Shifts API - Admin: Update/Delete Leave Type
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const updateLeaveTypeSchema = z.object({

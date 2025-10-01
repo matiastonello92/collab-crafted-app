@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabase';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getEmailService } from '@/lib/email/email-service';
 import { rotaPublishedTemplate } from '@/lib/email/templates/rota-published';
 import { format } from 'date-fns';

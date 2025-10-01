@@ -1,6 +1,6 @@
 // Get users for a specific location with their primary job tag
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   try {

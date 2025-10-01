@@ -1,7 +1,7 @@
 // Klyra Shifts API - Rotas (List & Create)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createRotaSchema } from '@/lib/shifts/validations'
 import { ZodError } from 'zod'
 

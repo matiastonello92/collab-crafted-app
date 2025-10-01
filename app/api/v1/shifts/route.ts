@@ -1,7 +1,7 @@
 // Klyra Shifts API - Shifts (List & Create)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createShiftSchema } from '@/lib/shifts/validations'
 import { isDateInWeek } from '@/lib/shifts/timezone-utils'
 import { ZodError } from 'zod'
