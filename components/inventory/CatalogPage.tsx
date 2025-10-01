@@ -14,7 +14,7 @@ import { EditProductDialog } from './EditProductDialog';
 import { NewProductForm } from './NewProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store/unified';
-import { usePermissions, hasPermission } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface CatalogPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
