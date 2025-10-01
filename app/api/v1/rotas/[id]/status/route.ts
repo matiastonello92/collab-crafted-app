@@ -78,6 +78,20 @@ export async function PUT(
       throw error
     }
 
+    // Trigger email notification if status changed to 'published'
+    if (validated.status === 'published' && existingRota.status !== 'published') {
+      // Fire-and-forget email notification
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      fetch(`${appUrl}/api/v1/notifications/rota-published`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cookie': request.headers.get('cookie') || ''
+        },
+        body: JSON.stringify({ rotaId: params.id })
+      }).catch(err => console.error('Failed to trigger rota published email:', err));
+    }
+
     return NextResponse.json({ rota: updatedRota })
   } catch (error) {
     console.error('Error in PUT /api/v1/rotas/[id]/status:', error)

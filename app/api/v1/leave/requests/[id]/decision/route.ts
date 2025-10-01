@@ -76,8 +76,16 @@ export async function PUT(
       throw error
     }
 
-    // TODO: Send notification to user (email/push)
-    // This would be implemented via Supabase Edge Function or email service
+    // Trigger email notification for leave decision
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    fetch(`${appUrl}/api/v1/notifications/leave-decision`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || ''
+      },
+      body: JSON.stringify({ leaveRequestId: params.id })
+    }).catch(err => console.error('Failed to trigger leave decision email:', err));
 
     return NextResponse.json({ 
       leave_request: updated,

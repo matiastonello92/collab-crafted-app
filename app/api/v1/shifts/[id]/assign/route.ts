@@ -110,6 +110,22 @@ export async function POST(
       assignment = data
     }
 
+    // Trigger email notification for shift assignment
+    const changeType = existingAssignment ? 'modified' : 'assigned';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    fetch(`${appUrl}/api/v1/notifications/shift-assignment`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || ''
+      },
+      body: JSON.stringify({ 
+        shiftId: params.id, 
+        userId: validated.user_id,
+        changeType
+      })
+    }).catch(err => console.error('Failed to trigger shift assignment email:', err));
+
     return NextResponse.json({ assignment }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/v1/shifts/[id]/assign:', error)

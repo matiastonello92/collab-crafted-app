@@ -260,6 +260,59 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          org_id: string
+          provider_id: string | null
+          recipient_email: string
+          sent_at: string | null
+          status: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          org_id: string
+          provider_id?: string | null
+          recipient_email: string
+          sent_at?: string | null
+          status?: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          org_id?: string
+          provider_id?: string | null
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       features: {
         Row: {
           description: string | null
@@ -1473,6 +1526,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           default_location_id: string | null
+          email_preferences: Json | null
           full_name: string | null
           id: string
           locale: string | null
@@ -1488,6 +1542,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           default_location_id?: string | null
+          email_preferences?: Json | null
           full_name?: string | null
           id: string
           locale?: string | null
@@ -1503,6 +1558,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           default_location_id?: string | null
+          email_preferences?: Json | null
           full_name?: string | null
           id?: string
           locale?: string | null
@@ -2641,6 +2697,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           default_location_id: string | null
+          email_preferences: Json | null
           full_name: string | null
           id: string
           locale: string | null

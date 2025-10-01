@@ -36,6 +36,16 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      // Save email preferences separately
+      if (profile.email_preferences) {
+        const { error: emailPrefError } = await supabase
+          .from('profiles')
+          .update({ email_preferences: profile.email_preferences })
+          .eq('id', userId);
+        
+        if (emailPrefError) throw emailPrefError;
+      }
+
       const { error } = await supabase.rpc('profile_update_self', {
         p_full_name: profile.full_name || null,
         p_avatar_url: profile.avatar_url || null,
@@ -63,6 +73,14 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
   const updateNotificationPref = (key: string, value: boolean) => {
     const newNotifPrefs = { ...profile.notif_prefs, [key]: value }
     updateProfile('notif_prefs', newNotifPrefs)
+  }
+
+  const updateEmailPref = (key: string, value: boolean) => {
+    const newEmailPrefs = { 
+      ...profile.email_preferences, 
+      [key]: value 
+    }
+    updateProfile('email_preferences', newEmailPrefs)
   }
 
   const handleTestEmail = async () => {
@@ -358,6 +376,51 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                       checked={profile.notif_prefs?.activity_notifications || false}
                       onCheckedChange={(checked) => updateNotificationPref('activity_notifications', checked)}
                     />
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="text-sm font-semibold mb-4">Preferenze Email Dettagliate</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Scegli quali email ricevere per ogni tipo di evento
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Planning pubblicato</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Email quando un nuovo planning settimanale viene pubblicato
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profile.email_preferences?.rota_published !== false}
+                        onCheckedChange={(checked) => updateEmailPref('rota_published', checked)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Modifiche turni</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Email quando ti viene assegnato o modificato un turno
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profile.email_preferences?.shift_assignment_change !== false}
+                        onCheckedChange={(checked) => updateEmailPref('shift_assignment_change', checked)}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Decisioni assenze</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Email quando le tue richieste di assenza vengono approvate o rifiutate
+                        </p>
+                      </div>
+                      <Switch
+                        checked={profile.email_preferences?.leave_decision !== false}
+                        onCheckedChange={(checked) => updateEmailPref('leave_decision', checked)}
+                      />
+                    </div>
                   </div>
                 </div>
 
