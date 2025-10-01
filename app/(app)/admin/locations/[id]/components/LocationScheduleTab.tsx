@@ -35,10 +35,9 @@ export function LocationScheduleTab({ location }: Props) {
   const [openingHours, setOpeningHours] = useState(location.opening_hours || {})
   const [openDays, setOpenDays] = useState<string[]>(location.open_days || [])
   const [loading, setLoading] = useState(false)
-  const { permissions } = useHydratedStore()
+  const { isAdmin, can } = usePermissions()
 
-  const isAdmin = can(permissions, '*')
-  const canEdit = isAdmin || can(permissions, 'locations:manage')
+  const canEdit = isAdmin || can('locations:manage')
 
   useEffect(() => {
     setOpeningHours(location.opening_hours || {})
