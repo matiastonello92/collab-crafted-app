@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
-import { createSupabaseAdminClient } from "@/lib/supabase/server"
-import { checkOrgAdmin } from "@/lib/admin/guards"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -17,90 +15,64 @@ interface RevokeRoleRequest {
   location_id?: string
 }
 
-// Audit log stub - TODO: replace with real audit system
-async function createAuditLog(action: string, details: any, actor_id: string) {
-  console.log('AUDIT LOG STUB:', { action, details, actor_id, timestamp: new Date().toISOString() })
-  // TODO: Insert into audit_log table when available
-}
-
-// Event outbox stub - TODO: replace with real outbox system  
-async function emitOutboxEvent(event_type: string, payload: any) {
-  console.log('OUTBOX EVENT STUB:', { event_type, payload, timestamp: new Date().toISOString() })
-  // TODO: Insert into event_outbox table when available
-}
-
 export async function POST(
   req: Request,
   { params }: { params: { userId: string } }
 ) {
   try {
-    // Check admin access using centralized guard
-    const { userId: actorId, hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !actorId || !orgId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    console.log('🔍 [API DEBUG] POST /api/v1/admin/users/[userId]/roles called')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabaseAdmin = createSupabaseAdminClient()
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
     const { userId } = params
     const body: AssignRoleRequest = await req.json()
 
-    // Validate input
     if (!body.role_id) {
       return NextResponse.json({ error: 'role_id is required' }, { status: 400 })
     }
 
-    // Verify user exists and belongs to same org
-    const { data: targetUser, error: userError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id, org_id')
-      .eq('id', userId)
-      .single()
+    console.log('🔍 [API DEBUG] Assignment request:', { userId, role_id: body.role_id, location_id: body.location_id })
 
-    if (userError || !targetUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    if (targetUser.org_id !== orgId) {
-      return NextResponse.json({ error: 'User not found in your organization' }, { status: 404 })
-    }
-
-    // Verify role exists and belongs to same org
-    const { data: role, error: roleError } = await supabaseAdmin
+    // Verify role exists and get org_id
+    const { data: role, error: roleError } = await supabase
       .from('roles')
       .select('id, name, display_name, org_id')
       .eq('id', body.role_id)
       .single()
 
     if (roleError || !role) {
+      console.log('❌ [API DEBUG] Role not found')
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
     }
 
-    if (role.org_id !== orgId) {
-      return NextResponse.json({ error: 'Role not found in your organization' }, { status: 404 })
-    }
+    console.log('✅ [API DEBUG] Role verified:', role.name)
 
-    // If location_id provided, verify location exists and belongs to same org
-    let location = null
+    // If location_id provided, verify it belongs to same org
     if (body.location_id) {
-      const { data: loc, error: locError } = await supabaseAdmin
+      const { data: location, error: locError } = await supabase
         .from('locations')
         .select('id, name, org_id')
         .eq('id', body.location_id)
         .single()
 
-      if (locError || !loc) {
+      if (locError || !location || location.org_id !== role.org_id) {
+        console.log('❌ [API DEBUG] Location not found or org mismatch')
         return NextResponse.json({ error: 'Location not found' }, { status: 404 })
       }
 
-      if (loc.org_id !== orgId) {
-        return NextResponse.json({ error: 'Location not found in your organization' }, { status: 404 })
-      }
-
-      location = loc
+      console.log('✅ [API DEBUG] Location verified:', location.name)
     }
 
     // Check if assignment already exists
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await supabase
       .from('user_roles_locations')
       .select('id, is_active')
       .eq('user_id', userId)
@@ -109,15 +81,17 @@ export async function POST(
       .single()
 
     if (existing?.is_active) {
+      console.log('⚠️ [API DEBUG] Role already assigned')
       return NextResponse.json({ error: 'Role already assigned' }, { status: 409 })
     }
 
-    // Assign role (or reactivate existing)
+    // Assign role using RLS policies
     const roleData = {
       user_id: userId,
       role_id: body.role_id,
       location_id: body.location_id || null,
-      assigned_by: actorId,
+      org_id: role.org_id,
+      assigned_by: user.id,
       assigned_at: new Date().toISOString(),
       is_active: true
     }
@@ -125,10 +99,10 @@ export async function POST(
     let result
     if (existing) {
       // Reactivate existing assignment
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('user_roles_locations')
         .update({
-          assigned_by: actorId,
+          assigned_by: user.id,
           assigned_at: new Date().toISOString(),
           is_active: true
         })
@@ -139,7 +113,7 @@ export async function POST(
       result = { data, error }
     } else {
       // Create new assignment
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('user_roles_locations')
         .insert(roleData)
         .select()
@@ -149,33 +123,11 @@ export async function POST(
     }
 
     if (result.error) {
-      console.error('Error assigning role:', result.error)
+      console.error('❌ [API DEBUG] Assignment error:', result.error)
       return NextResponse.json({ error: 'Failed to assign role' }, { status: 500 })
     }
 
-    // Create audit log
-    await createAuditLog('role_assigned', {
-      user_id: userId,
-      role_id: body.role_id,
-      role_name: role.name,
-      location_id: body.location_id,
-      location_name: location?.name
-    }, actorId)
-
-    // Emit outbox event
-    await emitOutboxEvent('permissions.updated', {
-      user_id: userId,
-      delta: {
-        action: 'role_assigned',
-        role_id: body.role_id,
-        role_name: role.name,
-        location_id: body.location_id,
-        location_name: location?.name
-      },
-      actor_id: actorId,
-      at: new Date().toISOString()
-    })
-
+    console.log('✅ [API DEBUG] Role assigned:', result.data?.id)
     return NextResponse.json({ 
       success: true, 
       assignment: result.data,
@@ -183,7 +135,7 @@ export async function POST(
     })
 
   } catch (error: any) {
-    console.error('Error in role assignment:', error)
+    console.error('❌ [API DEBUG] Unexpected error:', error)
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
   }
 }
@@ -193,23 +145,29 @@ export async function DELETE(
   { params }: { params: { userId: string } }
 ) {
   try {
-    // Check admin access using centralized guard
-    const { userId: actorId, hasAccess } = await checkOrgAdmin()
-    if (!hasAccess || !actorId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    console.log('🔍 [API DEBUG] DELETE /api/v1/admin/users/[userId]/roles called')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabaseAdmin = createSupabaseAdminClient()
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
     const { userId } = params
     const body: RevokeRoleRequest = await req.json()
 
-    // Validate input
     if (!body.role_id) {
       return NextResponse.json({ error: 'role_id is required' }, { status: 400 })
     }
 
-    // Find and deactivate role assignment
-    const { data: assignment, error: findError } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Revocation request:', { userId, role_id: body.role_id, location_id: body.location_id })
+
+    // Find assignment using RLS
+    const { data: assignment, error: findError } = await supabase
       .from('user_roles_locations')
       .select(`
         id,
@@ -218,10 +176,6 @@ export async function DELETE(
           id,
           name,
           display_name
-        ),
-        locations (
-          id,
-          name
         )
       `)
       .eq('user_id', userId)
@@ -231,45 +185,23 @@ export async function DELETE(
       .single()
 
     if (findError || !assignment) {
+      console.log('❌ [API DEBUG] Assignment not found')
       return NextResponse.json({ error: 'Role assignment not found' }, { status: 404 })
     }
 
-    // Deactivate assignment
-    const { error: updateError } = await supabaseAdmin
+    // Deactivate assignment using RLS
+    const { error: updateError } = await supabase
       .from('user_roles_locations')
       .update({ is_active: false })
       .eq('id', assignment.id)
 
     if (updateError) {
-      console.error('Error revoking role:', updateError)
+      console.error('❌ [API DEBUG] Revocation error:', updateError)
       return NextResponse.json({ error: 'Failed to revoke role' }, { status: 500 })
     }
 
     const role = (assignment.roles as any)
-    const location = assignment.locations as any
-
-    // Create audit log
-    await createAuditLog('role_revoked', {
-      user_id: userId,
-      role_id: body.role_id,
-      role_name: role.name,
-      location_id: body.location_id,
-      location_name: location?.name
-    }, actorId)
-
-    // Emit outbox event
-    await emitOutboxEvent('permissions.updated', {
-      user_id: userId,
-      delta: {
-        action: 'role_revoked',
-        role_id: body.role_id,
-        role_name: role.name,
-        location_id: body.location_id,
-        location_name: location?.name
-      },
-      actor_id: actorId,
-      at: new Date().toISOString()
-    })
+    console.log('✅ [API DEBUG] Role revoked:', role.name)
 
     return NextResponse.json({ 
       success: true,
@@ -277,7 +209,7 @@ export async function DELETE(
     })
 
   } catch (error: any) {
-    console.error('Error in role revocation:', error)
+    console.error('❌ [API DEBUG] Unexpected error:', error)
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
   }
 }

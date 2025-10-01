@@ -12,10 +12,9 @@ const fetcher = async (url: string) => {
 
 export function useMyShifts() {
   const hasHydrated = useAppStore(state => state.hasHydrated)
-  const orgId = useAppStore(state => state.context.org_id)
   
   const { data, error, mutate } = useSWR<{ shifts: ShiftWithAssignments[] }>(
-    hasHydrated && orgId ? '/api/v1/shifts/my-shifts' : null,
+    hasHydrated ? '/api/v1/shifts/my-shifts' : null,
     fetcher,
     {
       revalidateOnFocus: false,

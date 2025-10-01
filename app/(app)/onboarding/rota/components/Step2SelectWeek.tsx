@@ -50,13 +50,10 @@ export function Step2SelectWeek({
   const handleCreateRota = async () => {
     if (!selectedDate) return
     
-    // Validate context before API call - check for null/undefined and string "null"
-    const validLocationId = locationId && locationId !== 'null' ? locationId : null
-    const validOrgId = orgId && orgId !== 'null' ? orgId : null
-    
-    if (!validLocationId || !validOrgId) {
-      toast.error('Location o organizzazione mancante. Ricarica la pagina.')
-      console.error('Invalid context:', { locationId, orgId, validLocationId, validOrgId })
+    // Validate location_id only - backend will derive org_id
+    if (!locationId || locationId === 'null') {
+      toast.error('Location mancante. Ricarica la pagina.')
+      console.error('Invalid locationId:', locationId)
       return
     }
 
@@ -69,8 +66,7 @@ export function Step2SelectWeek({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          location_id: validLocationId,
-          org_id: validOrgId,
+          location_id: locationId,
           week_start_date: weekStart,
         }),
       })

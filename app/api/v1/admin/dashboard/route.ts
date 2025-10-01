@@ -1,24 +1,44 @@
 import { NextResponse } from 'next/server'
-import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 
 export async function GET() {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
+    console.log('🔍 [API DEBUG] GET /api/v1/admin/dashboard called')
     
-    if (!hasAccess || !orgId) {
-      return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 403 })
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
 
-    // Use org-scoped RPC function
+    // Derive org_id from user's membership
+    const { data: membership, error: membershipError } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (membershipError || !membership?.org_id) {
+      console.log('❌ [API DEBUG] No membership found')
+      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    }
+
+    const orgId = membership.org_id
+    console.log('✅ [API DEBUG] Derived org_id:', orgId)
+
+    // Use org-scoped RPC function (RLS enforced)
     const { data: dashboardStats, error } = await supabase.rpc('org_dashboard_stats', { p_org_id: orgId })
 
     if (error) {
-      console.error('Org dashboard error:', error)
+      console.error('❌ [API DEBUG] RPC error:', error)
       return NextResponse.json({ error: 'DATA_ERROR' }, { status: 500 })
     }
+
+    console.log('✅ [API DEBUG] Dashboard stats fetched')
 
     // Get health status
     let healthResponse: { status: string; [key: string]: any } = { status: 'ok' }
@@ -26,7 +46,7 @@ export async function GET() {
       const healthRes = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3000'}/api/healthz`)
       healthResponse = await healthRes.json()
     } catch (error) {
-      console.warn('Health check failed:', error)
+      console.warn('⚠️ [API DEBUG] Health check failed:', error)
       healthResponse = { status: 'error', error: 'Health check failed' }
     }
 
@@ -43,13 +63,12 @@ export async function GET() {
         health: healthResponse
       },
       plans: {
-        // TODO: get active plan for this org
         active_plan: null
       },
       generated_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Admin dashboard error:', error)
+    console.error('❌ [API DEBUG] Unexpected error:', error)
     return NextResponse.json({ error: 'INTERNAL_ERROR' }, { status: 500 })
   }
 }

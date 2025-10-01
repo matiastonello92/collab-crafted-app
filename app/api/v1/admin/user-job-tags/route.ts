@@ -1,17 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { assignJobTagSchema } from '@/lib/admin/validations'
 
 export async function GET(request: NextRequest) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
+    console.log('🔍 [API DEBUG] GET /api/v1/admin/user-job-tags called')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
+    // Derive org_id from user's membership
+    const { data: membership } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!membership?.org_id) {
+      console.log('❌ [API DEBUG] No membership found')
+      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+    }
+
+    const orgId = membership.org_id
+    console.log('✅ [API DEBUG] Derived org_id:', orgId)
+
     const { searchParams } = new URL(request.url)
+    const locationId = searchParams.get('location_id')
+    const userId = searchParams.get('user_id')
+    console.log('🔍 [API DEBUG] Query params:', { locationId, userId })
     
     let query = supabase
       .from('user_job_tags')
@@ -29,53 +52,60 @@ export async function GET(request: NextRequest) {
       .eq('org_id', orgId)
       .order('is_primary', { ascending: false })
 
-    const locationId = searchParams.get('location_id')
     if (locationId) query = query.eq('location_id', locationId)
-
-    const userId = searchParams.get('user_id')
     if (userId) query = query.eq('user_id', userId)
 
     const { data, error } = await query
     if (error) throw error
 
+    console.log('✅ [API DEBUG] Assignments fetched:', data?.length || 0)
     return NextResponse.json({ assignments: data })
   } catch (error) {
-    console.error('API error:', error)
+    console.error('❌ [API DEBUG] Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
+    console.log('🔍 [API DEBUG] POST /api/v1/admin/user-job-tags called')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('❌ [API DEBUG] Auth failed')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    console.log('✅ [API DEBUG] User authenticated:', user.id)
+
     const body = await request.json()
+    console.log('🔍 [API DEBUG] Request body:', body)
+    
     const validation = assignJobTagSchema.safeParse(body)
     
     if (!validation.success) {
+      console.log('❌ [API DEBUG] Validation failed:', validation.error.issues)
       return NextResponse.json({ error: 'Validation failed', details: validation.error.issues }, { status: 400 })
     }
 
     const { location_id, user_id, job_tag_id, is_primary, note } = validation.data
-    const supabase = await createSupabaseServerClient()
 
-    // Get current user BEFORE building insert object
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      console.error('Auth error:', authError)
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    // Derive org_id from location
+    const { data: location, error: locError } = await supabase
+      .from('locations')
+      .select('org_id')
+      .eq('id', location_id)
+      .single()
+
+    if (locError || !location) {
+      console.log('❌ [API DEBUG] Location not found')
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
     }
 
-    console.log('Attempting to assign job tag:', {
-      org_id: orgId,
-      location_id,
-      user_id,
-      job_tag_id,
-      assigned_by: user.id
-    })
+    const orgId = location.org_id
+    console.log('✅ [API DEBUG] Derived org_id from location:', orgId)
 
     const { data, error } = await supabase
       .from('user_job_tags')
@@ -92,7 +122,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('DB Insert Error:', error)
+      console.error('❌ [API DEBUG] Insert error:', error)
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Tag già assegnato' }, { status: 409 })
       }
@@ -108,9 +138,10 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
+    console.log('✅ [API DEBUG] Assignment created:', data?.id)
     return NextResponse.json({ assignment: data }, { status: 201 })
   } catch (error) {
-    console.error('API error:', error)
+    console.error('❌ [API DEBUG] Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
