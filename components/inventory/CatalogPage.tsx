@@ -57,7 +57,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
   // Use global store and permissions hook
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
-  const { isAdmin, permissions } = usePermissions(locationId || undefined);
+  const { isAdmin, can } = usePermissions(locationId || undefined);
 
   const loadCatalog = useCallback(async () => {
     if (!locationId) return;
