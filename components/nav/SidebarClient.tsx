@@ -78,7 +78,8 @@ export default function SidebarClient() {
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const pathname = usePathname()
   const supabase = useSupabase()
-  const { permissions, context, permissionsLoading } = useHydratedStore()
+  const context = useAppStore((state) => state.context)
+  const { can, isAdmin: isAdminPerm, isLoading: permissionsLoading } = usePermissions(context.location_id || undefined)
 
   const toggleGroup = (groupName: string) => {
     setOpenGroups(prev => 
