@@ -139,15 +139,21 @@ export const useAppStore = create<AppState>()(
   )
 )
 
-// Selective hooks for performance (modern store compatibility)
+/**
+ * Selective hooks for optimized re-renders
+ */
 export const useAppContext = () => useAppStore((state) => state.context)
+
 export const useLocationContext = () => useAppStore((state) => ({
   location_id: state.context.location_id,
   location_name: state.context.location_name,
 }))
+
 export const usePerformanceMetrics = () => useAppStore((state) => state.metrics)
 
-// Action hooks (modern store compatibility)
+/**
+ * Action hooks - only re-render when actions change (never)
+ */
 export const useContextActions = () => useAppStore((state) => ({
   setContext: state.setContext,
   updateLocation: state.updateLocation,
@@ -155,7 +161,7 @@ export const useContextActions = () => useAppStore((state) => ({
 }))
 
 /**
- * Performance monitoring hook (modern store compatibility)
+ * Performance monitoring utilities
  */
 export function usePerformanceMonitor() {
   const metrics = usePerformanceMetrics()
@@ -171,15 +177,19 @@ export function usePerformanceMonitor() {
       const result = await operation()
       const time = performance.now() - start
       updateLoadTime(time)
+      
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Performance] ${name}: ${time.toFixed(2)}ms`)
       }
+      
       return result
     } catch (error) {
       const time = performance.now() - start
+      
       if (process.env.NODE_ENV === 'development') {
         console.warn(`[Performance] ${name} failed: ${time.toFixed(2)}ms`)
       }
+      
       throw error
     }
   }
@@ -197,6 +207,3 @@ export function usePerformanceMonitor() {
     recordCacheMiss,
   }
 }
-
-// Legacy compatibility - re-export the main store as useModernStore
-export const useModernStore = useAppStore
