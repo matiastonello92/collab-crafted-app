@@ -6,8 +6,8 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, CheckCircle, Clock, Calendar } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/integrations/supabase/client'
+import { toast } from 'sonner'
+import { useSupabase } from '@/hooks/useSupabase'
 import { formatMinutesToHours } from '@/lib/shifts/timesheet-calculator'
 import type { Timesheet } from '@/types/shifts'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ interface TimesheetWithUser extends Timesheet {
 }
 
 export default function TimesheetDetailClient({ timesheetId }: { timesheetId: string }) {
-  const { toast } = useToast()
+  const supabase = useSupabase()
   const router = useRouter()
   const [timesheet, setTimesheet] = useState<TimesheetWithUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -53,11 +53,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
       setTimesheet(data)
       setNotes(data.notes || '')
     } catch (err: any) {
-      toast({
-        title: 'Errore',
-        description: err.message,
-        variant: 'destructive'
-      })
+      toast.error(err.message || 'Errore nel caricamento del timesheet')
     } finally {
       setLoading(false)
     }
@@ -86,18 +82,11 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
         throw new Error(err.error || 'Approvazione fallita')
       }
 
-      toast({
-        title: 'Approvato',
-        description: 'Timesheet approvato e bloccato'
-      })
+      toast.success('Timesheet approvato e bloccato')
       
       fetchTimesheet()
     } catch (err: any) {
-      toast({
-        title: 'Errore approvazione',
-        description: err.message,
-        variant: 'destructive'
-      })
+      toast.error(err.message || 'Errore nell\'approvazione del timesheet')
     } finally {
       setApproving(false)
     }

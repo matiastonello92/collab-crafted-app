@@ -10,8 +10,8 @@ import { Calendar, Download, Filter, Plus, Clock } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/integrations/supabase/client'
+import { toast } from 'sonner'
+import { useSupabase } from '@/hooks/useSupabase'
 import { getCurrentMonthPeriod, formatMinutesToHours } from '@/lib/shifts/timesheet-calculator'
 import type { Timesheet } from '@/types/shifts'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ interface TimesheetWithUser extends Timesheet {
 }
 
 export default function TimesheetsClient() {
-  const { toast } = useToast()
+  const supabase = useSupabase()
   const [timesheets, setTimesheets] = useState<TimesheetWithUser[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState({
@@ -80,11 +80,7 @@ export default function TimesheetsClient() {
       if (error) throw error
       setTimesheets(data || [])
     } catch (err: any) {
-      toast({
-        title: 'Errore',
-        description: err.message,
-        variant: 'destructive'
-      })
+      toast.error(err.message || 'Errore nel caricamento dei timesheets')
     } finally {
       setLoading(false)
     }
@@ -102,17 +98,15 @@ export default function TimesheetsClient() {
         .lte('occurred_at', period.end)
 
       if (!events || events.length === 0) {
-        toast({
-          title: 'Nessun evento',
-          description: 'Non ci sono eventi time clock nel mese corrente'
-        })
+        toast.error('Non ci sono eventi time clock nel mese corrente')
         return
       }
 
       // Get unique user/location combinations
+      type EventCombo = { user_id: string; location_id: string }
       const uniqueCombos = [...new Map(
-        events.map(e => [`${e.user_id}-${e.location_id}`, e])
-      ).values()]
+        events.map((e: EventCombo) => [`${e.user_id}-${e.location_id}`, e])
+      ).values()] as EventCombo[]
 
       // Generate timesheets
       for (const combo of uniqueCombos) {
@@ -128,18 +122,11 @@ export default function TimesheetsClient() {
         })
       }
 
-      toast({
-        title: 'Generati',
-        description: `${uniqueCombos.length} timesheet generati`
-      })
+      toast.success(`${uniqueCombos.length} timesheet generati`)
       
       fetchTimesheets()
     } catch (err: any) {
-      toast({
-        title: 'Errore',
-        description: err.message,
-        variant: 'destructive'
-      })
+      toast.error(err.message || 'Errore nella generazione dei timesheets')
     }
   }
 
@@ -167,18 +154,11 @@ export default function TimesheetsClient() {
       a.download = `timesheets_${new Date().toISOString().split('T')[0]}.csv`
       a.click()
 
-      toast({
-        title: 'Export completato',
-        description: 'File CSV scaricato'
-      })
+      toast.success('File CSV scaricato')
       
       setExportOpen(false)
     } catch (err: any) {
-      toast({
-        title: 'Errore export',
-        description: err.message,
-        variant: 'destructive'
-      })
+      toast.error(err.message || 'Errore nell\'export')
     }
   }
 
