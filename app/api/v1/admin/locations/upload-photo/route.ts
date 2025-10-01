@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server"
-import { checkOrgAdmin } from "@/lib/admin/guards"
 import { createSupabaseServerClient } from "@/utils/supabase/server"
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  const { hasAccess } = await checkOrgAdmin()
-  if (!hasAccess) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  }
-
+  console.log('🔍 [API DEBUG] POST /api/v1/admin/locations/upload-photo')
+  
   try {
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
     const formData = await request.formData()
     const file = formData.get('file') as File
     
@@ -26,14 +31,6 @@ export async function POST(request: Request) {
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 })
-    }
-
-    const supabase = await createSupabaseServerClient()
-    
-    // Get user session for org context
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 })
     }
     
     const { data: profile } = await supabase

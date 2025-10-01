@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { updateJobTagSchema } from '@/lib/admin/validations'
 
@@ -12,10 +11,30 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.log('🔍 [API DEBUG] PUT /api/v1/admin/job-tags/[id]', { tagId: params.id })
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
+    // Get tag to verify org_id
+    const { data: tag } = await supabase
+      .from('job_tags')
+      .select('org_id')
+      .eq('id', params.id)
+      .single()
+
+    if (!tag) {
+      return NextResponse.json({ error: 'Job tag not found' }, { status: 404 })
+    }
+
+    console.log('🔍 [API DEBUG] Tag org:', { orgId: tag.org_id })
 
     const body = await request.json()
     const validation = updateJobTagSchema.safeParse(body)
@@ -27,7 +46,6 @@ export async function PUT(
       )
     }
 
-    const supabase = await createSupabaseServerClient()
     const updates: any = {}
 
     if (validation.data.label_it) {
@@ -57,9 +75,11 @@ export async function PUT(
       .from('job_tags')
       .update(updates)
       .eq('id', params.id)
-      .eq('org_id', orgId)
+      .eq('org_id', tag.org_id)
       .select()
       .single()
+
+    console.log('🔍 [API DEBUG] Update result:', { success: !!data, error })
 
     if (error) {
       if (error.code === '23505') { // Unique violation
@@ -92,12 +112,25 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.log('🔍 [API DEBUG] DELETE /api/v1/admin/job-tags/[id]', { tagId: params.id })
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    // Get tag to verify org_id
+    const { data: tag } = await supabase
+      .from('job_tags')
+      .select('org_id')
+      .eq('id', params.id)
+      .single()
+
+    if (!tag) {
+      return NextResponse.json({ error: 'Job tag not found' }, { status: 404 })
+    }
 
     // Check if referenced in user_job_tags
     const { count } = await supabase
@@ -111,7 +144,7 @@ export async function DELETE(
         .from('job_tags')
         .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq('id', params.id)
-        .eq('org_id', orgId)
+        .eq('org_id', tag.org_id)
         .select()
         .single()
 
@@ -131,7 +164,7 @@ export async function DELETE(
       .from('job_tags')
       .delete()
       .eq('id', params.id)
-      .eq('org_id', orgId)
+      .eq('org_id', tag.org_id)
 
     if (error) {
       console.error('Error deleting job tag:', error)

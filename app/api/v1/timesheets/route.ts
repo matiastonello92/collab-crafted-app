@@ -8,10 +8,23 @@ import {
   calculatePlannedHoursFromShifts,
   generateTimesheetTotals
 } from '@/lib/shifts/timesheet-calculator'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('🔍 [API DEBUG] GET /api/v1/timesheets')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
     const { searchParams } = new URL(req.url)
     const location_id = searchParams.get('location_id')
     const user_id = searchParams.get('user_id')
@@ -19,13 +32,15 @@ export async function GET(req: NextRequest) {
     const period_start = searchParams.get('period_start')
     const period_end = searchParams.get('period_end')
 
-    let query = supabaseAdmin
+    console.log('🔍 [API DEBUG] Query params:', { location_id, user_id, status, period_start, period_end })
+
+    // Use user client - RLS will handle permissions
+    let query = supabase
       .from('timesheets')
       .select(`
         *,
-        user:user_id (
-          email,
-          raw_user_meta_data
+        profiles!user_id (
+          full_name
         )
       `)
       .order('period_start', { ascending: false })
@@ -38,7 +53,12 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error('🔍 [API DEBUG] Query error:', error)
+      throw error
+    }
+
+    console.log('🔍 [API DEBUG] Timesheets found:', { count: data?.length })
 
     return NextResponse.json({ timesheets: data })
   } catch (err: any) {
@@ -49,13 +69,27 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🔍 [API DEBUG] POST /api/v1/timesheets')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
     const body = await req.json()
     const payload = generateTimesheetSchema.parse(body)
 
     const { user_id, location_id, period_start, period_end, force } = payload
 
-    // Check if timesheet already exists
-    const { data: existing } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Generate timesheet:', { user_id, location_id, period_start, period_end, force })
+
+    // Check if timesheet already exists (RLS-protected)
+    const { data: existing } = await supabase
       .from('timesheets')
       .select('id, status, approved_at')
       .eq('user_id', user_id)
@@ -72,8 +106,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Fetch time_clock_events for period
-    const { data: events } = await supabaseAdmin
+    // Fetch time_clock_events for period (RLS-protected)
+    const { data: events } = await supabase
       .from('time_clock_events')
       .select('*')
       .eq('user_id', user_id)
@@ -82,8 +116,10 @@ export async function POST(req: NextRequest) {
       .lte('occurred_at', period_end)
       .order('occurred_at', { ascending: true })
 
-    // Fetch assigned shifts for period
-    const { data: assignments } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Time clock events:', { count: events?.length })
+
+    // Fetch assigned shifts for period (RLS-protected)
+    const { data: assignments } = await supabase
       .from('shift_assignments')
       .select('shift_id, shifts!inner(*)')
       .eq('user_id', user_id)
@@ -96,16 +132,31 @@ export async function POST(req: NextRequest) {
         return start >= new Date(period_start) && start <= new Date(period_end)
       }) || []
 
+    console.log('🔍 [API DEBUG] Shifts found:', { count: shifts.length })
+
     // Calculate hours
     const worked = calculateWorkedHoursFromClockEvents(events || [], period_start, period_end)
     const planned = calculatePlannedHoursFromShifts(shifts, period_start, period_end)
     const totals = generateTimesheetTotals(worked, planned)
 
-    // Upsert timesheet
+    console.log('🔍 [API DEBUG] Calculated totals:', totals)
+
+    // Get org_id from location
+    const { data: location } = await supabase
+      .from('locations')
+      .select('org_id')
+      .eq('id', location_id)
+      .single()
+
+    if (!location) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+    }
+
+    // Upsert timesheet (RLS-protected)
     const timesheetData = {
       user_id,
       location_id,
-      org_id: (await supabaseAdmin.from('locations').select('org_id').eq('id', location_id).single()).data?.org_id,
+      org_id: location.org_id,
       period_start,
       period_end,
       totals,
@@ -115,24 +166,32 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       // Update existing
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('timesheets')
         .update(timesheetData)
         .eq('id', existing.id)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('🔍 [API DEBUG] Update error:', error)
+        throw error
+      }
+      console.log('🔍 [API DEBUG] Timesheet updated:', { id: data.id })
       return NextResponse.json({ timesheet: data })
     } else {
       // Insert new
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('timesheets')
         .insert(timesheetData)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('🔍 [API DEBUG] Insert error:', error)
+        throw error
+      }
+      console.log('🔍 [API DEBUG] Timesheet created:', { id: data.id })
       return NextResponse.json({ timesheet: data }, { status: 201 })
     }
   } catch (err: any) {

@@ -12,10 +12,9 @@ const fetcher = async (url: string) => {
 
 export function useMyAvailability() {
   const hasHydrated = useAppStore(state => state.hasHydrated)
-  const orgId = useAppStore(state => state.context.org_id)
   
   const { data, error, mutate } = useSWR<{ availability: Availability[] }>(
-    hasHydrated && orgId ? '/api/v1/availability' : null,
+    hasHydrated ? '/api/v1/availability' : null,
     fetcher,
     {
       revalidateOnFocus: false,

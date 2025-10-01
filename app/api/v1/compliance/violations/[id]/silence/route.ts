@@ -1,7 +1,7 @@
 // POST /api/v1/compliance/violations/[id]/silence - Silence a violation
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { silenceViolationSchema } from '@/lib/shifts/compliance-validations'
 
 export async function POST(
@@ -9,24 +9,24 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('🔍 [API DEBUG] POST /api/v1/compliance/violations/[id]/silence', { violationId: params.id })
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
     const body = await req.json()
     const payload = silenceViolationSchema.parse(body)
     const violationId = params.id
 
-    // Get current user from auth header
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Non autenticato' }, { status: 401 })
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Non autenticato' }, { status: 401 })
-    }
-
-    // Check if violation exists
-    const { data: violation, error: fetchError } = await supabaseAdmin
+    // Check if violation exists (RLS-protected)
+    const { data: violation, error: fetchError } = await supabase
       .from('compliance_violations')
       .select('*')
       .eq('id', violationId)
@@ -36,8 +36,8 @@ export async function POST(
       return NextResponse.json({ error: 'Violation not found' }, { status: 404 })
     }
 
-    // Silence the violation
-    const { data, error } = await supabaseAdmin
+    // Silence the violation (RLS-protected)
+    const { data, error } = await supabase
       .from('compliance_violations')
       .update({
         is_silenced: true,
@@ -48,6 +48,8 @@ export async function POST(
       .eq('id', violationId)
       .select()
       .single()
+
+    console.log('🔍 [API DEBUG] Violation silenced:', { success: !!data, error })
 
     if (error) throw error
 

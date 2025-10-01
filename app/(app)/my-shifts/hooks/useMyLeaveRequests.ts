@@ -12,10 +12,9 @@ const fetcher = async (url: string) => {
 
 export function useMyLeaveRequests() {
   const hasHydrated = useAppStore(state => state.hasHydrated)
-  const orgId = useAppStore(state => state.context.org_id)
   
   const { data, error, mutate } = useSWR<{ requests: LeaveRequest[] }>(
-    hasHydrated && orgId ? '/api/v1/leave/requests' : null,
+    hasHydrated ? '/api/v1/leave/requests' : null,
     fetcher,
     {
       revalidateOnFocus: false,

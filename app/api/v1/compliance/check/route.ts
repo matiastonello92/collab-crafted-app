@@ -1,19 +1,33 @@
 // POST /api/v1/compliance/check - Run compliance checks
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { checkComplianceSchema } from '@/lib/shifts/compliance-validations'
 import { runComplianceChecks } from '@/lib/shifts/compliance-calculator'
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🔍 [API DEBUG] POST /api/v1/compliance/check')
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.log('🔍 [API DEBUG] Auth failed:', authError)
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
     const body = await req.json()
     const payload = checkComplianceSchema.parse(body)
 
     const { user_id, location_id, period_start, period_end } = payload
 
-    // Get org_id from location
-    const { data: location } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Check compliance:', { user_id, location_id, period_start, period_end })
+
+    // Get org_id from location (RLS-protected)
+    const { data: location } = await supabase
       .from('locations')
       .select('org_id')
       .eq('id', location_id)
@@ -23,8 +37,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Location not found' }, { status: 404 })
     }
 
-    // Fetch active rules for org
-    const { data: rules } = await supabaseAdmin
+    // Fetch active rules for org (RLS-protected)
+    const { data: rules } = await supabase
       .from('compliance_rules')
       .select('*')
       .eq('org_id', location.org_id)
@@ -34,8 +48,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'No active rules for this org', violations: [] })
     }
 
-    // Fetch time clock events
-    const { data: events } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Active rules:', { count: rules.length })
+
+    // Fetch time clock events (RLS-protected)
+    const { data: events } = await supabase
       .from('time_clock_events')
       .select('*')
       .eq('user_id', user_id)
@@ -44,8 +60,10 @@ export async function POST(req: NextRequest) {
       .lte('occurred_at', period_end)
       .order('occurred_at', { ascending: true })
 
-    // Fetch assigned shifts
-    const { data: assignments } = await supabaseAdmin
+    console.log('🔍 [API DEBUG] Time clock events:', { count: events?.length })
+
+    // Fetch assigned shifts (RLS-protected)
+    const { data: assignments } = await supabase
       .from('shift_assignments')
       .select('shift_id, shifts!inner(*)')
       .eq('user_id', user_id)
@@ -68,10 +86,12 @@ export async function POST(req: NextRequest) {
       period_end
     )
 
-    // Upsert violations to DB
+    console.log('🔍 [API DEBUG] Violations detected:', { count: violations.length })
+
+    // Upsert violations to DB (RLS-protected)
     const upsertResults = []
     for (const v of violations) {
-      const { error } = await supabaseAdmin
+      const { error } = await supabase
         .from('compliance_violations')
         .upsert({
           org_id: v.org_id,
@@ -88,6 +108,8 @@ export async function POST(req: NextRequest) {
 
       if (!error) upsertResults.push(v)
     }
+
+    console.log('🔍 [API DEBUG] Violations saved:', { count: upsertResults.length })
 
     return NextResponse.json({
       message: 'Compliance check completed',

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkOrgAdmin } from '@/lib/admin/guards'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { updateUserJobTagSchema } from '@/lib/admin/validations'
 
@@ -13,10 +12,29 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.log('🔍 [API DEBUG] PUT /api/v1/admin/user-job-tags/[id]', { assignmentId: params.id })
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
+
+    console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
+
+    // Get assignment to verify org_id
+    const { data: assignment } = await supabase
+      .from('user_job_tags')
+      .select('org_id')
+      .eq('id', params.id)
+      .single()
+
+    if (!assignment) {
+      return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
+    }
+
+    console.log('🔍 [API DEBUG] Assignment org:', { orgId: assignment.org_id })
 
     const body = await request.json()
     const validation = updateUserJobTagSchema.safeParse(body)
@@ -28,7 +46,6 @@ export async function PUT(
       )
     }
 
-    const supabase = await createSupabaseServerClient()
     const updates: any = {}
 
     if (validation.data.is_primary !== undefined) {
@@ -44,12 +61,14 @@ export async function PUT(
       .from('user_job_tags')
       .update(updates)
       .eq('id', params.id)
-      .eq('org_id', orgId)
+      .eq('org_id', assignment.org_id)
       .select(`
         *,
         job_tag:job_tags(id, label_it, key, categoria, color, is_active)
       `)
       .single()
+
+    console.log('🔍 [API DEBUG] Update result:', { success: !!data, error })
 
     if (error) {
       console.error('Error updating user job tag:', error)
@@ -76,18 +95,31 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { hasAccess, orgId } = await checkOrgAdmin()
-    if (!hasAccess || !orgId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.log('🔍 [API DEBUG] DELETE /api/v1/admin/user-job-tags/[id]', { assignmentId: params.id })
+    
+    const supabase = await createSupabaseServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const supabase = await createSupabaseServerClient()
+    // Get assignment to verify org_id
+    const { data: assignment } = await supabase
+      .from('user_job_tags')
+      .select('org_id')
+      .eq('id', params.id)
+      .single()
+
+    if (!assignment) {
+      return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
+    }
 
     const { error } = await supabase
       .from('user_job_tags')
       .delete()
       .eq('id', params.id)
-      .eq('org_id', orgId)
+      .eq('org_id', assignment.org_id)
 
     if (error) {
       console.error('Error deleting user job tag:', error)

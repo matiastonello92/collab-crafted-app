@@ -28,11 +28,10 @@ interface LeaveRequestWithType extends LeaveRequest {
 
 export function useRotaData(locationId: string | null, weekStart: string) {
   const hasHydrated = useAppStore(state => state.hasHydrated)
-  const orgId = useAppStore(state => state.context.org_id)
   
   // Fetch rotas for location and week - wait for hydration
   const { data: rotaData, error: rotaError, mutate: mutateRota } = useSWR(
-    hasHydrated && orgId && locationId ? `/api/v1/rotas?location_id=${locationId}&week=${weekStart}` : null,
+    hasHydrated && locationId ? `/api/v1/rotas?location_id=${locationId}&week=${weekStart}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -54,7 +53,7 @@ export function useRotaData(locationId: string | null, weekStart: string) {
 
   // Fetch approved leaves for the week - wait for hydration
   const { data: leavesData, error: leavesError, mutate: mutateLeaves } = useSWR(
-    hasHydrated && orgId && locationId && weekStart
+    hasHydrated && locationId && weekStart
       ? `/api/v1/leave/requests?location_id=${locationId}&week_start=${weekStart}&status=approved`
       : null,
     fetcher,
