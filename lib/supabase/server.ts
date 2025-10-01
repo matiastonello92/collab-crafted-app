@@ -1,30 +1,24 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { requireSupabaseEnv } from '@/utils/supabase/config';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { requireSupabaseEnv } from '@/utils/supabase/config'
 
-function initAdminClient(): SupabaseClient {
-  const { url } = requireSupabaseEnv();
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
+/**
+ * Create Supabase Admin Client with service role key
+ * Use this for operations that need to bypass RLS
+ * 
+ * WARNING: Only use in secure server-side contexts
+ */
+export function createSupabaseAdminClient(): SupabaseClient {
+  const { url } = requireSupabaseEnv()
+  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
   if (!serviceRole) {
-    throw new Error('Supabase env missing: set SUPABASE_SERVICE_ROLE_KEY');
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required')
   }
+  
   return createClient(url, serviceRole, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  });
+  })
 }
-
-export function createSupabaseAdminClient() {
-  return initAdminClient();
-}
-
-let cached: SupabaseClient | null = null;
-export const supabaseAdmin = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    if (!cached) cached = initAdminClient();
-    // @ts-ignore
-    return cached[prop];
-  },
-});
-

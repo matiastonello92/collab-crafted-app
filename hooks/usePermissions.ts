@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { normalizeSet } from '@/lib/permissions'
+import { normalizePermissions, checkPermission } from '@/lib/permissions'
 
 interface PermissionsResponse {
   permissions: string[]
@@ -18,7 +18,16 @@ const fetcher = async (url: string): Promise<PermissionsResponse> => {
 
 /**
  * Unified permissions hook with SWR caching
- * Replaces old useEffectivePermissions + store pattern
+ * 
+ * Fetches user permissions from the server and provides permission checking utilities.
+ * Includes automatic caching and revalidation via SWR.
+ * 
+ * @param locationId - Optional location ID to fetch location-scoped permissions
+ * @returns Object with permissions, loading state, and utilities
+ * 
+ * @example
+ * const { permissions, isAdmin, can, isLoading } = usePermissions()
+ * if (can('users:edit')) { ... }
  */
 export function usePermissions(locationId?: string) {
   const key = locationId 
@@ -36,50 +45,31 @@ export function usePermissions(locationId?: string) {
     }
   )
 
-  const permissions = data?.permissions ? normalizeSet(data.permissions) : []
+  const permissions = data?.permissions ? normalizePermissions(data.permissions) : []
   const isAdmin = data?.is_admin || permissions.includes('*')
+
+  /**
+   * Check if user has required permission(s)
+   */
+  const can = (required: string | string[]): boolean => {
+    return checkPermission(permissions, required)
+  }
 
   return {
     permissions,
     isAdmin,
+    can,
     isLoading,
     error,
-    mutate, // For manual cache invalidation
+    refetch: mutate,
   }
 }
 
 /**
- * Unified permission checking utility
- * Replaces both can() and hasPermission() patterns
- */
-export function hasPermission(permissions: string[], required: string | string[]): boolean {
-  if (!permissions || permissions.length === 0) return false
-  
-  // Admin wildcard check
-  if (permissions.includes('*')) return true
-  
-  const requiredList = Array.isArray(required) ? required : [required]
-  
-  return requiredList.some(perm => {
-    // Direct permission match
-    if (permissions.includes(perm)) return true
-    
-    // Module wildcard check (e.g., 'users:*' covers 'users:view')
-    const [module] = perm.split(':')
-    if (module && permissions.includes(`${module}:*`)) return true
-    
-    return false
-  })
-}
-
-/**
- * Hook for permission checking with current context
+ * Standalone permission checker hook
+ * Use when you only need to check permissions without accessing the full list
  */
 export function usePermissionCheck() {
-  const { permissions, isLoading } = usePermissions()
-  
-  return {
-    hasPermission: (required: string | string[]) => hasPermission(permissions, required),
-    isLoading,
-  }
+  const { can, isLoading } = usePermissions()
+  return { can, isLoading }
 }
