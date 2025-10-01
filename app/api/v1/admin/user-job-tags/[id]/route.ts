@@ -24,11 +24,19 @@ export async function PUT(
     console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
 
     // Get assignment to verify org_id
-    const { data: assignment } = await supabase
+    const { data: assignment, error: assignmentError } = await supabase
       .from('user_job_tags')
       .select('org_id')
       .eq('id', params.id)
       .single()
+
+    if (assignmentError) {
+      console.error('❌ [API DEBUG] Assignment query error:', assignmentError)
+      return NextResponse.json({
+        error: 'Database error',
+        details: assignmentError.message
+      }, { status: 500 })
+    }
 
     if (!assignment) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
@@ -105,11 +113,19 @@ export async function DELETE(
     }
 
     // Get assignment to verify org_id
-    const { data: assignment } = await supabase
+    const { data: assignment, error: assignmentError } = await supabase
       .from('user_job_tags')
       .select('org_id')
       .eq('id', params.id)
       .single()
+
+    if (assignmentError) {
+      console.error('❌ [API DEBUG] Assignment query error:', assignmentError)
+      return NextResponse.json({
+        error: 'Database error',
+        details: assignmentError.message
+      }, { status: 500 })
+    }
 
     if (!assignment) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })

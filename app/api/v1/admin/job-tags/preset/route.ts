@@ -20,15 +20,23 @@ export async function POST(request: NextRequest) {
     console.log('✅ [API DEBUG] User authenticated:', user.id)
 
     // Derive org_id from user's membership
-    const { data: membership } = await supabase
+    const { data: membership, error: membershipError } = await supabase
       .from('memberships')
       .select('org_id')
       .eq('user_id', user.id)
       .single()
 
+    if (membershipError) {
+      console.error('❌ [API DEBUG] Membership query error:', membershipError)
+      return NextResponse.json({
+        error: 'Database error',
+        details: membershipError.message
+      }, { status: 500 })
+    }
+
     if (!membership?.org_id) {
-      console.log('❌ [API DEBUG] No membership found')
-      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+      console.log('❌ [API DEBUG] No membership found for user:', user.id)
+      return NextResponse.json({ error: 'No organization membership' }, { status: 400 })
     }
 
     const orgId = membership.org_id
