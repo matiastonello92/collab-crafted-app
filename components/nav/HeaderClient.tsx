@@ -5,8 +5,11 @@ import { useEffect, useRef, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
-import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('HeaderClient');
 
 export default function HeaderClient({
   locations,
@@ -26,13 +29,14 @@ export default function HeaderClient({
   const didPersistRef = useRef(false);
   const context = useHydratedContext();
   const { setContext } = useHydratedStore();
-  useEffectivePermissions();
+  
+  // Fetch permissions with SWR (replaces useEffectivePermissions)
+  usePermissions(context.location_id || undefined);
 
-  // Step 4: Verify timing and add detailed logging
   useEffect(() => {
     const active = locations.find(l => l.id === activeLocationId) || null;
     
-    console.log('📍 [HEADER] Setting context:', {
+    logger.debug('Setting context', {
       org_id: context.org_id,
       user_id: context.user_id,
       old_location_id: context.location_id,
@@ -47,7 +51,7 @@ export default function HeaderClient({
       location_name: active?.name ?? null,
     });
     
-    console.log('✅ [HEADER] Context updated successfully');
+    logger.debug('Context updated successfully');
   }, [locations, activeLocationId, setContext, context.org_id, context.user_id]);
 
   // Auto-persist della default location quando il server ha scelto ma il cookie non c'è
