@@ -1,6 +1,6 @@
 import "server-only";
 import { redirect } from 'next/navigation'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
 /**
