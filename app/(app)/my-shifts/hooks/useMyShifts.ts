@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { useAppStore } from '@/lib/store/unified'
 import type { ShiftWithAssignments } from '@/types/shifts'
 
 const fetcher = async (url: string) => {
@@ -10,8 +11,11 @@ const fetcher = async (url: string) => {
 }
 
 export function useMyShifts() {
+  const hasHydrated = useAppStore(state => state.hasHydrated)
+  const orgId = useAppStore(state => state.context.org_id)
+  
   const { data, error, mutate } = useSWR<{ shifts: ShiftWithAssignments[] }>(
-    '/api/v1/shifts/my-shifts',
+    hasHydrated && orgId ? '/api/v1/shifts/my-shifts' : null,
     fetcher,
     {
       revalidateOnFocus: false,

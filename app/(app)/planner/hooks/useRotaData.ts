@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { useAppStore } from '@/lib/store/unified'
 import type { Rota, ShiftWithAssignments, LeaveRequest } from '@/types/shifts'
 
 const fetcher = async (url: string) => {
@@ -26,9 +27,12 @@ interface LeaveRequestWithType extends LeaveRequest {
 }
 
 export function useRotaData(locationId: string | null, weekStart: string) {
-  // Fetch rotas for location and week
+  const hasHydrated = useAppStore(state => state.hasHydrated)
+  const orgId = useAppStore(state => state.context.org_id)
+  
+  // Fetch rotas for location and week - wait for hydration
   const { data: rotaData, error: rotaError, mutate: mutateRota } = useSWR(
-    locationId ? `/api/v1/rotas?location_id=${locationId}&week=${weekStart}` : null,
+    hasHydrated && orgId && locationId ? `/api/v1/rotas?location_id=${locationId}&week=${weekStart}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -48,9 +52,9 @@ export function useRotaData(locationId: string | null, weekStart: string) {
     }
   )
 
-  // Fetch approved leaves for the week
+  // Fetch approved leaves for the week - wait for hydration
   const { data: leavesData, error: leavesError, mutate: mutateLeaves } = useSWR(
-    locationId && weekStart
+    hasHydrated && orgId && locationId && weekStart
       ? `/api/v1/leave/requests?location_id=${locationId}&week_start=${weekStart}&status=approved`
       : null,
     fetcher,

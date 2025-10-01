@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { useAppStore } from '@/lib/store/unified'
 import type { Availability } from '@/types/shifts'
 
 const fetcher = async (url: string) => {
@@ -10,8 +11,11 @@ const fetcher = async (url: string) => {
 }
 
 export function useMyAvailability() {
+  const hasHydrated = useAppStore(state => state.hasHydrated)
+  const orgId = useAppStore(state => state.context.org_id)
+  
   const { data, error, mutate } = useSWR<{ availability: Availability[] }>(
-    '/api/v1/availability',
+    hasHydrated && orgId ? '/api/v1/availability' : null,
     fetcher,
     {
       revalidateOnFocus: false,

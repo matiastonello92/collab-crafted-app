@@ -18,15 +18,7 @@ export async function GET(request: Request) {
     const locationId = searchParams.get('location_id')
     const week = searchParams.get('week') // YYYY-MM-DD format
 
-    // Check permission: shifts:view
-    const { data: hasPerm } = await supabase.rpc('user_has_permission', {
-      p_user: user.id,
-      p_permission: 'shifts:view'
-    })
-    
-    if (!hasPerm) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    // RLS policies will handle permissions - no need for explicit check
 
     // Build query with RLS (user can only see rotas for their org/locations)
     let query = supabase

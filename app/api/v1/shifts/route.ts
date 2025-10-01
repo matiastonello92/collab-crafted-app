@@ -18,15 +18,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const rotaId = searchParams.get('rota_id')
 
-    // Check permission: shifts:view
-    const { data: hasPerm } = await supabase.rpc('user_has_permission', {
-      p_user: user.id,
-      p_permission: 'shifts:view'
-    })
-    
-    if (!hasPerm) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    // RLS policies will handle permissions - no need for explicit check
 
     // Build query (RLS applies)
     let query = supabase

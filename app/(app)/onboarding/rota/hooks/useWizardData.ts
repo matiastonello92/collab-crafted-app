@@ -111,9 +111,12 @@ export function useWizardData() {
   // Wait for hydration before fetching locations
   useEffect(() => {
     if (hasHydrated && !locations.length) {
+      console.log('[useWizardData] Store hydrated, fetching locations. Context:', { locationId, orgId })
       fetchLocations()
+    } else if (!hasHydrated) {
+      console.log('[useWizardData] Waiting for store hydration...')
     }
-  }, [hasHydrated, locations.length, fetchLocations])
+  }, [hasHydrated, locations.length, fetchLocations, locationId, orgId])
 
   return {
     locationId,
