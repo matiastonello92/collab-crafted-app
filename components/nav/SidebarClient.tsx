@@ -25,6 +25,7 @@ import {
   Package,
   CalendarClock,
   CalendarDays,
+  Mail,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -55,6 +56,7 @@ const navigation: any[] = [
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
   { name: 'Permission Tags', href: '/permission-tags', icon: Shield, permission: null, platformAdminOnly: true },
   { name: 'Compliance Settings', href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
+  { name: 'Email Logs', href: '/admin/settings/email-logs', icon: Mail, permission: 'view_settings' },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
 ]

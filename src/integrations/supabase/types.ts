@@ -2743,6 +2743,10 @@ export type Database = {
         Args: { p_location_id: string; p_org_id: string }
         Returns: boolean
       }
+      user_can_view_shift_assignment: {
+        Args: { _shift_id: string }
+        Returns: boolean
+      }
       user_has_permission: {
         Args: { p_permission: string; p_user: string }
         Returns: boolean
