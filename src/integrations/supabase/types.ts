@@ -2597,6 +2597,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_users_for_location: {
+        Args: { p_location_id?: string; p_org_id: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       insert_preset_ristorazione_tags: {
         Args: { p_org_id: string }
         Returns: Json

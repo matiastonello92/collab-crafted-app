@@ -21,49 +21,16 @@ export async function GET(request: NextRequest) {
     // Get location_id filter if provided
     const locationId = request.nextUrl.searchParams.get('location_id')
 
-    // Build query to get users from org, optionally filtered by location
-    let query = supabase
-      .from('profiles')
-      .select(`
-        id,
-        full_name,
-        user_roles_locations!inner(
-          location_id,
-          org_id,
-          is_active
-        ),
-        memberships!inner(
-          org_id
-        )
-      `)
-      .eq('memberships.org_id', orgId)
-      .eq('user_roles_locations.org_id', orgId)
-      .eq('user_roles_locations.is_active', true)
-
-    if (locationId) {
-      query = query.eq('user_roles_locations.location_id', locationId)
-    }
-
-    const { data: profiles, error } = await query
+    // Use RPC function to get users (handles complex JOIN properly)
+    const { data: users, error } = await supabase.rpc('get_users_for_location', {
+      p_org_id: orgId,
+      p_location_id: locationId || null
+    })
 
     if (error) {
-      console.error('Error fetching users:', error)
+      console.error('Error fetching users via RPC:', error)
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
     }
-
-    // Get unique users (deduplicate since one user can have multiple roles/locations)
-    const uniqueUsersMap = new Map()
-    
-    for (const profile of profiles || []) {
-      if (!uniqueUsersMap.has(profile.id)) {
-        uniqueUsersMap.set(profile.id, {
-          id: profile.id,
-          full_name: profile.full_name
-        })
-      }
-    }
-
-    const uniqueUsers = Array.from(uniqueUsersMap.values())
 
     // Fetch emails using admin client (auth.users table)
     const { data: authData } = await supabaseAdmin.auth.admin.listUsers()
@@ -76,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add emails to users
-    const usersWithEmails = uniqueUsers.map(user => ({
+    const usersWithEmails = (users || []).map((user: { id: string; full_name: string }) => ({
       ...user,
       email: emailMap.get(user.id) || ''
     }))
