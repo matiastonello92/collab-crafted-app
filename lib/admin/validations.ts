@@ -134,3 +134,34 @@ export const silenceViolationSchema = z.object({
   silenced_by: z.string().uuid(),
   silence_reason: z.string().min(10).max(500),
 })
+
+// ============================================
+// Job Tags Validation Schemas
+// ============================================
+
+export const createJobTagSchema = z.object({
+  label_it: z.string().min(1, "Il nome del tag è obbligatorio").max(100),
+  categoria: z.enum(['Direzione', 'Cucina', 'Sala', 'Trasversali']).optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Colore non valido (formato HEX richiesto)").optional(),
+  is_active: z.boolean().optional().default(true),
+})
+
+export const updateJobTagSchema = z.object({
+  label_it: z.string().min(1).max(100).optional(),
+  categoria: z.enum(['Direzione', 'Cucina', 'Sala', 'Trasversali']).optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  is_active: z.boolean().optional(),
+})
+
+export const assignJobTagSchema = z.object({
+  location_id: z.string().uuid("Location ID non valido"),
+  user_id: z.string().uuid("User ID non valido"),
+  job_tag_id: z.string().uuid("Job Tag ID non valido"),
+  is_primary: z.boolean().optional().default(false),
+  note: z.string().max(500).optional(),
+})
+
+export const updateUserJobTagSchema = z.object({
+  is_primary: z.boolean().optional(),
+  note: z.string().max(500).optional(),
+})
