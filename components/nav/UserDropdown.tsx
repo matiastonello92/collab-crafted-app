@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 import { hardLogout } from '@/lib/hardLogout'
 import {
   DropdownMenu,

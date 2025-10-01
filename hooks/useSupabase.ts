@@ -1,6 +1,6 @@
 'use client';
 import { useMemo } from 'react';
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 /**
  * Singleton Supabase client hook - prevents multiple client creation

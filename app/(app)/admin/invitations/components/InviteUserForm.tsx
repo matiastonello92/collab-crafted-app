@@ -16,7 +16,7 @@ import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } f
 import { PERMISSIONS } from '@/lib/permissions/registry'
 import { normalizePermission } from '@/lib/permissions'
 import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),

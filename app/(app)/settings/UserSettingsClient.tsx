@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 import { AvatarUploader } from '@/components/AvatarUploader'
 
 interface UserSettingsClientProps {

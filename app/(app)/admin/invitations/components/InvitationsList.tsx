@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Copy, Ban, RefreshCw } from 'lucide-react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 

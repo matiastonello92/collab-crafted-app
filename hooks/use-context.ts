@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 
 interface AppContext {
   organizationId: string | null

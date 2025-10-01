@@ -1,4 +1,4 @@
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { createSupabaseBrowserClient } from '@/lib/supabase';
 
 export async function hardLogout() {
   const supabase = createSupabaseBrowserClient();

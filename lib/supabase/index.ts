@@ -21,7 +21,7 @@
  */
 
 // Re-export browser client
-export { createSupabaseBrowserClient } from '@/utils/supabase/client'
+export { createSupabaseBrowserClient } from '@/lib/supabase'
 
 // Re-export server client
 export { createSupabaseServerClient } from '@/utils/supabase/server'

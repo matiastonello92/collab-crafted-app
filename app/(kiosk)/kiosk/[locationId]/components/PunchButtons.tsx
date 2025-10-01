@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { LogIn, LogOut, Coffee, Play, User } from 'lucide-react'
 import { getTodaySessionSummary } from '@/lib/shifts/time-clock-logic'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { createSupabaseBrowserClient } from '@/lib/supabase'
 
 interface PunchButtonsProps {
   locationId: string
