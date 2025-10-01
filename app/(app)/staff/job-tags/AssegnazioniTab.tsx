@@ -91,13 +91,19 @@ export function AssegnazioniTab() {
     try {
       // Fetch users for location
       const usersRes = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
-      if (!usersRes.ok) throw new Error('Failed to fetch users')
+      if (!usersRes.ok) {
+        const errorData = await usersRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
+        throw new Error(errorData.error || 'Errore caricamento utenti')
+      }
       const usersData = await usersRes.json()
       setUsers(usersData.users || [])
 
       // Fetch assignments for location
       const assignRes = await fetch(`/api/v1/admin/user-job-tags?location_id=${selectedLocation}`)
-      if (!assignRes.ok) throw new Error('Failed to fetch assignments')
+      if (!assignRes.ok) {
+        const errorData = await assignRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
+        throw new Error(errorData.error || 'Errore caricamento assegnazioni')
+      }
       const assignData = await assignRes.json()
 
       // Group by user
@@ -128,7 +134,10 @@ export function AssegnazioniTab() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_primary: true }),
         })
-        if (!res.ok) throw new Error('Failed to update')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
+          throw new Error(errorData.error || 'Errore aggiornamento tag')
+        }
       } else {
         // Create new primary
         const res = await fetch('/api/v1/admin/user-job-tags', {
@@ -141,7 +150,10 @@ export function AssegnazioniTab() {
             is_primary: true,
           }),
         })
-        if (!res.ok) throw new Error('Failed to assign')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
+          throw new Error(errorData.error || 'Errore assegnazione tag')
+        }
       }
 
       toast.success('Tag primario impostato')
@@ -161,7 +173,10 @@ export function AssegnazioniTab() {
         const res = await fetch(`/api/v1/admin/user-job-tags/${assignment.id}`, {
           method: 'DELETE',
         })
-        if (!res.ok) throw new Error('Failed to delete')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
+          throw new Error(errorData.error || 'Errore rimozione tag')
+        }
         toast.success('Tag rimosso')
       } else {
         // Add
@@ -175,7 +190,10 @@ export function AssegnazioniTab() {
             is_primary: false,
           }),
         })
-        if (!res.ok) throw new Error('Failed to assign')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
+          throw new Error(errorData.error || 'Errore assegnazione tag')
+        }
         toast.success('Tag assegnato')
       }
 

@@ -16,7 +16,14 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('user_job_tags')
       .select(`
-        *,
+        id,
+        user_id,
+        job_tag_id,
+        location_id,
+        is_primary,
+        note,
+        assigned_by,
+        created_at,
         job_tag:job_tags(id, label_it, key, categoria, color, is_active)
       `)
       .eq('org_id', orgId)
