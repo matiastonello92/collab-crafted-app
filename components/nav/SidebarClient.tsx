@@ -239,7 +239,7 @@ export default function SidebarClient() {
                             }
                             
                             // Check child permissions
-                            const childIsAdmin = isAdminClaims || can(permissions, '*')
+                            const childIsAdmin = isAdminClaims || isAdminPerm
                             let childCanAccess = false
                             
                             if (child.platformAdminOnly) {
@@ -247,7 +247,7 @@ export default function SidebarClient() {
                             } else if (child.adminOnly) {
                               childCanAccess = childIsAdmin
                             } else {
-                              childCanAccess = childIsAdmin || !child.permission || can(permissions, child.permission)
+                              childCanAccess = childIsAdmin || !child.permission || can(child.permission)
                             }
                             
                             if (!childCanAccess) return null
