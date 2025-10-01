@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { checkOrgAdmin } from "@/lib/admin/guards"
-import { createSupabaseServerClient } from "@/utils/supabase/server"
-import { createSupabaseAdminClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
