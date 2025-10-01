@@ -58,7 +58,8 @@ export function TimeCorrectionRequestForm({
           original_time: originalTime,
           requested_time: new Date(formData.requested_time).toISOString(),
           reason: formData.reason
-        })
+        }),
+        credentials: 'include',
       })
 
       if (!res.ok) {

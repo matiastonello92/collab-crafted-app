@@ -81,7 +81,7 @@ export function AssegnazioniTab() {
 
   const fetchLocations = async () => {
     try {
-      const res = await fetch('/api/v1/admin/locations')
+      const res = await fetch('/api/v1/admin/locations', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setLocations(data.locations || [])
@@ -92,7 +92,7 @@ export function AssegnazioniTab() {
 
   const fetchJobTags = async () => {
     try {
-      const res = await fetch('/api/v1/admin/job-tags?is_active=true')
+      const res = await fetch('/api/v1/admin/job-tags?is_active=true', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setJobTags(data.jobTags || [])
@@ -105,7 +105,7 @@ export function AssegnazioniTab() {
     setLoading(true)
     try {
       // Fetch users for location
-      const usersRes = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
+      const usersRes = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`, { credentials: 'include' })
       if (!usersRes.ok) {
         const errorData = await usersRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
         throw new Error(errorData.error || 'Errore caricamento utenti')
@@ -114,7 +114,7 @@ export function AssegnazioniTab() {
       setUsers(usersData.users || [])
 
       // Fetch assignments for location
-      const assignRes = await fetch(`/api/v1/admin/user-job-tags?location_id=${selectedLocation}`)
+      const assignRes = await fetch(`/api/v1/admin/user-job-tags?location_id=${selectedLocation}`, { credentials: 'include' })
       if (!assignRes.ok) {
         const errorData = await assignRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
         throw new Error(errorData.error || 'Errore caricamento assegnazioni')
@@ -148,6 +148,7 @@ export function AssegnazioniTab() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_primary: true }),
+          credentials: 'include',
         })
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
@@ -164,6 +165,7 @@ export function AssegnazioniTab() {
             job_tag_id: tagId,
             is_primary: true,
           }),
+          credentials: 'include',
         })
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
@@ -187,6 +189,7 @@ export function AssegnazioniTab() {
         // Remove
         const res = await fetch(`/api/v1/admin/user-job-tags/${assignment.id}`, {
           method: 'DELETE',
+          credentials: 'include',
         })
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
@@ -204,6 +207,7 @@ export function AssegnazioniTab() {
             job_tag_id: tagId,
             is_primary: false,
           }),
+          credentials: 'include',
         })
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))

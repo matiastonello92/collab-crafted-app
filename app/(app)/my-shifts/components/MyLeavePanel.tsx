@@ -40,7 +40,8 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       const res = await fetch('/api/v1/leave/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRequest)
+        body: JSON.stringify(newRequest),
+        credentials: 'include',
       })
 
       if (!res.ok) {

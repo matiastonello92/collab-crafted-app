@@ -51,7 +51,7 @@ export function useWizardData() {
   const fetchLocations = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/v1/admin/locations')
+      const res = await fetch('/api/v1/admin/locations', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch locations')
       const data = await res.json()
       setLocations(data.locations || [])
@@ -66,7 +66,7 @@ export function useWizardData() {
   const fetchJobTags = useCallback(async (orgId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/v1/admin/job-tags?org_id=${orgId}&is_active=true`)
+      const res = await fetch(`/api/v1/admin/job-tags?org_id=${orgId}&is_active=true`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch job tags')
       const data = await res.json()
       setJobTags(data.jobTags || [])
@@ -81,7 +81,7 @@ export function useWizardData() {
   const fetchUsers = useCallback(async (locationId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/v1/users/location?location_id=${locationId}`)
+      const res = await fetch(`/api/v1/users/location?location_id=${locationId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch users')
       const data = await res.json()
       setUsers(data.users || [])
@@ -96,7 +96,7 @@ export function useWizardData() {
   const fetchShifts = useCallback(async (rotaId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/v1/shifts?rota_id=${rotaId}`)
+      const res = await fetch(`/api/v1/shifts?rota_id=${rotaId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch shifts')
       const data = await res.json()
       setShifts(data.shifts || [])

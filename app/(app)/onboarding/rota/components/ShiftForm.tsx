@@ -115,6 +115,7 @@ export function ShiftForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(shiftData),
+        credentials: 'include',
       })
 
       if (!res.ok) {
@@ -133,6 +134,7 @@ export function ShiftForm({
             user_id: assignedUserId,
             status: 'assigned',
           }),
+          credentials: 'include',
         })
       }
 

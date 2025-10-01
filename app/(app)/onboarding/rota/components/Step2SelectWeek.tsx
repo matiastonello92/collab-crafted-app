@@ -69,6 +69,7 @@ export function Step2SelectWeek({
           location_id: locationId,
           week_start_date: weekStart,
         }),
+        credentials: 'include',
       })
 
       if (!res.ok) {

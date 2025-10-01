@@ -48,7 +48,7 @@ export function CatalogoTagTab() {
 
   const fetchTags = async () => {
     try {
-      const res = await fetch('/api/v1/admin/job-tags')
+      const res = await fetch('/api/v1/admin/job-tags', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setTags(data.jobTags || [])
@@ -87,11 +87,13 @@ export function CatalogoTagTab() {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
+            credentials: 'include',
           })
         : await fetch('/api/v1/admin/job-tags', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
+            credentials: 'include',
           })
 
       if (!res.ok) {
@@ -113,6 +115,7 @@ export function CatalogoTagTab() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_active: !tag.is_active }),
+        credentials: 'include',
       })
 
       if (!res.ok) throw new Error('Failed to update')
@@ -130,7 +133,7 @@ export function CatalogoTagTab() {
     }
 
     try {
-      const res = await fetch('/api/v1/admin/job-tags/preset', { method: 'POST' })
+      const res = await fetch('/api/v1/admin/job-tags/preset', { method: 'POST', credentials: 'include' })
       if (!res.ok) throw new Error('Failed to insert preset')
 
       const data = await res.json()

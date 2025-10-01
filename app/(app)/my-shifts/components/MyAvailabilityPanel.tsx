@@ -46,7 +46,8 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
       const res = await fetch('/api/v1/availability', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
+        body: JSON.stringify(newEntry),
+        credentials: 'include',
       })
 
       if (!res.ok) throw new Error(await res.text())
@@ -64,7 +65,8 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/v1/availability/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include',
       })
 
       if (!res.ok) throw new Error(await res.text())
