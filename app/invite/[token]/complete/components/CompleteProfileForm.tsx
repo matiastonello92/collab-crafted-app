@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { User, Phone, Globe, ArrowRight, CheckCircle } from 'lucide-react'
-import { createSupabaseBrowserClient } from '@/lib/supabase'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Nome completo è richiesto').max(100, 'Nome troppo lungo'),

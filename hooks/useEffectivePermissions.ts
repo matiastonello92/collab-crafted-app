@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { useAppStore } from '@/lib/store/unified'
 import { getUserPermissions, normalizeSet } from '@/lib/permissions'
-import { createSupabaseBrowserClient } from '@/lib/supabase'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export function useEffectivePermissions() {
   const { context, setPermissions, setPermissionsLoading } = useHydratedStore()

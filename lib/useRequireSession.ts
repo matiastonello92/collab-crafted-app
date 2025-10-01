@@ -4,7 +4,7 @@
 
 'use client';
 import { useEffect } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 /**
  * @deprecated Use AuthGuard component in layout instead
