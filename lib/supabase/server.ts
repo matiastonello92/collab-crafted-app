@@ -1,5 +1,20 @@
+/**
+ * Server-Side Supabase Exports
+ * 
+ * Use this in Server Components, API Routes, and Server Actions only.
+ * For Client Components, use '@/lib/supabase/client'
+ * 
+ * @example
+ * // Server Component or API Route
+ * import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+ */
+
+import 'server-only'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { requireSupabaseEnv } from '@/utils/supabase/config'
+
+// Re-export server client
+export { createSupabaseServerClient } from '@/utils/supabase/server'
 
 /**
  * Create Supabase Admin Client with service role key
@@ -22,3 +37,5 @@ export function createSupabaseAdminClient(): SupabaseClient {
     },
   })
 }
+
+export type { SupabaseClient }

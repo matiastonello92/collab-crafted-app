@@ -1,33 +1,18 @@
 /**
- * Centralized Supabase Client Exports
+ * ⚠️ DEPRECATED: Use specific imports instead
  * 
- * This is the single source of truth for Supabase client creation.
+ * This file is kept for backward compatibility but should not be used.
  * 
- * Usage Guidelines:
+ * Instead, use:
+ * - '@/lib/supabase/client' for Client Components
+ * - '@/lib/supabase/server' for Server Components/API Routes
  * 
- * 1. **Browser/Client Components:**
- *    import { createSupabaseBrowserClient } from '@/lib/supabase'
- *    const supabase = createSupabaseBrowserClient()
+ * This prevents webpack from trying to bundle server-side code in client bundles.
  * 
- * 2. **Server Components/API Routes:**
- *    import { createSupabaseServerClient } from '@/lib/supabase'
- *    const supabase = await createSupabaseServerClient()
- * 
- * 3. **Admin Operations (bypass RLS):**
- *    import { createSupabaseAdminClient } from '@/lib/supabase'
- *    const supabase = createSupabaseAdminClient()
- * 
- * @module lib/supabase
+ * @deprecated Use '@/lib/supabase/client' or '@/lib/supabase/server' instead
  */
 
-// Re-export browser client
-export { createSupabaseBrowserClient } from '@/lib/supabase'
+// Note: Do not re-export server functions here as it causes build errors
+// when client components import from this file
 
-// Re-export server client
-export { createSupabaseServerClient } from '@/utils/supabase/server'
-
-// Re-export admin client (optimized version)
-export { createSupabaseAdminClient } from './server'
-
-// Type exports
 export type { SupabaseClient } from '@supabase/supabase-js'
