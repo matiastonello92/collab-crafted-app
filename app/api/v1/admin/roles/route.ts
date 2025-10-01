@@ -9,8 +9,8 @@ export const runtime = 'nodejs'
 export async function GET(request: NextRequest) {
   try {
     // Check admin access using centralized guard
-    const { hasAccess } = await checkOrgAdmin()
-    if (!hasAccess) {
+    const { hasAccess, orgId } = await checkOrgAdmin()
+    if (!hasAccess || !orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('roles')
       .select('id, name, display_name, level, description')
+      .eq('org_id', orgId)
       .eq('is_active', true)
     
     if (inviteOnly) {

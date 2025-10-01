@@ -69,7 +69,7 @@ export async function GET() {
       }
     }
 
-    // Get invitations with their roles and permissions
+    // Get invitations with their roles and permissions (filtered by org)
     const { data: invitations, error } = await supabaseAdmin
       .from('invitations')
       .select(`
@@ -87,6 +87,7 @@ export async function GET() {
           permissions(name, display_name)
         )
       `)
+      .eq('org_id', orgId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -177,7 +178,7 @@ export async function POST(request: Request) {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // 7 days from now
 
-    // Create invitation
+    // Create invitation (force org_id from authenticated user)
     const { data: invitation, error: inviteError } = await supabaseAdmin
       .from('invitations')
       .insert({
@@ -188,6 +189,7 @@ export async function POST(request: Request) {
         token,
         expires_at: expiresAt.toISOString(),
         invited_by: user.id,
+        org_id: orgId,
         status: 'pending',
       })
       .select()

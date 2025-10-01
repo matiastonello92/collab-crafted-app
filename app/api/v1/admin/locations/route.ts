@@ -5,8 +5,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server"
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const { hasAccess } = await checkOrgAdmin()
-  if (!hasAccess) {
+  const { hasAccess, orgId } = await checkOrgAdmin()
+  if (!hasAccess || !orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -14,6 +14,7 @@ export async function GET() {
   const { data: locations, error } = await supabase
     .from('locations')
     .select('*')
+    .eq('org_id', orgId)
     .order('name')
 
   if (error) {
@@ -24,17 +25,18 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { hasAccess } = await checkOrgAdmin()
-  if (!hasAccess) {
+  const { hasAccess, orgId } = await checkOrgAdmin()
+  if (!hasAccess || !orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
   const body = await request.json()
   const supabase = createSupabaseAdminClient()
   
+  // Force org_id from authenticated user's organization
   const { data: location, error } = await supabase
     .from('locations')
-    .insert(body)
+    .insert({ ...body, org_id: orgId })
     .select()
     .single()
 
