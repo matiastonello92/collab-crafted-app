@@ -2602,7 +2602,6 @@ export type Database = {
           | { p_location_id: string }
           | { p_location_id?: string; p_org_id: string }
         Returns: {
-          avatar_url: string
           email: string
           full_name: string
           id: string

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useAppStore } from '@/lib/store/unified'
 
 interface Location {
   id: string
@@ -35,6 +36,12 @@ interface Shift {
 }
 
 export function useWizardData() {
+  // Global context (like inventory modules)
+  const rawLocationId = useAppStore(state => state.context.location_id)
+  const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId
+  const orgId = useAppStore(state => state.context.org_id)
+  const hasHydrated = useAppStore(state => state.hasHydrated)
+  
   const [locations, setLocations] = useState<Location[]>([])
   const [jobTags, setJobTags] = useState<JobTag[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -102,6 +109,9 @@ export function useWizardData() {
   }, [])
 
   return {
+    locationId,
+    orgId,
+    hasHydrated,
     locations,
     jobTags,
     users,

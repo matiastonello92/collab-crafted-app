@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAppStore } from '@/lib/store/unified'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -45,8 +46,13 @@ type UserAssignments = {
 }
 
 export function AssegnazioniTab() {
+  // Global context (like inventory modules)
+  const rawLocationId = useAppStore(state => state.context.location_id)
+  const defaultLocationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId
+  const hasHydrated = useAppStore(state => state.hasHydrated)
+  
   const [locations, setLocations] = useState<Location[]>([])
-  const [selectedLocation, setSelectedLocation] = useState<string>('')
+  const [selectedLocation, setSelectedLocation] = useState<string>(defaultLocationId || '')
   const [jobTags, setJobTags] = useState<JobTag[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [userAssignments, setUserAssignments] = useState<Map<string, Assignment[]>>(new Map())
@@ -57,6 +63,13 @@ export function AssegnazioniTab() {
     fetchLocations()
     fetchJobTags()
   }, [])
+
+  // Auto-select default location from context when hydrated
+  useEffect(() => {
+    if (hasHydrated && defaultLocationId && !selectedLocation) {
+      setSelectedLocation(defaultLocationId)
+    }
+  }, [hasHydrated, defaultLocationId, selectedLocation])
 
   useEffect(() => {
     if (selectedLocation) {

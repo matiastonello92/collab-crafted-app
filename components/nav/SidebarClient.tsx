@@ -50,15 +50,22 @@ const navigation: any[] = [
       { name: 'Catalogo Prodotti', href: '/inventory/catalog', icon: Package },
     ]
   },
-  { name: 'Onboarding Rota', href: '/onboarding/rota', icon: CalendarClock, permission: 'shifts:manage', badge: 'NEW' },
-  { name: 'Planner Turni', href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
-  { name: 'I miei Turni', href: '/my-shifts', icon: CalendarDays, permission: null },
-  { name: 'Job Tags', href: '/staff/job-tags', icon: Tag, permission: 'manage_users', adminOnly: true },
+  {
+    name: 'Klyra Shifts',
+    icon: CalendarClock,
+    permission: null,
+    children: [
+      { name: 'Onboarding Rota', href: '/onboarding/rota', icon: CalendarClock, permission: 'shifts:manage', badge: 'NEW' },
+      { name: 'Planner Turni', href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
+      { name: 'I miei Turni', href: '/my-shifts', icon: CalendarDays, permission: null },
+      { name: 'Job Tags', href: '/staff/job-tags', icon: Tag, permission: 'manage_users', adminOnly: true },
+      { name: 'Compliance', href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
+    ]
+  },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
   { name: 'Permission Tags', href: '/permission-tags', icon: Shield, permission: null, platformAdminOnly: true },
-  { name: 'Compliance Settings', href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
   { name: 'Email Logs', href: '/admin/settings/email-logs', icon: Mail, permission: 'view_settings' },
   { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
@@ -230,6 +237,20 @@ export default function SidebarClient() {
                               );
                             }
                             
+                            // Check child permissions
+                            const childIsAdmin = isAdminClaims || can(permissions, '*')
+                            let childCanAccess = false
+                            
+                            if (child.platformAdminOnly) {
+                              childCanAccess = isPlatformAdmin
+                            } else if (child.adminOnly) {
+                              childCanAccess = childIsAdmin
+                            } else {
+                              childCanAccess = childIsAdmin || !child.permission || can(permissions, child.permission)
+                            }
+                            
+                            if (!childCanAccess) return null
+                            
                             const isChildActive = pathname === child.href;
                             return (
                               <Link
@@ -244,6 +265,9 @@ export default function SidebarClient() {
                               >
                                 <child.icon className="size-4 shrink-0" />
                                 <span className="flex-1 truncate">{child.name}</span>
+                                {child.badge && (
+                                  <Badge variant="outline" className="text-[10px]">{child.badge}</Badge>
+                                )}
                               </Link>
                             );
                           })}
