@@ -97,14 +97,19 @@ export interface Timesheet {
   org_id: string
   location_id: string
   user_id: string
-  shift_id?: string | null
-  date: string // ISO date
-  clock_in?: string | null
-  clock_out?: string | null
-  break_minutes: number
-  regular_minutes: number
-  overtime_minutes: number
-  status: 'draft' | 'submitted' | 'approved'
+  period_start: string // ISO date
+  period_end: string // ISO date
+  totals: {
+    regular_minutes: number
+    overtime_minutes: number
+    break_minutes: number
+    planned_minutes: number
+    variance_minutes: number
+    days_worked: number
+  }
+  status: 'draft' | 'approved' | 'locked'
+  approved_by?: string | null
+  approved_at?: string | null
   notes?: string | null
   created_at: string
   updated_at: string
