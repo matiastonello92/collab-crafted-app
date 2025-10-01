@@ -102,29 +102,35 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create shift
-    const { data: shift, error } = await supabase
+    // Create shift(s) - support batch creation with quantity
+    const quantity = validated.quantity || 1
+    const shiftsToCreate = Array.from({ length: quantity }, () => ({
+      org_id: rota.org_id,
+      location_id: rota.location_id,
+      rota_id: validated.rota_id,
+      job_tag_id: validated.job_tag_id,
+      start_at: validated.start_at,
+      end_at: validated.end_at,
+      break_minutes: validated.break_minutes,
+      notes: validated.notes,
+      created_by: user.id,
+    }))
+
+    const { data: shifts, error } = await supabase
       .from('shifts')
-      .insert({
-        org_id: rota.org_id,
-        location_id: rota.location_id,
-        rota_id: validated.rota_id,
-        job_tag_id: validated.job_tag_id,
-        start_at: validated.start_at,
-        end_at: validated.end_at,
-        break_minutes: validated.break_minutes,
-        notes: validated.notes,
-        created_by: user.id,
-      })
+      .insert(shiftsToCreate)
       .select()
-      .single()
 
     if (error) {
-      console.error('Error creating shift:', error)
+      console.error('Error creating shift(s):', error)
       throw error
     }
 
-    return NextResponse.json({ shift }, { status: 201 })
+    return NextResponse.json({ 
+      shift: shifts?.[0], // Return first shift for backward compatibility
+      shifts, // Return all shifts
+      count: shifts?.length || 0 
+    }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/v1/shifts:', error)
     

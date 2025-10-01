@@ -50,6 +50,7 @@ const navigation: any[] = [
       { name: 'Catalogo Prodotti', href: '/inventory/catalog', icon: Package },
     ]
   },
+  { name: 'Onboarding Rota', href: '/onboarding/rota', icon: CalendarClock, permission: 'shifts:manage', badge: 'NEW' },
   { name: 'Planner Turni', href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
   { name: 'I miei Turni', href: '/my-shifts', icon: CalendarDays, permission: null },
   { name: 'Job Tags', href: '/staff/job-tags', icon: Tag, permission: 'manage_users', adminOnly: true },

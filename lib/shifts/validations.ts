@@ -21,6 +21,7 @@ export const createShiftSchema = z.object({
   end_at: z.string().datetime('end_at must be ISO datetime'),
   break_minutes: z.number().int().min(0).default(0),
   notes: z.string().optional(),
+  quantity: z.number().int().min(1).max(20).optional().default(1),
 })
 .refine(data => new Date(data.end_at) > new Date(data.start_at), {
   message: "end_at must be after start_at"

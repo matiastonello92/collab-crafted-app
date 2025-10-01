@@ -2598,10 +2598,17 @@ export type Database = {
         Returns: string
       }
       get_users_for_location: {
-        Args: { p_location_id?: string; p_org_id: string }
+        Args:
+          | { p_location_id: string }
+          | { p_location_id?: string; p_org_id: string }
         Returns: {
+          avatar_url: string
+          email: string
           full_name: string
           id: string
+          primary_job_tag_color: string
+          primary_job_tag_id: string
+          primary_job_tag_label: string
         }[]
       }
       insert_preset_ristorazione_tags: {
