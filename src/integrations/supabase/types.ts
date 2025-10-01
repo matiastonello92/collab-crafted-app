@@ -870,29 +870,35 @@ export type Database = {
       }
       job_tags: {
         Row: {
+          categoria: string | null
+          color: string | null
           created_at: string
           id: string
           is_active: boolean
-          label: string
-          name: string
+          key: string
+          label_it: string
           org_id: string
           updated_at: string
         }
         Insert: {
+          categoria?: string | null
+          color?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
-          label: string
-          name: string
+          key: string
+          label_it: string
           org_id: string
           updated_at?: string
         }
         Update: {
+          categoria?: string | null
+          color?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
-          label?: string
-          name?: string
+          key?: string
+          label_it?: string
           org_id?: string
           updated_at?: string
         }
@@ -2179,28 +2185,44 @@ export type Database = {
         Row: {
           assigned_at: string
           assigned_by: string | null
+          id: string
+          is_primary: boolean | null
+          job_tag_id: string
           location_id: string
+          note: string | null
           org_id: string
-          tag_id: string
           user_id: string
         }
         Insert: {
           assigned_at?: string
           assigned_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          job_tag_id: string
           location_id: string
+          note?: string | null
           org_id: string
-          tag_id: string
           user_id: string
         }
         Update: {
           assigned_at?: string
           assigned_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          job_tag_id?: string
           location_id?: string
+          note?: string | null
           org_id?: string
-          tag_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_job_tags_job_tag_id_fkey"
+            columns: ["job_tag_id"]
+            isOneToOne: false
+            referencedRelation: "job_tags"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_job_tags_location_id_fkey"
             columns: ["location_id"]
@@ -2224,7 +2246,7 @@ export type Database = {
           },
           {
             foreignKeyName: "user_job_tags_tag_id_fkey"
-            columns: ["tag_id"]
+            columns: ["job_tag_id"]
             isOneToOne: false
             referencedRelation: "job_tags"
             referencedColumns: ["id"]
@@ -2563,6 +2585,10 @@ export type Database = {
         Args: { p_feature_key: string; p_org: string }
         Returns: Json
       }
+      generate_job_tag_key: {
+        Args: { p_label: string }
+        Returns: string
+      }
       get_active_plan_id: {
         Args: { p_org: string }
         Returns: string
@@ -2570,6 +2596,10 @@ export type Database = {
       get_my_default_location: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      insert_preset_ristorazione_tags: {
+        Args: { p_org_id: string }
+        Returns: Json
       }
       invitation_accept_v2: {
         Args: { p_token: string }
