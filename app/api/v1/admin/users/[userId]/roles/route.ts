@@ -35,8 +35,8 @@ export async function POST(
 ) {
   try {
     // Check admin access using centralized guard
-    const { userId: actorId, hasAccess } = await checkOrgAdmin()
-    if (!hasAccess || !actorId) {
+    const { userId: actorId, hasAccess, orgId } = await checkOrgAdmin()
+    if (!hasAccess || !actorId || !orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -49,10 +49,10 @@ export async function POST(
       return NextResponse.json({ error: 'role_id is required' }, { status: 400 })
     }
 
-    // Verify user exists
+    // Verify user exists and belongs to same org
     const { data: targetUser, error: userError } = await supabaseAdmin
       .from('user_profiles')
-      .select('id')
+      .select('id, org_id')
       .eq('id', userId)
       .single()
 
@@ -60,10 +60,14 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Verify role exists
+    if (targetUser.org_id !== orgId) {
+      return NextResponse.json({ error: 'User not found in your organization' }, { status: 404 })
+    }
+
+    // Verify role exists and belongs to same org
     const { data: role, error: roleError } = await supabaseAdmin
       .from('roles')
-      .select('id, name, display_name')
+      .select('id, name, display_name, org_id')
       .eq('id', body.role_id)
       .single()
 
@@ -71,18 +75,27 @@ export async function POST(
       return NextResponse.json({ error: 'Role not found' }, { status: 404 })
     }
 
-    // If location_id provided, verify location exists
+    if (role.org_id !== orgId) {
+      return NextResponse.json({ error: 'Role not found in your organization' }, { status: 404 })
+    }
+
+    // If location_id provided, verify location exists and belongs to same org
     let location = null
     if (body.location_id) {
       const { data: loc, error: locError } = await supabaseAdmin
         .from('locations')
-        .select('id, name')
+        .select('id, name, org_id')
         .eq('id', body.location_id)
         .single()
 
       if (locError || !loc) {
         return NextResponse.json({ error: 'Location not found' }, { status: 404 })
       }
+
+      if (loc.org_id !== orgId) {
+        return NextResponse.json({ error: 'Location not found in your organization' }, { status: 404 })
+      }
+
       location = loc
     }
 

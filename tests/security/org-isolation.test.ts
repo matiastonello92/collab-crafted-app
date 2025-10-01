@@ -113,6 +113,167 @@ describe('Multi-Tenant Org Isolation', () => {
     })
   })
 
+  describe('Users Endpoint Isolation', () => {
+    it('should only return users from authenticated admin org', async () => {
+      // This test verifies that /api/v1/admin/users filters by org_id
+      // and that cross-org access is prevented
+      
+      const response = await fetch('http://localhost:3000/api/v1/admin/users', {
+        headers: {
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        }
+      })
+
+      expect(response.status).toBe(200)
+      const data = await response.json()
+      
+      // Verify all returned users belong to the same org
+      expect(Array.isArray(data.users)).toBe(true)
+      
+      if (data.users.length > 0) {
+        const { data: firstUserProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('org_id')
+          .eq('id', data.users[0].id)
+          .single()
+
+        for (const user of data.users) {
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('org_id')
+            .eq('id', user.id)
+            .single()
+
+          expect(profile?.org_id).toBe(firstUserProfile?.org_id)
+        }
+      }
+    })
+
+    it('should filter users by location_id when provided', async () => {
+      const locationId = 'test-location-uuid'
+      
+      const response = await fetch(`http://localhost:3000/api/v1/admin/users?location_id=${locationId}`, {
+        headers: {
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        }
+      })
+
+      expect(response.status).toBe(200)
+      const data = await response.json()
+      
+      // Verify all returned users are assigned to the specified location
+      for (const user of data.users || []) {
+        const { data: assignments } = await supabaseAdmin
+          .from('user_roles_locations')
+          .select('location_id')
+          .eq('user_id', user.id)
+          .eq('location_id', locationId)
+          .eq('is_active', true)
+
+        expect(assignments && assignments.length > 0).toBe(true)
+      }
+    })
+  })
+
+  describe('Permissions Endpoint Isolation', () => {
+    it('should only return permissions for authenticated admin org', async () => {
+      const response = await fetch('http://localhost:3000/api/v1/admin/permissions', {
+        headers: {
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        }
+      })
+
+      expect(response.status).toBe(200)
+      const data = await response.json()
+      
+      // Verify all returned permissions belong to the same org
+      expect(Array.isArray(data.permissions)).toBe(true)
+      
+      if (data.permissions.length > 0) {
+        const { data: firstPermProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('org_id')
+          .eq('id', process.env.TEST_USER_ID!)
+          .single()
+
+        for (const perm of data.permissions) {
+          const { data: permission } = await supabaseAdmin
+            .from('permissions')
+            .select('org_id')
+            .eq('id', perm.id)
+            .single()
+
+          expect(permission?.org_id).toBe(firstPermProfile?.org_id)
+        }
+      }
+    })
+  })
+
+  describe('User Permissions Endpoint Isolation', () => {
+    it('should prevent viewing permissions for users in other orgs', async () => {
+      const otherOrgUserId = 'user-from-another-org'
+      
+      const response = await fetch(`http://localhost:3000/api/v1/admin/users/${otherOrgUserId}/permissions`, {
+        headers: {
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        }
+      })
+
+      // Should return 404 for users not in admin's org
+      expect(response.status).toBe(404)
+    })
+  })
+
+  describe('User Roles Endpoint Isolation', () => {
+    it('should prevent assigning roles to users in other orgs', async () => {
+      const otherOrgUserId = 'user-from-another-org'
+      const roleId = 'test-role-uuid'
+      
+      const response = await fetch(`http://localhost:3000/api/v1/admin/users/${otherOrgUserId}/roles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        },
+        body: JSON.stringify({ role_id: roleId })
+      })
+
+      // Should return 404 for users not in admin's org
+      expect(response.status).toBe(404)
+    })
+  })
+
+  describe('Location Managers Endpoint Isolation', () => {
+    it('should prevent viewing managers for locations in other orgs', async () => {
+      const otherOrgLocationId = 'location-from-another-org'
+      
+      const response = await fetch(`http://localhost:3000/api/v1/admin/locations/${otherOrgLocationId}/managers`, {
+        headers: {
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        }
+      })
+
+      // Should return 404 for locations not in admin's org
+      expect(response.status).toBe(404)
+    })
+
+    it('should prevent adding managers to locations in other orgs', async () => {
+      const otherOrgLocationId = 'location-from-another-org'
+      
+      const response = await fetch(`http://localhost:3000/api/v1/admin/locations/${otherOrgLocationId}/managers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': `supabase-auth-token=${process.env.TEST_USER_TOKEN}`
+        },
+        body: JSON.stringify({ email: 'manager@example.com' })
+      })
+
+      // Should return 404 for locations not in admin's org
+      expect(response.status).toBe(404)
+    })
+  })
+
   describe('Invitations Endpoint Isolation', () => {
     it('should only return invitations from user org', async () => {
       // This test verifies that GET /api/v1/admin/invitations

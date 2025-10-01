@@ -94,6 +94,25 @@ export async function getUsersWithDetails(
   try {
     const supabase = await createSupabaseServerClient()
     
+    // Get current user's org_id for filtering
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { users: [], total: 0, hasMore: false }
+    }
+
+    // Get org_id from profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.org_id) {
+      return { users: [], total: 0, hasMore: false }
+    }
+
+    const orgId = profile.org_id
+    
     // Verifica autorizzazioni admin
     const isAdmin = await checkIsAdmin()
     if (!isAdmin) {
@@ -105,7 +124,7 @@ export async function getUsersWithDetails(
     let total = 0
 
     try {
-      // Prima prova con user_profiles
+      // Prima prova con user_profiles FILTERED BY ORG_ID
       let query = supabase
         .from('user_profiles')
         .select(`
@@ -114,8 +133,10 @@ export async function getUsersWithDetails(
           last_name,
           phone,
           is_active,
-          created_at
+          created_at,
+          org_id
         `, { count: 'exact' })
+        .eq('org_id', orgId)
         .order('created_at', { ascending: false })
 
       // Applica filtro di ricerca se presente
@@ -136,12 +157,24 @@ export async function getUsersWithDetails(
         }))
         total = count || 0
       } else {
-        // Fallback a auth.admin.listUsers per super-admin
+        // Fallback a auth.admin.listUsers con filtro per org
         console.log('Fallback to auth.admin.listUsers')
         
         // Use admin client for auth operations
         const { createSupabaseAdminClient } = await import('@/lib/supabase/server')
         const adminSupabase = createSupabaseAdminClient()
+
+        // Get user IDs from memberships for org filtering
+        const { data: memberships } = await adminSupabase
+          .from('memberships')
+          .select('user_id')
+          .eq('org_id', orgId)
+
+        if (!memberships) {
+          return { users: [], total: 0, hasMore: false }
+        }
+
+        const orgUserIds = memberships.map(m => m.user_id)
         
         const { data: authData, error: authError } = await adminSupabase.auth.admin.listUsers({
           page: page,
@@ -153,8 +186,9 @@ export async function getUsersWithDetails(
           return { users: [], total: 0, hasMore: false }
         }
 
-        // Filter by search if provided
-        let filteredUsers = authData.users || []
+        // Filter by org membership AND search
+        let filteredUsers = (authData.users || []).filter(u => orgUserIds.includes(u.id))
+        
         if (search.trim()) {
           const searchLower = search.toLowerCase()
           filteredUsers = filteredUsers.filter(user => 
@@ -172,7 +206,7 @@ export async function getUsersWithDetails(
           created_at: user.created_at,
         }))
 
-        total = authData.total || users.length
+        total = filteredUsers.length
       }
     } catch (fallbackError) {
       console.error('Error in fallback query:', fallbackError)

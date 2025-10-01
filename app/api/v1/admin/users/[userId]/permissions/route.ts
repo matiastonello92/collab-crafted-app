@@ -17,6 +17,19 @@ export async function GET(request: Request, { params }: { params: { userId: stri
 
     const supabaseAdmin = createSupabaseAdminClient()
     
+    // Get current user's org_id
+    const { data: currentProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!currentProfile?.org_id) {
+      return NextResponse.json({ error: 'User org not found' }, { status: 403 })
+    }
+
+    const currentOrgId = currentProfile.org_id
+    
     // Check if current user can view user permissions
     const { data: isAdmin } = await supabaseAdmin.rpc('user_is_admin', { p_user: user.id })
     if (!isAdmin) {
@@ -31,6 +44,17 @@ export async function GET(request: Request, { params }: { params: { userId: stri
     }
 
     const targetUserId = params.userId
+
+    // Verify target user belongs to same org
+    const { data: targetProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('org_id')
+      .eq('id', targetUserId)
+      .single()
+
+    if (!targetProfile || targetProfile.org_id !== currentOrgId) {
+      return NextResponse.json({ error: 'User not found in your organization' }, { status: 404 })
+    }
 
     // Get user role assignments
     const { data: assignments } = await supabaseAdmin

@@ -9,17 +9,18 @@ export const runtime = 'nodejs'
 export async function GET() {
   try {
     // Check admin access using centralized guard
-    const { hasAccess } = await checkOrgAdmin()
-    if (!hasAccess) {
+    const { hasAccess, orgId } = await checkOrgAdmin()
+    if (!hasAccess || !orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const supabaseAdmin = createSupabaseAdminClient()
 
-    // Fetch all permissions
+    // Fetch permissions filtered by org_id
     const { data: permissions, error } = await supabaseAdmin
       .from('permissions')
       .select('id, name, display_name, category, description')
+      .eq('org_id', orgId)
       .order('category', { ascending: true })
       .order('display_name', { ascending: true })
 

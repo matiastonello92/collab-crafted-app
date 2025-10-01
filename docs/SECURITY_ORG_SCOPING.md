@@ -121,6 +121,93 @@ WITH CHECK (
 
 ---
 
+## Additional Security Patterns
+
+### User Management Endpoints
+
+When fetching users for display or assignment:
+
+```typescript
+// ✅ SECURE: Filter by org_id and optionally by location_id
+export async function GET(request: NextRequest) {
+  const { hasAccess, orgId } = await checkOrgAdmin()
+  if (!hasAccess || !orgId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
+  const locationId = request.nextUrl.searchParams.get('location_id')
+
+  let query = supabase
+    .from('profiles')
+    .select(`id, full_name, user_roles_locations!inner(location_id, org_id, is_active), memberships!inner(org_id)`)
+    .eq('memberships.org_id', orgId)
+    .eq('user_roles_locations.org_id', orgId)
+    .eq('user_roles_locations.is_active', true)
+
+  if (locationId) {
+    query = query.eq('user_roles_locations.location_id', locationId)
+  }
+
+  const { data } = await query
+  // Deduplicate and return users
+}
+```
+
+### Cross-Resource Operations
+
+When operating on resources that reference other resources (e.g., assigning roles to users):
+
+```typescript
+// ✅ SECURE: Verify ALL resources belong to admin's org
+export async function POST(req: Request, { params }: { params: { userId: string } }) {
+  const { hasAccess, orgId } = await checkOrgAdmin()
+  if (!hasAccess || !orgId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
+  const body = await req.json()
+
+  // 1. Verify user belongs to org
+  const { data: user } = await supabase
+    .from('profiles')
+    .select('org_id')
+    .eq('id', params.userId)
+    .single()
+
+  if (!user || user.org_id !== orgId) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  }
+
+  // 2. Verify role belongs to org
+  const { data: role } = await supabase
+    .from('roles')
+    .select('org_id')
+    .eq('id', body.role_id)
+    .single()
+
+  if (!role || role.org_id !== orgId) {
+    return NextResponse.json({ error: 'Role not found' }, { status: 404 })
+  }
+
+  // 3. If location_id provided, verify it belongs to org
+  if (body.location_id) {
+    const { data: location } = await supabase
+      .from('locations')
+      .select('org_id')
+      .eq('id', body.location_id)
+      .single()
+
+    if (!location || location.org_id !== orgId) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+    }
+  }
+
+  // Now safe to proceed with operation
+}
+```
+
+---
+
 ## 🧪 Testing Organization Isolation
 
 ### Manual Testing
