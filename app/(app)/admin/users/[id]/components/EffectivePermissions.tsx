@@ -126,7 +126,7 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
           </Alert>
         ) : (
           <div className="space-y-4">
-            {Object.entries(groupedPermissions).map(([module, actions]) => (
+            {(Object.entries(groupedPermissions) as [string, string[]][]).map(([module, actions]) => (
               <div key={module} className="space-y-2">
                 <h4 className="font-medium capitalize text-sm">
                   {module === '*' ? 'Amministratore' : module}
