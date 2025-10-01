@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Edit2, Save, X, Clock } from 'lucide-react'
 import { toast } from 'sonner'
-import { useHydratedStore } from '@/lib/store/useHydratedStore'
-import { can } from '@/lib/permissions'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface Location {
   id: string
