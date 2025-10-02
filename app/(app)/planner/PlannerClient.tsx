@@ -89,25 +89,48 @@ export function PlannerClient() {
 
   // Load users and job tags when selectedLocation changes
   useEffect(() => {
-    if (!selectedLocation) return
+    if (!selectedLocation) {
+      console.log('🔍 [Planner] No selectedLocation, skipping user load')
+      return
+    }
 
     async function loadUsersAndTags() {
       try {
         const location = locations.find(l => l.id === selectedLocation)
-        if (!location) return
+        if (!location) {
+          console.log('🔍 [Planner] Location not found in state:', { selectedLocation, locations })
+          return
+        }
 
-        console.log('🔍 [Planner] Loading users for location:', selectedLocation)
+        console.log('🔍 [Planner] Loading users for location:', { 
+          locationId: selectedLocation, 
+          locationName: location.name,
+          orgId: location.org_id 
+        })
 
         // Fetch users with email from API endpoint
-        const response = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
+        const url = `/api/v1/admin/users?location_id=${selectedLocation}`
+        console.log('🔍 [Planner] Fetching from:', url)
+        
+        const response = await fetch(url)
+        console.log('🔍 [Planner] Response status:', response.status, response.statusText)
+        
         if (!response.ok) {
+          const errorText = await response.text()
+          console.error('🔍 [Planner] API Error:', { status: response.status, error: errorText })
           toast.error('Errore nel caricamento utenti')
-          console.error('Failed to fetch users:', response.statusText)
           return
         }
         
-        const { users: usersData } = await response.json()
-        console.log('🔍 [Planner] Users loaded:', usersData)
+        const responseData = await response.json()
+        console.log('🔍 [Planner] Full API response:', responseData)
+        
+        const { users: usersData } = responseData
+        console.log('🔍 [Planner] Users extracted:', { 
+          count: usersData?.length || 0,
+          users: usersData 
+        })
+        
         setUsers(usersData || [])
 
         // Load job tags for org

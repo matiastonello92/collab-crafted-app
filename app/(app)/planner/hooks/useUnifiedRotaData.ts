@@ -43,6 +43,7 @@ export function useUnifiedRotaData(locationId: string | null, weekStart: string)
     fetcher,
     {
       revalidateOnFocus: false,
+      revalidateOnMount: true, // Force refresh on mount
       dedupingInterval: 5000, // 5s deduplication
     }
   )
