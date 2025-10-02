@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Copy, Lock, Send, RefreshCw, LayoutGrid, List, Filter, X } from 'lucide-react'
+import { Copy, Lock, Send, RefreshCw, LayoutGrid, List, Filter, X, FolderOpen } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Rota, Location, ShiftWithAssignments, UserProfile, JobTag } from '@/types/shifts'
 import { toast } from 'sonner'
 import { PlannerStats } from './PlannerStats'
 import { UnassignedShiftsPool } from './UnassignedShiftsPool'
+import { TemplateLibraryDialog } from './TemplateLibraryDialog'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -45,6 +46,7 @@ interface Props {
   users?: UserProfile[]
   filters: PlannerFilters
   onFiltersChange: (filters: PlannerFilters) => void
+  currentWeekStart?: string
 }
 
 export function PlannerSidebar({ 
@@ -60,12 +62,15 @@ export function PlannerSidebar({
   jobTags = [],
   users = [],
   filters,
-  onFiltersChange
+  onFiltersChange,
+  currentWeekStart
 }: Props) {
   const [publishing, setPublishing] = useState(false)
   const [locking, setLocking] = useState(false)
+  const [duplicating, setDuplicating] = useState(false)
   const [showPublishDialog, setShowPublishDialog] = useState(false)
   const [showLockDialog, setShowLockDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   
   const canPublish = rota?.status === 'draft'
   const canLock = rota?.status === 'published'
@@ -74,9 +79,30 @@ export function PlannerSidebar({
   const handleDuplicateWeek = async () => {
     if (!rota) return
     
-    toast.info('Funzionalità in sviluppo', {
-      description: 'La duplicazione settimana sarà disponibile prossimamente'
-    })
+    setDuplicating(true)
+    try {
+      const response = await fetch(`/api/v1/rotas/${rota.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          copy_assignments: false // User can customize this
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        toast.success(`Settimana duplicata: ${data.shifts_created} turni creati`)
+        onRefresh()
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Errore durante duplicazione')
+      }
+    } catch (error) {
+      console.error('Error duplicating week:', error)
+      toast.error('Errore durante duplicazione')
+    } finally {
+      setDuplicating(false)
+    }
   }
   
   const handlePublish = async () => {
@@ -206,10 +232,20 @@ export function PlannerSidebar({
                 variant="outline" 
                 className="w-full justify-start"
                 onClick={handleDuplicateWeek}
-                disabled={!canDuplicate}
+                disabled={!canDuplicate || duplicating}
               >
                 <Copy className="mr-2 h-4 w-4" />
-                Duplica settimana
+                {duplicating ? 'Duplicazione...' : 'Duplica settimana'}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowTemplatesDialog(true)}
+                disabled={!selectedLocation}
+              >
+                <FolderOpen className="mr-2 h-4 w-4" />
+                Template
               </Button>
               
               <Button 
@@ -358,6 +394,17 @@ export function PlannerSidebar({
           </Tabs>
         </div>
       </div>
+
+      {/* Template Library Dialog */}
+      {selectedLocation && currentWeekStart && (
+        <TemplateLibraryDialog
+          open={showTemplatesDialog}
+          onClose={() => setShowTemplatesDialog(false)}
+          locationId={selectedLocation}
+          currentWeekStart={currentWeekStart}
+          onApplied={onRefresh}
+        />
+      )}
 
       {/* Publish confirmation dialog */}
       <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>

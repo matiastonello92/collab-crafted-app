@@ -1839,6 +1839,124 @@ export type Database = {
           },
         ]
       }
+      shift_template_items: {
+        Row: {
+          break_minutes: number
+          created_at: string
+          end_time: string
+          id: string
+          job_tag_id: string | null
+          location_id: string
+          notes: string | null
+          org_id: string
+          sort_order: number
+          start_time: string
+          template_id: string
+          weekday: number
+        }
+        Insert: {
+          break_minutes?: number
+          created_at?: string
+          end_time: string
+          id?: string
+          job_tag_id?: string | null
+          location_id: string
+          notes?: string | null
+          org_id: string
+          sort_order?: number
+          start_time: string
+          template_id: string
+          weekday: number
+        }
+        Update: {
+          break_minutes?: number
+          created_at?: string
+          end_time?: string
+          id?: string
+          job_tag_id?: string | null
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          sort_order?: number
+          start_time?: string
+          template_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_template_items_job_tag_id_fkey"
+            columns: ["job_tag_id"]
+            isOneToOne: false
+            referencedRelation: "job_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "shift_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location_id: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location_id: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_templates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       shifts: {
         Row: {
           break_minutes: number

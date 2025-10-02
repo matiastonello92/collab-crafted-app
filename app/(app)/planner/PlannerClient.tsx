@@ -163,6 +163,7 @@ export function PlannerClient() {
           users={users}
           filters={filters}
           onFiltersChange={setFilters}
+          currentWeekStart={currentWeek}
         />
         
         <div className="flex-1 flex flex-col overflow-hidden">
