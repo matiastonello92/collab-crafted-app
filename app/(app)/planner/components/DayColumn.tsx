@@ -27,9 +27,10 @@ interface Props {
   leaves: LeaveRequestWithType[] // approved leaves for this day
   rota?: Rota
   allJobTags: string[] // All possible job tags to show consistent rows
+  onShiftClick?: (shift: ShiftWithAssignments) => void
 }
 
-export function DayColumn({ date, shifts, leaves, rota, allJobTags }: Props) {
+export function DayColumn({ date, shifts, leaves, rota, allJobTags, onShiftClick }: Props) {
   const dayName = formatDayHeader(date)
   const isToday = checkIsToday(date)
   
@@ -82,6 +83,7 @@ export function DayColumn({ date, shifts, leaves, rota, allJobTags }: Props) {
             tagId={tagId}
             shifts={shifts[tagId] || []}
             isLocked={rota?.status === 'locked'}
+            onShiftClick={onShiftClick}
           />
         ))}
       </div>
@@ -94,9 +96,10 @@ interface DroppableRowProps {
   tagId: string
   shifts: ShiftWithAssignments[]
   isLocked: boolean
+  onShiftClick?: (shift: ShiftWithAssignments) => void
 }
 
-function DroppableRow({ date, tagId, shifts, isLocked }: DroppableRowProps) {
+function DroppableRow({ date, tagId, shifts, isLocked, onShiftClick }: DroppableRowProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${date}-tag-${tagId}`,
     disabled: isLocked
@@ -121,6 +124,7 @@ function DroppableRow({ date, tagId, shifts, isLocked }: DroppableRowProps) {
           key={shift.id} 
           shift={shift}
           isLocked={isLocked}
+          onClick={onShiftClick}
         />
       ))}
     </div>

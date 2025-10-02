@@ -5,6 +5,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { WeekNavigator } from './components/WeekNavigator'
 import { PlannerGrid } from './components/PlannerGrid'
 import { PlannerSidebar } from './components/PlannerSidebar'
+import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { useRotaData } from './hooks/useRotaData'
 import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
@@ -17,39 +18,58 @@ export function PlannerClient() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
   const [locationsLoading, setLocationsLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'day' | 'employee'>('day')
+  const [selectedShift, setSelectedShift] = useState<any>(null)
+  const [users, setUsers] = useState<any[]>([])
+  const [jobTags, setJobTags] = useState<any[]>([])
   
   const { permissions, isLoading: permLoading } = usePermissions(selectedLocation || undefined)
   const { rota, shifts, leaves, loading, error, mutate } = useRotaData(selectedLocation, currentWeek)
 
-  // Load accessible locations
+  // Load accessible locations, users, and job tags
   useEffect(() => {
-    async function loadLocations() {
+    async function loadData() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        // Get locations where user has shifts:manage permission
-        const { data } = await supabase
+        // Load locations
+        const { data: locsData } = await supabase
           .from('locations')
           .select('id, org_id, name, status')
           .eq('status', 'active')
           .order('name')
 
-        if (data && data.length > 0) {
-          setLocations(data)
-          // Auto-select first location
+        if (locsData && locsData.length > 0) {
+          setLocations(locsData)
           if (!selectedLocation) {
-            setSelectedLocation(data[0].id)
+            setSelectedLocation(locsData[0].id)
           }
         }
+        
+        // Load users and job tags for the org
+        if (selectedLocation) {
+          const { data: usersData } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url, email')
+            .limit(100)
+          
+          const { data: tagsData } = await supabase
+            .from('job_tags')
+            .select('id, key, label_it, color')
+            .eq('is_active', true)
+          
+          setUsers(usersData || [])
+          setJobTags((tagsData || []).map(t => ({ ...t, name: t.key, label: t.label_it })))
+        }
       } catch (err) {
-        console.error('Error loading locations:', err)
+        console.error('Error loading data:', err)
       } finally {
         setLocationsLoading(false)
       }
     }
 
-    loadLocations()
+    loadData()
   }, [supabase, selectedLocation])
 
   if (locationsLoading || permLoading) {
@@ -81,42 +101,54 @@ export function PlannerClient() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar filtri */}
-      <PlannerSidebar 
-        rota={rota}
-        locations={locations}
-        selectedLocation={selectedLocation}
-        onLocationChange={setSelectedLocation}
-        onRefresh={mutate}
-      />
-      
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <WeekNavigator 
-          currentWeek={currentWeek}
-          onWeekChange={setCurrentWeek}
-          rotaStatus={rota?.status}
+    <>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <PlannerSidebar 
+          rota={rota}
+          shifts={shifts}
+          locations={locations}
+          selectedLocation={selectedLocation}
+          onLocationChange={setSelectedLocation}
+          onRefresh={mutate}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onShiftClick={setSelectedShift}
         />
         
-        {selectedLocation ? (
-          <PlannerGrid 
-            rota={rota}
-            shifts={shifts}
-            leaves={leaves}
-            weekStart={currentWeek}
-            locationId={selectedLocation}
-            onRefresh={mutate}
-            loading={loading}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <WeekNavigator 
+            currentWeek={currentWeek}
+            onWeekChange={setCurrentWeek}
+            rotaStatus={rota?.status}
           />
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">
-              Seleziona una location per iniziare
-            </p>
-          </div>
-        )}
+          
+          {selectedLocation ? (
+            <PlannerGrid 
+              rota={rota}
+              shifts={shifts}
+              leaves={leaves}
+              weekStart={currentWeek}
+              locationId={selectedLocation}
+              onRefresh={mutate}
+              loading={loading}
+              onShiftClick={setSelectedShift}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-muted-foreground">Seleziona una location</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      
+      <ShiftEditDialog
+        shift={selectedShift}
+        open={!!selectedShift}
+        onClose={() => setSelectedShift(null)}
+        onSave={mutate}
+        jobTags={jobTags}
+        users={users}
+      />
+    </>
   )
 }

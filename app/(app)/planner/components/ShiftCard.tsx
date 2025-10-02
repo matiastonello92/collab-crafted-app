@@ -15,9 +15,10 @@ interface Props {
   shift: ShiftWithAssignments
   isDragging?: boolean
   isLocked?: boolean
+  onClick?: (shift: ShiftWithAssignments) => void
 }
 
-export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }: Props) {
+export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, onClick }: Props) {
   const [violation, setViolation] = useState<ViolationWithUser | null>(null)
   
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -59,9 +60,10 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked }
       style={style}
       {...listeners}
       {...attributes}
+      onClick={() => onClick?.(shift)}
       className={cn(
         'bg-card border rounded-lg p-3 shadow-sm transition-all',
-        !isLocked && 'cursor-move hover:shadow-md',
+        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02]',
         isDragging && 'opacity-50 rotate-2',
         violation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
         isLocked && 'cursor-not-allowed opacity-60'

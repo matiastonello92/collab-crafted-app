@@ -32,6 +32,10 @@ interface Props {
   loading: boolean
 }
 
+interface PropsWithCallbacks extends Props {
+  onShiftClick?: (shift: ShiftWithAssignments) => void
+}
+
 export const PlannerGrid = memo(function PlannerGrid({ 
   rota, 
   shifts,
@@ -39,10 +43,12 @@ export const PlannerGrid = memo(function PlannerGrid({
   weekStart, 
   locationId,
   onRefresh,
-  loading
-}: Props) {
+  loading,
+  onShiftClick
+}: PropsWithCallbacks) {
   const { days } = getWeekBounds(weekStart)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [optimisticShifts, setOptimisticShifts] = useState<ShiftWithAssignments[]>(shifts)
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -87,6 +93,12 @@ export const PlannerGrid = memo(function PlannerGrid({
     const duration = new Date(shift.end_at).getTime() - new Date(shift.start_at).getTime()
     const newEnd = new Date(new Date(newStart).getTime() + duration).toISOString()
     
+    // Optimistic update
+    const updatedShift = { ...shift, start_at: newStart, end_at: newEnd }
+    setOptimisticShifts(prev => 
+      prev.map(s => s.id === shiftId ? updatedShift : s)
+    )
+    
     try {
       const response = await fetch(`/api/v1/shifts/${shiftId}`, {
         method: 'PUT',
@@ -100,16 +112,23 @@ export const PlannerGrid = memo(function PlannerGrid({
       if (!response.ok) {
         const error = await response.json()
         toast.error(error.message || 'Errore durante lo spostamento')
+        setOptimisticShifts(shifts) // Revert on error
         return
       }
       
-      toast.success('Turno spostato con successo')
+      toast.success('Turno spostato')
       onRefresh()
     } catch (error) {
       console.error('Error moving shift:', error)
       toast.error('Errore durante lo spostamento')
+      setOptimisticShifts(shifts) // Revert on error
     }
   }
+  
+  // Sync optimistic shifts with real shifts
+  const displayShifts = useMemo(() => {
+    return activeId ? optimisticShifts : shifts
+  }, [activeId, optimisticShifts, shifts])
   
   // Raggruppa shift per giorno e job_tag
   const shiftsByDayAndTag = useMemo(() => {
@@ -119,7 +138,7 @@ export const PlannerGrid = memo(function PlannerGrid({
       grouped[day] = {}
     })
     
-    shifts.forEach(shift => {
+    displayShifts.forEach(shift => {
       const day = shift.start_at.split('T')[0]
       const tagId = shift.job_tag_id || 'unassigned'
       
@@ -129,18 +148,18 @@ export const PlannerGrid = memo(function PlannerGrid({
     })
     
     return grouped
-  }, [shifts, days])
+  }, [displayShifts, days])
 
   // Get all unique job tags
   const allJobTags = useMemo(() => {
     const tags = new Set<string>()
-    shifts.forEach(shift => {
+    displayShifts.forEach(shift => {
       if (shift.job_tag_id) {
         tags.add(shift.job_tag_id)
       }
     })
     return ['unassigned', ...Array.from(tags)]
-  }, [shifts])
+  }, [displayShifts])
   
   if (loading) {
     return (
@@ -170,6 +189,7 @@ export const PlannerGrid = memo(function PlannerGrid({
               leaves={leaves}
               rota={rota}
               allJobTags={allJobTags}
+              onShiftClick={onShiftClick}
             />
           ))}
         </div>
@@ -178,7 +198,7 @@ export const PlannerGrid = memo(function PlannerGrid({
       <DragOverlay>
         {activeId && (
           <ShiftCard 
-            shift={shifts.find(s => s.id === activeId)!}
+            shift={displayShifts.find(s => s.id === activeId)!}
             isDragging
           />
         )}
