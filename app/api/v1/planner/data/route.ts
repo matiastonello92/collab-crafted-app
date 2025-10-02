@@ -51,13 +51,13 @@ export async function GET(request: Request) {
         .lt('start_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())
         .order('start_at', { ascending: true }),
       
-      // Leave requests
+      // Leave requests with explicit relationship specification to avoid ambiguity
       supabase
         .from('leave_requests')
         .select(`
           *,
           leave_types(id, key, label, color),
-          profiles(id, full_name)
+          user:profiles!leave_requests_user_id_fkey(id, full_name)
         `)
         .eq('status', 'approved')
         .gte('start_at', weekStart)

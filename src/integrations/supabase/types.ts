@@ -1532,6 +1532,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           default_location_id: string | null
+          email: string | null
           email_preferences: Json | null
           full_name: string | null
           id: string
@@ -1548,6 +1549,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           default_location_id?: string | null
+          email?: string | null
           email_preferences?: Json | null
           full_name?: string | null
           id: string
@@ -1564,6 +1566,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           default_location_id?: string | null
+          email?: string | null
           email_preferences?: Json | null
           full_name?: string | null
           id?: string
@@ -1794,8 +1797,10 @@ export type Database = {
       shift_assignments: {
         Row: {
           acknowledged_at: string | null
+          assigned_at: string | null
           created_at: string
           id: string
+          proposed_at: string | null
           published_at: string | null
           shift_id: string
           status: string
@@ -1804,8 +1809,10 @@ export type Database = {
         }
         Insert: {
           acknowledged_at?: string | null
+          assigned_at?: string | null
           created_at?: string
           id?: string
+          proposed_at?: string | null
           published_at?: string | null
           shift_id: string
           status?: string
@@ -1814,8 +1821,10 @@ export type Database = {
         }
         Update: {
           acknowledged_at?: string | null
+          assigned_at?: string | null
           created_at?: string
           id?: string
+          proposed_at?: string | null
           published_at?: string | null
           shift_id?: string
           status?: string
@@ -2849,6 +2858,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           default_location_id: string | null
+          email: string | null
           email_preferences: Json | null
           full_name: string | null
           id: string

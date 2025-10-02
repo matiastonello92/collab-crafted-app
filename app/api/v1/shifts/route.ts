@@ -17,6 +17,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url)
     const rotaId = searchParams.get('rota_id')
+    const locationId = searchParams.get('location_id')
 
     // RLS policies will handle permissions - no need for explicit check
 
@@ -38,6 +39,10 @@ export async function GET(request: Request) {
     
     if (rotaId) {
       query = query.eq('rota_id', rotaId)
+    }
+
+    if (locationId) {
+      query = query.eq('location_id', locationId)
     }
 
     const { data, error } = await query
