@@ -2244,13 +2244,6 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
           },
-          {
-            foreignKeyName: "user_job_tags_tag_id_fkey"
-            columns: ["job_tag_id"]
-            isOneToOne: false
-            referencedRelation: "job_tags"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_permissions: {

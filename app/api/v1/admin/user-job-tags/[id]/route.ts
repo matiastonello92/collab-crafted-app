@@ -72,7 +72,7 @@ export async function PUT(
       .eq('org_id', assignment.org_id)
       .select(`
         *,
-        job_tag:job_tags(id, label_it, key, categoria, color, is_active)
+        job_tag:job_tags!user_job_tags_job_tag_id_fkey(id, label_it, key, categoria, color, is_active)
       `)
       .single()
 

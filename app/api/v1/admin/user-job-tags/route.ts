@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         note,
         assigned_by,
         assigned_at,
-        job_tag:job_tags(id, label_it, key, categoria, color, is_active)
+        job_tag:job_tags!user_job_tags_job_tag_id_fkey(id, label_it, key, categoria, color, is_active)
       `)
       .order('is_primary', { ascending: false })
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         note: note || null,
         assigned_by: user.id,
       })
-      .select(`*, job_tag:job_tags(*)`)
+      .select(`*, job_tag:job_tags!user_job_tags_job_tag_id_fkey(*)`)
       .single()
 
     if (error) {
