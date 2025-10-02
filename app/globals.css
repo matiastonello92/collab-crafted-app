@@ -1,74 +1,87 @@
 @import "tailwindcss";
 
-:root {
-  /* Klyra Brand Colors */
-  --klyra-primary: 235 90% 85%;
-  --klyra-accent: 187 94% 87%;
+@theme {
+  /* Klyra Brand Colors (OKLCH for v4) */
+  --color-klyra-primary: oklch(85% 0.15 270);
+  --color-klyra-accent: oklch(87% 0.18 190);
   
   /* Semantic Design Tokens */
-  --background: 0 0% 100%;
-  --foreground: 224 25% 15%;
-  --muted: 220 13% 97%;
-  --muted-foreground: 215 16% 47%;
-  --primary: var(--klyra-primary);
-  --accent: var(--klyra-accent);
-  --border: 220 13% 91%;
-  --ring: var(--klyra-primary);
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(25% 0.02 240);
+  --color-muted: oklch(97% 0.01 240);
+  --color-muted-foreground: oklch(55% 0.02 240);
+  --color-primary: var(--color-klyra-primary);
+  --color-primary-foreground: oklch(100% 0 0);
+  --color-accent: var(--color-klyra-accent);
+  --color-accent-foreground: oklch(15% 0.02 240);
+  --color-border: oklch(91% 0.01 240);
+  --color-input: oklch(91% 0.01 240);
+  --color-ring: var(--color-klyra-primary);
   
   /* Card & Popover */
-  --card: 0 0% 100%;
-  --card-foreground: 224 25% 15%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 224 25% 15%;
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(25% 0.02 240);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(25% 0.02 240);
   
   /* Secondary */
-  --secondary: 220 13% 97%;
-  --secondary-foreground: 224 25% 15%;
+  --color-secondary: oklch(97% 0.01 240);
+  --color-secondary-foreground: oklch(25% 0.02 240);
   
   /* Destructive */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+  --color-destructive: oklch(60% 0.18 25);
+  --color-destructive-foreground: oklch(100% 0 0);
   
-  /* Input */
-  --input: 220 13% 91%;
+  /* Radius */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+  
+  /* Animations (replacing tailwindcss-animate) */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-scale-in: scale-in 0.15s ease-out;
+  --animate-slide-up: slide-up 0.2s ease-out;
 }
 
-.dark {
-  --background: 240 19% 7%;
-  --foreground: 224 25% 92%;
-  --muted: 232 20% 15%;
-  --muted-foreground: 214 20% 69%;
-  --border: 225 25% 18%;
-  
-  /* Card & Popover */
-  --card: 232 20% 15%;
-  --card-foreground: 224 25% 92%;
-  --popover: 232 20% 15%;
-  --popover-foreground: 224 25% 92%;
-  
-  /* Secondary */
-  --secondary: 232 20% 20%;
-  --secondary-foreground: 224 25% 92%;
-  
-  /* Destructive */
-  --destructive: 0 62% 50%;
-  --destructive-foreground: 0 0% 100%;
-  
-  /* Input */
-  --input: 225 25% 18%;
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: oklch(20% 0.02 240);
+    --color-foreground: oklch(92% 0.02 240);
+    --color-muted: oklch(25% 0.02 240);
+    --color-muted-foreground: oklch(69% 0.02 240);
+    --color-border: oklch(28% 0.02 240);
+    --color-input: oklch(28% 0.02 240);
+    
+    /* Card & Popover */
+    --color-card: oklch(25% 0.02 240);
+    --color-card-foreground: oklch(92% 0.02 240);
+    --color-popover: oklch(25% 0.02 240);
+    --color-popover-foreground: oklch(92% 0.02 240);
+    
+    /* Secondary */
+    --color-secondary: oklch(30% 0.02 240);
+    --color-secondary-foreground: oklch(92% 0.02 240);
+    
+    /* Destructive */
+    --color-destructive: oklch(50% 0.18 25);
+    --color-destructive-foreground: oklch(100% 0 0);
+  }
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* Design System Utilities */
 .gradient-title {
   background-image: linear-gradient(
     to right,
-    hsl(var(--primary)),
-    hsl(var(--accent))
+    var(--color-primary),
+    var(--color-accent)
   );
   color: transparent;
   -webkit-background-clip: text;
@@ -76,7 +89,7 @@ body {
 }
 
 .grid-bg {
-  background-image: radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.03) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--color-foreground) 3%, transparent) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
@@ -88,39 +101,62 @@ body {
 
 /* Focus States */
 .focus-enhanced:focus-visible {
-  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
-  outline: none;
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
 }
 
 /* Typography Scale */
-.text-display { @apply text-4xl font-bold tracking-tight; }
-.text-headline { @apply text-2xl font-semibold; }
-.text-body { @apply text-base font-normal; }
-.text-caption { @apply text-sm text-muted-foreground; }
+.text-display { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.025em; }
+.text-headline { font-size: 1.5rem; font-weight: 600; }
+.text-body { font-size: 1rem; font-weight: 400; }
+.text-caption { font-size: 0.875rem; color: var(--color-muted-foreground); }
 
 /* Animation Consistency */
 .animate-smooth { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
 .animate-bounce-subtle { animation: bounce 1s ease-in-out infinite; }
 
+/* Keyframes for animations */
+@keyframes accordion-down {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* Touch-Friendly Forms (iOS/Android 44px minimum) */
-@layer base {
-  input:not([type="checkbox"]):not([type="radio"]), 
-  select, 
-  textarea {
-    @apply min-h-[44px];
-  }
-  
-  button {
-    @apply min-h-[44px];
-  }
-  
-  label {
-    @apply text-base; /* Minimum 16px to prevent iOS zoom */
-  }
+input:not([type="checkbox"]):not([type="radio"]), 
+select, 
+textarea {
+  min-height: 44px;
+}
+
+button {
+  min-height: 44px;
+}
+
+label {
+  font-size: 1rem; /* Minimum 16px to prevent iOS zoom */
 }
 
 /* Mobile Safe Area */
 .safe-area-inset-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
-
