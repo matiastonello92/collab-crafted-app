@@ -54,6 +54,9 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, 
   // Calculate shift duration
   const duration = differenceInHours(parseISO(shift.end_at), parseISO(shift.start_at))
   
+  const assignmentStatus = assignment?.status
+  const hasViolation = !!violation
+  
   return (
     <div
       ref={setNodeRef}
@@ -62,10 +65,12 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, 
       {...attributes}
       onClick={() => onClick?.(shift)}
       className={cn(
-        'bg-card border rounded-lg p-3 shadow-sm transition-all',
-        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02]',
-        isDragging && 'opacity-50 rotate-2',
-        violation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
+        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200',
+        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] hover:border-primary/50',
+        isDragging && 'opacity-50 rotate-2 scale-105',
+        hasViolation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
+        assignmentStatus === 'accepted' && 'border-green-500/30',
+        assignmentStatus === 'declined' && 'border-red-500/30',
         isLocked && 'cursor-not-allowed opacity-60'
       )}
     >

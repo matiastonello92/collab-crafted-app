@@ -228,3 +228,23 @@ export interface Location {
   name: string
   status: string
 }
+
+// Planner View Modes & Filters
+export type PlannerViewMode = 'day' | 'employee'
+
+export interface PlannerFilters {
+  jobTagIds?: string[]
+  userIds?: string[]
+  showUnassigned?: boolean
+  showViolations?: boolean
+}
+
+export interface ShiftEditFormData {
+  startDate: string
+  startTime: string
+  endTime: string
+  breakMinutes: number
+  jobTagId: string
+  notes: string
+  assignedUserId: string
+}

@@ -6,6 +6,7 @@ import { WeekNavigator } from './components/WeekNavigator'
 import { PlannerGrid } from './components/PlannerGrid'
 import { PlannerSidebar } from './components/PlannerSidebar'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
+import { EmployeeGridView } from './components/EmployeeGridView'
 import { useRotaData } from './hooks/useRotaData'
 import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
@@ -60,7 +61,12 @@ export function PlannerClient() {
             .eq('is_active', true)
           
           setUsers(usersData || [])
-          setJobTags((tagsData || []).map(t => ({ ...t, name: t.key, label: t.label_it })))
+          setJobTags((tagsData || []).map(t => ({ 
+            id: t.id,
+            name: t.key, 
+            label: t.label_it || t.key,
+            color: t.color 
+          })))
         }
       } catch (err) {
         console.error('Error loading data:', err)
@@ -123,16 +129,25 @@ export function PlannerClient() {
           />
           
           {selectedLocation ? (
-            <PlannerGrid 
-              rota={rota}
-              shifts={shifts}
-              leaves={leaves}
-              weekStart={currentWeek}
-              locationId={selectedLocation}
-              onRefresh={mutate}
-              loading={loading}
-              onShiftClick={setSelectedShift}
-            />
+            viewMode === 'day' ? (
+              <PlannerGrid 
+                rota={rota}
+                shifts={shifts}
+                leaves={leaves}
+                weekStart={currentWeek}
+                locationId={selectedLocation}
+                onRefresh={mutate}
+                loading={loading}
+                onShiftClick={setSelectedShift}
+              />
+            ) : (
+              <EmployeeGridView
+                shifts={shifts}
+                users={users}
+                weekStart={currentWeek}
+                onShiftClick={setSelectedShift}
+              />
+            )
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-muted-foreground">Seleziona una location</p>

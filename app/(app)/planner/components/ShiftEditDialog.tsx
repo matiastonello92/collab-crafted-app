@@ -66,9 +66,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
     
     setLoading(true)
     try {
-      // Update shift details
-      const newStartAt = `${startDate}T${startTime}:00+01:00`
-      const newEndAt = `${startDate}T${endTime}:00+01:00`
+      // Update shift details - use ISO format for timezone flexibility
+      const newStartAt = new Date(`${startDate}T${startTime}:00`).toISOString()
+      const newEndAt = new Date(`${startDate}T${endTime}:00`).toISOString()
       
       const response = await fetch(`/api/v1/shifts/${shift.id}`, {
         method: 'PUT',

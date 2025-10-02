@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, memo } from 'react'
+import { useState, useMemo, memo, useCallback, useRef } from 'react'
 import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, DragStartEvent } from '@dnd-kit/core'
 import { ShiftCard } from './ShiftCard'
 import { DayColumn } from './DayColumn'
@@ -49,6 +49,7 @@ export const PlannerGrid = memo(function PlannerGrid({
   const { days } = getWeekBounds(weekStart)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [optimisticShifts, setOptimisticShifts] = useState<ShiftWithAssignments[]>(shifts)
+  const dragEndTimeoutRef = useRef<NodeJS.Timeout>()
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -60,7 +61,8 @@ export const PlannerGrid = memo(function PlannerGrid({
     setActiveId(event.active.id as string)
   }
   
-  const handleDragEnd = async (event: DragEndEvent) => {
+  // Debounced drag end handler for smoother performance
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event
     setActiveId(null)
     
@@ -99,7 +101,14 @@ export const PlannerGrid = memo(function PlannerGrid({
       prev.map(s => s.id === shiftId ? updatedShift : s)
     )
     
-    try {
+    // Clear any pending API calls
+    if (dragEndTimeoutRef.current) {
+      clearTimeout(dragEndTimeoutRef.current)
+    }
+    
+    // Debounce API call for smoother UX
+    dragEndTimeoutRef.current = setTimeout(async () => {
+      try {
       const response = await fetch(`/api/v1/shifts/${shiftId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -116,14 +125,15 @@ export const PlannerGrid = memo(function PlannerGrid({
         return
       }
       
-      toast.success('Turno spostato')
-      onRefresh()
-    } catch (error) {
-      console.error('Error moving shift:', error)
-      toast.error('Errore durante lo spostamento')
-      setOptimisticShifts(shifts) // Revert on error
-    }
-  }
+        toast.success('Turno spostato')
+        onRefresh()
+      } catch (error) {
+        console.error('Error moving shift:', error)
+        toast.error('Errore durante lo spostamento')
+        setOptimisticShifts(shifts) // Revert on error
+      }
+    }, 300) // 300ms debounce
+  }, [shifts, rota, onRefresh])
   
   // Sync optimistic shifts with real shifts
   const displayShifts = useMemo(() => {
