@@ -57,14 +57,13 @@ export function PlannerClient() {
   // Conflict detection
   const { conflicts, hasConflict, getConflicts } = useConflictDetector(shifts, leaves)
 
-  // Load accessible locations and users for selected location
+  // Load accessible locations on mount
   useEffect(() => {
-    async function loadData() {
+    async function loadLocations() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        // Load locations
         const { data: locsData } = await supabase
           .from('locations')
           .select('id, org_id, name, status')
@@ -77,42 +76,63 @@ export function PlannerClient() {
             setSelectedLocation(locsData[0].id)
           }
         }
-        
-        // Load users FOR SELECTED LOCATION via API
-        if (selectedLocation) {
-          const location = locsData?.find(l => l.id === selectedLocation)
-          
-          // Fetch users with email from API endpoint
-          const response = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
-          const { users: usersData } = await response.json()
-          
-          // Load job tags for org
-          if (location?.org_id) {
-            const { data: tagsData } = await supabase
-              .from('job_tags')
-              .select('id, key, label_it, color')
-              .eq('org_id', location.org_id)
-              .eq('is_active', true)
-            
-            setJobTags((tagsData || []).map(t => ({ 
-              id: t.id,
-              name: t.key,
-              label: t.label_it || t.key,
-              color: t.color 
-            })))
-          }
-          
-          setUsers(usersData || [])
-        }
       } catch (err) {
-        console.error('Error loading data:', err)
+        console.error('Error loading locations:', err)
+        toast.error('Errore nel caricamento delle locations')
       } finally {
         setLocationsLoading(false)
       }
     }
 
-    loadData()
-  }, [supabase, selectedLocation])
+    loadLocations()
+  }, [supabase])
+
+  // Load users and job tags when selectedLocation changes
+  useEffect(() => {
+    if (!selectedLocation) return
+
+    async function loadUsersAndTags() {
+      try {
+        const location = locations.find(l => l.id === selectedLocation)
+        if (!location) return
+
+        console.log('🔍 [Planner] Loading users for location:', selectedLocation)
+
+        // Fetch users with email from API endpoint
+        const response = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
+        if (!response.ok) {
+          toast.error('Errore nel caricamento utenti')
+          console.error('Failed to fetch users:', response.statusText)
+          return
+        }
+        
+        const { users: usersData } = await response.json()
+        console.log('🔍 [Planner] Users loaded:', usersData)
+        setUsers(usersData || [])
+
+        // Load job tags for org
+        if (location.org_id) {
+          const { data: tagsData } = await supabase
+            .from('job_tags')
+            .select('id, key, label_it, color')
+            .eq('org_id', location.org_id)
+            .eq('is_active', true)
+
+          setJobTags((tagsData || []).map(t => ({ 
+            id: t.id,
+            name: t.key,
+            label: t.label_it || t.key,
+            color: t.color 
+          })))
+        }
+      } catch (err) {
+        console.error('Error loading users and tags:', err)
+        toast.error('Errore nel caricamento dati')
+      }
+    }
+
+    loadUsersAndTags()
+  }, [selectedLocation, locations, supabase])
   
   // Handle cell click to create new shift
   const handleCellClick = (userId: string, date: string) => {
