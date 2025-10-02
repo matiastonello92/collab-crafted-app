@@ -80,3 +80,25 @@ body {
   background-size: 24px 24px;
 }
 
+/* Z-Index Consistency */
+.z-dropdown { z-index: 1000; }
+.z-modal { z-index: 2000; }
+.z-toast { z-index: 3000; }
+.z-tooltip { z-index: 4000; }
+
+/* Focus States */
+.focus-enhanced:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+  outline: none;
+}
+
+/* Typography Scale */
+.text-display { @apply text-4xl font-bold tracking-tight; }
+.text-headline { @apply text-2xl font-semibold; }
+.text-body { @apply text-base font-normal; }
+.text-caption { @apply text-sm text-muted-foreground; }
+
+/* Animation Consistency */
+.animate-smooth { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-bounce-subtle { animation: bounce 1s ease-in-out infinite; }
+

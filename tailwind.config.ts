@@ -89,6 +89,8 @@ const config: Config = {
         "klyra-soft": "var(--klyra-shadow-soft)",
         card: "0 4px 20px -2px rgba(11, 15, 26, 0.4)",
         glow: "0 0 40px rgba(124, 92, 255, 0.3)",
+        dropdown: "0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+        dialog: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
       },
       animation: {
         "fade-in": "fade-in 0.2s ease-out",

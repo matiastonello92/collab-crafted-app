@@ -90,9 +90,18 @@ export const ShiftCard = memo(function ShiftCard({
       {...listeners}
       {...attributes}
       onClick={() => onClick?.(shift)}
+      role="button"
+      tabIndex={isLocked ? -1 : 0}
+      aria-label={`Turno dalle ${startTime} alle ${endTime}${assignment ? ` assegnato a ${assignment.user?.full_name}` : ' non assegnato'}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.(shift)
+        }
+      }}
       className={cn(
-        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200 relative',
-        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] hover:border-primary/50',
+        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
+        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] hover:border-primary/50 focus-enhanced',
         isDragging && 'opacity-50 rotate-2 scale-105',
         hasViolation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
         showConflicts && hasError && 'border-red-500 border-2',
@@ -109,6 +118,7 @@ export const ShiftCard = memo(function ShiftCard({
           <Badge 
             variant={hasError ? "destructive" : "outline"}
             className="h-6 w-6 p-0 flex items-center justify-center rounded-full"
+            aria-label={hasError ? 'Errore conflitto' : 'Avviso conflitto'}
           >
             <AlertTriangle className="h-3 w-3" />
           </Badge>
@@ -117,7 +127,7 @@ export const ShiftCard = memo(function ShiftCard({
       {/* Header: orario + durata */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5 text-xs font-medium">
-          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+          <Clock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
           <span>{startTime} - {endTime}</span>
           <span className="text-muted-foreground">({duration}h)</span>
         </div>
@@ -152,7 +162,7 @@ export const ShiftCard = memo(function ShiftCard({
         </div>
       ) : (
         <div className="flex items-center gap-2 text-muted-foreground mb-1">
-          <User className="h-4 w-4" />
+          <User className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Non assegnato</span>
         </div>
       )}
@@ -179,7 +189,7 @@ export const ShiftCard = memo(function ShiftCard({
               <AlertTriangle className={cn(
                 "h-3 w-3 mt-0.5 shrink-0",
                 conflict.severity === 'error' ? 'text-red-500' : 'text-yellow-500'
-              )} />
+              )} aria-hidden="true" />
               <span className={cn(
                 conflict.severity === 'error' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'
               )}>
@@ -192,8 +202,11 @@ export const ShiftCard = memo(function ShiftCard({
     </div>
   )
 }, (prev, next) => {
+  // Aggressive memoization
   return prev.shift.id === next.shift.id && 
          prev.shift.updated_at === next.shift.updated_at &&
          prev.isDragging === next.isDragging &&
-         prev.isLocked === next.isLocked
+         prev.isLocked === next.isLocked &&
+         prev.showConflicts === next.showConflicts &&
+         JSON.stringify(prev.conflicts) === JSON.stringify(next.conflicts)
 })

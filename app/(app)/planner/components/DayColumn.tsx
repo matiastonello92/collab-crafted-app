@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { ShiftCard } from './ShiftCard'
 import { formatDayHeader, isToday as checkIsToday } from '@/lib/shifts/week-utils'
@@ -32,7 +33,7 @@ interface Props {
   showConflicts?: boolean
 }
 
-export function DayColumn({ 
+export const DayColumn = memo(function DayColumn({ 
   date, 
   shifts, 
   leaves, 
@@ -78,7 +79,7 @@ export function DayColumn({
                 borderColor: leave.leave_types.color || '#6b7280'
               }}
             >
-              <Calendar className="h-3 w-3 mr-1" />
+              <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
               {leave.profiles.full_name?.split(' ')[0] || 'User'}: {leave.leave_types.label}
             </Badge>
           ))}
@@ -102,7 +103,14 @@ export function DayColumn({
       </div>
     </div>
   )
-}
+}, (prev: Props, next: Props) => {
+  return prev.date === next.date &&
+         prev.rota?.status === next.rota?.status &&
+         prev.showConflicts === next.showConflicts &&
+         JSON.stringify(prev.allJobTags) === JSON.stringify(next.allJobTags) &&
+         JSON.stringify(prev.shifts) === JSON.stringify(next.shifts) &&
+         JSON.stringify(prev.leaves) === JSON.stringify(next.leaves)
+})
 
 interface DroppableRowProps {
   date: string
