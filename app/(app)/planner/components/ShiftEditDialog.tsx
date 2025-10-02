@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Trash2, Save, X } from 'lucide-react'
+import { Trash2, Save, X, Sparkles } from 'lucide-react'
 import type { ShiftWithAssignments, UserProfile, JobTag } from '@/types/shifts'
+import { SmartAssignDialog } from './SmartAssignDialog'
 import { format, parseISO } from 'date-fns'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -36,6 +37,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showSmartAssign, setShowSmartAssign] = useState(false)
   
   // Form state
   const [startDate, setStartDate] = useState('')
@@ -270,6 +272,15 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             </Button>
             
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSmartAssign(true)}
+                disabled={isLocked}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Assegnazione AI
+              </Button>
               <Button variant="outline" onClick={onClose} disabled={loading}>
                 <X className="h-4 w-4 mr-2" />
                 Annulla
@@ -300,6 +311,17 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Smart Assignment */}
+      <SmartAssignDialog
+        open={showSmartAssign}
+        onClose={() => setShowSmartAssign(false)}
+        shiftId={shift?.id || null}
+        onAssign={() => {
+          onSave()
+          onClose()
+        }}
+      />
     </>
   )
 }

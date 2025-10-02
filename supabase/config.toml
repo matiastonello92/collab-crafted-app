@@ -1,1 +1,4 @@
 project_id = "jwchmdivuwgfjrwvgtia"
+
+[functions.smart-assign]
+verify_jwt = true
