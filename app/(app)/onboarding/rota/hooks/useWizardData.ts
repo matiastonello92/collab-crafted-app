@@ -66,7 +66,7 @@ export function useWizardData() {
   const fetchJobTags = useCallback(async (orgId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/v1/admin/job-tags?org_id=${orgId}&is_active=true`, { credentials: 'include' })
+      const res = await fetch(`/api/v1/admin/job-tags?is_active=true`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch job tags')
       const data = await res.json()
       setJobTags(data.jobTags || [])

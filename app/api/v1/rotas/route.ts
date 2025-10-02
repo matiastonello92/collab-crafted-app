@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       .from('locations')
       .select('org_id')
       .eq('id', validated.location_id)
-      .maybeSingle()
+      .single()
     
     if (locationError) {
       console.error('❌ [ROTAS POST] Error fetching location:', locationError)

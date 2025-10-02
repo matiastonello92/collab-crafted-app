@@ -29,9 +29,14 @@ export async function GET(request: NextRequest) {
       .from('memberships')
       .select('org_id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (membershipError || !membership?.org_id) {
+    if (membershipError) {
+      console.log('❌ [API DEBUG] Membership query error:', membershipError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
+
+    if (!membership?.org_id) {
       console.log('❌ [API DEBUG] No membership found')
       return NextResponse.json({ error: 'No organization' }, { status: 400 })
     }
