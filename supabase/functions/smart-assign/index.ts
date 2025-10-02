@@ -146,7 +146,6 @@ Rispondi SOLO con un array JSON di oggetti con: user_id, score, reason (breve mo
           { role: 'system', content: 'You are an HR scheduling assistant. Respond only with valid JSON.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3,
       }),
     });
 

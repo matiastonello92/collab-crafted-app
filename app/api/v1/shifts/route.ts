@@ -20,10 +20,20 @@ export async function GET(request: Request) {
 
     // RLS policies will handle permissions - no need for explicit check
 
-    // Build query (RLS applies)
+    // Build query with JOINs to load assignments + users + job tags
     let query = supabase
       .from('shifts')
-      .select('*')
+      .select(`
+        *,
+        job_tags(id, key, label_it, color),
+        rotas(id, status),
+        assignments:shift_assignments(
+          id,
+          user_id,
+          status,
+          user:profiles(id, full_name, email, avatar_url)
+        )
+      `)
       .order('start_at', { ascending: true })
     
     if (rotaId) {

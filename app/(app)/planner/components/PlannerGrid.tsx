@@ -80,7 +80,7 @@ export const PlannerGrid = memo(function PlannerGrid({
     setActiveId(shiftId)
   }
   
-  // Debounced drag end handler for smoother performance
+  // Debounced drag end handler for smoother performance (300ms debounce)
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event
     setActiveId(null)
@@ -91,7 +91,6 @@ export const PlannerGrid = memo(function PlannerGrid({
       return
     }
     
-    // over.id formato: 'day-2025-01-20-tag-uuid' oppure 'day-2025-01-20-tag-unassigned'
     const overId = over.id as string
     const parts = overId.split('-')
     
@@ -102,15 +101,11 @@ export const PlannerGrid = memo(function PlannerGrid({
     
     const date = `${parts[1]}-${parts[2]}-${parts[3]}`
     const shiftId = active.id as string
-    
-    // Calcola nuovo start_at mantenendo ora originale
     const shift = shifts.find(s => s.id === shiftId)
     if (!shift) return
     
-    const originalTime = shift.start_at.split('T')[1] // Keep time part
+    const originalTime = shift.start_at.split('T')[1]
     const newStart = `${date}T${originalTime}`
-    
-    // Calculate new end_at maintaining same duration
     const duration = new Date(shift.end_at).getTime() - new Date(shift.start_at).getTime()
     const newEnd = new Date(new Date(newStart).getTime() + duration).toISOString()
     
@@ -120,38 +115,34 @@ export const PlannerGrid = memo(function PlannerGrid({
       prev.map(s => s.id === shiftId ? updatedShift : s)
     )
     
-    // Clear any pending API calls
+    // Clear pending calls + debounce for 300ms
     if (dragEndTimeoutRef.current) {
       clearTimeout(dragEndTimeoutRef.current)
     }
     
-    // Debounce API call for smoother UX
     dragEndTimeoutRef.current = setTimeout(async () => {
       try {
-      const response = await fetch(`/api/v1/shifts/${shiftId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          start_at: newStart,
-          end_at: newEnd
+        const response = await fetch(`/api/v1/shifts/${shiftId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ start_at: newStart, end_at: newEnd })
         })
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        toast.error(error.message || 'Errore durante lo spostamento')
-        setOptimisticShifts(shifts) // Revert on error
-        return
-      }
-      
+        
+        if (!response.ok) {
+          const error = await response.json()
+          toast.error(error.message || 'Errore durante lo spostamento')
+          setOptimisticShifts(shifts)
+          return
+        }
+        
         toast.success('Turno spostato')
         onRefresh()
       } catch (error) {
         console.error('Error moving shift:', error)
         toast.error('Errore durante lo spostamento')
-        setOptimisticShifts(shifts) // Revert on error
+        setOptimisticShifts(shifts)
       }
-    }, 300) // 300ms debounce
+    }, 300)
   }, [shifts, rota, onRefresh])
   
   // Fix 4: Improved useMemo with fallback
