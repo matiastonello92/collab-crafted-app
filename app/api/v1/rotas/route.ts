@@ -82,20 +82,20 @@ export async function POST(request: Request) {
       .from('locations')
       .select('org_id')
       .eq('id', validated.location_id)
-      .single()
+      .maybeSingle()
     
     if (locationError) {
       console.error('❌ [ROTAS POST] Error fetching location:', locationError)
       return NextResponse.json(
-        { error: locationError.message },
+        { error: 'Location lookup failed' },
         { status: 500 }
       )
     }
     
-    if (!location) {
-      console.error('❌ [ROTAS POST] Location not found');
+    if (!location?.org_id) {
+      console.error('❌ [ROTAS POST] Location not found or no access');
       return NextResponse.json(
-        { error: 'Location not found' },
+        { error: 'Location not found or access denied' },
         { status: 404 }
       )
     }

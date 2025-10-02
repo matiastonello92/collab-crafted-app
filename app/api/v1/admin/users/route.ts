@@ -29,19 +29,32 @@ export async function GET(request: NextRequest) {
       .from('memberships')
       .select('org_id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (membershipError) {
       console.log('❌ [USERS] Membership query error:', membershipError)
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
+    let orgId: string
     if (!membership?.org_id) {
-      console.log('❌ [USERS] No membership found')
-      return NextResponse.json({ error: 'No organization' }, { status: 400 })
+      // Try to get ANY membership if user has multiple
+      const { data: anyMembership, error: anyError } = await supabase
+        .from('memberships')
+        .select('org_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+      
+      if (anyError || !anyMembership?.org_id) {
+        console.log('❌ [USERS] No membership found')
+        return NextResponse.json({ error: 'No organization' }, { status: 400 })
+      }
+      
+      orgId = anyMembership.org_id
+    } else {
+      orgId = membership.org_id
     }
-
-    const orgId = membership.org_id
     console.log('✅ [USERS] Derived org_id:', orgId)
 
     // Build query with optional location filter (Inventari pattern - direct queries + RLS)

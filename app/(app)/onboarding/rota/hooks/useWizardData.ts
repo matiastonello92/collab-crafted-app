@@ -81,7 +81,7 @@ export function useWizardData() {
   const fetchUsers = useCallback(async (locationId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/v1/users/location?location_id=${locationId}`, { credentials: 'include' })
+      const res = await fetch(`/api/v1/admin/users?location_id=${locationId}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch users')
       const data = await res.json()
       setUsers(data.users || [])
