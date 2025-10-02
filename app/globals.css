@@ -46,29 +46,27 @@
 }
 
 /* Dark mode */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: oklch(20% 0.02 240);
-    --color-foreground: oklch(92% 0.02 240);
-    --color-muted: oklch(25% 0.02 240);
-    --color-muted-foreground: oklch(69% 0.02 240);
-    --color-border: oklch(28% 0.02 240);
-    --color-input: oklch(28% 0.02 240);
-    
-    /* Card & Popover */
-    --color-card: oklch(25% 0.02 240);
-    --color-card-foreground: oklch(92% 0.02 240);
-    --color-popover: oklch(25% 0.02 240);
-    --color-popover-foreground: oklch(92% 0.02 240);
-    
-    /* Secondary */
-    --color-secondary: oklch(30% 0.02 240);
-    --color-secondary-foreground: oklch(92% 0.02 240);
-    
-    /* Destructive */
-    --color-destructive: oklch(50% 0.18 25);
-    --color-destructive-foreground: oklch(100% 0 0);
-  }
+.dark {
+  --color-background: oklch(20% 0.02 240);
+  --color-foreground: oklch(92% 0.02 240);
+  --color-muted: oklch(25% 0.02 240);
+  --color-muted-foreground: oklch(69% 0.02 240);
+  --color-border: oklch(28% 0.02 240);
+  --color-input: oklch(28% 0.02 240);
+  
+  /* Card & Popover */
+  --color-card: oklch(25% 0.02 240);
+  --color-card-foreground: oklch(92% 0.02 240);
+  --color-popover: oklch(25% 0.02 240);
+  --color-popover-foreground: oklch(92% 0.02 240);
+  
+  /* Secondary */
+  --color-secondary: oklch(30% 0.02 240);
+  --color-secondary-foreground: oklch(92% 0.02 240);
+  
+  /* Destructive */
+  --color-destructive: oklch(50% 0.18 25);
+  --color-destructive-foreground: oklch(100% 0 0);
 }
 
 body {
