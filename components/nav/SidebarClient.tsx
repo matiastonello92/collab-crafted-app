@@ -71,7 +71,7 @@ const navigation: any[] = [
   { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
 ]
 
-export default function SidebarClient() {
+export default function SidebarClient({ onNavigate }: { onNavigate?: () => void } = {}) {
   const [collapsed, setCollapsed] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
   const [isAdminClaims, setIsAdminClaims] = useState(false)
@@ -79,6 +79,10 @@ export default function SidebarClient() {
   const pathname = usePathname()
   const supabase = useSupabase()
   const { permissions, context, permissionsLoading } = useHydratedStore()
+
+  const handleLinkClick = () => {
+    onNavigate?.()
+  }
 
   const toggleGroup = (groupName: string) => {
     setOpenGroups(prev => 
@@ -256,6 +260,7 @@ export default function SidebarClient() {
                               <Link
                                 key={child.href}
                                 href={child.href}
+                                onClick={handleLinkClick}
                                 className={cn(
                                   'group flex w-full items-center gap-3 rounded-xl px-3 py-2 pl-10 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                                   isChildActive
@@ -301,6 +306,8 @@ export default function SidebarClient() {
                     onClick={(event) => {
                       if (!canAccess) {
                         event.preventDefault()
+                      } else {
+                        handleLinkClick()
                       }
                     }}
                   >
