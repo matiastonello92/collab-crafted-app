@@ -2,16 +2,21 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Send, Lock } from 'lucide-react'
 import { formatWeekLabel, getPreviousWeek, getNextWeek, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 
 interface Props {
   currentWeek: string // ISO date (lunedì)
   onWeekChange: (weekStart: string) => void
   rotaStatus?: 'draft' | 'published' | 'locked'
+  rotaId?: string
+  onPublish?: () => void
+  onLock?: () => void
+  canPublish?: boolean
+  canLock?: boolean
 }
 
-export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus }: Props) {
+export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, onPublish, onLock, canPublish, canLock }: Props) {
   const goToPrevWeek = () => {
     onWeekChange(getPreviousWeek(currentWeek))
   }
@@ -90,6 +95,33 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus }: Props) 
           <Calendar className="h-4 w-4 mr-2" />
           Oggi
         </Button>
+      </div>
+
+      {/* Rota Actions */}
+      <div className="flex items-center gap-2">
+        {canPublish && onPublish && (
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={onPublish}
+            className="h-8"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            Pubblica
+          </Button>
+        )}
+        
+        {canLock && onLock && (
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={onLock}
+            className="h-8"
+          >
+            <Lock className="h-4 w-4 mr-2" />
+            Blocca
+          </Button>
+        )}
       </div>
     </div>
   )

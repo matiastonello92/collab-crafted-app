@@ -4,46 +4,45 @@ import { useState, useEffect, useMemo } from 'react'
 import { useUnifiedRotaData } from './hooks/useUnifiedRotaData'
 import { usePermissions } from '@/hooks/usePermissions'
 import { WeekNavigator } from './components/WeekNavigator'
-import { PlannerGrid } from './components/PlannerGrid'
-import { CompactWeekView } from './components/CompactWeekView'
-import { PlannerSidebar, type PlannerFilters } from './components/PlannerSidebar'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { EmployeeGridView } from './components/EmployeeGridView'
 import { useConflictDetector } from './hooks/useConflictDetector'
-import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
+import { getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
-import type { Location } from '@/types/shifts'
+import type { Location, ShiftWithAssignments } from '@/types/shifts'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Calendar, Users, LayoutGrid, SlidersHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { useBreakpoint } from '@/hooks/useBreakpoint'
-import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export function PlannerClient() {
   const supabase = useSupabase()
-  const { isMobile } = useBreakpoint()
   const [locations, setLocations] = useState<Location[]>([])
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
   const [locationsLoading, setLocationsLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<'day' | 'employee' | 'compact'>('day')
-  const [selectedShift, setSelectedShift] = useState<any>(null)
+  const [selectedShift, setSelectedShift] = useState<ShiftWithAssignments | null>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-  const [filters, setFilters] = useState<PlannerFilters>({
-    jobTags: [],
-    users: [],
-    assignmentStatus: 'all',
-    showLeave: true,
-    showConflicts: true
-  })
+  
+  // Publish/Lock dialogs
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [showLockDialog, setShowLockDialog] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [locking, setLocking] = useState(false)
   
   const { permissions, isLoading: permLoading } = usePermissions(selectedLocation || undefined)
   const { rota, shifts, leaves: rawLeaves, isLoading, mutate } = useUnifiedRotaData(selectedLocation, currentWeek)
   
-  // Map leaves to expected type with proper status typing
+  // Map leaves to expected type
   const leaves = useMemo(() => 
     rawLeaves.map(l => ({
       ...l,
@@ -57,37 +56,8 @@ export function PlannerClient() {
   
   // Conflict detection
   const { conflicts, hasConflict, getConflicts } = useConflictDetector(shifts, leaves)
-  
-  // Filter shifts based on active filters
-  const filteredShifts = useMemo(() => {
-    let result = shifts
-    
-    // Filter by job tags
-    if (filters.jobTags.length > 0) {
-      result = result.filter(s => filters.jobTags.includes(s.job_tag_id || ''))
-    }
-    
-    // Filter by assignment status
-    if (filters.assignmentStatus !== 'all') {
-      result = result.filter(s => {
-        const hasAssignment = s.assignments && s.assignments.length > 0
-        if (filters.assignmentStatus === 'assigned') {
-          return hasAssignment && s.assignments?.[0]?.status === 'assigned'
-        }
-        if (filters.assignmentStatus === 'unassigned') {
-          return !hasAssignment
-        }
-        if (filters.assignmentStatus === 'pending') {
-          return hasAssignment && s.assignments?.[0]?.status === 'proposed'
-        }
-        return true
-      })
-    }
-    
-    return result
-  }, [shifts, filters])
 
-  // Load accessible locations, users, and job tags
+  // Load accessible locations and users for selected location
   useEffect(() => {
     async function loadData() {
       try {
@@ -108,25 +78,44 @@ export function PlannerClient() {
           }
         }
         
-        // Load users and job tags for the org
+        // Load users FOR SELECTED LOCATION via user_roles_locations
         if (selectedLocation) {
+          const location = locsData?.find(l => l.id === selectedLocation)
+          
+          // Query users assigned to this location
           const { data: usersData } = await supabase
             .from('profiles')
-            .select('id, full_name, avatar_url, email')
-            .limit(100)
+            .select(`
+              id, 
+              full_name, 
+              avatar_url, 
+              email,
+              user_roles_locations!inner(
+                location_id,
+                is_active
+              )
+            `)
+            .eq('user_roles_locations.location_id', selectedLocation)
+            .eq('user_roles_locations.is_active', true)
+            .order('full_name')
           
-          const { data: tagsData } = await supabase
-            .from('job_tags')
-            .select('id, key, label_it, color')
-            .eq('is_active', true)
+          // Load job tags for org
+          if (location?.org_id) {
+            const { data: tagsData } = await supabase
+              .from('job_tags')
+              .select('id, key, label_it, color')
+              .eq('org_id', location.org_id)
+              .eq('is_active', true)
+            
+            setJobTags((tagsData || []).map(t => ({ 
+              id: t.id,
+              name: t.key,
+              label: t.label_it || t.key,
+              color: t.color 
+            })))
+          }
           
           setUsers(usersData || [])
-          setJobTags((tagsData || []).map(t => ({ 
-            id: t.id,
-            name: t.key, 
-            label: t.label_it || t.key,
-            color: t.color 
-          })))
         }
       } catch (err) {
         console.error('Error loading data:', err)
@@ -137,16 +126,106 @@ export function PlannerClient() {
 
     loadData()
   }, [supabase, selectedLocation])
+  
+  // Handle cell click to create new shift
+  const handleCellClick = (userId: string, date: string) => {
+    const user = users.find(u => u.id === userId)
+    
+    // Pre-fill shift with user and date
+    setSelectedShift({
+      id: 'new',
+      rota_id: rota?.id || '',
+      location_id: selectedLocation || '',
+      org_id: locations.find(l => l.id === selectedLocation)?.org_id || '',
+      start_at: `${date}T09:00:00`,
+      end_at: `${date}T17:00:00`,
+      break_minutes: 20,
+      notes: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      job_tag_id: null,
+      job_tag: null,
+      assignments: [{
+        id: 'new',
+        shift_id: 'new',
+        user_id: userId,
+        status: 'assigned',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        org_id: '',
+        user: user ? {
+          id: user.id,
+          full_name: user.full_name,
+          avatar_url: user.avatar_url,
+          email: user.email
+        } : null
+      }]
+    } as any)
+  }
+  
+  // Publish rota
+  const handlePublish = async () => {
+    if (!rota) return
+    
+    setPublishing(true)
+    try {
+      const response = await fetch(`/api/v1/rotas/${rota.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'published' })
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        toast.error(error.message || 'Errore durante la pubblicazione')
+        return
+      }
+      
+      toast.success('Rota pubblicata con successo')
+      mutate()
+    } catch (error) {
+      console.error('Error publishing rota:', error)
+      toast.error('Errore durante la pubblicazione')
+    } finally {
+      setPublishing(false)
+      setShowPublishDialog(false)
+    }
+  }
+  
+  // Lock rota
+  const handleLock = async () => {
+    if (!rota) return
+    
+    setLocking(true)
+    try {
+      const response = await fetch(`/api/v1/rotas/${rota.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'locked' })
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        toast.error(error.message || 'Errore durante il blocco')
+        return
+      }
+      
+      toast.success('Rota bloccata con successo')
+      mutate()
+    } catch (error) {
+      console.error('Error locking rota:', error)
+      toast.error('Errore durante il blocco')
+    } finally {
+      setLocking(false)
+      setShowLockDialog(false)
+    }
+  }
 
   if (locationsLoading || permLoading) {
     return (
-      <div className="flex h-screen">
-        <div className="w-80 border-r p-4 space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
+      <div className="flex flex-col h-screen">
+        <Skeleton className="h-16 w-full" />
         <div className="flex-1 p-4">
-          <Skeleton className="h-16 w-full mb-4" />
           <Skeleton className="h-96 w-full" />
         </div>
       </div>
@@ -166,128 +245,36 @@ export function PlannerClient() {
     )
   }
 
+  const canPublish = rota?.status === 'draft'
+  const canLock = rota?.status === 'published'
+
   return (
     <>
-      <div className={cn("flex overflow-hidden bg-background", isMobile ? "flex-col min-h-screen" : "h-screen")}>
-        {isMobile ? (
-          <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" className="m-4 touch-manipulation">
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
-                Filtri & Azioni
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
-              <PlannerSidebar 
-                rota={rota || undefined}
-                shifts={shifts}
-                locations={locations}
-                selectedLocation={selectedLocation}
-                onLocationChange={setSelectedLocation}
-                onRefresh={mutate}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-                onShiftClick={setSelectedShift}
-                jobTags={jobTags}
-                users={users}
-                filters={filters}
-                onFiltersChange={setFilters}
-                currentWeekStart={currentWeek}
-              />
-            </SheetContent>
-          </Sheet>
-        ) : (
-          <PlannerSidebar 
-            rota={rota || undefined}
-            shifts={shifts}
-            locations={locations}
-            selectedLocation={selectedLocation}
-            onLocationChange={setSelectedLocation}
-            onRefresh={mutate}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            onShiftClick={setSelectedShift}
-            jobTags={jobTags}
-            users={users}
-            filters={filters}
-            onFiltersChange={setFilters}
-            currentWeekStart={currentWeek}
-          />
-        )}
+      <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <WeekNavigator 
+          currentWeek={currentWeek}
+          onWeekChange={setCurrentWeek}
+          rotaStatus={rota?.status}
+          rotaId={rota?.id}
+          onPublish={() => setShowPublishDialog(true)}
+          onLock={() => setShowLockDialog(true)}
+          canPublish={canPublish && !publishing}
+          canLock={canLock && !locking}
+        />
         
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="border-b p-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <WeekNavigator 
-              currentWeek={currentWeek}
-              onWeekChange={setCurrentWeek}
-              rotaStatus={rota?.status}
-            />
-            
-            <div className="flex gap-2 overflow-x-auto">
-              <Button
-                variant={viewMode === 'day' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('day')}
-                className="min-h-[44px] touch-manipulation whitespace-nowrap"
-              >
-                <Calendar className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Griglia</span>
-              </Button>
-              <Button
-                variant={viewMode === 'compact' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('compact')}
-                className="min-h-[44px] touch-manipulation whitespace-nowrap"
-              >
-                <LayoutGrid className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Compatta</span>
-              </Button>
-              <Button
-                variant={viewMode === 'employee' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('employee')}
-                className="min-h-[44px] touch-manipulation whitespace-nowrap"
-              >
-                <Users className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Dipendente</span>
-              </Button>
-            </div>
+        {selectedLocation ? (
+          <EmployeeGridView
+            shifts={shifts}
+            users={users}
+            weekStart={currentWeek}
+            onShiftClick={setSelectedShift}
+            onCellClick={handleCellClick}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-muted-foreground">Seleziona una location dalla top bar</p>
           </div>
-          
-          {selectedLocation ? (
-            viewMode === 'day' ? (
-              <PlannerGrid 
-                rota={rota || undefined}
-                shifts={filteredShifts}
-                leaves={filters.showLeave ? leaves : []}
-                weekStart={currentWeek}
-                locationId={selectedLocation}
-                onRefresh={mutate}
-                loading={isLoading}
-                onShiftClick={setSelectedShift}
-                conflicts={conflicts}
-                showConflicts={filters.showConflicts}
-              />
-            ) : viewMode === 'compact' ? (
-              <CompactWeekView
-                shifts={filteredShifts}
-                weekDays={getWeekBounds(currentWeek).days}
-                onShiftClick={setSelectedShift}
-              />
-            ) : (
-              <EmployeeGridView
-                shifts={filteredShifts}
-                users={users}
-                weekStart={currentWeek}
-                onShiftClick={setSelectedShift}
-              />
-            )
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-muted-foreground">Seleziona una location</p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
       
       <ShiftEditDialog
@@ -298,6 +285,44 @@ export function PlannerClient() {
         jobTags={jobTags}
         users={users}
       />
+
+      {/* Publish confirmation dialog */}
+      <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Pubblicare la rota?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Una volta pubblicata, la rota sarà visibile a tutti i dipendenti.
+              I manager potranno ancora modificare i turni.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handlePublish}>
+              Pubblica
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Lock confirmation dialog */}
+      <AlertDialog open={showLockDialog} onOpenChange={setShowLockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bloccare la rota?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Una volta bloccata, la rota non potrà più essere modificata da nessuno.
+              Questa azione è irreversibile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLock} className="bg-destructive text-destructive-foreground">
+              Blocca Definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

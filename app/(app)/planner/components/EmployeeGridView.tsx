@@ -17,9 +17,10 @@ interface Props {
   users: UserProfile[]
   weekStart: string
   onShiftClick?: (shift: ShiftWithAssignments) => void
+  onCellClick?: (userId: string, date: string) => void
 }
 
-export function EmployeeGridView({ shifts, users, weekStart, onShiftClick }: Props) {
+export function EmployeeGridView({ shifts, users, weekStart, onShiftClick, onCellClick }: Props) {
   const { days } = getWeekBounds(weekStart)
   
   // Calculate employee stats (ComboHR style)
@@ -175,7 +176,11 @@ export function EmployeeGridView({ shifts, users, weekStart, onShiftClick }: Pro
                 )
                 
                 return (
-                  <div key={day} className="space-y-1">
+                  <div 
+                    key={day} 
+                    className="space-y-1 min-h-[80px] p-2 rounded-lg hover:bg-accent/10 transition-all group relative cursor-pointer"
+                    onClick={() => onCellClick?.(userId, day)}
+                  >
                     {dayShifts.map(shift => {
                       const hours = differenceInHours(
                         parseISO(shift.end_at), 
@@ -187,7 +192,10 @@ export function EmployeeGridView({ shifts, users, weekStart, onShiftClick }: Pro
                         <Card
                           key={shift.id}
                           className="p-2 cursor-pointer hover:shadow-md transition-shadow"
-                          onClick={() => onShiftClick?.(shift)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onShiftClick?.(shift)
+                          }}
                         >
                           <div className="text-xs space-y-1">
                             <div className="font-medium flex items-center gap-1">
@@ -207,6 +215,15 @@ export function EmployeeGridView({ shifts, users, weekStart, onShiftClick }: Pro
                         </Card>
                       )
                     })}
+                    
+                    {/* Empty state with + icon */}
+                    {dayShifts.length === 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}
