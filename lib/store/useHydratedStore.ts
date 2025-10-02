@@ -103,3 +103,70 @@ export function useHydratedContext() {
 
   return context
 }
+
+/**
+ * Hook for safe location context access during hydration
+ */
+export function useHydratedLocationContext() {
+  const [isHydrated, setIsHydrated] = useState(false)
+  const locationId = useAppStore((state) => state.context.location_id)
+  const locationName = useAppStore((state) => state.context.location_name)
+  const storeHasHydrated = useAppStore(state => state.hasHydrated)
+  
+  useEffect(() => {
+    const unsubscribe = useAppStore.subscribe(
+      (state) => state.hasHydrated,
+      (hasHydrated) => {
+        setIsHydrated(hasHydrated)
+      }
+    )
+    
+    if (storeHasHydrated) {
+      setIsHydrated(true)
+    }
+    
+    return unsubscribe
+  }, [storeHasHydrated])
+
+  if (!isHydrated) {
+    return {
+      location_id: null,
+      location_name: null,
+    }
+  }
+
+  return {
+    location_id: locationId,
+    location_name: locationName,
+  }
+}
+
+/**
+ * Hook for safe org_id access during hydration
+ */
+export function useHydratedOrgId() {
+  const [isHydrated, setIsHydrated] = useState(false)
+  const orgId = useAppStore((state) => state.context.org_id)
+  const storeHasHydrated = useAppStore(state => state.hasHydrated)
+  
+  useEffect(() => {
+    const unsubscribe = useAppStore.subscribe(
+      (state) => state.hasHydrated,
+      (hasHydrated) => {
+        setIsHydrated(hasHydrated)
+      }
+    )
+    
+    if (storeHasHydrated) {
+      setIsHydrated(true)
+    }
+    
+    return unsubscribe
+  }, [storeHasHydrated])
+
+  if (!isHydrated) {
+    return null
+  }
+
+  return orgId
+}

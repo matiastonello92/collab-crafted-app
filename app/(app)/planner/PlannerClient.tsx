@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useUnifiedRotaData } from './hooks/useUnifiedRotaData'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useLocationContext, useAppContext } from '@/lib/store'
+import { useHydratedLocationContext, useHydratedOrgId } from '@/lib/store/useHydratedStore'
 import { WeekNavigator } from './components/WeekNavigator'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { EmployeeGridView } from './components/EmployeeGridView'
@@ -26,8 +26,8 @@ import {
 
 export function PlannerClient() {
   const supabase = useSupabase()
-  const { location_id: selectedLocation } = useLocationContext()
-  const context = useAppContext()
+  const { location_id: selectedLocation } = useHydratedLocationContext()
+  const orgId = useHydratedOrgId()
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
   const [selectedShift, setSelectedShift] = useState<ShiftWithAssignments | null>(null)
   const [users, setUsers] = useState<any[]>([])
@@ -94,11 +94,11 @@ export function PlannerClient() {
         setUsers(usersData || [])
 
         // Load job tags for org
-        if (context.org_id) {
+        if (orgId) {
           const { data: tagsData } = await supabase
             .from('job_tags')
             .select('id, key, label_it, color')
-            .eq('org_id', context.org_id)
+            .eq('org_id', orgId)
             .eq('is_active', true)
 
           setJobTags((tagsData || []).map(t => ({ 
@@ -115,7 +115,7 @@ export function PlannerClient() {
     }
 
     loadUsersAndTags()
-  }, [selectedLocation, context.org_id, supabase])
+  }, [selectedLocation, orgId, supabase])
   
   // Handle cell click to create new shift
   const handleCellClick = (userId: string, date: string) => {
@@ -126,7 +126,7 @@ export function PlannerClient() {
       id: 'new',
       rota_id: rota?.id || '',
       location_id: selectedLocation || '',
-      org_id: context.org_id || '',
+      org_id: orgId || '',
       start_at: `${date}T09:00:00`,
       end_at: `${date}T17:00:00`,
       break_minutes: 20,
