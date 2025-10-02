@@ -78,26 +78,13 @@ export function PlannerClient() {
           }
         }
         
-        // Load users FOR SELECTED LOCATION via user_roles_locations
+        // Load users FOR SELECTED LOCATION via API
         if (selectedLocation) {
           const location = locsData?.find(l => l.id === selectedLocation)
           
-          // Query users assigned to this location
-          const { data: usersData } = await supabase
-            .from('profiles')
-            .select(`
-              id, 
-              full_name, 
-              avatar_url, 
-              email,
-              user_roles_locations!inner(
-                location_id,
-                is_active
-              )
-            `)
-            .eq('user_roles_locations.location_id', selectedLocation)
-            .eq('user_roles_locations.is_active', true)
-            .order('full_name')
+          // Fetch users with email from API endpoint
+          const response = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`)
+          const { users: usersData } = await response.json()
           
           // Load job tags for org
           if (location?.org_id) {
