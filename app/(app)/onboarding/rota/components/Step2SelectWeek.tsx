@@ -59,29 +59,36 @@ export function Step2SelectWeek({
 
     const monday = startOfWeek(selectedDate, { weekStartsOn: 1 })
     const weekStart = format(monday, 'yyyy-MM-dd')
+    
+    const body = {
+      location_id: locationId,
+      week_start_date: weekStart,
+    }
 
     setCreating(true)
     try {
+      console.log('🔍 [Step2SelectWeek] Creating rota with body:', body)
       const res = await fetch('/api/v1/rotas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location_id: locationId,
-          week_start_date: weekStart,
-        }),
+        body: JSON.stringify(body),
         credentials: 'include',
       })
 
+      console.log('🔍 [Step2SelectWeek] Rota creation response:', { status: res.status, ok: res.ok })
+
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Errore nella creazione della rota')
+        const errorData = await res.json().catch(() => ({}))
+        console.error('❌ [Step2SelectWeek] Failed to create rota:', { status: res.status, error: errorData })
+        throw new Error(errorData.error || 'Errore nella creazione della rota')
       }
 
       const data = await res.json()
+      console.log('✅ [Step2SelectWeek] Rota created:', data.rota?.id)
       toast.success('Rota creata con successo')
       onRotaCreated(data.rota.id, weekStart)
     } catch (error: any) {
-      console.error('Error creating rota:', error)
+      console.error('❌ [Step2SelectWeek] Exception:', error)
       toast.error(error.message || 'Errore nella creazione della rota')
     } finally {
       setCreating(false)

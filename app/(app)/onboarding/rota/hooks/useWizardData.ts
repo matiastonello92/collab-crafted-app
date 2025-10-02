@@ -81,9 +81,18 @@ export function useWizardData() {
   const fetchUsers = useCallback(async (locationId: string) => {
     setLoading(true)
     try {
+      console.log('🔍 [useWizardData] Fetching users for location:', locationId)
       const res = await fetch(`/api/v1/admin/users?location_id=${locationId}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('Failed to fetch users')
+      console.log('🔍 [useWizardData] Users response:', { status: res.status, ok: res.ok })
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        console.error('❌ [useWizardData] Failed to fetch users:', { status: res.status, error: errorData })
+        throw new Error(errorData.error || 'Failed to fetch users')
+      }
+      
       const data = await res.json()
+      console.log('✅ [useWizardData] Users fetched:', data.users?.length || 0)
       setUsers(data.users || [])
     } catch (error) {
       console.error('Error fetching users:', error)

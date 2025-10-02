@@ -76,18 +76,19 @@ export async function POST(request: Request) {
     const validated = createRotaSchema.parse(body)
 
     // Derive org_id from location (like inventory modules)
-    console.log('🔍 [ROTAS POST] Deriving org_id from location_id:', validated.location_id);
-    
+    console.log('🔍 [ROTAS POST] Looking up location:', validated.location_id, 'for user:', user.id)
     const { data: location, error: locationError } = await supabase
       .from('locations')
       .select('org_id')
       .eq('id', validated.location_id)
       .maybeSingle()
     
+    console.log('🔍 [ROTAS POST] Location result:', { location, locationError })
+    
     if (locationError) {
       console.error('❌ [ROTAS POST] Error fetching location:', locationError)
       return NextResponse.json(
-        { error: 'Location lookup failed' },
+        { error: 'Location lookup failed', details: locationError.message },
         { status: 500 }
       )
     }
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
     if (!location?.org_id) {
       console.error('❌ [ROTAS POST] Location not found or no access');
       return NextResponse.json(
-        { error: 'Location not found or access denied' },
+        { error: 'Location not found or access denied', details: 'Location does not exist or RLS blocked access' },
         { status: 404 }
       )
     }

@@ -105,12 +105,17 @@ export function AssegnazioniTab() {
     setLoading(true)
     try {
       // Fetch users for location
+      console.log('🔍 [AssegnazioniTab] Fetching users for location:', selectedLocation)
       const usersRes = await fetch(`/api/v1/admin/users?location_id=${selectedLocation}`, { credentials: 'include' })
+      console.log('🔍 [AssegnazioniTab] Users response:', { status: usersRes.status, ok: usersRes.ok })
+      
       if (!usersRes.ok) {
         const errorData = await usersRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
+        console.error('❌ [AssegnazioniTab] Failed to fetch users:', { status: usersRes.status, error: errorData })
         throw new Error(errorData.error || 'Errore caricamento utenti')
       }
       const usersData = await usersRes.json()
+      console.log('✅ [AssegnazioniTab] Users fetched:', usersData.users?.length || 0)
       setUsers(usersData.users || [])
 
       // Fetch assignments for location

@@ -25,19 +25,23 @@ export async function GET(request: NextRequest) {
     console.log('🔍 [USERS] Query params:', { locationId })
 
     // Derive org_id from user's membership (Inventari pattern)
+    console.log('🔍 [USERS] Querying memberships for user:', user.id)
     const { data: membership, error: membershipError } = await supabase
       .from('memberships')
       .select('org_id')
       .eq('user_id', user.id)
       .maybeSingle()
 
+    console.log('🔍 [USERS] Membership result:', { membership, membershipError })
+
     if (membershipError) {
       console.log('❌ [USERS] Membership query error:', membershipError)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      return NextResponse.json({ error: 'Database error', details: membershipError.message }, { status: 500 })
     }
 
     let orgId: string
     if (!membership?.org_id) {
+      console.log('⚠️ [USERS] No single membership, trying to get any membership')
       // Try to get ANY membership if user has multiple
       const { data: anyMembership, error: anyError } = await supabase
         .from('memberships')
@@ -46,9 +50,11 @@ export async function GET(request: NextRequest) {
         .limit(1)
         .maybeSingle()
       
+      console.log('🔍 [USERS] Any membership result:', { anyMembership, anyError })
+      
       if (anyError || !anyMembership?.org_id) {
-        console.log('❌ [USERS] No membership found')
-        return NextResponse.json({ error: 'No organization' }, { status: 400 })
+        console.log('❌ [USERS] No membership found at all')
+        return NextResponse.json({ error: 'No organization', details: 'User has no memberships' }, { status: 400 })
       }
       
       orgId = anyMembership.org_id
@@ -62,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     if (locationId) {
       // If location filter, get users assigned to this location first
-      console.log('🔍 [USERS] Filtering by location:', locationId)
+      console.log('🔍 [USERS] Filtering by location:', locationId, 'with org_id:', orgId)
       const { data: urlData, error: urlError } = await supabase
         .from('user_roles_locations')
         .select('user_id')
@@ -70,13 +76,19 @@ export async function GET(request: NextRequest) {
         .eq('org_id', orgId)
         .eq('is_active', true)
 
+      console.log('🔍 [USERS] user_roles_locations result:', { 
+        count: urlData?.length || 0, 
+        error: urlError,
+        sample: urlData?.slice(0, 3)
+      })
+
       if (urlError) {
         console.error('❌ [USERS] user_roles_locations error:', urlError)
-        return NextResponse.json({ error: 'Failed to fetch location users' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to fetch location users', details: urlError.message }, { status: 500 })
       }
 
       userIds = [...new Set((urlData || []).map(u => u.user_id))]
-      console.log('✅ [USERS] Found', userIds.length, 'users for location')
+      console.log('✅ [USERS] Found', userIds.length, 'unique users for location')
 
       if (userIds.length === 0) {
         console.log('✅ [USERS] No users for this location, returning empty')
@@ -85,6 +97,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Query profiles directly (RLS handles org filtering automatically)
+    console.log('🔍 [USERS] Querying profiles with org_id:', orgId, 'and userIds:', userIds?.length || 'all')
     let query = supabase
       .from('profiles')
       .select('id, full_name, org_id')
@@ -97,9 +110,15 @@ export async function GET(request: NextRequest) {
 
     const { data: profiles, error: profilesError } = await query
 
+    console.log('🔍 [USERS] Profiles result:', {
+      count: profiles?.length || 0,
+      error: profilesError,
+      sample: profiles?.slice(0, 3)
+    })
+
     if (profilesError) {
       console.error('❌ [USERS] Profiles query error:', profilesError)
-      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to fetch users', details: profilesError.message }, { status: 500 })
     }
 
     console.log('✅ [USERS] Profiles fetched:', profiles?.length || 0)
