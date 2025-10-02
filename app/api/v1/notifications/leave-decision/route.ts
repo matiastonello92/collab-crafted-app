@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 import { getEmailService } from '@/lib/email/email-service';
 import { leaveDecisionTemplate } from '@/lib/email/templates/leave-decision';
 import { format } from 'date-fns';
@@ -7,7 +7,7 @@ import { it, fr } from 'date-fns/locale';
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

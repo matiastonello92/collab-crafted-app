@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { normalizeSet } from '@/lib/permissions';
 
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const rawLocationId = url.searchParams.get('locationId');
     const locationId = (rawLocationId === 'null' || !rawLocationId) ? undefined : rawLocationId;
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr || !user) {
       console.log('❌ [API DEBUG] Auth failed')

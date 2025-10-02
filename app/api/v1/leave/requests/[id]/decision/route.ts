@@ -1,7 +1,7 @@
 // Klyra Shifts API - Approve/Reject Leave Request (Manager Only)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { decideLeaveRequestSchema } from '@/lib/shifts/validations'
 import { ZodError } from 'zod'
 
@@ -10,7 +10,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {

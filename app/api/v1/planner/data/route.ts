@@ -1,10 +1,10 @@
 // Unified Planner Data API - Single fetch for rota + shifts + leaves
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {

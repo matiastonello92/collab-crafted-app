@@ -8,14 +8,14 @@ import {
   calculatePlannedHoursFromShifts,
   generateTimesheetTotals
 } from '@/lib/shifts/timesheet-calculator'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
   try {
     console.log('🔍 [API DEBUG] GET /api/v1/timesheets')
     
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   try {
     console.log('🔍 [API DEBUG] POST /api/v1/timesheets')
     
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {

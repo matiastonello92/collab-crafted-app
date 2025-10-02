@@ -1,14 +1,14 @@
 // Klyra Shifts API - Leave Requests (Create)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { createLeaveRequestSchema } from '@/lib/shifts/validations'
 import { checkLeaveCollision } from '@/lib/shifts/collision-checker'
 import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {

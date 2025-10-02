@@ -1,7 +1,7 @@
 // POST /api/v1/timesheets/export - Export timesheets as CSV
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { exportTimesheetsSchema } from '@/lib/shifts/timesheet-validations'
 import { generateTimesheetsCsv, generateCsvFilename } from '@/lib/exports/csv-generator'
 
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     console.log('🔍 [TIMESHEETS EXPORT] Starting export request');
     
     // Use server client with RLS (Inventory pattern)
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {

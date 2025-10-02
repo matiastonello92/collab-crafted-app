@@ -1,7 +1,7 @@
 // Klyra Shifts API - Time Correction Decision (Manager Approve/Reject)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { decideCorrectionSchema } from '@/lib/shifts/timeclock-validations'
 import { ZodError } from 'zod'
 
@@ -12,7 +12,7 @@ export async function POST(
   try {
     console.log('🔍 [API DEBUG] POST /api/v1/timeclock/corrections/[id]/decision called', { id: params.id })
     
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

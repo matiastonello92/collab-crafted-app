@@ -2,10 +2,10 @@
 
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 
 async function userHasLocation(userId: string, locationId: string) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerActionClient();
   // Tabella corretta: public.user_roles_locations
   // Check di esistenza senza scaricare righe
   const { count, error } = await supabase
@@ -19,7 +19,7 @@ async function userHasLocation(userId: string, locationId: string) {
 }
 
 export async function setActiveLocationAction(locationId?: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
 

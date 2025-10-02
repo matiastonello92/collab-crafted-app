@@ -1,7 +1,7 @@
 // Klyra Shifts API - Time Clock Punch (Kiosk/Mobile)
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { punchClockSchema } from '@/lib/shifts/validations'
 import { validatePunchSequence, checkDoublePunch } from '@/lib/shifts/time-clock-logic'
 import { verifyKioskToken } from '@/lib/kiosk/token'
@@ -9,7 +9,7 @@ import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerActionClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
