@@ -54,6 +54,7 @@ export const acceptAssignmentSchema = z.object({
 
 // Availability
 export const createAvailabilitySchema = z.object({
+  location_id: z.string().uuid('Invalid location_id'),
   weekday: z.number().int().min(0).max(6, 'weekday must be 0-6 (Sunday-Saturday)'),
   start_time: z.string().regex(/^\d{2}:\d{2}$/, 'start_time must be HH:mm'),
   end_time: z.string().regex(/^\d{2}:\d{2}$/, 'end_time must be HH:mm'),
@@ -65,6 +66,7 @@ export const createAvailabilitySchema = z.object({
 
 // Leave Requests
 export const createLeaveRequestSchema = z.object({
+  location_id: z.string().uuid('Invalid location_id'),
   type_id: z.string().uuid('Invalid type_id'),
   start_at: z.string().datetime({ offset: true, message: 'start_at must be ISO datetime' }),
   end_at: z.string().datetime({ offset: true, message: 'end_at must be ISO datetime' }),

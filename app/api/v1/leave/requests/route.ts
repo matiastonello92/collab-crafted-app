@@ -82,6 +82,7 @@ export async function POST(request: Request) {
       .from('leave_requests')
       .insert({
         org_id: profile.org_id,
+        location_id: validated.location_id,
         user_id: user.id,
         type_id: validated.type_id,
         start_at: validated.start_at,

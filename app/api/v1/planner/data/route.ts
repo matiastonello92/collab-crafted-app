@@ -59,6 +59,7 @@ export async function GET(request: Request) {
           leave_types(id, key, label, color),
           user:profiles!leave_requests_user_id_fkey(id, full_name)
         `)
+        .eq('location_id', locationId)
         .eq('status', 'approved')
         .gte('start_at', weekStart)
         .lt('end_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())

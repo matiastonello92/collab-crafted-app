@@ -14,12 +14,20 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch own availability (RLS enforces user_id check)
-    const { data, error } = await supabase
+    // Get location_id from query params (optional, defaults to user's default location)
+    const { searchParams } = new URL(request.url)
+    const locationId = searchParams.get('location_id')
+
+    let query = supabase
       .from('availability')
       .select('*')
       .eq('user_id', user.id)
-      .order('weekday', { ascending: true })
+
+    if (locationId) {
+      query = query.eq('location_id', locationId)
+    }
+
+    const { data, error } = await query.order('weekday', { ascending: true })
 
     if (error) {
       console.error('Error fetching availability:', error)
@@ -71,6 +79,7 @@ export async function POST(request: Request) {
       .from('availability')
       .insert({
         org_id: profile.org_id,
+        location_id: validated.location_id,
         user_id: user.id,
         weekday: validated.weekday,
         time_range: timeRange,

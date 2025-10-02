@@ -95,6 +95,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          location_id: string
           org_id: string
           preference: string
           time_range: unknown
@@ -105,6 +106,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          location_id: string
           org_id: string
           preference?: string
           time_range: unknown
@@ -115,6 +117,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          location_id?: string
           org_id?: string
           preference?: string
           time_range?: unknown
@@ -123,6 +126,20 @@ export type Database = {
           weekday?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "availability_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "availability_org_id_fkey"
             columns: ["org_id"]
@@ -919,6 +936,7 @@ export type Database = {
           created_at: string
           end_at: string
           id: string
+          location_id: string
           notes: string | null
           org_id: string
           reason: string | null
@@ -934,6 +952,7 @@ export type Database = {
           created_at?: string
           end_at: string
           id?: string
+          location_id: string
           notes?: string | null
           org_id: string
           reason?: string | null
@@ -949,6 +968,7 @@ export type Database = {
           created_at?: string
           end_at?: string
           id?: string
+          location_id?: string
           notes?: string | null
           org_id?: string
           reason?: string | null
@@ -964,6 +984,20 @@ export type Database = {
             columns: ["approver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
             referencedColumns: ["id"]
           },
           {
