@@ -14,11 +14,15 @@ import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
 import type { Location } from '@/types/shifts'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Calendar, Users, LayoutGrid } from 'lucide-react'
+import { Calendar, Users, LayoutGrid, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { cn } from '@/lib/utils'
 
 export function PlannerClient() {
   const supabase = useSupabase()
+  const { isMobile } = useBreakpoint()
   const [locations, setLocations] = useState<Location[]>([])
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
@@ -27,6 +31,7 @@ export function PlannerClient() {
   const [selectedShift, setSelectedShift] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<PlannerFilters>({
     jobTags: [],
     users: [],
@@ -163,56 +168,88 @@ export function PlannerClient() {
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden bg-background">
-        <PlannerSidebar 
-          rota={rota || undefined}
-          shifts={shifts}
-          locations={locations}
-          selectedLocation={selectedLocation}
-          onLocationChange={setSelectedLocation}
-          onRefresh={mutate}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onShiftClick={setSelectedShift}
-          jobTags={jobTags}
-          users={users}
-          filters={filters}
-          onFiltersChange={setFilters}
-          currentWeekStart={currentWeek}
-        />
+      <div className={cn("flex overflow-hidden bg-background", isMobile ? "flex-col min-h-screen" : "h-screen")}>
+        {isMobile ? (
+          <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="m-4 touch-manipulation">
+                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                Filtri & Azioni
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
+              <PlannerSidebar 
+                rota={rota || undefined}
+                shifts={shifts}
+                locations={locations}
+                selectedLocation={selectedLocation}
+                onLocationChange={setSelectedLocation}
+                onRefresh={mutate}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                onShiftClick={setSelectedShift}
+                jobTags={jobTags}
+                users={users}
+                filters={filters}
+                onFiltersChange={setFilters}
+                currentWeekStart={currentWeek}
+              />
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <PlannerSidebar 
+            rota={rota || undefined}
+            shifts={shifts}
+            locations={locations}
+            selectedLocation={selectedLocation}
+            onLocationChange={setSelectedLocation}
+            onRefresh={mutate}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onShiftClick={setSelectedShift}
+            jobTags={jobTags}
+            users={users}
+            filters={filters}
+            onFiltersChange={setFilters}
+            currentWeekStart={currentWeek}
+          />
+        )}
         
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="border-b p-2 flex items-center justify-between">
+          <div className="border-b p-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <WeekNavigator 
               currentWeek={currentWeek}
               onWeekChange={setCurrentWeek}
               rotaStatus={rota?.status}
             />
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto">
               <Button
                 variant={viewMode === 'day' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('day')}
+                className="min-h-[44px] touch-manipulation whitespace-nowrap"
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                Griglia
+                <Calendar className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Griglia</span>
               </Button>
               <Button
                 variant={viewMode === 'compact' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('compact')}
+                className="min-h-[44px] touch-manipulation whitespace-nowrap"
               >
-                <LayoutGrid className="h-4 w-4 mr-2" />
-                Compatta
+                <LayoutGrid className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Compatta</span>
               </Button>
               <Button
                 variant={viewMode === 'employee' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('employee')}
+                className="min-h-[44px] touch-manipulation whitespace-nowrap"
               >
-                <Users className="h-4 w-4 mr-2" />
-                Dipendente
+                <Users className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dipendente</span>
               </Button>
             </div>
           </div>

@@ -101,7 +101,8 @@ export const ShiftCard = memo(function ShiftCard({
       }}
       className={cn(
         'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
-        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] hover:border-primary/50 focus-enhanced',
+        'min-h-[88px] touch-manipulation',
+        !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 focus-enhanced',
         isDragging && 'opacity-50 rotate-2 scale-105',
         hasViolation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
         showConflicts && hasError && 'border-red-500 border-2',

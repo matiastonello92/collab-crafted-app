@@ -102,3 +102,25 @@ body {
 .animate-smooth { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
 .animate-bounce-subtle { animation: bounce 1s ease-in-out infinite; }
 
+/* Touch-Friendly Forms (iOS/Android 44px minimum) */
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]), 
+  select, 
+  textarea {
+    @apply min-h-[44px];
+  }
+  
+  button {
+    @apply min-h-[44px];
+  }
+  
+  label {
+    @apply text-base; /* Minimum 16px to prevent iOS zoom */
+  }
+}
+
+/* Mobile Safe Area */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+

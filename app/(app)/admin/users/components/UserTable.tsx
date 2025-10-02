@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Users, Eye } from 'lucide-react'
 import type { UserWithDetails } from '@/lib/data/admin'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 interface UserTableProps {
   users: UserWithDetails[]
@@ -18,6 +19,7 @@ interface UserTableProps {
 }
 
 export default function UserTable({ users, total, currentPage, hasMore }: UserTableProps) {
+  const { isMobile } = useBreakpoint()
   const [search, setSearch] = useState('')
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -63,61 +65,106 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
           <Button type="submit">Cerca</Button>
         </form>
 
-        {/* Table */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Stato</TableHead>
-              <TableHead>Registrato</TableHead>
-              <TableHead>Azioni</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        {/* Mobile: Card Layout */}
+        {isMobile ? (
+          <div className="space-y-3">
             {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  Nessun utente trovato
-                </TableCell>
-              </TableRow>
+              <p className="text-center py-8 text-muted-foreground">
+                Nessun utente trovato
+              </p>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-mono text-sm">
-                    {user.id.slice(0, 8)}...
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {user.email || 'Email non disponibile'}
-                  </TableCell>
-                  <TableCell>
-                    {getFullName(user)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                      {user.is_active ? 'Attivo' : 'Inattivo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {user.created_at 
-                      ? new Date(user.created_at).toLocaleDateString('it-IT')
-                      : 'N/D'
-                    }
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/admin/users/${user.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Dettagli
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <Card key={user.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">
+                          {user.email || 'Email non disponibile'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {getFullName(user)}
+                        </p>
+                      </div>
+                      <Badge variant={user.is_active ? 'default' : 'secondary'} className="shrink-0">
+                        {user.is_active ? 'Attivo' : 'Inattivo'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        {user.created_at 
+                          ? new Date(user.created_at).toLocaleDateString('it-IT')
+                          : 'N/D'
+                        }
+                      </p>
+                      <Button asChild variant="outline" size="sm" className="shrink-0">
+                        <Link href={`/admin/users/${user.id}`}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Dettagli
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))
             )}
-          </TableBody>
-        </Table>
+          </div>
+        ) : (
+          /* Desktop: Table */
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Stato</TableHead>
+                <TableHead>Registrato</TableHead>
+                <TableHead>Azioni</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    Nessun utente trovato
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-mono text-sm">
+                      {user.id.slice(0, 8)}...
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {user.email || 'Email non disponibile'}
+                    </TableCell>
+                    <TableCell>
+                      {getFullName(user)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
+                        {user.is_active ? 'Attivo' : 'Inattivo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {user.created_at 
+                        ? new Date(user.created_at).toLocaleDateString('it-IT')
+                        : 'N/D'
+                      }
+                    </TableCell>
+                    <TableCell>
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/admin/users/${user.id}`}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Dettagli
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        )}
 
         {/* Pagination */}
         {total > 0 && (

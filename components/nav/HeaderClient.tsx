@@ -82,28 +82,30 @@ export default function HeaderClient({
 
   // --- RENDER ---
   return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-4">
-      <div className="flex min-w-[200px] flex-1 items-center gap-3">
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Row 1: Logo + Status */}
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3 py-1.5 shadow-sm">
-          <Image src="/brand/klyra-icon.svg" alt="Klyra" width={28} height={28} className="size-7" priority />
-          <span className="text-lg font-semibold tracking-tight text-foreground">Klyra</span>
+          <Image src="/brand/klyra-icon.svg" alt="Klyra" width={28} height={28} className="size-6 sm:size-7" priority />
+          <span className="text-base font-semibold tracking-tight text-foreground sm:text-lg">Klyra</span>
         </div>
         {errorMessage ? (
-          <span className="inline-flex items-center rounded-full border border-klyra-warning/40 bg-klyra-warning/10 px-3 py-1 text-xs font-medium text-klyra-warning">
+          <span className="inline-flex items-center rounded-full border border-klyra-warning/40 bg-klyra-warning/10 px-2 py-1 text-xs font-medium text-klyra-warning sm:px-3">
             {errorMessage}
           </span>
         ) : !locations?.length ? (
-          <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-            Nessuna sede assegnata
+          <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-2 py-1 text-xs font-medium text-muted-foreground sm:px-3">
+            Nessuna sede
           </span>
         ) : null}
       </div>
 
+      {/* Row 2: Location + Theme + User */}
       <div className="flex flex-shrink-0 items-center gap-2">
         {locations?.length ? (
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <select
-              className="h-10 min-w-[180px] rounded-xl border border-border/60 bg-background px-4 text-sm font-medium text-foreground shadow-sm transition focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="focus-enhanced h-11 w-full min-w-[160px] rounded-xl border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition sm:h-10 sm:min-w-[180px] sm:px-4"
               value={activeLocationId ?? ''}
               onChange={event => onSelect(event.target.value)}
               aria-label="Seleziona sede attiva"

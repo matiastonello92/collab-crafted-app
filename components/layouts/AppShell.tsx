@@ -3,6 +3,7 @@ import Header from '@/components/nav/Header';
 import SidebarClient from '@/components/nav/SidebarClient';
 import { ClientOnly } from '@/lib/hydration/ClientOnly';
 import { SmartLoadingSkeleton } from '@/components/performance/SmartLoading';
+import { BottomNav } from '@/components/nav/BottomNav';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -20,11 +21,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </Suspense>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-muted/10">
+        <main className="flex-1 overflow-y-auto bg-muted/10 pb-20 lg:pb-0">
           <div className="mx-auto w-full max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>
+        <BottomNav />
       </div>
     </div>
   );
