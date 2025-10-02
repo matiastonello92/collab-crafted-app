@@ -14,6 +14,23 @@
   --accent: var(--klyra-accent);
   --border: 220 13% 91%;
   --ring: var(--klyra-primary);
+  
+  /* Card & Popover */
+  --card: 0 0% 100%;
+  --card-foreground: 224 25% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 25% 15%;
+  
+  /* Secondary */
+  --secondary: 220 13% 97%;
+  --secondary-foreground: 224 25% 15%;
+  
+  /* Destructive */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Input */
+  --input: 220 13% 91%;
 }
 
 .dark {
@@ -22,6 +39,23 @@
   --muted: 232 20% 15%;
   --muted-foreground: 214 20% 69%;
   --border: 225 25% 18%;
+  
+  /* Card & Popover */
+  --card: 232 20% 15%;
+  --card-foreground: 224 25% 92%;
+  --popover: 232 20% 15%;
+  --popover-foreground: 224 25% 92%;
+  
+  /* Secondary */
+  --secondary: 232 20% 20%;
+  --secondary-foreground: 224 25% 92%;
+  
+  /* Destructive */
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Input */
+  --input: 225 25% 18%;
 }
 
 body {
