@@ -1736,6 +1736,7 @@ export type Database = {
       rotas: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           labor_budget_eur: number | null
           location_id: string
@@ -1746,6 +1747,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           labor_budget_eur?: number | null
           location_id: string
@@ -1756,6 +1758,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           labor_budget_eur?: number | null
           location_id?: string
