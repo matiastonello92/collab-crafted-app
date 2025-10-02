@@ -5,7 +5,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { format, parseISO, differenceInHours } from 'date-fns'
-import { Clock, AlertTriangle, User } from 'lucide-react'
+import { Clock, AlertTriangle, User, MoreHorizontal } from 'lucide-react'
 import type { ShiftWithAssignments } from '@/types/shifts'
 import type { ViolationWithUser } from '@/types/compliance'
 import { cn } from '@/lib/utils'
@@ -83,6 +83,21 @@ export const ShiftCard = memo(function ShiftCard({
   const hasWarning = conflicts && conflicts.some(c => c.severity === 'warning')
   const isUnassigned = !assignment
   
+  // Get job tag color class (ComboHR style)
+  const getJobTagColorClass = (jobTagName?: string) => {
+    if (!jobTagName) return 'bg-card border-l-muted'
+    
+    const colorMap: Record<string, string> = {
+      'pizzaiolo': 'bg-[var(--color-job-pizzaiolo)] border-l-[var(--color-job-pizzaiolo-border)]',
+      'plongeur': 'bg-[var(--color-job-plongeur)] border-l-[var(--color-job-plongeur-border)]',
+      'commis': 'bg-[var(--color-job-commis)] border-l-[var(--color-job-commis-border)]',
+      'serveur': 'bg-[var(--color-job-serveur)] border-l-[var(--color-job-serveur-border)]',
+      'barista': 'bg-[var(--color-job-barista)] border-l-[var(--color-job-barista-border)]',
+    }
+    
+    return colorMap[jobTagName.toLowerCase()] || 'bg-accent/20 border-l-accent'
+  }
+  
   return (
     <div
       ref={setNodeRef}
@@ -100,11 +115,12 @@ export const ShiftCard = memo(function ShiftCard({
         }
       }}
       className={cn(
-        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
-        'min-h-[88px] touch-manipulation',
+        'group border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
+        'min-h-[88px] touch-manipulation border-l-4',
+        getJobTagColorClass(shift.job_tag?.name),
         !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 focus-enhanced',
         isDragging && 'opacity-50 rotate-2 scale-105',
-        hasViolation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
+        hasViolation && 'border-yellow-500',
         showConflicts && hasError && 'border-red-500 border-2',
         showConflicts && hasWarning && !hasError && 'border-yellow-500',
         isUnassigned && 'border-dashed border-muted-foreground/30',
@@ -113,9 +129,19 @@ export const ShiftCard = memo(function ShiftCard({
         isLocked && 'cursor-not-allowed opacity-60'
       )}
     >
+      {/* Break time badge - ComboHR style: prominent and dark */}
+      {shift.break_minutes > 0 && (
+        <Badge 
+          className="absolute top-2 right-2 bg-muted-foreground/90 text-white font-bold border-none px-2 py-0.5"
+          aria-label={`Pausa ${shift.break_minutes} minuti`}
+        >
+          -{shift.break_minutes}mn
+        </Badge>
+      )}
+      
       {/* Conflict indicator badge */}
       {showConflicts && (hasError || hasWarning) && (
-        <div className="absolute -top-2 -right-2 z-10">
+        <div className="absolute -top-2 -left-2 z-10">
           <Badge 
             variant={hasError ? "destructive" : "outline"}
             className="h-6 w-6 p-0 flex items-center justify-center rounded-full"
@@ -125,26 +151,31 @@ export const ShiftCard = memo(function ShiftCard({
           </Badge>
         </div>
       )}
+      
       {/* Header: orario + durata */}
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5 text-xs font-medium">
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
           <Clock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
           <span>{startTime} - {endTime}</span>
-          <span className="text-muted-foreground">({duration}h)</span>
+          <span className="text-muted-foreground font-normal">({duration}h)</span>
         </div>
         <div className="flex items-center gap-2">
           {violation && <ViolationBadge violation={violation} compact />}
-          {shift.job_tag && (
-            <Badge variant="outline" className="text-xs">
-              {shift.job_tag.label}
-            </Badge>
-          )}
         </div>
       </div>
       
+      {/* Job tag badge - smaller below time */}
+      {shift.job_tag && (
+        <div className="mb-2">
+          <Badge variant="outline" className="text-xs font-medium">
+            {shift.job_tag.label}
+          </Badge>
+        </div>
+      )}
+      
       {/* Assegnazione utente */}
       {assignment ? (
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
             <AvatarImage src={assignment.user?.avatar_url || undefined} />
             <AvatarFallback className="text-xs">
@@ -162,16 +193,9 @@ export const ShiftCard = memo(function ShiftCard({
           </Badge>
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="flex items-center gap-2 text-muted-foreground">
           <User className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm">Non assegnato</span>
-        </div>
-      )}
-
-      {/* Break minutes if present */}
-      {shift.break_minutes > 0 && (
-        <div className="text-xs text-muted-foreground mt-1">
-          Pausa: {shift.break_minutes} min
         </div>
       )}
 
@@ -181,6 +205,18 @@ export const ShiftCard = memo(function ShiftCard({
           📝 {shift.notes}
         </div>
       )}
+      
+      {/* Action icon - ComboHR style, visible on hover */}
+      <button
+        className="absolute bottom-2 right-2 h-6 w-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
+        onClick={(e) => {
+          e.stopPropagation()
+          onClick?.(shift)
+        }}
+        aria-label="Azioni turno"
+      >
+        <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+      </button>
       
       {/* Conflict messages */}
       {showConflicts && conflicts && conflicts.length > 0 && (

@@ -5,6 +5,18 @@
   --color-klyra-primary: oklch(85% 0.15 270);
   --color-klyra-accent: oklch(87% 0.18 190);
   
+  /* Job Tag Colors - ComboHR style (distinctive and vibrant) */
+  --color-job-pizzaiolo: oklch(92% 0.08 60);           /* warm amber */
+  --color-job-pizzaiolo-border: oklch(65% 0.15 50);    /* amber border */
+  --color-job-plongeur: oklch(92% 0.07 220);           /* cool blue */
+  --color-job-plongeur-border: oklch(60% 0.15 220);    /* blue border */
+  --color-job-commis: oklch(90% 0.10 35);              /* orange */
+  --color-job-commis-border: oklch(60% 0.18 30);       /* orange border */
+  --color-job-serveur: oklch(92% 0.08 145);            /* fresh green */
+  --color-job-serveur-border: oklch(55% 0.15 145);     /* green border */
+  --color-job-barista: oklch(90% 0.09 300);            /* purple/magenta */
+  --color-job-barista-border: oklch(55% 0.16 300);     /* purple border */
+  
   /* Semantic Design Tokens */
   --color-background: oklch(100% 0 0);
   --color-foreground: oklch(25% 0.02 240);
