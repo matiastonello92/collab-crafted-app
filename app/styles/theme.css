@@ -2,9 +2,9 @@
 
 :root {
   /* Klyra Brand Colors */
-  --klyra-primary: 235 90 85%;        /* #6C5CE7 */
-  --klyra-primary-600: 247 71 75%;    /* #5947D6 */
-  --klyra-accent: 187 94 87%;          /* #22D3EE */
+  --klyra-primary: 235 90% 85%;        /* #6C5CE7 */
+  --klyra-primary-600: 247 71% 75%;    /* #5947D6 */
+  --klyra-accent: 187 94% 87%;          /* #22D3EE */
 
   /* Backgrounds */
   --klyra-bg: 0 0% 100%;              /* #FFFFFF */

@@ -2,8 +2,8 @@
 
 :root {
   /* Klyra Brand Colors */
-  --klyra-primary: 235 90 85%;
-  --klyra-accent: 187 94 87%;
+  --klyra-primary: 235 90% 85%;
+  --klyra-accent: 187 94% 87%;
   
   /* Semantic Design Tokens */
   --background: 0 0% 100%;
