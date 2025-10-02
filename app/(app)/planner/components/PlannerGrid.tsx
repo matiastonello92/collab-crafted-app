@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, memo, useCallback, useRef } from 'react'
+import { useState, useMemo, memo, useCallback, useRef, useEffect } from 'react'
 import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, DragStartEvent } from '@dnd-kit/core'
 import { ShiftCard } from './ShiftCard'
 import { DayColumn } from './DayColumn'
@@ -51,14 +51,29 @@ export const PlannerGrid = memo(function PlannerGrid({
   const [optimisticShifts, setOptimisticShifts] = useState<ShiftWithAssignments[]>(shifts)
   const dragEndTimeoutRef = useRef<NodeJS.Timeout>()
   
+  // Fix 2: Sync optimisticShifts with shifts
+  useEffect(() => {
+    setOptimisticShifts(shifts)
+  }, [shifts])
+  
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 }
     })
   )
   
+  // Fix 5: Guard clause to validate shift exists
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
+    const shiftId = event.active.id as string
+    const shiftExists = shifts.some(s => s.id === shiftId)
+    
+    if (!shiftExists) {
+      console.error('Shift not found:', shiftId)
+      toast.error('Impossibile spostare questo turno')
+      return
+    }
+    
+    setActiveId(shiftId)
   }
   
   // Debounced drag end handler for smoother performance
@@ -135,9 +150,14 @@ export const PlannerGrid = memo(function PlannerGrid({
     }, 300) // 300ms debounce
   }, [shifts, rota, onRefresh])
   
-  // Sync optimistic shifts with real shifts
+  // Fix 4: Improved useMemo with fallback
   const displayShifts = useMemo(() => {
-    return activeId ? optimisticShifts : shifts
+    // Use optimisticShifts only if it contains the active shift
+    if (activeId) {
+      const hasActiveShift = optimisticShifts.some(s => s.id === activeId)
+      return hasActiveShift ? optimisticShifts : shifts
+    }
+    return shifts
   }, [activeId, optimisticShifts, shifts])
   
   // Raggruppa shift per giorno e job_tag
@@ -205,13 +225,17 @@ export const PlannerGrid = memo(function PlannerGrid({
         </div>
       </div>
       
+      {/* Fix 1: Null-safe DragOverlay */}
       <DragOverlay>
-        {activeId && (
-          <ShiftCard 
-            shift={displayShifts.find(s => s.id === activeId)!}
-            isDragging
-          />
-        )}
+        {activeId && (() => {
+          const draggedShift = displayShifts.find(s => s.id === activeId)
+          return draggedShift ? (
+            <ShiftCard 
+              shift={draggedShift}
+              isDragging
+            />
+          ) : null
+        })()}
       </DragOverlay>
     </DndContext>
   )

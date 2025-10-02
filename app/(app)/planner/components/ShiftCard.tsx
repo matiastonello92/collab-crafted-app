@@ -19,11 +19,18 @@ interface Props {
 }
 
 export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, onClick }: Props) {
+  // Fix 6: Defensive programming - return early if shift is invalid
+  if (!shift || !shift.id) {
+    console.error('Invalid shift:', shift)
+    return null
+  }
+  
   const [violation, setViolation] = useState<ViolationWithUser | null>(null)
   
+  // Fix 3: Safe access - disable drag if shift has no valid ID
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: shift.id,
-    disabled: isLocked || shift.rota?.status === 'locked'
+    disabled: isLocked || shift.rota?.status === 'locked' || !shift.id
   })
   
   useEffect(() => {
