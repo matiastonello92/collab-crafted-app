@@ -30,6 +30,8 @@ interface Props {
   locationId: string
   onRefresh: () => void
   loading: boolean
+  conflicts?: Map<string, any[]>
+  showConflicts?: boolean
 }
 
 interface PropsWithCallbacks extends Props {
@@ -44,7 +46,9 @@ export const PlannerGrid = memo(function PlannerGrid({
   locationId,
   onRefresh,
   loading,
-  onShiftClick
+  onShiftClick,
+  conflicts = new Map(),
+  showConflicts = false
 }: PropsWithCallbacks) {
   const { days } = getWeekBounds(weekStart)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -220,6 +224,8 @@ export const PlannerGrid = memo(function PlannerGrid({
               rota={rota}
               allJobTags={allJobTags}
               onShiftClick={onShiftClick}
+              conflicts={conflicts}
+              showConflicts={showConflicts}
             />
           ))}
         </div>

@@ -28,9 +28,20 @@ interface Props {
   rota?: Rota
   allJobTags: string[] // All possible job tags to show consistent rows
   onShiftClick?: (shift: ShiftWithAssignments) => void
+  conflicts?: Map<string, any[]>
+  showConflicts?: boolean
 }
 
-export function DayColumn({ date, shifts, leaves, rota, allJobTags, onShiftClick }: Props) {
+export function DayColumn({ 
+  date, 
+  shifts, 
+  leaves, 
+  rota, 
+  allJobTags, 
+  onShiftClick,
+  conflicts = new Map(),
+  showConflicts = false
+}: Props) {
   const dayName = formatDayHeader(date)
   const isToday = checkIsToday(date)
   
@@ -84,6 +95,8 @@ export function DayColumn({ date, shifts, leaves, rota, allJobTags, onShiftClick
             shifts={shifts[tagId] || []}
             isLocked={rota?.status === 'locked'}
             onShiftClick={onShiftClick}
+            conflicts={conflicts}
+            showConflicts={showConflicts}
           />
         ))}
       </div>
@@ -97,9 +110,19 @@ interface DroppableRowProps {
   shifts: ShiftWithAssignments[]
   isLocked: boolean
   onShiftClick?: (shift: ShiftWithAssignments) => void
+  conflicts?: Map<string, any[]>
+  showConflicts?: boolean
 }
 
-function DroppableRow({ date, tagId, shifts, isLocked, onShiftClick }: DroppableRowProps) {
+function DroppableRow({ 
+  date, 
+  tagId, 
+  shifts, 
+  isLocked, 
+  onShiftClick,
+  conflicts = new Map(),
+  showConflicts = false
+}: DroppableRowProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${date}-tag-${tagId}`,
     disabled: isLocked
@@ -125,6 +148,8 @@ function DroppableRow({ date, tagId, shifts, isLocked, onShiftClick }: Droppable
           shift={shift}
           isLocked={isLocked}
           onClick={onShiftClick}
+          conflicts={conflicts.get(shift.id)}
+          showConflicts={showConflicts}
         />
       ))}
     </div>

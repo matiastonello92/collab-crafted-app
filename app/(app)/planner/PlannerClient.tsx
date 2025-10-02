@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePermissions } from '@/hooks/usePermissions'
 import { WeekNavigator } from './components/WeekNavigator'
 import { PlannerGrid } from './components/PlannerGrid'
-import { PlannerSidebar } from './components/PlannerSidebar'
+import { PlannerSidebar, type PlannerFilters } from './components/PlannerSidebar'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { EmployeeGridView } from './components/EmployeeGridView'
 import { useRotaData } from './hooks/useRotaData'
+import { useConflictDetector } from './hooks/useConflictDetector'
 import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
 import type { Location } from '@/types/shifts'
@@ -23,9 +24,48 @@ export function PlannerClient() {
   const [selectedShift, setSelectedShift] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
+  const [filters, setFilters] = useState<PlannerFilters>({
+    jobTags: [],
+    users: [],
+    assignmentStatus: 'all',
+    showLeave: true,
+    showConflicts: true
+  })
   
   const { permissions, isLoading: permLoading } = usePermissions(selectedLocation || undefined)
   const { rota, shifts, leaves, loading, error, mutate } = useRotaData(selectedLocation, currentWeek)
+  
+  // Conflict detection
+  const { conflicts, hasConflict, getConflicts } = useConflictDetector(shifts, leaves)
+  
+  // Filter shifts based on active filters
+  const filteredShifts = useMemo(() => {
+    let result = shifts
+    
+    // Filter by job tags
+    if (filters.jobTags.length > 0) {
+      result = result.filter(s => filters.jobTags.includes(s.job_tag_id || ''))
+    }
+    
+    // Filter by assignment status
+    if (filters.assignmentStatus !== 'all') {
+      result = result.filter(s => {
+        const hasAssignment = s.assignments && s.assignments.length > 0
+        if (filters.assignmentStatus === 'assigned') {
+          return hasAssignment && s.assignments?.[0]?.status === 'assigned'
+        }
+        if (filters.assignmentStatus === 'unassigned') {
+          return !hasAssignment
+        }
+        if (filters.assignmentStatus === 'pending') {
+          return hasAssignment && s.assignments?.[0]?.status === 'proposed'
+        }
+        return true
+      })
+    }
+    
+    return result
+  }, [shifts, filters])
 
   // Load accessible locations, users, and job tags
   useEffect(() => {
@@ -119,6 +159,10 @@ export function PlannerClient() {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           onShiftClick={setSelectedShift}
+          jobTags={jobTags}
+          users={users}
+          filters={filters}
+          onFiltersChange={setFilters}
         />
         
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -132,17 +176,19 @@ export function PlannerClient() {
             viewMode === 'day' ? (
               <PlannerGrid 
                 rota={rota}
-                shifts={shifts}
-                leaves={leaves}
+                shifts={filteredShifts}
+                leaves={filters.showLeave ? leaves : []}
                 weekStart={currentWeek}
                 locationId={selectedLocation}
                 onRefresh={mutate}
                 loading={loading}
                 onShiftClick={setSelectedShift}
+                conflicts={conflicts}
+                showConflicts={filters.showConflicts}
               />
             ) : (
               <EmployeeGridView
-                shifts={shifts}
+                shifts={filteredShifts}
                 users={users}
                 weekStart={currentWeek}
                 onShiftClick={setSelectedShift}

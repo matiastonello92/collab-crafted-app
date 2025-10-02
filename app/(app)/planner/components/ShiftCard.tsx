@@ -11,14 +11,30 @@ import type { ViolationWithUser } from '@/types/compliance'
 import { cn } from '@/lib/utils'
 import { ViolationBadge } from '@/components/compliance/ViolationBadge'
 
+interface ShiftConflict {
+  shiftId: string
+  type: 'shift_overlap' | 'leave_overlap' | 'availability_mismatch'
+  severity: 'error' | 'warning'
+  message: string
+}
+
 interface Props {
   shift: ShiftWithAssignments
   isDragging?: boolean
   isLocked?: boolean
   onClick?: (shift: ShiftWithAssignments) => void
+  conflicts?: ShiftConflict[]
+  showConflicts?: boolean
 }
 
-export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, onClick }: Props) {
+export const ShiftCard = memo(function ShiftCard({ 
+  shift, 
+  isDragging, 
+  isLocked, 
+  onClick,
+  conflicts = [],
+  showConflicts = false
+}: Props) {
   // Fix 6: Defensive programming - return early if shift is invalid
   if (!shift || !shift.id) {
     console.error('Invalid shift:', shift)
@@ -63,6 +79,9 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, 
   
   const assignmentStatus = assignment?.status
   const hasViolation = !!violation
+  const hasError = conflicts && conflicts.some(c => c.severity === 'error')
+  const hasWarning = conflicts && conflicts.some(c => c.severity === 'warning')
+  const isUnassigned = !assignment
   
   return (
     <div
@@ -72,15 +91,29 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, 
       {...attributes}
       onClick={() => onClick?.(shift)}
       className={cn(
-        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200',
+        'bg-card border rounded-lg p-3 shadow-sm transition-all duration-200 relative',
         !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] hover:border-primary/50',
         isDragging && 'opacity-50 rotate-2 scale-105',
         hasViolation && 'border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10',
+        showConflicts && hasError && 'border-red-500 border-2',
+        showConflicts && hasWarning && !hasError && 'border-yellow-500',
+        isUnassigned && 'border-dashed border-muted-foreground/30',
         assignmentStatus === 'accepted' && 'border-green-500/30',
         assignmentStatus === 'declined' && 'border-red-500/30',
         isLocked && 'cursor-not-allowed opacity-60'
       )}
     >
+      {/* Conflict indicator badge */}
+      {showConflicts && (hasError || hasWarning) && (
+        <div className="absolute -top-2 -right-2 z-10">
+          <Badge 
+            variant={hasError ? "destructive" : "outline"}
+            className="h-6 w-6 p-0 flex items-center justify-center rounded-full"
+          >
+            <AlertTriangle className="h-3 w-3" />
+          </Badge>
+        </div>
+      )}
       {/* Header: orario + durata */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5 text-xs font-medium">
@@ -135,6 +168,25 @@ export const ShiftCard = memo(function ShiftCard({ shift, isDragging, isLocked, 
       {shift.notes && (
         <div className="text-xs text-muted-foreground mt-2 truncate">
           📝 {shift.notes}
+        </div>
+      )}
+      
+      {/* Conflict messages */}
+      {showConflicts && conflicts && conflicts.length > 0 && (
+        <div className="mt-2 pt-2 border-t space-y-1">
+          {conflicts.map((conflict, idx) => (
+            <div key={idx} className="flex items-start gap-2 text-xs">
+              <AlertTriangle className={cn(
+                "h-3 w-3 mt-0.5 shrink-0",
+                conflict.severity === 'error' ? 'text-red-500' : 'text-yellow-500'
+              )} />
+              <span className={cn(
+                conflict.severity === 'error' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'
+              )}>
+                {conflict.message}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Copy, Lock, Send, RefreshCw, LayoutGrid, List } from 'lucide-react'
+import { Copy, Lock, Send, RefreshCw, LayoutGrid, List, Filter, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Rota, Location, ShiftWithAssignments, UserProfile, JobTag } from '@/types/shifts'
 import { toast } from 'sonner'
 import { PlannerStats } from './PlannerStats'
 import { UnassignedShiftsPool } from './UnassignedShiftsPool'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +23,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+export interface PlannerFilters {
+  jobTags: string[]
+  users: string[]
+  assignmentStatus: 'all' | 'assigned' | 'unassigned' | 'pending'
+  showLeave: boolean
+  showConflicts: boolean
+}
+
 interface Props {
   rota?: Rota
   shifts: ShiftWithAssignments[]
@@ -31,6 +41,10 @@ interface Props {
   viewMode: 'day' | 'employee'
   onViewModeChange: (mode: 'day' | 'employee') => void
   onShiftClick: (shift: ShiftWithAssignments) => void
+  jobTags?: JobTag[]
+  users?: UserProfile[]
+  filters: PlannerFilters
+  onFiltersChange: (filters: PlannerFilters) => void
 }
 
 export function PlannerSidebar({ 
@@ -42,7 +56,11 @@ export function PlannerSidebar({
   onRefresh,
   viewMode,
   onViewModeChange,
-  onShiftClick
+  onShiftClick,
+  jobTags = [],
+  users = [],
+  filters,
+  onFiltersChange
 }: Props) {
   const [publishing, setPublishing] = useState(false)
   const [locking, setLocking] = useState(false)
@@ -161,11 +179,15 @@ export function PlannerSidebar({
             </div>
           </div>
           
-          {/* Tabs: Actions / Stats / Unassigned */}
+          {/* Tabs: Actions / Stats / Filters / Unassigned */}
           <Tabs defaultValue="actions" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="actions">Azioni</TabsTrigger>
-              <TabsTrigger value="stats">Statistiche</TabsTrigger>
+              <TabsTrigger value="filters">
+                <Filter className="h-3 w-3 mr-1" />
+                Filtri
+              </TabsTrigger>
+              <TabsTrigger value="stats">Stats</TabsTrigger>
               <TabsTrigger value="pool">Pool</TabsTrigger>
             </TabsList>
             
@@ -222,6 +244,101 @@ export function PlannerSidebar({
                     )}
                   </div>
                 </div>
+              )}
+            </TabsContent>
+            
+            {/* Filters Tab */}
+            <TabsContent value="filters" className="space-y-4 mt-4">
+              {/* Assignment Status */}
+              <div className="space-y-2">
+                <Label>Stato Assegnazione</Label>
+                <Select 
+                  value={filters.assignmentStatus} 
+                  onValueChange={(value: any) => onFiltersChange({ ...filters, assignmentStatus: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tutti</SelectItem>
+                    <SelectItem value="assigned">Assegnati</SelectItem>
+                    <SelectItem value="unassigned">Non assegnati</SelectItem>
+                    <SelectItem value="pending">In attesa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Job Tags Filter */}
+              {jobTags.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Job Tags</Label>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {jobTags.map(tag => (
+                      <div key={tag.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={filters.jobTags.includes(tag.id)}
+                          onCheckedChange={(checked) => {
+                            const newTags = checked
+                              ? [...filters.jobTags, tag.id]
+                              : filters.jobTags.filter(t => t !== tag.id)
+                            onFiltersChange({ ...filters, jobTags: newTags })
+                          }}
+                        />
+                        <Badge 
+                          variant="outline" 
+                          style={{ 
+                            borderColor: tag.color || '#888',
+                            color: tag.color || '#888'
+                          }}
+                        >
+                          {tag.label}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Visual Toggles */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Mostra Ferie</Label>
+                  <Checkbox
+                    checked={filters.showLeave}
+                    onCheckedChange={(checked) => 
+                      onFiltersChange({ ...filters, showLeave: !!checked })
+                    }
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Evidenzia Conflitti</Label>
+                  <Checkbox
+                    checked={filters.showConflicts}
+                    onCheckedChange={(checked) => 
+                      onFiltersChange({ ...filters, showConflicts: !!checked })
+                    }
+                  />
+                </div>
+              </div>
+              
+              {/* Clear Filters */}
+              {(filters.jobTags.length > 0 || filters.assignmentStatus !== 'all') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => onFiltersChange({
+                    jobTags: [],
+                    users: [],
+                    assignmentStatus: 'all',
+                    showLeave: true,
+                    showConflicts: true
+                  })}
+                >
+                  <X className="h-3 w-3 mr-2" />
+                  Reset Filtri
+                </Button>
               )}
             </TabsContent>
             
