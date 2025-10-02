@@ -1,18 +1,21 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useUnifiedRotaData } from './hooks/useUnifiedRotaData'
 import { usePermissions } from '@/hooks/usePermissions'
 import { WeekNavigator } from './components/WeekNavigator'
 import { PlannerGrid } from './components/PlannerGrid'
+import { CompactWeekView } from './components/CompactWeekView'
 import { PlannerSidebar, type PlannerFilters } from './components/PlannerSidebar'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { EmployeeGridView } from './components/EmployeeGridView'
-import { useRotaData } from './hooks/useRotaData'
 import { useConflictDetector } from './hooks/useConflictDetector'
 import { getWeekBounds, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useSupabase } from '@/hooks/useSupabase'
 import type { Location } from '@/types/shifts'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Calendar, Users, LayoutGrid } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export function PlannerClient() {
   const supabase = useSupabase()
@@ -20,7 +23,7 @@ export function PlannerClient() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
   const [locationsLoading, setLocationsLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<'day' | 'employee'>('day')
+  const [viewMode, setViewMode] = useState<'day' | 'employee' | 'compact'>('day')
   const [selectedShift, setSelectedShift] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
@@ -33,7 +36,19 @@ export function PlannerClient() {
   })
   
   const { permissions, isLoading: permLoading } = usePermissions(selectedLocation || undefined)
-  const { rota, shifts, leaves, loading, error, mutate } = useRotaData(selectedLocation, currentWeek)
+  const { rota, shifts, leaves: rawLeaves, isLoading, mutate } = useUnifiedRotaData(selectedLocation, currentWeek)
+  
+  // Map leaves to expected type with proper status typing
+  const leaves = useMemo(() => 
+    rawLeaves.map(l => ({
+      ...l,
+      status: l.status as 'pending' | 'approved' | 'rejected' | 'cancelled',
+      org_id: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })), 
+    [rawLeaves]
+  )
   
   // Conflict detection
   const { conflicts, hasConflict, getConflicts } = useConflictDetector(shifts, leaves)
@@ -150,7 +165,7 @@ export function PlannerClient() {
     <>
       <div className="flex h-screen overflow-hidden bg-background">
         <PlannerSidebar 
-          rota={rota}
+          rota={rota || undefined}
           shifts={shifts}
           locations={locations}
           selectedLocation={selectedLocation}
@@ -167,25 +182,60 @@ export function PlannerClient() {
         />
         
         <div className="flex-1 flex flex-col overflow-hidden">
-          <WeekNavigator 
-            currentWeek={currentWeek}
-            onWeekChange={setCurrentWeek}
-            rotaStatus={rota?.status}
-          />
+          <div className="border-b p-2 flex items-center justify-between">
+            <WeekNavigator 
+              currentWeek={currentWeek}
+              onWeekChange={setCurrentWeek}
+              rotaStatus={rota?.status}
+            />
+            
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'day' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('day')}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Griglia
+              </Button>
+              <Button
+                variant={viewMode === 'compact' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('compact')}
+              >
+                <LayoutGrid className="h-4 w-4 mr-2" />
+                Compatta
+              </Button>
+              <Button
+                variant={viewMode === 'employee' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('employee')}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Dipendente
+              </Button>
+            </div>
+          </div>
           
           {selectedLocation ? (
             viewMode === 'day' ? (
               <PlannerGrid 
-                rota={rota}
+                rota={rota || undefined}
                 shifts={filteredShifts}
                 leaves={filters.showLeave ? leaves : []}
                 weekStart={currentWeek}
                 locationId={selectedLocation}
                 onRefresh={mutate}
-                loading={loading}
+                loading={isLoading}
                 onShiftClick={setSelectedShift}
                 conflicts={conflicts}
                 showConflicts={filters.showConflicts}
+              />
+            ) : viewMode === 'compact' ? (
+              <CompactWeekView
+                shifts={filteredShifts}
+                weekDays={getWeekBounds(currentWeek).days}
+                onShiftClick={setSelectedShift}
               />
             ) : (
               <EmployeeGridView

@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Copy, Lock, Send, RefreshCw, LayoutGrid, List, Filter, X, FolderOpen } from 'lucide-react'
+import { Copy, Lock, Send, RefreshCw, LayoutGrid, List, Filter, X, FolderOpen, Sparkles } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Rota, Location, ShiftWithAssignments, UserProfile, JobTag } from '@/types/shifts'
 import { toast } from 'sonner'
 import { PlannerStats } from './PlannerStats'
 import { UnassignedShiftsPool } from './UnassignedShiftsPool'
 import { TemplateLibraryDialog } from './TemplateLibraryDialog'
+import { SmartAssignDialog } from './SmartAssignDialog'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,8 +41,8 @@ interface Props {
   selectedLocation: string | null
   onLocationChange: (id: string) => void
   onRefresh: () => void
-  viewMode: 'day' | 'employee'
-  onViewModeChange: (mode: 'day' | 'employee') => void
+  viewMode: 'day' | 'employee' | 'compact'
+  onViewModeChange: (mode: 'day' | 'employee' | 'compact') => void
   onShiftClick: (shift: ShiftWithAssignments) => void
   jobTags?: JobTag[]
   users?: UserProfile[]
@@ -70,6 +72,8 @@ export function PlannerSidebar({
   const [duplicating, setDuplicating] = useState(false)
   const [showPublishDialog, setShowPublishDialog] = useState(false)
   const [showLockDialog, setShowLockDialog] = useState(false)
+  const [showSmartAssign, setShowSmartAssign] = useState(false)
+  const [bulkAssignShiftId, setBulkAssignShiftId] = useState<string | null>(null)
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   
   const canPublish = rota?.status === 'draft'
@@ -246,6 +250,24 @@ export function PlannerSidebar({
               >
                 <FolderOpen className="mr-2 h-4 w-4" />
                 Template
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  const unassigned = shifts.find(s => !s.assignments?.length)
+                  if (unassigned) {
+                    setBulkAssignShiftId(unassigned.id)
+                    setShowSmartAssign(true)
+                  } else {
+                    toast.info('Nessun turno da assegnare')
+                  }
+                }}
+                disabled={!shifts.length}
+                className="w-full justify-start"
+                variant="outline"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Assegnazione AI
               </Button>
               
               <Button 
@@ -425,6 +447,21 @@ export function PlannerSidebar({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Smart Assign Dialog */}
+      <SmartAssignDialog
+        open={showSmartAssign}
+        onClose={() => {
+          setShowSmartAssign(false)
+          setBulkAssignShiftId(null)
+        }}
+        shiftId={bulkAssignShiftId}
+        onAssign={() => {
+          onRefresh()
+          setShowSmartAssign(false)
+          setBulkAssignShiftId(null)
+        }}
+      />
+      
       {/* Lock confirmation dialog */}
       <AlertDialog open={showLockDialog} onOpenChange={setShowLockDialog}>
         <AlertDialogContent>
