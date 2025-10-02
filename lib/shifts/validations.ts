@@ -17,8 +17,8 @@ export const updateRotaStatusSchema = z.object({
 export const createShiftSchema = z.object({
   rota_id: z.string().uuid('Invalid rota_id'),
   job_tag_id: z.string().uuid('Invalid job_tag_id').optional(),
-  start_at: z.string().datetime('start_at must be ISO datetime'),
-  end_at: z.string().datetime('end_at must be ISO datetime'),
+  start_at: z.string().datetime({ offset: true, message: 'start_at must be ISO datetime' }),
+  end_at: z.string().datetime({ offset: true, message: 'end_at must be ISO datetime' }),
   break_minutes: z.number().int().min(0).default(0),
   notes: z.string().optional(),
   quantity: z.number().int().min(1).max(20).optional().default(1),
@@ -28,8 +28,8 @@ export const createShiftSchema = z.object({
 })
 
 export const updateShiftSchema = z.object({
-  start_at: z.string().datetime('start_at must be ISO datetime').optional(),
-  end_at: z.string().datetime('end_at must be ISO datetime').optional(),
+  start_at: z.string().datetime({ offset: true, message: 'start_at must be ISO datetime' }).optional(),
+  end_at: z.string().datetime({ offset: true, message: 'end_at must be ISO datetime' }).optional(),
   break_minutes: z.number().int().min(0).optional(),
   job_tag_id: z.string().uuid('Invalid job_tag_id').optional().nullable(),
   notes: z.string().optional().nullable(),
@@ -66,8 +66,8 @@ export const createAvailabilitySchema = z.object({
 // Leave Requests
 export const createLeaveRequestSchema = z.object({
   type_id: z.string().uuid('Invalid type_id'),
-  start_at: z.string().datetime('start_at must be ISO datetime'),
-  end_at: z.string().datetime('end_at must be ISO datetime'),
+  start_at: z.string().datetime({ offset: true, message: 'start_at must be ISO datetime' }),
+  end_at: z.string().datetime({ offset: true, message: 'end_at must be ISO datetime' }),
   reason: z.string().optional(),
 })
 .refine(data => new Date(data.end_at) > new Date(data.start_at), {
@@ -83,6 +83,6 @@ export const decideLeaveRequestSchema = z.object({
 export const punchClockSchema = z.object({
   location_id: z.string().uuid('Invalid location_id'),
   kind: z.enum(['clock_in', 'clock_out', 'break_start', 'break_end']),
-  occurred_at: z.string().datetime('occurred_at must be ISO datetime').optional(),
+  occurred_at: z.string().datetime({ offset: true, message: 'occurred_at must be ISO datetime' }).optional(),
   source: z.enum(['kiosk', 'mobile']).default('kiosk'),
 })
