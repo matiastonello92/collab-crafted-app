@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useUnifiedRotaData } from './hooks/useUnifiedRotaData'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useLocationContext, useAppContext } from '@/lib/store'
 import { WeekNavigator } from './components/WeekNavigator'
 import { ShiftEditDialog } from './components/ShiftEditDialog'
 import { EmployeeGridView } from './components/EmployeeGridView'
@@ -25,10 +26,9 @@ import {
 
 export function PlannerClient() {
   const supabase = useSupabase()
-  const [locations, setLocations] = useState<Location[]>([])
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const { location_id: selectedLocation } = useLocationContext()
+  const context = useAppContext()
   const [currentWeek, setCurrentWeek] = useState(() => getCurrentWeekStart())
-  const [locationsLoading, setLocationsLoading] = useState(true)
   const [selectedShift, setSelectedShift] = useState<ShiftWithAssignments | null>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
@@ -57,36 +57,6 @@ export function PlannerClient() {
   // Conflict detection
   const { conflicts, hasConflict, getConflicts } = useConflictDetector(shifts, leaves)
 
-  // Load accessible locations on mount
-  useEffect(() => {
-    async function loadLocations() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { data: locsData } = await supabase
-          .from('locations')
-          .select('id, org_id, name, status')
-          .eq('status', 'active')
-          .order('name')
-
-        if (locsData && locsData.length > 0) {
-          setLocations(locsData)
-          if (!selectedLocation) {
-            setSelectedLocation(locsData[0].id)
-          }
-        }
-      } catch (err) {
-        console.error('Error loading locations:', err)
-        toast.error('Errore nel caricamento delle locations')
-      } finally {
-        setLocationsLoading(false)
-      }
-    }
-
-    loadLocations()
-  }, [supabase])
-
   // Load users and job tags when selectedLocation changes
   useEffect(() => {
     if (!selectedLocation) {
@@ -96,17 +66,7 @@ export function PlannerClient() {
 
     async function loadUsersAndTags() {
       try {
-        const location = locations.find(l => l.id === selectedLocation)
-        if (!location) {
-          console.log('🔍 [Planner] Location not found in state:', { selectedLocation, locations })
-          return
-        }
-
-        console.log('🔍 [Planner] Loading users for location:', { 
-          locationId: selectedLocation, 
-          locationName: location.name,
-          orgId: location.org_id 
-        })
+        console.log('🔍 [Planner] Loading users for location:', selectedLocation)
 
         // Fetch users with email from API endpoint
         const url = `/api/v1/admin/users?location_id=${selectedLocation}`
@@ -134,11 +94,11 @@ export function PlannerClient() {
         setUsers(usersData || [])
 
         // Load job tags for org
-        if (location.org_id) {
+        if (context.org_id) {
           const { data: tagsData } = await supabase
             .from('job_tags')
             .select('id, key, label_it, color')
-            .eq('org_id', location.org_id)
+            .eq('org_id', context.org_id)
             .eq('is_active', true)
 
           setJobTags((tagsData || []).map(t => ({ 
@@ -155,7 +115,7 @@ export function PlannerClient() {
     }
 
     loadUsersAndTags()
-  }, [selectedLocation, locations, supabase])
+  }, [selectedLocation, context.org_id, supabase])
   
   // Handle cell click to create new shift
   const handleCellClick = (userId: string, date: string) => {
@@ -166,7 +126,7 @@ export function PlannerClient() {
       id: 'new',
       rota_id: rota?.id || '',
       location_id: selectedLocation || '',
-      org_id: locations.find(l => l.id === selectedLocation)?.org_id || '',
+      org_id: context.org_id || '',
       start_at: `${date}T09:00:00`,
       end_at: `${date}T17:00:00`,
       break_minutes: 20,
@@ -251,7 +211,7 @@ export function PlannerClient() {
     }
   }
 
-  if (locationsLoading || permLoading) {
+  if (permLoading || !selectedLocation) {
     return (
       <div className="flex flex-col h-screen">
         <Skeleton className="h-16 w-full" />
