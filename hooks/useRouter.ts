@@ -1,5 +1,6 @@
 'use client';
 import { useRouter as useNextRouter } from 'next/navigation';
+import { useCallback } from 'react';
 
 /**
  * Enhanced router hook that replaces window.location.href with proper Next.js navigation
@@ -7,13 +8,13 @@ import { useRouter as useNextRouter } from 'next/navigation';
 export function useRouter() {
   const router = useNextRouter();
 
-  const navigateTo = (path: string) => {
+  const navigateTo = useCallback((path: string) => {
     router.push(path);
-  };
+  }, [router]);
 
-  const replaceTo = (path: string) => {
+  const replaceTo = useCallback((path: string) => {
     router.replace(path);
-  };
+  }, [router]);
 
   return {
     ...router,
