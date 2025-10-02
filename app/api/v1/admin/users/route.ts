@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         .select('user_id')
         .eq('location_id', locationId)
         .eq('org_id', orgId)
-        .eq('is_active', true)
+        .or('is_active.is.null,is_active.eq.true')
 
       console.log('🔍 [USERS] user_roles_locations result:', { 
         count: urlData?.length || 0, 

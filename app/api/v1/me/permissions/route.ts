@@ -36,7 +36,7 @@ export async function GET(req: Request) {
       .from('user_roles_locations')
       .select('role_id, location_id')
       .eq('user_id', user.id)
-      .eq('is_active', true);
+      .or('is_active.is.null,is_active.eq.true');
 
     // Se locationId è fornito, filtra per quella location specifica
     // Altrimenti recupera TUTTI i roles dell'utente (non solo location_id NULL)

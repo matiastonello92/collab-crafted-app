@@ -181,7 +181,7 @@ export async function DELETE(
       .eq('user_id', userId)
       .eq('role_id', body.role_id)
       .eq('location_id', body.location_id || null)
-      .eq('is_active', true)
+      .or('is_active.is.null,is_active.eq.true')
       .single()
 
     if (findError || !assignment) {

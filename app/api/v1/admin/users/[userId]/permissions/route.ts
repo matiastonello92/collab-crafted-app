@@ -56,7 +56,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       .from('user_roles_locations')
       .select('role_id, location_id')
       .eq('user_id', targetUserId)
-      .eq('is_active', true)
+      .or('is_active.is.null,is_active.eq.true')
 
     const roleIds = (assignments || []).map(a => a.role_id).filter(Boolean)
     const permSet = new Set<string>()
