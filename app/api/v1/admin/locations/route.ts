@@ -16,24 +16,11 @@ export async function GET() {
 
   console.log('🔍 [API DEBUG] Auth check:', { userId: user.id })
 
-  // Get user's org_id from profile or membership
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.org_id) {
-    return NextResponse.json({ error: 'User org not found' }, { status: 403 })
-  }
-
-  console.log('🔍 [API DEBUG] User org:', { orgId: profile.org_id })
-
-  // RLS will filter by org
+  // RLS-only with business filter for active locations
   const { data: locations, error } = await supabase
     .from('locations')
     .select('*')
-    .eq('org_id', profile.org_id)
+    .eq('status', 'active')
     .order('name')
 
   if (error) {
@@ -56,25 +43,50 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // Get user's org_id
-  const { data: profile } = await supabase
+  // Get org_id from profile with membership fallback
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('org_id')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  if (!profile?.org_id) {
-    return NextResponse.json({ error: 'User org not found' }, { status: 403 })
+  if (profileError) {
+    console.error('🔍 [API DEBUG] Profile query error:', profileError)
+    return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 
-  console.log('🔍 [API DEBUG] Creating location for org:', { orgId: profile.org_id })
+  let orgId = profile?.org_id
+
+  // Fallback to membership if profile has no org_id
+  if (!orgId) {
+    console.log('🔍 [API DEBUG] Profile has no org_id, checking membership')
+    const { data: membership, error: membershipError } = await supabase
+      .from('memberships')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (membershipError) {
+      console.error('🔍 [API DEBUG] Membership query error:', membershipError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
+
+    if (!membership?.org_id) {
+      console.log('🔍 [API DEBUG] No organization context for user:', user.id)
+      return NextResponse.json({ error: 'No organization context' }, { status: 400 })
+    }
+
+    orgId = membership.org_id
+  }
+
+  console.log('🔍 [API DEBUG] Creating location for org:', { orgId })
 
   const body = await request.json()
   
   // RLS will enforce org scoping
   const { data: location, error } = await supabase
     .from('locations')
-    .insert({ ...body, org_id: profile.org_id })
+    .insert({ ...body, org_id: orgId })
     .select()
     .single()
 

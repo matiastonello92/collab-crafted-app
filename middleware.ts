@@ -18,6 +18,9 @@ const RATE_LIMITS = {
   'POST:/api/v1/availability': { limit: 30, window: 60 },
   'POST:/api/v1/leave/requests': { limit: 10, window: 60 },
   'POST:/api/v1/timeclock/punch': { limit: 10, window: 60 },
+  // Job Tags - Rate Limits
+  'POST:/api/v1/admin/job-tags': { limit: 20, window: 60 },
+  'POST:/api/v1/admin/user-job-tags': { limit: 30, window: 60 },
 } as const;
 
 const FALLBACK_LIMIT = { limit: 120, window: 60 };

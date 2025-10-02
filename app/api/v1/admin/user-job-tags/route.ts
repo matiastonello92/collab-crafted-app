@@ -16,29 +16,7 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
 
-    // Derive org_id from user's membership
-    const { data: membership, error: membershipError } = await supabase
-      .from('memberships')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError) {
-      console.error('❌ [API DEBUG] Membership query error:', membershipError)
-      return NextResponse.json({
-        error: 'Database error',
-        details: membershipError.message
-      }, { status: 500 })
-    }
-
-    if (!membership?.org_id) {
-      console.log('❌ [API DEBUG] No membership found for user:', user.id)
-      return NextResponse.json({ error: 'No organization membership' }, { status: 400 })
-    }
-
-    const orgId = membership.org_id
-    console.log('✅ [API DEBUG] Derived org_id:', orgId)
-
+    // RLS-only: no explicit org_id derivation
     const { searchParams } = new URL(request.url)
     const locationId = searchParams.get('location_id')
     const userId = searchParams.get('user_id')
@@ -57,7 +35,6 @@ export async function GET(request: NextRequest) {
         assigned_at,
         job_tag:job_tags(id, label_it, key, categoria, color, is_active)
       `)
-      .eq('org_id', orgId)
       .order('is_primary', { ascending: false })
 
     if (locationId) query = query.eq('location_id', locationId)
@@ -131,9 +108,23 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('❌ [API DEBUG] Insert error:', error)
+      
+      // Handle unique constraint violations with better differentiation
       if (error.code === '23505') {
+        // Check if it's the duplicate assignment constraint
+        if (error.message?.includes('user_job_tags_user_id_job_tag_id_location_id_key')) {
+          return NextResponse.json({ error: 'Tag già assegnato' }, { status: 409 })
+        }
+        // Check if it's the primary tag unique constraint
+        if (error.message?.includes('ujt_primary_one_per_loc')) {
+          return NextResponse.json({ 
+            error: 'Esiste già un tag primario per questo utente in questa location' 
+          }, { status: 409 })
+        }
+        // Generic duplicate error
         return NextResponse.json({ error: 'Tag già assegnato' }, { status: 409 })
       }
+      
       if (error.code === '23503') {
         return NextResponse.json({ error: 'ID non valido (user, location o tag)' }, { status: 400 })
       }

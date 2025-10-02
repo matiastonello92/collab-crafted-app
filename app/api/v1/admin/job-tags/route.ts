@@ -16,29 +16,7 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
 
-    // Derive org_id from user's membership
-    const { data: membership, error: membershipError } = await supabase
-      .from('memberships')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (membershipError) {
-      console.error('❌ [API DEBUG] Membership query error:', membershipError)
-      return NextResponse.json({
-        error: 'Database error',
-        details: membershipError.message
-      }, { status: 500 })
-    }
-
-    if (!membership?.org_id) {
-      console.log('❌ [API DEBUG] No membership found for user:', user.id)
-      return NextResponse.json({ error: 'No organization membership' }, { status: 400 })
-    }
-
-    const orgId = membership.org_id
-    console.log('✅ [API DEBUG] Derived org_id:', orgId)
-
+    // RLS-only: no explicit org_id derivation
     const { searchParams } = new URL(request.url)
     const isActive = searchParams.get('is_active')
     const categoria = searchParams.get('categoria')
@@ -47,7 +25,6 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('job_tags')
       .select('*')
-      .eq('org_id', orgId)
       .order('categoria', { ascending: true })
       .order('label_it', { ascending: true })
 
@@ -88,27 +65,48 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
 
-    // Derive org_id from user's membership
-    const { data: membership, error: membershipError } = await supabase
-      .from('memberships')
+    // Get org_id from profile with membership fallback
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
       .select('org_id')
-      .eq('user_id', user.id)
-      .single()
+      .eq('id', user.id)
+      .maybeSingle()
 
-    if (membershipError) {
-      console.error('❌ [API DEBUG] Membership query error:', membershipError)
+    if (profileError) {
+      console.error('❌ [API DEBUG] Profile query error:', profileError)
       return NextResponse.json({
         error: 'Database error',
-        details: membershipError.message
+        details: profileError.message
       }, { status: 500 })
     }
 
-    if (!membership?.org_id) {
-      console.log('❌ [API DEBUG] No membership found for user:', user.id)
-      return NextResponse.json({ error: 'No organization membership' }, { status: 400 })
+    let orgId = profile?.org_id
+
+    // Fallback to membership if profile has no org_id
+    if (!orgId) {
+      console.log('🔍 [API DEBUG] Profile has no org_id, checking membership')
+      const { data: membership, error: membershipError } = await supabase
+        .from('memberships')
+        .select('org_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (membershipError) {
+        console.error('❌ [API DEBUG] Membership query error:', membershipError)
+        return NextResponse.json({
+          error: 'Database error',
+          details: membershipError.message
+        }, { status: 500 })
+      }
+
+      if (!membership?.org_id) {
+        console.log('❌ [API DEBUG] No organization context for user:', user.id)
+        return NextResponse.json({ error: 'Nessun contesto organizzazione' }, { status: 400 })
+      }
+
+      orgId = membership.org_id
     }
 
-    const orgId = membership.org_id
     console.log('✅ [API DEBUG] Derived org_id:', orgId)
 
     const body = await request.json()
