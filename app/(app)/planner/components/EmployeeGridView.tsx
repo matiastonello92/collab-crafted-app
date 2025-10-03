@@ -47,6 +47,14 @@ export function EmployeeGridView({
   // Collision detection - prioritize delete zone, fallback to closestCenter
   const collisionDetection = useCallback((args: any) => {
     const pointer = pointerWithin(args);
+    
+    // Cerca il delete-zone tra i collisions e dagli priorità assoluta
+    const deleteZoneCollision = pointer.find((c: any) => c.id === 'delete-zone');
+    if (deleteZoneCollision) {
+      return [deleteZoneCollision];
+    }
+    
+    // Comportamento normale per le celle
     if (pointer.length) return pointer;
     return closestCenter(args);
   }, []);
