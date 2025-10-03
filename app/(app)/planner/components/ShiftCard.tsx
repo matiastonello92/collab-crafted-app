@@ -86,8 +86,17 @@ export const ShiftCard = memo(function ShiftCard({
   // Get dynamic job tag styles from database color
   const getJobTagStyle = (color?: string | null) => {
     if (!color) return {}
+    
+    // Convert hex to rgba with opacity
+    const hexToRgba = (hex: string, alpha: number) => {
+      const r = parseInt(hex.slice(1, 3), 16)
+      const g = parseInt(hex.slice(3, 5), 16)
+      const b = parseInt(hex.slice(5, 7), 16)
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    }
+    
     return {
-      backgroundColor: `${color}15`, // ~8% opacity for subtle background
+      backgroundColor: hexToRgba(color, 0.08), // 8% opacity
       borderLeftColor: color,
     }
   }
