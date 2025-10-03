@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         .from('shifts')
         .select(`
           *,
-          job_tags(id, key, label_it, color),
+          job_tags(id, key, label_it, color, categoria),
           rotas(id, status),
           assignments:shift_assignments(
             id,

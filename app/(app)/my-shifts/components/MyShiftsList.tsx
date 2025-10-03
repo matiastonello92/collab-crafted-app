@@ -123,7 +123,7 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                           {assignment?.status === 'proposed' && 'Proposto'}
                         </Badge>
                         {shift.job_tag && (
-                          <Badge variant="outline">{shift.job_tag.label}</Badge>
+                          <Badge variant="outline">{shift.job_tag.label_it}</Badge>
                         )}
                       </div>
                     </div>

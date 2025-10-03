@@ -117,7 +117,7 @@ export const ShiftCard = memo(function ShiftCard({
       className={cn(
         'group border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
         'min-h-[88px] touch-manipulation border-l-4',
-        getJobTagColorClass(shift.job_tag?.label),
+        getJobTagColorClass(shift.job_tag?.key),
         !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 focus-enhanced',
         isDragging && 'opacity-50 rotate-2 scale-105',
         hasViolation && 'border-yellow-500',
@@ -168,7 +168,7 @@ export const ShiftCard = memo(function ShiftCard({
       {shift.job_tag && (
         <div className="mb-2">
           <Badge variant="outline" className="text-xs font-medium">
-            {shift.job_tag.label}
+            {shift.job_tag.label_it}
           </Badge>
         </div>
       )}

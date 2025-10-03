@@ -60,7 +60,7 @@ export function UnassignedShiftsPool({ shifts, onAssignClick, onShiftClick }: Pr
                     </div>
                     {shift.job_tag && (
                       <Badge variant="outline" className="text-xs">
-                        {shift.job_tag.label}
+                        {shift.job_tag.label_it}
                       </Badge>
                     )}
                   </div>

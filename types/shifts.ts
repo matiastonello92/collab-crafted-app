@@ -217,10 +217,10 @@ export interface UserProfile {
 
 export interface JobTag {
   id: string
-  name: string
-  label: string
-  label_it?: string
+  key: string
+  label_it: string
   color?: string | null
+  categoria?: string | null
 }
 
 export interface Location {

@@ -280,7 +280,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                     <SelectItem value={NONE_VALUE}>Nessun ruolo</SelectItem>
                     {jobTags.map(tag => (
                       <SelectItem key={tag.id} value={tag.id}>
-                        {tag.label || tag.name}
+                        {tag.label_it}
                       </SelectItem>
                     ))}
                   </SelectContent>

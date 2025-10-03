@@ -373,7 +373,7 @@ export function EmployeeGridView({
           >
             {activeShift.job_tag && (
               <div className="text-xs font-semibold text-gray-900 mb-1 truncate">
-                {activeShift.job_tag.label_it || activeShift.job_tag.label}
+                {activeShift.job_tag.label_it}
               </div>
             )}
             <div className="flex items-center justify-between gap-2 text-xs text-gray-800">
@@ -471,7 +471,7 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     >
       {shift.job_tag && (
         <div className="text-xs font-semibold text-gray-900 dark:text-gray-900 mb-1 truncate">
-          {shift.job_tag.label_it || shift.job_tag.label}
+          {shift.job_tag.label_it}
         </div>
       )}
       
