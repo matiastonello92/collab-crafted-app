@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Save, X } from 'lucide-react';
 import { IngredientsForm } from './IngredientsForm';
-import { PortionScaler } from './PortionScaler';
+import { RecipePhotoUploader } from './RecipePhotoUploader';
 import { ScalableIngredient } from '@/lib/recipes/scaling';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 
@@ -47,9 +47,9 @@ export function RecipeEditorDialog({
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string>('main_course');
   const [servings, setServings] = useState(4);
-  const [currentServings, setCurrentServings] = useState(4);
   const [prepTime, setPrepTime] = useState(0);
   const [cookTime, setCookTime] = useState(0);
+  const [photoUrl, setPhotoUrl] = useState('');
   const [ingredients, setIngredients] = useState<ScalableIngredient[]>([]);
 
   useEffect(() => {
@@ -88,9 +88,9 @@ export function RecipeEditorDialog({
     setDescription('');
     setCategory('main_course');
     setServings(4);
-    setCurrentServings(4);
     setPrepTime(0);
     setCookTime(0);
+    setPhotoUrl('');
     setIngredients([]);
   };
 
@@ -103,6 +103,11 @@ export function RecipeEditorDialog({
     // Validazione base
     if (!title.trim()) {
       toast.error('Il titolo è obbligatorio');
+      return;
+    }
+
+    if (!photoUrl) {
+      toast.error('Carica una foto per la ricetta');
       return;
     }
 
@@ -133,6 +138,7 @@ export function RecipeEditorDialog({
         servings,
         prep_time_minutes: prepTime,
         cook_time_minutes: cookTime,
+        photo_url: photoUrl,
         ingredients: ingredients.length > 0 ? ingredients : undefined
       };
 
@@ -215,6 +221,14 @@ export function RecipeEditorDialog({
               </Select>
             </div>
 
+            {/* Photo Upload */}
+            <div>
+              <RecipePhotoUploader
+                currentUrl={photoUrl}
+                onPhotoUpdate={setPhotoUrl}
+              />
+            </div>
+
             {/* Porzioni */}
             <div>
               <Label htmlFor="servings">Porzioni Standard *</Label>
@@ -226,10 +240,7 @@ export function RecipeEditorDialog({
                 value={servings}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
-                  if (!isNaN(val)) {
-                    setServings(val);
-                    setCurrentServings(val);
-                  }
+                  if (!isNaN(val)) setServings(val);
                 }}
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -263,18 +274,9 @@ export function RecipeEditorDialog({
           </TabsContent>
 
           <TabsContent value="ingredients" className="space-y-4 mt-4">
-            {/* Portion Scaler */}
-            <PortionScaler
-              originalServings={servings}
-              currentServings={currentServings}
-              onServingsChange={setCurrentServings}
-            />
-
             {/* Ingredients Form */}
             <IngredientsForm
               ingredients={ingredients}
-              originalServings={servings}
-              currentServings={currentServings}
               onIngredientsChange={setIngredients}
             />
           </TabsContent>

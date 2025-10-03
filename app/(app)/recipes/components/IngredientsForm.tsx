@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Trash2, Plus, GripVertical } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
-import { ScalableIngredient, scaleIngredients, formatQuantity } from '@/lib/recipes/scaling';
+import { ScalableIngredient } from '@/lib/recipes/scaling';
 
 interface CatalogItem {
   id: string;
@@ -21,16 +21,12 @@ interface CatalogItem {
 
 interface IngredientsFormProps {
   ingredients: ScalableIngredient[];
-  originalServings: number;
-  currentServings: number;
   onIngredientsChange: (ingredients: ScalableIngredient[]) => void;
   readOnly?: boolean;
 }
 
 export function IngredientsForm({
   ingredients,
-  originalServings,
-  currentServings,
   onIngredientsChange,
   readOnly = false
 }: IngredientsFormProps) {
@@ -105,13 +101,6 @@ export function IngredientsForm({
     onIngredientsChange(updated);
   };
 
-  // Scala gli ingredienti per display
-  const displayIngredients = scaleIngredients(
-    ingredients,
-    originalServings,
-    currentServings
-  );
-
   if (loading) {
     return (
       <div className="text-sm text-muted-foreground p-4 text-center">
@@ -144,7 +133,6 @@ export function IngredientsForm({
       ) : (
         <div className="space-y-3">
           {ingredients.map((ingredient, index) => {
-            const displayQty = displayIngredients[index]?.quantity || ingredient.quantity;
             const isComplete = ingredient.catalog_item_id && ingredient.quantity > 0;
 
             return (
@@ -187,7 +175,7 @@ export function IngredientsForm({
                         <Label className="text-xs">Quantità *</Label>
                         {readOnly ? (
                           <div className="text-sm mt-1">
-                            {formatQuantity(displayQty)} {ingredient.unit}
+                            {ingredient.quantity} {ingredient.unit}
                           </div>
                         ) : (
                           <div className="flex items-center gap-2 mt-1">
@@ -202,11 +190,6 @@ export function IngredientsForm({
                             <span className="text-sm text-muted-foreground w-16">
                               {ingredient.unit}
                             </span>
-                          </div>
-                        )}
-                        {currentServings !== originalServings && readOnly && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Originale: {formatQuantity(ingredient.quantity)} {ingredient.unit}
                           </div>
                         )}
                       </div>
