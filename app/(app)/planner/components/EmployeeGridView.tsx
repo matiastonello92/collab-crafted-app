@@ -316,32 +316,32 @@ export function EmployeeGridView({
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={customCollisionDetection}>
       {/* Delete Zone - Top Right Corner */}
-      {activeShift && (
-        <div 
-          ref={deleteZone.setNodeRef}
-          title="Trascina qui uno shift per eliminarlo"
-          className={`fixed top-4 right-4 w-16 h-16 flex items-center justify-center z-[9999] transition-all duration-300 rounded-2xl ${
-            deleteZone.isOver 
+      <div 
+        ref={deleteZone.setNodeRef}
+        title="Trascina qui uno shift per eliminarlo"
+        className={`fixed top-4 right-4 w-16 h-16 flex items-center justify-center z-[9999] transition-all duration-300 rounded-2xl ${
+          !activeShift 
+            ? 'opacity-0 pointer-events-none' 
+            : deleteZone.isOver 
               ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-[1.2] ring-4 ring-red-400/60 border-2' 
               : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
-          }`}
-        >
-          <div className="flex flex-col items-center gap-1 pointer-events-none">
-            <Trash2 
-              className={`transition-transform duration-200 ${
-                deleteZone.isOver ? 'scale-110' : 'scale-100'
-              }`}
-              size={28} 
-              color="white" 
-            />
-            {deleteZone.isOver && (
-              <span className="text-white font-bold text-xs tracking-wide animate-fade-in">
-                Elimina
-              </span>
-            )}
-          </div>
+        }`}
+      >
+        <div className="flex flex-col items-center gap-1 pointer-events-none">
+          <Trash2 
+            className={`transition-transform duration-200 ${
+              deleteZone.isOver ? 'scale-110' : 'scale-100'
+            }`}
+            size={28} 
+            color="white" 
+          />
+          {deleteZone.isOver && activeShift && (
+            <span className="text-white font-bold text-xs tracking-wide animate-fade-in">
+              Elimina
+            </span>
+          )}
         </div>
-      )}
+      </div>
       
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
