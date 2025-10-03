@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Trash2, Save, X, Sparkles } from 'lucide-react'
+import { Trash2, Save, X, Sparkles, Calendar } from 'lucide-react'
 import type { ShiftWithAssignments, UserProfile, JobTag } from '@/types/shifts'
 import { SmartAssignDialog } from './SmartAssignDialog'
+import { AbsenceForm } from './AbsenceForm'
 import { format, parseISO } from 'date-fns'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -40,6 +42,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   const [deleting, setDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showSmartAssign, setShowSmartAssign] = useState(false)
+  const [activeTab, setActiveTab] = useState<'shift' | 'absence'>('shift')
   
   // Form state
   const [startDate, setStartDate] = useState('')
@@ -63,6 +66,11 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       setJobTagId(shift.job_tag_id || NONE_VALUE)
       setNotes(shift.notes || '')
       setAssignedUserId(shift.assignments?.[0]?.user_id || NONE_VALUE)
+      
+      // Reset to shift tab when opening for new shift
+      if (isNew) {
+        setActiveTab('shift')
+      }
     }
   }, [shift, open])
   
@@ -208,16 +216,32 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   if (!shift) return null
   
   const isLocked = shift.rota?.status === 'locked'
+  const isNew = shift.id === 'new'
   
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
-            <DialogTitle>Modifica Turno</DialogTitle>
+            <DialogTitle>
+              {isNew ? 'Nuovo Turno o Assenza' : 'Modifica Turno'}
+            </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
+          {isNew ? (
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'shift' | 'absence')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="shift">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Nuovo Turno
+                </TabsTrigger>
+                <TabsTrigger value="absence">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Nuova Assenza
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="shift" className="space-y-4 py-4">
             {/* Date & Time */}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
@@ -326,39 +350,200 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 disabled={isLocked}
               />
             </div>
-          </div>
-          
-          <DialogFooter className="flex justify-between items-center">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={isLocked || deleting}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Elimina
-            </Button>
             
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowSmartAssign(true)}
-                disabled={isLocked}
-                className="gap-2"
+            <DialogFooter className="flex justify-between items-center">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isLocked || deleting}
               >
-                <Sparkles className="h-4 w-4" />
-                Assegnazione AI
+                <Trash2 className="h-4 w-4 mr-2" />
+                Elimina
               </Button>
-              <Button variant="outline" onClick={onClose} disabled={loading}>
-                <X className="h-4 w-4 mr-2" />
-                Annulla
-              </Button>
-              <Button onClick={handleSave} disabled={loading || isLocked}>
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Salvataggio...' : 'Salva'}
-              </Button>
-            </div>
-          </DialogFooter>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowSmartAssign(true)}
+                  disabled={isLocked}
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Assegnazione AI
+                </Button>
+                <Button variant="outline" onClick={onClose} disabled={loading}>
+                  <X className="h-4 w-4 mr-2" />
+                  Annulla
+                </Button>
+                <Button onClick={handleSave} disabled={loading || isLocked}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {loading ? 'Salvataggio...' : 'Salva'}
+                </Button>
+              </div>
+            </DialogFooter>
+          </TabsContent>
+          
+          <TabsContent value="absence">
+            <AbsenceForm
+              users={users}
+              date={startDate}
+              locationId={shift.location_id}
+              onSuccess={() => {
+                onSave()
+                onClose()
+              }}
+              onCancel={onClose}
+            />
+          </TabsContent>
+        </Tabs>
+          ) : (
+            // Edit existing shift - no tabs
+            <>
+              <div className="space-y-4 py-4">
+                {/* Date & Time */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-medium text-foreground">Data</Label>
+                    <Input
+                      className="bg-background"
+                      type="date" 
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      disabled={isLocked}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="font-medium text-foreground">Inizio</Label>
+                    <Input
+                      className="bg-background"
+                      required
+                      type="time" 
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      disabled={isLocked}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="font-medium text-foreground">Fine</Label>
+                    <Input
+                      className="bg-background"
+                      required
+                      type="time" 
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      disabled={isLocked}
+                    />
+                  </div>
+                </div>
+                
+                {/* Break & Job Tag */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-medium text-foreground">Pausa (minuti)</Label>
+                    <Input
+                      className="bg-background"
+                      type="number" 
+                      value={breakMinutes}
+                      onChange={(e) => setBreakMinutes(parseInt(e.target.value) || 0)}
+                      min={0}
+                      disabled={isLocked}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="font-medium text-foreground">Ruolo</Label>
+                    <Select value={jobTagId} onValueChange={setJobTagId} disabled={isLocked}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Seleziona ruolo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>Nessun ruolo</SelectItem>
+                        {jobTags.map(tag => (
+                          <SelectItem key={tag.id} value={tag.id}>
+                            {tag.label_it}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* User Assignment */}
+                <div className="space-y-2">
+                  <Label className="font-medium text-foreground">Assegna Utente</Label>
+                  <Select value={assignedUserId} onValueChange={setAssignedUserId} disabled={isLocked}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Seleziona utente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>Nessun utente</SelectItem>
+                      {users.map(user => (
+                        <SelectItem key={user.id} value={user.id}>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={user.avatar_url || undefined} />
+                              <AvatarFallback className="text-xs">
+                                {user.full_name?.[0]?.toUpperCase() || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{user.full_name || user.email}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Notes */}
+                <div className="space-y-2">
+                  <Label className="font-medium text-foreground">Note</Label>
+                  <Textarea
+                    className="bg-background"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Aggiungi note..."
+                    rows={3}
+                    disabled={isLocked}
+                  />
+                </div>
+              </div>
+              
+              <DialogFooter className="flex justify-between items-center">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isLocked || deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Elimina
+                </Button>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowSmartAssign(true)}
+                    disabled={isLocked}
+                    className="gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Assegnazione AI
+                  </Button>
+                  <Button variant="outline" onClick={onClose} disabled={loading}>
+                    <X className="h-4 w-4 mr-2" />
+                    Annulla
+                  </Button>
+                  <Button onClick={handleSave} disabled={loading || isLocked}>
+                    <Save className="h-4 w-4 mr-2" />
+                    {loading ? 'Salvataggio...' : 'Salva'}
+                  </Button>
+                </div>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
       
