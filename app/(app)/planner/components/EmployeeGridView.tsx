@@ -453,11 +453,11 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     opacity: isDragging ? 0.5 : 1,
     backgroundColor: bgColor,
     borderColor: borderColor,
-    borderWidth: '3px'
+    borderWidth: '1px'
   } : {
     backgroundColor: bgColor,
     borderColor: borderColor,
-    borderWidth: '3px'
+    borderWidth: '1px'
   }
 
   const handleClick = (e: React.MouseEvent) => {
