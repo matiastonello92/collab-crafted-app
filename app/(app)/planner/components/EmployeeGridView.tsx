@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection, getFirstCollision } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
 // Custom collision detection che usa pointerWithin (più preciso)
@@ -480,7 +480,7 @@ export function EmployeeGridView({
         })}
       </div>
       
-      <DragOverlay>
+      <DragOverlay style={{ zIndex: 10000 }}>
         {activeShift && (
           <Card 
             className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
