@@ -9,10 +9,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
-// Custom collision detection che usa pointerWithin (più preciso)
+// Custom collision detection che usa pointerWithin (più preciso) con fallback a closestCenter
 function customCollisionDetection(args: any) {
   // 1. Usa pointerWithin - verifica dove è il POINTER, non il centro del drag
   const pointerCollisions = pointerWithin(args)
@@ -23,7 +23,6 @@ function customCollisionDetection(args: any) {
   )
   
   if (deleteZoneCollision) {
-    console.log('✅ Delete zone detected by pointerWithin!')
     return [deleteZoneCollision]
   }
   
@@ -32,8 +31,8 @@ function customCollisionDetection(args: any) {
     return pointerCollisions
   }
   
-  // 4. Fallback a rectIntersection (per edge cases)
-  return rectIntersection(args)
+  // 4. Fallback a closestCenter (più naturale per celle)
+  return closestCenter(args)
 }
 
 interface Props {
@@ -324,38 +323,46 @@ export function EmployeeGridView({
 
   return (
     <DndContext 
-      sensors={sensors} 
+      sensors={sensors}
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       onDragStart={handleDragStart} 
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd} 
       collisionDetection={customCollisionDetection}
     >
-      {/* Delete Zone - Top Right Corner */}
+      {/* Delete Zone - Bottom Center Bar */}
       <div 
         ref={deleteZone.setNodeRef}
         title="Trascina qui uno shift per eliminarlo"
-        style={{ pointerEvents: activeShift ? 'auto' : 'none' }}
-        className={`fixed top-8 right-8 w-24 h-24 flex items-center justify-center z-[10001] transition-all duration-300 rounded-2xl ${
+        style={{ 
+          pointerEvents: activeShift ? 'auto' : 'none',
+          position: 'fixed',
+          bottom: 80,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 280,
+          height: 64,
+          zIndex: 100
+        }}
+        className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
           !activeShift 
-            ? 'opacity-0' 
+            ? 'opacity-0 scale-95' 
             : deleteZone.isOver 
-              ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-[1.2] ring-4 ring-red-400/60 border-2' 
+              ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-105 ring-4 ring-red-400/60 border-2' 
               : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
         }`}
       >
-        <div className="flex flex-col items-center gap-1 pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-none">
           <Trash2 
             className={`transition-transform duration-200 ${
               deleteZone.isOver ? 'scale-110' : 'scale-100'
             }`}
-            size={32} 
+            size={28} 
             color="white" 
           />
-          {deleteZone.isOver && activeShift && (
-            <span className="text-white font-bold text-xs tracking-wide animate-fade-in">
-              Elimina
-            </span>
-          )}
+          <span className="text-white font-semibold text-sm tracking-wide">
+            {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+          </span>
         </div>
       </div>
       
@@ -480,7 +487,7 @@ export function EmployeeGridView({
         })}
       </div>
       
-      <DragOverlay style={{ zIndex: 10000, pointerEvents: 'none' }}>
+      <DragOverlay style={{ zIndex: 9999, pointerEvents: 'none' }}>
         {activeShift && (
           <Card 
             className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
