@@ -399,10 +399,7 @@ export function EmployeeGridView({
                   userId="unassigned"
                   date={day.dateStr}
                 >
-                  <div 
-                    className="p-2 space-y-2 cursor-pointer min-h-[60px]"
-                    onClick={() => onCellClick?.('unassigned', day.dateStr)}
-                  >
+                  <div className="relative p-2 space-y-2 min-h-[60px] group">
                     {dayShifts.map(shift => (
                       <DraggableShiftCard
                         key={shift.id}
@@ -410,6 +407,23 @@ export function EmployeeGridView({
                         onClick={() => onShiftClick?.(shift)}
                       />
                     ))}
+                    
+                    {/* Pulsante "+" flottante */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onCellClick?.('unassigned', day.dateStr)
+                      }}
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 
+                                 opacity-0 group-hover:opacity-100 
+                                 transition-opacity duration-200
+                                 bg-primary text-primary-foreground 
+                                 hover:bg-primary/90
+                                 rounded-full p-1.5 shadow-lg z-10"
+                      title="Aggiungi turno o assenza"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
                   </div>
                 </DroppableCell>
               )
@@ -456,10 +470,7 @@ export function EmployeeGridView({
                     userId={userId}
                     date={day.dateStr}
                   >
-                    <div 
-                      className="p-2 space-y-2 cursor-pointer min-h-[60px]"
-                      onClick={() => onCellClick?.(userId, day.dateStr)}
-                    >
+                    <div className="relative p-2 space-y-2 min-h-[60px] group">
                       {dayShifts.map(shift => (
                         <DraggableShiftCard
                           key={shift.id}
@@ -468,11 +479,22 @@ export function EmployeeGridView({
                         />
                       ))}
                       
-                      {dayShifts.length === 0 && (
-                        <div className="flex items-center justify-center h-16 text-muted-foreground opacity-0 hover:opacity-100 transition-opacity">
-                          <Plus className="h-4 w-4" />
-                        </div>
-                      )}
+                      {/* Pulsante "+" flottante - appare sempre su hover */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onCellClick?.(userId, day.dateStr)
+                        }}
+                        className="absolute bottom-1 left-1/2 -translate-x-1/2 
+                                   opacity-0 group-hover:opacity-100 
+                                   transition-opacity duration-200
+                                   bg-primary text-primary-foreground 
+                                   hover:bg-primary/90
+                                   rounded-full p-1.5 shadow-lg z-10"
+                        title="Aggiungi turno o assenza"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
                     </div>
                   </DroppableCell>
                 )
