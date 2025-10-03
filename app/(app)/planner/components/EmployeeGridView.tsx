@@ -12,6 +12,47 @@ import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, MouseSensor, TouchSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
+// Delete Zone Component - Separate to ensure proper droppable registration
+function DeleteZone({ visible }: { visible: boolean }) {
+  const { isOver, setNodeRef } = useDroppable({ 
+    id: 'delete-zone',
+    data: { action: 'delete' }
+  })
+  
+  if (!visible) return null
+  
+  return (
+    <div
+      ref={setNodeRef}
+      title="Trascina qui uno shift per eliminarlo"
+      style={{
+        position: 'fixed',
+        bottom: 80,
+        left: '50%',
+        marginLeft: -140,
+        width: 280,
+        height: 64,
+        zIndex: 1000
+      }}
+      className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
+        isOver 
+          ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-105 ring-4 ring-red-400/60 border-2' 
+          : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
+      }`}
+    >
+      <div className="flex items-center gap-3 pointer-events-none">
+        <Trash2 
+          className={`transition-transform duration-200 ${isOver ? 'scale-110' : 'scale-100'}`}
+          size={28} 
+          color="white" 
+        />
+        <span className="text-white font-semibold text-sm tracking-wide">
+          {isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+        </span>
+      </div>
+    </div>
+  )
+}
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -58,12 +99,6 @@ export function EmployeeGridView({
     if (pointer.length) return pointer;
     return closestCenter(args);
   }, []);
-
-  // Delete zone droppable
-  const deleteZone = useDroppable({
-    id: 'delete-zone',
-    data: { action: 'delete' }
-  })
 
   const handleDragStart = (event: DragStartEvent) => {
     const shift = localShifts.find(s => s.id === event.active.id)
@@ -324,40 +359,7 @@ export function EmployeeGridView({
       onDragEnd={handleDragEnd} 
       collisionDetection={collisionDetection}
     >
-      {/* Delete Zone - Bottom Center Bar */}
-      {activeShift && (
-        <div 
-          ref={deleteZone.setNodeRef}
-          title="Trascina qui uno shift per eliminarlo"
-          style={{ 
-            position: 'fixed',
-            bottom: 80,
-            left: '50%',
-            marginLeft: -140,
-            width: 280,
-            height: 64,
-            zIndex: 1000
-          }}
-          className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
-            deleteZone.isOver 
-              ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-105 ring-4 ring-red-400/60 border-2' 
-              : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
-          }`}
-        >
-          <div className="flex items-center gap-3 pointer-events-none">
-            <Trash2 
-              className={`transition-transform duration-200 ${
-                deleteZone.isOver ? 'scale-110' : 'scale-100'
-              }`}
-              size={28} 
-              color="white" 
-            />
-            <span className="text-white font-semibold text-sm tracking-wide">
-              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
-            </span>
-          </div>
-        </div>
-      )}
+      <DeleteZone visible={activeShift !== null} />
       
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
