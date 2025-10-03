@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -42,14 +42,24 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
 
     setLoading(true)
     try {
+      console.log('🤖 [SmartAssign] Calling edge function for shift:', shiftId)
+      
       const { data, error } = await supabase.functions.invoke('smart-assign', {
         body: { shift_id: shiftId }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('🤖 [SmartAssign] Error:', error)
+        if (error.message?.includes('LOVABLE_API_KEY')) {
+          toast.error('Configurazione AI mancante. Contatta l\'amministratore.')
+        }
+        throw error
+      }
+      
+      console.log('🤖 [SmartAssign] Received candidates:', data)
       setCandidates(data.candidates || [])
     } catch (error) {
-      console.error('Error loading candidates:', error)
+      console.error('🤖 [SmartAssign] Exception:', error)
       toast.error('Errore nel caricamento candidati')
     } finally {
       setLoading(false)
@@ -91,6 +101,12 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
     if (score >= 60) return 'secondary'
     return 'destructive'
   }
+
+  useEffect(() => {
+    if (open && shiftId && candidates.length === 0) {
+      loadCandidates()
+    }
+  }, [open, shiftId])
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

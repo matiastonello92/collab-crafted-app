@@ -52,12 +52,13 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   
   useEffect(() => {
     if (shift && open) {
+      const isNew = shift.id === 'new'
       const start = parseISO(shift.start_at)
       const end = parseISO(shift.end_at)
       
       setStartDate(format(start, 'yyyy-MM-dd'))
-      setStartTime(format(start, 'HH:mm'))
-      setEndTime(format(end, 'HH:mm'))
+      setStartTime(isNew ? '' : format(start, 'HH:mm'))
+      setEndTime(isNew ? '' : format(end, 'HH:mm'))
       setBreakMinutes(shift.break_minutes || 0)
       setJobTagId(shift.job_tag_id || NONE_VALUE)
       setNotes(shift.notes || '')
@@ -65,50 +66,104 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
     }
   }, [shift, open])
   
+  const validateForm = () => {
+    if (!startDate) {
+      toast.error('Data obbligatoria')
+      return false
+    }
+    if (!startTime || !endTime) {
+      toast.error('Orari di inizio e fine obbligatori')
+      return false
+    }
+    const start = new Date(`${startDate}T${startTime}:00`)
+    const end = new Date(`${startDate}T${endTime}:00`)
+    if (end <= start) {
+      toast.error('L\'orario di fine deve essere successivo all\'inizio')
+      return false
+    }
+    return true
+  }
+
   const handleSave = async () => {
     if (!shift) return
+    if (!validateForm()) return
     
     setLoading(true)
     try {
-      // Update shift details - use ISO format for timezone flexibility
+      const isNew = shift.id === 'new'
       const newStartAt = new Date(`${startDate}T${startTime}:00`).toISOString()
       const newEndAt = new Date(`${startDate}T${endTime}:00`).toISOString()
       
-      const response = await fetch(`/api/v1/shifts/${shift.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          start_at: newStartAt,
-          end_at: newEndAt,
-          break_minutes: breakMinutes,
-          job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : null,
-          notes: notes || null
-        })
-      })
-      
-      if (!response.ok) {
-        const error = await response.json()
-        toast.error(error.message || 'Errore durante il salvataggio')
-        return
-      }
-      
-      // Update assignment if changed
-      if (assignedUserId && assignedUserId !== NONE_VALUE && assignedUserId !== shift.assignments?.[0]?.user_id) {
-        const assignResponse = await fetch(`/api/v1/shifts/${shift.id}/assign`, {
+      if (isNew) {
+        const createResponse = await fetch(`/api/v1/shifts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            user_id: assignedUserId,
-            status: 'assigned'
+            rota_id: shift.rota_id,
+            location_id: shift.location_id,
+            start_at: newStartAt,
+            end_at: newEndAt,
+            break_minutes: breakMinutes,
+            job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : null,
+            notes: notes || null
           })
         })
         
-        if (!assignResponse.ok) {
-          toast.error('Errore durante l\'assegnazione utente')
+        if (!createResponse.ok) {
+          const error = await createResponse.json()
+          toast.error(error.message || 'Errore durante la creazione')
+          return
         }
+        
+        const { shift: newShift } = await createResponse.json()
+        
+        if (assignedUserId && assignedUserId !== NONE_VALUE) {
+          await fetch(`/api/v1/shifts/${newShift.id}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: assignedUserId, status: 'assigned' })
+          })
+        }
+        
+        toast.success('Turno creato con successo')
+      } else {
+        const response = await fetch(`/api/v1/shifts/${shift.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            start_at: newStartAt,
+            end_at: newEndAt,
+            break_minutes: breakMinutes,
+            job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : null,
+            notes: notes || null
+          })
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          toast.error(error.message || 'Errore durante il salvataggio')
+          return
+        }
+        
+        // Update assignment if changed
+        if (assignedUserId && assignedUserId !== NONE_VALUE && assignedUserId !== shift.assignments?.[0]?.user_id) {
+          const assignResponse = await fetch(`/api/v1/shifts/${shift.id}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: assignedUserId,
+              status: 'assigned'
+            })
+          })
+          
+          if (!assignResponse.ok) {
+            toast.error('Errore durante l\'assegnazione utente')
+          }
+        }
+        
+        toast.success('Turno aggiornato con successo')
       }
       
-      toast.success('Turno aggiornato con successo')
       onSave()
       onClose()
     } catch (error) {
@@ -162,8 +217,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Date & Time */}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Data</Label>
-                <Input 
+                <Label className="font-medium">Data</Label>
+                <Input
+                  className="bg-background"
                   type="date" 
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
@@ -172,8 +228,10 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label>Inizio</Label>
-                <Input 
+                <Label className="font-medium">Inizio</Label>
+                <Input
+                  className="bg-background"
+                  required
                   type="time" 
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
@@ -182,8 +240,10 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label>Fine</Label>
-                <Input 
+                <Label className="font-medium">Fine</Label>
+                <Input
+                  className="bg-background"
+                  required
                   type="time" 
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
@@ -195,8 +255,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Break & Job Tag */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Pausa (minuti)</Label>
-                <Input 
+                <Label className="font-medium">Pausa (minuti)</Label>
+                <Input
+                  className="bg-background"
                   type="number" 
                   value={breakMinutes}
                   onChange={(e) => setBreakMinutes(parseInt(e.target.value) || 0)}
@@ -206,9 +267,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label>Ruolo</Label>
+                <Label className="font-medium">Ruolo</Label>
                 <Select value={jobTagId} onValueChange={setJobTagId} disabled={isLocked}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Seleziona ruolo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,9 +286,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* User Assignment */}
             <div className="space-y-2">
-              <Label>Assegna Utente</Label>
+              <Label className="font-medium">Assegna Utente</Label>
               <Select value={assignedUserId} onValueChange={setAssignedUserId} disabled={isLocked}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Seleziona utente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -251,8 +312,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* Notes */}
             <div className="space-y-2">
-              <Label>Note</Label>
-              <Textarea 
+              <Label className="font-medium">Note</Label>
+              <Textarea
+                className="bg-background"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Aggiungi note..."
