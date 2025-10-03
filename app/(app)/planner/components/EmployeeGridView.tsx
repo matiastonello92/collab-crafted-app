@@ -32,12 +32,19 @@ export function EmployeeGridView({
   onSave
 }: Props) {
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
+  // ✅ Local state for optimistic updates
+  const [localShifts, setLocalShifts] = useState<ShiftWithAssignments[]>(shifts)
+  
+  // ✅ Sync localShifts when shifts prop changes (after server refetch)
+  useEffect(() => {
+    setLocalShifts(shifts)
+  }, [shifts])
   
   const weekDays = getWeekBounds(weekStart)
   const employeeStats = useEmployeeStats({ shifts, weekStart })
 
   const handleDragStart = (event: DragStartEvent) => {
-    const shift = shifts.find(s => s.id === event.active.id)
+    const shift = localShifts.find(s => s.id === event.active.id)
     setActiveShift(shift || null)
   }
 
@@ -51,7 +58,7 @@ export function EmployeeGridView({
     }
     
     // Verifica che sia effettivamente cambiata la posizione
-    const shift = shifts.find(s => s.id === active.id)
+    const shift = localShifts.find(s => s.id === active.id)
     if (!shift) {
       setActiveShift(null)
       return
@@ -79,9 +86,55 @@ export function EmployeeGridView({
 
     const isDuplicate = action === 'duplicate'
 
-    // Aggiorna UI immediatamente (optimistic)
+    // ✅ 1️⃣ OPTIMISTIC UPDATE - Aggiorna UI IMMEDIATAMENTE
     setActiveShift(null)
 
+    if (isDuplicate) {
+      // Crea nuovo turno ottimisticamente con ID temporaneo
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(7)}`
+      const newStartAt = new Date(`${dateStr}T${format(new Date(shift.start_at), 'HH:mm')}:00`).toISOString()
+      const newEndAt = new Date(`${dateStr}T${format(new Date(shift.end_at), 'HH:mm')}:00`).toISOString()
+      
+      const optimisticShift: ShiftWithAssignments = {
+        ...shift,
+        id: tempId,
+        start_at: newStartAt,
+        end_at: newEndAt,
+        assignments: userId !== 'unassigned' ? [{
+          id: `temp-assign-${Date.now()}`,
+          shift_id: tempId,
+          user_id: userId,
+          status: 'assigned' as const,
+          created_at: new Date().toISOString()
+        }] : []
+      }
+      
+      setLocalShifts(prev => [...prev, optimisticShift])
+    } else {
+      // Sposta turno ottimisticamente
+      const newStartAt = new Date(`${dateStr}T${format(new Date(shift.start_at), 'HH:mm')}:00`).toISOString()
+      const newEndAt = new Date(`${dateStr}T${format(new Date(shift.end_at), 'HH:mm')}:00`).toISOString()
+      
+      setLocalShifts(prev => prev.map(s => {
+        if (s.id === shift.id) {
+          return {
+            ...s,
+            start_at: newStartAt,
+            end_at: newEndAt,
+            assignments: userId !== 'unassigned' ? [{
+              id: shift.assignments?.[0]?.id || `temp-assign-${Date.now()}`,
+              shift_id: shift.id,
+              user_id: userId,
+              status: 'assigned' as const,
+              created_at: shift.assignments?.[0]?.created_at || new Date().toISOString()
+            }] : []
+          }
+        }
+        return s
+      }))
+    }
+
+    // ✅ 2️⃣ API CALLS in background
     try {
       if (isDuplicate) {
         const newStartAt = new Date(`${dateStr}T${format(new Date(shift.start_at), 'HH:mm')}:00`).toISOString()
@@ -139,7 +192,7 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      // ✅ Refetch immediato per sincronizzare con server
+      // ✅ 3️⃣ Refetch per sincronizzare con server (in background)
       if (onSave) {
         onSave()
       }
@@ -147,7 +200,9 @@ export function EmployeeGridView({
       console.error('Error handling drag:', error)
       toast.error('Errore nello spostamento del turno')
       
-      // ✅ Revert immediato su errore
+      // ✅ 4️⃣ REVERT: Ripristina shifts originali su errore
+      setLocalShifts(shifts)
+      
       if (onSave) {
         onSave()
       }
@@ -163,14 +218,14 @@ export function EmployeeGridView({
       grouped[user.id] = []
     })
     
-    shifts.forEach(shift => {
+    localShifts.forEach(shift => {
       const userId = shift.assignments?.[0]?.user_id || 'unassigned'
       if (!grouped[userId]) grouped[userId] = []
       grouped[userId].push(shift)
     })
     
     return grouped
-  }, [shifts, users])
+  }, [localShifts, users])
 
   const unassignedShifts = shiftsByUser.unassigned || []
 
