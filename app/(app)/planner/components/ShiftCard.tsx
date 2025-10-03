@@ -83,25 +83,22 @@ export const ShiftCard = memo(function ShiftCard({
   const hasWarning = conflicts && conflicts.some(c => c.severity === 'warning')
   const isUnassigned = !assignment
   
-  // Get job tag color class (ComboHR style)
-  const getJobTagColorClass = (jobTagName?: string) => {
-    if (!jobTagName) return 'bg-card border-l-muted'
-    
-    const colorMap: Record<string, string> = {
-      'pizzaiolo': 'bg-[var(--color-job-pizzaiolo)] border-l-[var(--color-job-pizzaiolo-border)]',
-      'plongeur': 'bg-[var(--color-job-plongeur)] border-l-[var(--color-job-plongeur-border)]',
-      'commis': 'bg-[var(--color-job-commis)] border-l-[var(--color-job-commis-border)]',
-      'serveur': 'bg-[var(--color-job-serveur)] border-l-[var(--color-job-serveur-border)]',
-      'barista': 'bg-[var(--color-job-barista)] border-l-[var(--color-job-barista-border)]',
+  // Get dynamic job tag styles from database color
+  const getJobTagStyle = (color?: string | null) => {
+    if (!color) return {}
+    return {
+      backgroundColor: `${color}15`, // ~8% opacity for subtle background
+      borderLeftColor: color,
     }
-    
-    return colorMap[jobTagName.toLowerCase()] || 'bg-accent/20 border-l-accent'
   }
   
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        ...getJobTagStyle(shift.job_tag?.color)
+      }}
       {...listeners}
       {...attributes}
       onClick={() => onClick?.(shift)}
@@ -116,8 +113,7 @@ export const ShiftCard = memo(function ShiftCard({
       }}
       className={cn(
         'group border rounded-lg p-3 shadow-sm transition-all duration-200 relative animate-smooth',
-        'min-h-[88px] touch-manipulation border-l-4',
-        getJobTagColorClass(shift.job_tag?.key),
+        'min-h-[88px] touch-manipulation border-l-4 bg-card',
         !isLocked && 'cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] hover:border-primary/50 focus-enhanced',
         isDragging && 'opacity-50 rotate-2 scale-105',
         hasViolation && 'border-yellow-500',
