@@ -103,14 +103,15 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       const newEndAt = new Date(`${startDate}T${endTime}:00`).toISOString()
       
       if (isNew) {
-        const requestBody = {
-          rota_id: shift.rota_id,
-          start_at: newStartAt,
-          end_at: newEndAt,
-          break_minutes: breakMinutes,
-          job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : undefined,
-          notes: notes || undefined
-        }
+      const requestBody = {
+        rota_id: shift.rota_id,
+        location_id: shift.location_id,
+        start_at: newStartAt,
+        end_at: newEndAt,
+        break_minutes: breakMinutes,
+        job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : undefined,
+        notes: notes || undefined
+      }
         
         console.log('🔵 [ShiftCreate] Request body:', requestBody)
         
