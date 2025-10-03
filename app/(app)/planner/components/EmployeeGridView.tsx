@@ -440,7 +440,7 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   
   const startTime = formatTimeCombo(new Date(shift.start_at))
   const endTime = formatTimeCombo(new Date(shift.end_at))
-  const bgColor = hexToRgba(shift.job_tag?.color, 0.15) // ✅ Ridotto da 0.85 a 0.15 per colori più visibili
+  const bgColor = hexToRgba(shift.job_tag?.color, 0.35) // ✅ 35% opacità per colori visibili
   const borderColor = hexToRgba(shift.job_tag?.color, 1)
   
   // Debug: verifica presenza colore job_tag
@@ -453,11 +453,11 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     opacity: isDragging ? 0.5 : 1,
     backgroundColor: bgColor,
     borderColor: borderColor,
-    borderWidth: '2px'
+    borderWidth: '3px'
   } : {
     backgroundColor: bgColor,
     borderColor: borderColor,
-    borderWidth: '2px'
+    borderWidth: '3px'
   }
 
   const handleClick = (e: React.MouseEvent) => {
@@ -477,13 +477,19 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       className="p-2 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
       {shift.job_tag && (
-        <div className="text-xs font-semibold text-gray-900 dark:text-gray-900 mb-1 truncate">
+        <div 
+          className="text-xs font-bold text-white mb-1 truncate"
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+        >
           {shift.job_tag.label_it}
         </div>
       )}
       
-      <div className="flex items-center justify-between gap-2 text-xs text-gray-800 dark:text-gray-800">
-        <span className="font-medium truncate">
+      <div className="flex items-center justify-between gap-2 text-xs text-white">
+        <span 
+          className="font-semibold truncate"
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+        >
           {startTime} - {endTime}
         </span>
       </div>
