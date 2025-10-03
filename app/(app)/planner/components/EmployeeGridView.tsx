@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
+import { LeaveCard } from './LeaveCard'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, MouseSensor, TouchSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
@@ -54,8 +55,29 @@ function DeleteZone({ visible }: { visible: boolean }) {
   )
 }
 
+interface LeaveRequest {
+  id: string
+  user_id: string
+  type_id: string
+  start_at: string
+  end_at: string
+  status: string
+  reason: string | null
+  leave_types: {
+    id: string
+    key: string
+    label: string
+    color: string | null
+  }
+  profiles: {
+    id: string
+    full_name: string | null
+  }
+}
+
 interface Props {
   shifts: ShiftWithAssignments[]
+  leaves: LeaveRequest[]
   users: UserProfile[]
   weekStart: string
   onShiftClick?: (shift: ShiftWithAssignments) => void
@@ -66,6 +88,7 @@ interface Props {
 
 export function EmployeeGridView({ 
   shifts, 
+  leaves,
   users, 
   weekStart, 
   onShiftClick, 
@@ -393,6 +416,11 @@ export function EmployeeGridView({
                 format(new Date(s.start_at), 'yyyy-MM-dd') === day.dateStr
               )
               
+              const dayLeaves = leaves.filter(l =>
+                format(new Date(l.start_at), 'yyyy-MM-dd') === day.dateStr &&
+                l.user_id === 'unassigned'
+              )
+              
               return (
                 <DroppableCell
                   key={`unassigned-${day.dateStr}`}
@@ -400,12 +428,13 @@ export function EmployeeGridView({
                   date={day.dateStr}
                 >
                   <div 
-                    className="relative p-2 space-y-2 min-h-[80px] group"
-                    onClick={dayShifts.length === 0 ? (e) => {
-                      e.stopPropagation()
-                      onCellClick?.('unassigned', day.dateStr)
-                    } : undefined}
-                    style={dayShifts.length === 0 ? { cursor: 'pointer' } : undefined}
+                    className="relative p-2 space-y-2 min-h-[100px] group hover:bg-muted/20 cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (!target.closest('.shift-card') && !target.closest('button')) {
+                        onCellClick?.('unassigned', day.dateStr)
+                      }
+                    }}
                   >
                     {dayShifts.map(shift => (
                       <DraggableShiftCard
@@ -415,19 +444,23 @@ export function EmployeeGridView({
                       />
                     ))}
                     
-                    {/* Pulsante "+" flottante */}
+                    {dayLeaves.map(leave => (
+                      <LeaveCard key={leave.id} leave={leave} showUserName={true} />
+                    ))}
+                    
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         onCellClick?.('unassigned', day.dateStr)
                       }}
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 
-                                 w-8 h-8 flex items-center justify-center
+                      className="absolute bottom-2 left-1/2 -translate-x-1/2 
+                                 w-9 h-9 flex items-center justify-center
                                  opacity-0 group-hover:opacity-100 
-                                 transition-opacity duration-200
+                                 transition-all duration-200
                                  bg-primary text-primary-foreground 
-                                 hover:bg-primary/90
-                                 rounded-full shadow-lg z-10"
+                                 hover:bg-primary/90 hover:scale-110
+                                 rounded-full shadow-lg z-10
+                                 border-2 border-background"
                       title="Aggiungi turno o assenza"
                     >
                       <Plus className="h-4 w-4" />
@@ -472,6 +505,11 @@ export function EmployeeGridView({
                   format(new Date(s.start_at), 'yyyy-MM-dd') === day.dateStr
                 )
                 
+                const dayLeaves = leaves.filter(l =>
+                  format(new Date(l.start_at), 'yyyy-MM-dd') === day.dateStr &&
+                  l.user_id === userId
+                )
+                
                 return (
                   <DroppableCell
                     key={day.dateStr}
@@ -479,12 +517,13 @@ export function EmployeeGridView({
                     date={day.dateStr}
                   >
                     <div 
-                      className="relative p-2 space-y-2 min-h-[80px] group"
-                      onClick={dayShifts.length === 0 ? (e) => {
-                        e.stopPropagation()
-                        onCellClick?.(userId, day.dateStr)
-                      } : undefined}
-                      style={dayShifts.length === 0 ? { cursor: 'pointer' } : undefined}
+                      className="relative p-2 space-y-2 min-h-[100px] group hover:bg-muted/20 cursor-pointer transition-colors"
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement
+                        if (!target.closest('.shift-card') && !target.closest('button')) {
+                          onCellClick?.(userId, day.dateStr)
+                        }
+                      }}
                     >
                       {dayShifts.map(shift => (
                         <DraggableShiftCard
@@ -494,19 +533,23 @@ export function EmployeeGridView({
                         />
                       ))}
                       
-                      {/* Pulsante "+" flottante - appare sempre su hover */}
+                      {dayLeaves.map(leave => (
+                        <LeaveCard key={leave.id} leave={leave} />
+                      ))}
+                      
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           onCellClick?.(userId, day.dateStr)
                         }}
-                        className="absolute bottom-1 left-1/2 -translate-x-1/2 
-                                   w-8 h-8 flex items-center justify-center
+                        className="absolute bottom-2 left-1/2 -translate-x-1/2 
+                                   w-9 h-9 flex items-center justify-center
                                    opacity-0 group-hover:opacity-100 
-                                   transition-opacity duration-200
+                                   transition-all duration-200
                                    bg-primary text-primary-foreground 
-                                   hover:bg-primary/90
-                                   rounded-full shadow-lg z-10"
+                                   hover:bg-primary/90 hover:scale-110
+                                   rounded-full shadow-lg z-10
+                                   border-2 border-background"
                         title="Aggiungi turno o assenza"
                       >
                         <Plus className="h-4 w-4" />
@@ -633,7 +676,7 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="p-1.5 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
+      className="shift-card p-1.5 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
       {shift.job_tag && (
         <div 

@@ -269,6 +269,7 @@ export function PlannerClient() {
         {selectedLocation ? (
           <EmployeeGridView
             shifts={shifts}
+            leaves={rawLeaves}
             users={users}
             weekStart={currentWeek}
             onShiftClick={setSelectedShift}
