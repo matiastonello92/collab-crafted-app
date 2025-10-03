@@ -443,12 +443,9 @@ function DroppableCell({
       </div>
       
       {/* Contenuto reale della cella */}
-      <div className="relative z-10 pointer-events-none">
+      <div className="relative z-10">
         {children}
       </div>
-      
-      {/* Layer cliccabile sopra tutto */}
-      <div className="absolute inset-0 z-20 pointer-events-auto" />
     </div>
   )
 }
