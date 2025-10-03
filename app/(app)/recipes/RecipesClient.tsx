@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Clock, Users, ChefHat, Archive, Send, CheckCircle, Trash2 } from 'lucide-react';
+import { Clock, Users, ChefHat, Archive, Send, CheckCircle, Trash2, Plus } from 'lucide-react';
+import { RecipeEditorDialog } from './components/RecipeEditorDialog';
 
 interface Recipe {
   id: string;
@@ -43,6 +44,7 @@ export function RecipesClient() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   useEffect(() => {
     loadRecipes();
@@ -50,10 +52,7 @@ export function RecipesClient() {
   }, []);
 
   async function loadUser() {
-    const supabase = createClient(
-      'https://jwchmdivuwgfjrwvgtia.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Y2htZGl2dXdnZmpyd3ZndGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTA4NjMsImV4cCI6MjA3MjA4Njg2M30.e_pN2KPqn9ZtNC32vwYNhjK7xzmIgpqOweqEmUIoPbA'
-    );
+    const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
     setUserId(user?.id || null);
   }
@@ -176,7 +175,17 @@ export function RecipesClient() {
           <h1 className="text-3xl font-bold">Klyra Recipes</h1>
           <p className="text-muted-foreground">Gestione ricette con workflow approvativo</p>
         </div>
+        <Button onClick={() => setEditorOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nuova Ricetta
+        </Button>
       </div>
+
+      <RecipeEditorDialog
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        onSuccess={loadRecipes}
+      />
 
       {recipes.length === 0 ? (
         <Card className="p-12 text-center">
