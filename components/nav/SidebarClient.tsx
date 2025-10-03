@@ -62,6 +62,14 @@ const navigation: any[] = [
       { name: 'Compliance', href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
     ]
   },
+  {
+    name: 'Klyra Recipes',
+    icon: ChefHat,
+    permission: null,
+    children: [
+      { name: 'Lista Ricette', href: '/recipes', icon: ChefHat, permission: null },
+    ]
+  },
   { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
   { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
   { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
