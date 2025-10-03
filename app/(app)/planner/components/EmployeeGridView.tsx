@@ -139,9 +139,9 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      // Refetch per sincronizzare con server
+      // Refetch in background con debounce
       if (onSave) {
-        await onSave()
+        setTimeout(() => onSave(), 500)
       }
     } catch (error) {
       console.error('Error handling drag:', error)
@@ -149,7 +149,7 @@ export function EmployeeGridView({
       
       // Revert su errore
       if (onSave) {
-        await onSave()
+        setTimeout(() => onSave(), 100)
       }
     }
   }
@@ -300,12 +300,14 @@ export function EmployeeGridView({
       <DragOverlay>
         {activeShift && (
           <Card className="p-3 opacity-90 cursor-grabbing border-2 border-primary shadow-lg">
-            <div className="text-xs font-medium mb-1">
+            <div className="text-xs font-medium">
               {format(new Date(activeShift.start_at), 'HH:mm')} - {format(new Date(activeShift.end_at), 'HH:mm')}
             </div>
-            <div className="text-xs text-muted-foreground">
-              ← Sinistra = Duplica | Destra = Sposta →
-            </div>
+            {activeShift.job_tag && (
+              <Badge variant="outline" className="mt-1 text-xs">
+                {activeShift.job_tag.label}
+              </Badge>
+            )}
           </Card>
         )}
       </DragOverlay>
@@ -334,6 +336,7 @@ function formatHoursMinutes(decimalHours: number): string {
 }
 
 function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; onClick?: () => void }) {
+  const [mouseDownTime, setMouseDownTime] = useState<number | null>(null)
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
     data: { shift }
@@ -344,19 +347,30 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     opacity: isDragging ? 0.5 : 1,
   } : undefined
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setMouseDownTime(Date.now())
+    const dndListener = listeners?.onPointerDown
+    if (dndListener) {
+      dndListener(e as any)
+    }
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (mouseDownTime && Date.now() - mouseDownTime < 200 && !isDragging) {
+      e.stopPropagation()
+      onClick?.()
+    }
+    setMouseDownTime(null)
+  }
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      {...listeners}
       {...attributes}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
       className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
-      onClick={(e) => {
-        if (!isDragging) {
-          e.stopPropagation()
-          onClick?.()
-        }
-      }}
     >
       <div className="flex items-center gap-1 text-xs font-medium">
         <Clock className="h-3 w-3 shrink-0" />
@@ -395,21 +409,19 @@ function DroppableCell({
   const isHovering = leftZone.isOver || rightZone.isOver
 
   return (
-    <div className="relative min-h-[80px] rounded border border-border">
+    <div className="relative min-h-[80px] rounded border border-border overflow-hidden">
       {/* Zona sinistra - DUPLICA */}
       <div 
         ref={leftZone.setNodeRef}
-        className={`absolute left-0 top-0 bottom-0 w-1/2 transition-all rounded-l ${
+        className={`absolute left-0 top-0 bottom-0 w-1/2 transition-all duration-200 ${
           leftZone.isOver 
-            ? 'bg-blue-500/20 border-r-2 border-blue-500' 
-            : isHovering ? 'bg-blue-500/5' : ''
+            ? 'bg-blue-500/30 backdrop-blur-[2px]' 
+            : ''
         }`}
       >
         {leftZone.isOver && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Badge className="bg-blue-500 text-white font-bold text-xs">
-              📋 DUPLICA
-            </Badge>
+            <span className="text-3xl">📋</span>
           </div>
         )}
       </div>
@@ -417,25 +429,26 @@ function DroppableCell({
       {/* Zona destra - SPOSTA */}
       <div 
         ref={rightZone.setNodeRef}
-        className={`absolute right-0 top-0 bottom-0 w-1/2 transition-all rounded-r ${
+        className={`absolute right-0 top-0 bottom-0 w-1/2 transition-all duration-200 ${
           rightZone.isOver 
-            ? 'bg-green-500/20 border-l-2 border-green-500' 
-            : isHovering ? 'bg-green-500/5' : ''
+            ? 'bg-green-500/30 backdrop-blur-[2px]' 
+            : ''
         }`}
       >
         {rightZone.isOver && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Badge className="bg-green-500 text-white font-bold text-xs">
-              ➡️ SPOSTA
-            </Badge>
+            <span className="text-3xl">➡️</span>
           </div>
         )}
       </div>
       
       {/* Contenuto reale della cella */}
-      <div className="relative z-10">
+      <div className="relative z-10 pointer-events-none">
         {children}
       </div>
+      
+      {/* Layer cliccabile sopra tutto */}
+      <div className="absolute inset-0 z-20 pointer-events-auto" />
     </div>
   )
 }
