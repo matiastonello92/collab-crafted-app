@@ -16,12 +16,14 @@ import {
   Users, 
   Edit, 
   CheckCircle2,
-  Send
+  Send,
+  Play
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
 import { RecipeWorkflowBadge } from '../components/RecipeWorkflowBadge';
 import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
+import { StepsEditor } from '../components/StepsEditor';
 import { formatTime } from '@/lib/recipes/scaling';
 
 interface Recipe {
@@ -153,10 +155,12 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
   const isDraft = recipe.status === 'draft';
   const isSubmitted = recipe.status === 'submitted';
+  const isPublished = recipe.status === 'published';
   const isOwner = currentUserId === recipe.created_by;
   const canEdit = isDraft && isOwner;
   const canSubmit = isDraft && isOwner && recipe.photo_url;
   const canApprove = (isDraft || isSubmitted) && canManage && recipe.photo_url;
+  const canUseCookMode = isPublished && recipe.recipe_steps?.length > 0;
   const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
 
   return (
@@ -174,6 +178,17 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
         <div className="flex items-center gap-2">
           <RecipeWorkflowBadge status={recipe.status as any} />
+          
+          {canUseCookMode && (
+            <Button
+              variant="default"
+              onClick={() => router.push(`/recipes/${recipeId}/cook`)}
+              className="gap-2"
+            >
+              <Play className="h-4 w-4" />
+              Modalità Cucina
+            </Button>
+          )}
           
           {canEdit && (
             <Button
@@ -293,39 +308,12 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
         </TabsContent>
 
         <TabsContent value="steps" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Procedimento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recipe.recipe_steps?.length > 0 ? (
-                recipe.recipe_steps.map((step: any) => (
-                  <div key={step.id} className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      <Badge variant="outline" className="rounded-full h-8 w-8 flex items-center justify-center">
-                        {step.step_number}
-                      </Badge>
-                    </div>
-                    <div className="flex-1">
-                      {step.title && (
-                        <h4 className="font-medium mb-1">{step.title}</h4>
-                      )}
-                      <p className="text-sm text-muted-foreground">{step.instruction}</p>
-                      {step.timer_minutes > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          ⏱️ {step.timer_minutes} minuti
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Nessun passaggio disponibile
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <StepsEditor
+            recipeId={recipe.id}
+            steps={recipe.recipe_steps || []}
+            readOnly={!canEdit}
+            onStepsChange={loadRecipe}
+          />
         </TabsContent>
       </Tabs>
 

@@ -1,0 +1,313 @@
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2, Save, X, Clock, ListChecks } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface RecipeStep {
+  id?: string;
+  step_number: number;
+  title?: string;
+  instruction: string;
+  timer_minutes?: number;
+  checklist_items?: string[];
+  photo_url?: string;
+}
+
+interface StepsEditorProps {
+  recipeId: string;
+  steps: RecipeStep[];
+  readOnly?: boolean;
+  onStepsChange?: () => void;
+}
+
+export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }: StepsEditorProps) {
+  const [editingStep, setEditingStep] = useState<Partial<RecipeStep> | null>(null);
+  const [checklistInput, setChecklistInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sortedSteps = [...steps].sort((a, b) => a.step_number - b.step_number);
+
+  function handleStartAdd() {
+    const nextNumber = Math.max(0, ...steps.map(s => s.step_number)) + 1;
+    setEditingStep({
+      step_number: nextNumber,
+      instruction: '',
+      timer_minutes: 0,
+      checklist_items: []
+    });
+  }
+
+  function handleStartEdit(step: RecipeStep) {
+    setEditingStep({ ...step });
+    setChecklistInput('');
+  }
+
+  function handleCancel() {
+    setEditingStep(null);
+    setChecklistInput('');
+  }
+
+  async function handleSave() {
+    if (!editingStep?.instruction) {
+      toast.error('Inserisci le istruzioni');
+      return;
+    }
+
+    // Check step_number uniqueness
+    if (steps.some(s => s.id !== editingStep.id && s.step_number === editingStep.step_number)) {
+      toast.error('Numero step già esistente');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const endpoint = editingStep.id
+        ? `/api/v1/recipes/${recipeId}/steps/${editingStep.id}`
+        : `/api/v1/recipes/${recipeId}/steps`;
+
+      const method = editingStep.id ? 'PATCH' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step_number: editingStep.step_number,
+          title: editingStep.title || null,
+          instruction: editingStep.instruction,
+          timer_minutes: editingStep.timer_minutes || 0,
+          checklist_items: editingStep.checklist_items || []
+        })
+      });
+
+      if (!response.ok) throw new Error('Errore salvataggio step');
+
+      toast.success(editingStep.id ? 'Step aggiornato' : 'Step aggiunto');
+      setEditingStep(null);
+      setChecklistInput('');
+      onStepsChange?.();
+    } catch (error) {
+      console.error('Error saving step:', error);
+      toast.error('Errore salvataggio step');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(stepId: string) {
+    if (!confirm('Eliminare questo step?')) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${stepId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Errore eliminazione');
+
+      toast.success('Step eliminato');
+      onStepsChange?.();
+    } catch (error) {
+      console.error('Error deleting step:', error);
+      toast.error('Errore eliminazione step');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleAddChecklistItem() {
+    if (!checklistInput.trim()) return;
+    if (!editingStep) return;
+
+    setEditingStep({
+      ...editingStep,
+      checklist_items: [...(editingStep.checklist_items || []), checklistInput.trim()]
+    });
+    setChecklistInput('');
+  }
+
+  function handleRemoveChecklistItem(index: number) {
+    if (!editingStep) return;
+    setEditingStep({
+      ...editingStep,
+      checklist_items: editingStep.checklist_items?.filter((_, i) => i !== index) || []
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Procedimento</CardTitle>
+          {!readOnly && !editingStep && (
+            <Button onClick={handleStartAdd} size="sm" className="gap-2">
+              <Plus className="h-4 w-4" />
+              Aggiungi Step
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Editing Form */}
+        {editingStep && (
+          <Card className="border-primary">
+            <CardContent className="pt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="step_number">Numero Step *</Label>
+                  <Input
+                    id="step_number"
+                    type="number"
+                    min={1}
+                    value={editingStep.step_number || 1}
+                    onChange={e => setEditingStep({ ...editingStep, step_number: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="timer_minutes">Timer (minuti)</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="timer_minutes"
+                      type="number"
+                      min={0}
+                      value={editingStep.timer_minutes || 0}
+                      onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="title">Titolo (opzionale)</Label>
+                <Input
+                  id="title"
+                  value={editingStep.title || ''}
+                  onChange={e => setEditingStep({ ...editingStep, title: e.target.value })}
+                  placeholder="es. Preparazione impasto"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="instruction">Istruzioni *</Label>
+                <Textarea
+                  id="instruction"
+                  value={editingStep.instruction || ''}
+                  onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
+                  placeholder="Descrivi il passaggio..."
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2">
+                  <ListChecks className="h-4 w-4" />
+                  Checklist (opzionale)
+                </Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={checklistInput}
+                    onChange={e => setChecklistInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleAddChecklistItem()}
+                    placeholder="Aggiungi item e premi Invio"
+                  />
+                  <Button type="button" onClick={handleAddChecklistItem} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {editingStep.checklist_items && editingStep.checklist_items.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {editingStep.checklist_items.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm">
+                        <Badge variant="secondary" className="flex-1">{item}</Badge>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveChecklistItem(idx)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleSave} disabled={loading} className="gap-2">
+                  <Save className="h-4 w-4" />
+                  Salva
+                </Button>
+                <Button variant="outline" onClick={handleCancel} disabled={loading}>
+                  Annulla
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Steps List */}
+        {sortedSteps.length > 0 ? (
+          sortedSteps.map((step) => (
+            <div key={step.id} className="flex gap-4 p-4 border rounded-lg">
+              <div className="flex-shrink-0">
+                <Badge variant="outline" className="rounded-full h-10 w-10 flex items-center justify-center text-base font-bold">
+                  {step.step_number}
+                </Badge>
+              </div>
+              <div className="flex-1 space-y-2">
+                {step.title && <h4 className="font-medium">{step.title}</h4>}
+                <p className="text-sm text-muted-foreground">{step.instruction}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {step.timer_minutes && step.timer_minutes > 0 && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Clock className="h-3 w-3" />
+                      {step.timer_minutes} min
+                    </Badge>
+                  )}
+                  {step.checklist_items && step.checklist_items.length > 0 && (
+                    <Badge variant="secondary" className="gap-1">
+                      <ListChecks className="h-3 w-3" />
+                      {step.checklist_items.length} items
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              {!readOnly && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleStartEdit(step)}
+                    disabled={loading || !!editingStep}
+                  >
+                    Modifica
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => step.id && handleDelete(step.id)}
+                    disabled={loading || !!editingStep}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            {readOnly ? 'Nessun passaggio disponibile' : 'Aggiungi il primo passaggio'}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
