@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { User, Plus, Calendar } from 'lucide-react'
+import { User, Plus, Calendar, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +43,12 @@ export function EmployeeGridView({
   const weekDays = getWeekBounds(weekStart)
   const employeeStats = useEmployeeStats({ shifts, weekStart })
 
+  // Delete zone droppable
+  const deleteZone = useDroppable({
+    id: 'delete-zone',
+    data: { action: 'delete' }
+  })
+
   const handleDragStart = (event: DragStartEvent) => {
     const shift = localShifts.find(s => s.id === event.active.id)
     setActiveShift(shift || null)
@@ -66,6 +72,39 @@ export function EmployeeGridView({
     
     // Parsare ID per estrarre userId, date, action
     const overId = over.id as string
+
+    // Check se è stato trascinato sulla zona di eliminazione
+    if (overId === 'delete-zone') {
+      // Optimistic update: rimuovi lo shift
+      setLocalShifts(prev => prev.filter(s => s.id !== shift.id))
+      setActiveShift(null)
+      
+      // API call DELETE in background
+      try {
+        const response = await fetch(`/api/v1/shifts/${shift.id}`, { method: 'DELETE' })
+        
+        if (!response.ok) throw new Error('Failed to delete shift')
+        
+        toast.success('Turno eliminato')
+        
+        // Refetch per sincronizzare con server
+        if (onSave) {
+          onSave()
+        }
+      } catch (error) {
+        console.error('Error deleting shift:', error)
+        toast.error('Errore nell\'eliminazione del turno')
+        
+        // Revert: ripristina shifts originali su errore
+        setLocalShifts(shifts)
+        
+        if (onSave) {
+          onSave()
+        }
+      }
+      
+      return
+    }
     const parts = overId.split('_')
     
     // Formato: userId_yyyy-MM-dd_action (es: "123_2025-10-15_duplicate")
@@ -386,6 +425,31 @@ export function EmployeeGridView({
           </Card>
         )}
       </DragOverlay>
+
+      {/* Zona eliminazione - appare solo durante drag */}
+      {activeShift && (
+        <div 
+          ref={deleteZone.setNodeRef}
+          className={`fixed bottom-0 left-0 right-0 h-20 flex items-center justify-center z-50 transition-all duration-200 ${
+            deleteZone.isOver 
+              ? 'bg-red-600 shadow-2xl' 
+              : 'bg-red-500/80 backdrop-blur-sm'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <Trash2 
+              className={`transition-transform duration-200 ${
+                deleteZone.isOver ? 'scale-125' : 'scale-100'
+              }`}
+              size={32} 
+              color="white" 
+            />
+            <span className="text-white font-bold text-lg">
+              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+            </span>
+          </div>
+        </div>
+      )}
     </DndContext>
   )
 }
