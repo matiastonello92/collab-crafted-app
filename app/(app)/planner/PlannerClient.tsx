@@ -104,9 +104,10 @@ export function PlannerClient() {
 
           setJobTags((tagsData || []).map(t => ({ 
             id: t.id,
-            name: t.key,
-            label: t.label_it || t.key,
-            color: t.color 
+            key: t.key,
+            label_it: t.label_it,
+            color: t.color || null,
+            categoria: null
           })))
         }
       } catch (err) {
