@@ -32,6 +32,7 @@ export function PlannerClient() {
   const [selectedShift, setSelectedShift] = useState<ShiftWithAssignments | null>(null)
   const [users, setUsers] = useState<any[]>([])
   const [jobTags, setJobTags] = useState<any[]>([])
+  const [showUsersWithoutShifts, setShowUsersWithoutShifts] = useState(true)
   
   // Publish/Lock dialogs
   const [showPublishDialog, setShowPublishDialog] = useState(false)
@@ -250,6 +251,8 @@ export function PlannerClient() {
           onLock={() => setShowLockDialog(true)}
           canPublish={canPublish && !publishing}
           canLock={canLock && !locking}
+          showUsersWithoutShifts={showUsersWithoutShifts}
+          onToggleUsersWithoutShifts={setShowUsersWithoutShifts}
         />
         
         {selectedLocation ? (
@@ -259,6 +262,7 @@ export function PlannerClient() {
             weekStart={currentWeek}
             onShiftClick={setSelectedShift}
             onCellClick={handleCellClick}
+            showUsersWithoutShifts={showUsersWithoutShifts}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

@@ -18,9 +18,10 @@ interface Props {
   weekStart: string
   onShiftClick?: (shift: ShiftWithAssignments) => void
   onCellClick?: (userId: string, date: string) => void
+  showUsersWithoutShifts?: boolean
 }
 
-export function EmployeeGridView({ shifts, users, weekStart, onShiftClick, onCellClick }: Props) {
+export function EmployeeGridView({ shifts, users, weekStart, onShiftClick, onCellClick, showUsersWithoutShifts = true }: Props) {
   const { days } = getWeekBounds(weekStart)
   
   // Calculate employee stats (ComboHR style)
@@ -136,8 +137,10 @@ export function EmployeeGridView({ shifts, users, weekStart, onShiftClick, onCel
           const user = users.find(u => u.id === userId)
           const stats = employeeStats[userId]
           
-          // Skip unassigned (already shown at top) and users with no shifts
-          if (userId === 'unassigned' || (userShifts.length === 0 && userId !== 'unassigned')) return null
+          // Skip unassigned (already shown at top)
+          if (userId === 'unassigned') return null
+          // Hide users without shifts if toggle is off
+          if (!showUsersWithoutShifts && userShifts.length === 0) return null
           
           return (
             <div key={userId} className="grid grid-cols-8 gap-2 items-start">

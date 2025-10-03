@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+const NONE_VALUE = '__none__'
+
 interface Props {
   shift: ShiftWithAssignments | null
   open: boolean
@@ -57,9 +59,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       setStartTime(format(start, 'HH:mm'))
       setEndTime(format(end, 'HH:mm'))
       setBreakMinutes(shift.break_minutes || 0)
-      setJobTagId(shift.job_tag_id || '')
+      setJobTagId(shift.job_tag_id || NONE_VALUE)
       setNotes(shift.notes || '')
-      setAssignedUserId(shift.assignments?.[0]?.user_id || '')
+      setAssignedUserId(shift.assignments?.[0]?.user_id || NONE_VALUE)
     }
   }, [shift, open])
   
@@ -79,7 +81,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
           start_at: newStartAt,
           end_at: newEndAt,
           break_minutes: breakMinutes,
-          job_tag_id: jobTagId || null,
+          job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : null,
           notes: notes || null
         })
       })
@@ -91,7 +93,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       }
       
       // Update assignment if changed
-      if (assignedUserId && assignedUserId !== shift.assignments?.[0]?.user_id) {
+      if (assignedUserId && assignedUserId !== NONE_VALUE && assignedUserId !== shift.assignments?.[0]?.user_id) {
         const assignResponse = await fetch(`/api/v1/shifts/${shift.id}/assign`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -210,7 +212,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                     <SelectValue placeholder="Seleziona ruolo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nessun ruolo</SelectItem>
+                    <SelectItem value={NONE_VALUE}>Nessun ruolo</SelectItem>
                     {jobTags.map(tag => (
                       <SelectItem key={tag.id} value={tag.id}>
                         {tag.label || tag.name}
@@ -229,7 +231,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   <SelectValue placeholder="Seleziona utente" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nessun utente</SelectItem>
+                  <SelectItem value={NONE_VALUE}>Nessun utente</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex items-center gap-2">

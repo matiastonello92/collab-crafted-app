@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, Calendar, Send, Lock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Send, Lock, Eye, EyeOff } from 'lucide-react'
 import { formatWeekLabel, getPreviousWeek, getNextWeek, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 
 interface Props {
@@ -14,9 +14,11 @@ interface Props {
   onLock?: () => void
   canPublish?: boolean
   canLock?: boolean
+  showUsersWithoutShifts?: boolean
+  onToggleUsersWithoutShifts?: (show: boolean) => void
 }
 
-export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, onPublish, onLock, canPublish, canLock }: Props) {
+export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, onPublish, onLock, canPublish, canLock, showUsersWithoutShifts, onToggleUsersWithoutShifts }: Props) {
   const goToPrevWeek = () => {
     onWeekChange(getPreviousWeek(currentWeek))
   }
@@ -99,6 +101,27 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
 
       {/* Rota Actions */}
       <div className="flex items-center gap-2">
+        {onToggleUsersWithoutShifts && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onToggleUsersWithoutShifts(!showUsersWithoutShifts)}
+            className="h-8"
+          >
+            {showUsersWithoutShifts ? (
+              <>
+                <EyeOff className="h-4 w-4 mr-2" />
+                Nascondi utenti senza turni
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Mostra tutti gli utenti
+              </>
+            )}
+          </Button>
+        )}
+        
         {canPublish && onPublish && (
           <Button 
             variant="default" 
