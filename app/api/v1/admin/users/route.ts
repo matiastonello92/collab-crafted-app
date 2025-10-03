@@ -124,21 +124,38 @@ export async function GET(request: NextRequest) {
     console.log('✅ [USERS] Profiles fetched:', profiles?.length || 0)
 
     // Fetch emails using admin client (only for returned users - efficient)
-    const supabaseAdmin = createSupabaseAdminClient()
-    const usersWithEmails = await Promise.all(
-      (profiles || []).map(async (profile) => {
-        try {
-          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(profile.id)
-          return {
-            ...profile,
-            email: authUser?.user?.email || ''
-          }
-        } catch (err) {
-          console.warn('⚠️ [USERS] Failed to fetch email for user:', profile.id)
-          return { ...profile, email: '' }
-        }
-      })
-    )
+    let supabaseAdmin: ReturnType<typeof createSupabaseAdminClient> | null = null
+    const hasServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (hasServiceRole) {
+      try {
+        supabaseAdmin = createSupabaseAdminClient()
+      } catch (adminError) {
+        console.warn('⚠️ [USERS] Failed to init service role client - skipping email enrichment', adminError)
+      }
+    } else {
+      console.warn('⚠️ [USERS] SUPABASE_SERVICE_ROLE_KEY not configured - returning profiles without email metadata')
+    }
+
+    const usersWithEmails = supabaseAdmin
+      ? await Promise.all(
+          (profiles || []).map(async (profile) => {
+            try {
+              const { data: authUser } = await supabaseAdmin!.auth.admin.getUserById(profile.id)
+              return {
+                ...profile,
+                email: authUser?.user?.email || ''
+              }
+            } catch (err) {
+              console.warn('⚠️ [USERS] Failed to fetch email for user:', profile.id)
+              return { ...profile, email: '' }
+            }
+          })
+        )
+      : (profiles || []).map((profile) => ({
+          ...profile,
+          email: ''
+        }))
 
     console.log('✅ [USERS] Response ready with', usersWithEmails.length, 'users')
     return NextResponse.json({ users: usersWithEmails })
