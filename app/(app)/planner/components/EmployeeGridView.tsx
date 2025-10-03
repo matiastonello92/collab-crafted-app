@@ -9,8 +9,34 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor, rectIntersection } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor, rectIntersection, pointerWithin, getFirstCollision } from '@dnd-kit/core'
 import { toast } from 'sonner'
+
+// Custom collision detection che dà PRIORITÀ ASSOLUTA alla delete zone
+function customCollisionDetection(args: any) {
+  // 1. Prima controlla SOLO la delete zone
+  const deleteZoneCollisions = rectIntersection({
+    ...args,
+    droppableContainers: args.droppableContainers.filter(
+      (container: any) => container.id === 'delete-zone'
+    )
+  })
+  
+  // Se interseca la delete zone, ritorna SOLO quella (priorità assoluta)
+  if (deleteZoneCollisions.length > 0) {
+    return deleteZoneCollisions
+  }
+  
+  // 2. Altrimenti usa pointerWithin per le celle (più preciso di rectIntersection)
+  const pointerCollisions = pointerWithin(args)
+  
+  if (pointerCollisions.length > 0) {
+    return pointerCollisions
+  }
+  
+  // 3. Fallback a rectIntersection
+  return rectIntersection(args)
+}
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -75,8 +101,10 @@ export function EmployeeGridView({
     
     console.log('🔍 [DEBUG] Drop detected:', { 
       overId, 
+      overData: over.data,
       isDeleteZone: overId === 'delete-zone',
-      activeId: active.id 
+      activeId: active.id,
+      allDroppableIds: event.collisions?.map(c => c.id) || []
     })
 
     // Check se è stato trascinato sulla zona di eliminazione
@@ -286,13 +314,13 @@ export function EmployeeGridView({
   )
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={rectIntersection}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={customCollisionDetection}>
       {/* Delete Zone - Top Right Corner */}
       {activeShift && (
         <div 
           ref={deleteZone.setNodeRef}
           title="Trascina qui uno shift per eliminarlo"
-          className={`fixed top-4 right-4 w-16 h-16 flex items-center justify-center z-[100] transition-all duration-300 rounded-2xl ${
+          className={`fixed top-4 right-4 w-16 h-16 flex items-center justify-center z-[9999] transition-all duration-300 rounded-2xl ${
             deleteZone.isOver 
               ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-[1.2] ring-4 ring-red-400/60 border-2' 
               : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
