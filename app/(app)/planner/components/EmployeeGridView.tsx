@@ -136,6 +136,8 @@ export function EmployeeGridView({
     return grouped
   }, [shifts, users])
 
+  const unassignedShifts = shiftsByUser.unassigned || []
+
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
@@ -152,6 +154,48 @@ export function EmployeeGridView({
             </div>
           ))}
         </div>
+
+        {/* Unassigned shifts section */}
+        {unassignedShifts.length > 0 && (
+          <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-4 pb-4 border-b">
+            <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-lg">
+              <div className="flex-1">
+                <div className="font-medium text-sm">Turni Non Assegnati</div>
+                <div className="text-xs text-muted-foreground">
+                  {unassignedShifts.length} {unassignedShifts.length === 1 ? 'turno' : 'turni'}
+                </div>
+              </div>
+            </div>
+
+            {weekDays.map(day => {
+              const dayShifts = unassignedShifts.filter(s => 
+                format(new Date(s.start_at), 'yyyy-MM-dd') === day.dateStr
+              )
+              
+              return (
+                <DroppableCell
+                  key={`unassigned-${day.dateStr}`}
+                  userId="unassigned"
+                  date={day.dateStr}
+                  onIndicatorChange={setDropIndicator}
+                >
+                  <div 
+                    className="p-2 space-y-2 cursor-pointer min-h-[80px]"
+                    onClick={() => onCellClick?.('unassigned', day.dateStr)}
+                  >
+                    {dayShifts.map(shift => (
+                      <DraggableShiftCard
+                        key={shift.id}
+                        shift={shift}
+                        onClick={() => onShiftClick?.(shift)}
+                      />
+                    ))}
+                  </div>
+                </DroppableCell>
+              )
+            })}
+          </div>
+        )}
 
         {Object.entries(shiftsByUser).map(([userId, userShifts]) => {
           if (userId === 'unassigned') return null

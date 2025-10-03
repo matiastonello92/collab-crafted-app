@@ -60,7 +60,13 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
       setCandidates(data.candidates || [])
     } catch (error) {
       console.error('🤖 [SmartAssign] Exception:', error)
-      toast.error('Errore nel caricamento candidati')
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      
+      if (errorMessage.includes('LOVABLE_API_KEY') || errorMessage.includes('API key')) {
+        toast.error('Configurazione AI mancante. Aggiungi LOVABLE_API_KEY nei Supabase Edge Functions Secrets.')
+      } else {
+        toast.error('Errore nel caricamento candidati')
+      }
     } finally {
       setLoading(false)
     }

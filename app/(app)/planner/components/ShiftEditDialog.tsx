@@ -217,7 +217,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Date & Time */}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="font-medium">Data</Label>
+                <Label className="font-medium text-foreground">Data</Label>
                 <Input
                   className="bg-background"
                   type="date" 
@@ -228,7 +228,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium">Inizio</Label>
+                <Label className="font-medium text-foreground">Inizio</Label>
                 <Input
                   className="bg-background"
                   required
@@ -240,7 +240,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium">Fine</Label>
+                <Label className="font-medium text-foreground">Fine</Label>
                 <Input
                   className="bg-background"
                   required
@@ -255,7 +255,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Break & Job Tag */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="font-medium">Pausa (minuti)</Label>
+                <Label className="font-medium text-foreground">Pausa (minuti)</Label>
                 <Input
                   className="bg-background"
                   type="number" 
@@ -267,7 +267,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium">Ruolo</Label>
+                <Label className="font-medium text-foreground">Ruolo</Label>
                 <Select value={jobTagId} onValueChange={setJobTagId} disabled={isLocked}>
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Seleziona ruolo" />
@@ -286,7 +286,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* User Assignment */}
             <div className="space-y-2">
-              <Label className="font-medium">Assegna Utente</Label>
+              <Label className="font-medium text-foreground">Assegna Utente</Label>
               <Select value={assignedUserId} onValueChange={setAssignedUserId} disabled={isLocked}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Seleziona utente" />
@@ -312,7 +312,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* Notes */}
             <div className="space-y-2">
-              <Label className="font-medium">Note</Label>
+              <Label className="font-medium text-foreground">Note</Label>
               <Textarea
                 className="bg-background"
                 value={notes}
