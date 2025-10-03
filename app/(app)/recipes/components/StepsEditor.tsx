@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Save, X, Clock, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
+import { StepPhotoUploader } from './StepPhotoUploader';
 
 interface RecipeStep {
   id?: string;
@@ -82,7 +83,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           title: editingStep.title || null,
           instruction: editingStep.instruction,
           timer_minutes: editingStep.timer_minutes || 0,
-          checklist_items: editingStep.checklist_items || []
+          checklist_items: editingStep.checklist_items || [],
+          photo_url: editingStep.photo_url || null
         })
       });
 
@@ -202,6 +204,18 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                   onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
                   placeholder="Descrivi il passaggio..."
                   rows={4}
+                />
+              </div>
+
+              {/* Photo Upload */}
+              <div className="space-y-2">
+                <Label>Foto Step (Opzionale)</Label>
+                <StepPhotoUploader
+                  recipeId={recipeId}
+                  stepId={editingStep.id || 'temp'}
+                  currentUrl={editingStep.photo_url || ''}
+                  onPhotoUpdate={(url) => setEditingStep({ ...editingStep, photo_url: url })}
+                  disabled={readOnly}
                 />
               </div>
 

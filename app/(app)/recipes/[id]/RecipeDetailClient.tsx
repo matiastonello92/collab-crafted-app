@@ -17,7 +17,9 @@ import {
   Edit, 
   CheckCircle2,
   Send,
-  Play
+  Play,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
@@ -25,6 +27,7 @@ import { RecipeWorkflowBadge } from '../components/RecipeWorkflowBadge';
 import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
 import { StepsEditor } from '../components/StepsEditor';
 import { formatTime } from '@/lib/recipes/scaling';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Recipe {
   id: string;
@@ -54,6 +57,8 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [canManage, setCanManage] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   useEffect(() => {
     loadRecipe();
@@ -98,6 +103,12 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   }
 
   async function handleSubmit() {
+    if (!recipe?.photo_url) {
+      toast.error('Carica una foto prima di inviare');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/v1/recipes/${recipeId}/submit`, {
         method: 'POST'
@@ -109,12 +120,20 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       loadRecipe();
     } catch (error) {
       toast.error('Errore invio ricetta');
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   async function handleApprove() {
+    if (!recipe?.photo_url) {
+      toast.error('Foto obbligatoria per pubblicare');
+      return;
+    }
+
+    setIsApproving(true);
     try {
-      const response = await fetch(`/api/v1/recipes/${recipeId}/approve`, {
+      const response = await fetch(`/api/v1/recipes/${recipeId}/publish`, {
         method: 'POST'
       });
 
@@ -127,6 +146,8 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       loadRecipe();
     } catch (error: any) {
       toast.error(error.message || 'Errore approvazione ricetta');
+    } finally {
+      setIsApproving(false);
     }
   }
 
@@ -165,6 +186,26 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
   return (
     <div className="container mx-auto p-6 max-w-5xl space-y-6">
+      {/* Photo Required Warning for Draft */}
+      {recipe.status === 'draft' && !recipe.photo_url && (
+        <Alert variant="default" className="border-warning bg-warning/10">
+          <AlertCircle className="h-4 w-4 text-warning" />
+          <AlertDescription className="text-warning">
+            <strong>Foto obbligatoria:</strong> Carica una foto della ricetta prima di poter inviare per approvazione.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Photo Required Warning for Submitted */}
+      {recipe.status === 'submitted' && !recipe.photo_url && canManage && (
+        <Alert variant="default" className="border-warning bg-warning/10">
+          <AlertCircle className="h-4 w-4 text-warning" />
+          <AlertDescription className="text-warning">
+            <strong>Foto mancante:</strong> Questa ricetta non può essere pubblicata senza una foto.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button
@@ -201,25 +242,47 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             </Button>
           )}
           
-          {canSubmit && (
+          {isDraft && isOwner && (
             <Button
               variant="default"
               onClick={handleSubmit}
+              disabled={isSubmitting || !recipe.photo_url}
               className="gap-2"
+              title={!recipe.photo_url ? 'Carica una foto prima di inviare' : undefined}
             >
-              <Send className="h-4 w-4" />
-              Invia per Approvazione
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Invio...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Invia per Approvazione
+                </>
+              )}
             </Button>
           )}
           
-          {canApprove && (
+          {canManage && (isDraft || isSubmitted) && (
             <Button
               variant="default"
               onClick={handleApprove}
+              disabled={isApproving || !recipe.photo_url}
               className="gap-2 bg-green-600 hover:bg-green-700"
+              title={!recipe.photo_url ? 'Foto obbligatoria per pubblicare' : undefined}
             >
-              <CheckCircle2 className="h-4 w-4" />
-              Approva e Pubblica
+              {isApproving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Approvazione...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Approva e Pubblica
+                </>
+              )}
             </Button>
           )}
         </div>
