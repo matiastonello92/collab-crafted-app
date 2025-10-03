@@ -107,15 +107,24 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check for collisions with existing leaves
+    // Check for collisions with existing leaves (manual overlap detection)
     const { data: existingLeaves } = await supabase
       .from('leaves')
-      .select('id')
+      .select('id, start_at, end_at')
       .eq('user_id', validated.user_id)
       .eq('location_id', validated.location_id)
-      .or(`start_at.lte.${validated.end_at},end_at.gte.${validated.start_at}`)
 
-    if (existingLeaves && existingLeaves.length > 0) {
+    // Manual overlap detection: existingStart < newEnd AND existingEnd > newStart
+    const hasCollision = existingLeaves?.some(existing => {
+      const existingStart = new Date(existing.start_at).getTime()
+      const existingEnd = new Date(existing.end_at).getTime()
+      const newStart = new Date(validated.start_at).getTime()
+      const newEnd = new Date(validated.end_at).getTime()
+      
+      return existingStart < newEnd && existingEnd > newStart
+    })
+
+    if (hasCollision) {
       return NextResponse.json(
         { 
           error: 'LEAVE_COLLISION',

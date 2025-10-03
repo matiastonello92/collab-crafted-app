@@ -11,8 +11,11 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useLeaveTypes, type LeaveType } from '@/app/(app)/my-shifts/hooks/useLeaveTypes'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import type { UserProfile } from '@/types/shifts'
 
 interface AbsenceFormProps {
@@ -30,6 +33,8 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
   const [leaveTypeId, setLeaveTypeId] = useState<string>('')
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const [timeSlot, setTimeSlot] = useState<TimeSlot>('full_day')
+  const [startDate, setStartDate] = useState(date)
+  const [endDate, setEndDate] = useState(date)
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -50,23 +55,25 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
   }
 
   const getTimeRange = (slot: TimeSlot) => {
-    const baseDate = new Date(date)
+    const baseStartDate = new Date(startDate)
+    const baseEndDate = new Date(endDate)
+    
     switch (slot) {
       case 'morning':
         return {
-          start_at: new Date(baseDate.setHours(0, 0, 0, 0)).toISOString(),
-          end_at: new Date(baseDate.setHours(12, 0, 0, 0)).toISOString()
+          start_at: new Date(baseStartDate.setHours(0, 0, 0, 0)).toISOString(),
+          end_at: new Date(baseEndDate.setHours(12, 0, 0, 0)).toISOString()
         }
       case 'afternoon':
         return {
-          start_at: new Date(baseDate.setHours(12, 0, 0, 0)).toISOString(),
-          end_at: new Date(baseDate.setHours(23, 59, 59, 999)).toISOString()
+          start_at: new Date(baseStartDate.setHours(12, 0, 0, 0)).toISOString(),
+          end_at: new Date(baseEndDate.setHours(23, 59, 59, 999)).toISOString()
         }
       case 'full_day':
       default:
         return {
-          start_at: new Date(baseDate.setHours(0, 0, 0, 0)).toISOString(),
-          end_at: new Date(baseDate.setHours(23, 59, 59, 999)).toISOString()
+          start_at: new Date(baseStartDate.setHours(0, 0, 0, 0)).toISOString(),
+          end_at: new Date(baseEndDate.setHours(23, 59, 59, 999)).toISOString()
         }
     }
   }
@@ -78,6 +85,10 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
     }
     if (selectedUsers.size === 0) {
       toast.error('Seleziona almeno un utente')
+      return
+    }
+    if (new Date(startDate) > new Date(endDate)) {
+      toast.error('La data di fine deve essere successiva o uguale alla data di inizio')
       return
     }
 
@@ -126,13 +137,66 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
   return (
     <div className="space-y-4 py-4">
-      {/* Data Selezionata */}
-      <div className="bg-muted/50 p-3 rounded-md border">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">
-            Data: {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}
-          </span>
+      {/* Date Range Selection */}
+      <div className="space-y-2">
+        <Label className="font-medium text-foreground">Periodo Assenza</Label>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Start Date */}
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Data Inizio</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    "bg-background"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(parseISO(startDate), 'dd MMM yyyy', { locale: it })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={parseISO(startDate)}
+                  onSelect={(d) => d && setStartDate(d.toISOString().split('T')[0])}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* End Date */}
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Data Fine</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    "bg-background"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(parseISO(endDate), 'dd MMM yyyy', { locale: it })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={parseISO(endDate)}
+                  onSelect={(d) => d && setEndDate(d.toISOString().split('T')[0])}
+                  disabled={(date) => date < parseISO(startDate)}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
 

@@ -52,6 +52,7 @@ export async function GET(request: Request) {
         .order('start_at', { ascending: true }),
       
       // Definitive leaves (approved or manager-created)
+      // Fetch all leaves that overlap with the week (including multi-day leaves)
       supabase
         .from('leaves')
         .select(`
@@ -60,8 +61,8 @@ export async function GET(request: Request) {
           user:profiles(id, full_name, email, avatar_url)
         `)
         .eq('location_id', locationId)
-        .gte('start_at', weekStart)
-        .lt('end_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())
+        .lt('start_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('end_at', weekStart)
     ])
 
     if (rotaResult.error) console.error('Rota fetch error:', rotaResult.error)
