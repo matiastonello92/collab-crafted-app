@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Clock, User, Plus, Calendar } from 'lucide-react'
+import { Clock, User, Plus, Calendar, GripVertical } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -44,18 +44,21 @@ export function EmployeeGridView({
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-    setActiveShift(null)
-    setDropIndicator(null)
     
     // Verifica che ci sia un drop target valido
     if (!over || !active) {
-      console.log('🚫 [Drag] No valid drop target or active item')
+      setActiveShift(null)
+      setDropIndicator(null)
       return
     }
     
     // Verifica che sia effettivamente cambiata la posizione
     const shift = shifts.find(s => s.id === active.id)
-    if (!shift) return
+    if (!shift) {
+      setActiveShift(null)
+      setDropIndicator(null)
+      return
+    }
     
     const [userId, dateStr] = (over.id as string).split('_')
     const currentUserId = shift.assignments?.[0]?.user_id || 'unassigned'
@@ -63,7 +66,8 @@ export function EmployeeGridView({
     
     // Se la posizione non è cambiata, non fare nulla
     if (userId === currentUserId && dateStr === currentDate) {
-      console.log('🚫 [Drag] Position unchanged, aborting')
+      setActiveShift(null)
+      setDropIndicator(null)
       return
     }
     
@@ -74,6 +78,15 @@ export function EmployeeGridView({
     })
 
     const isDuplicate = dropIndicator === 'duplicate'
+
+    // Aggiorna UI immediatamente (optimistic)
+    setActiveShift(null)
+    setDropIndicator(null)
+    
+    // Chiama onSave PRIMA delle API calls per update immediato
+    if (onSave) {
+      onSave()
+    }
 
     try {
       if (isDuplicate) {
@@ -132,13 +145,18 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      // Chiama onSave per refresh dati invece di reload
+      // Secondo refetch per sincronizzare con server
       if (onSave) {
         onSave()
       }
     } catch (error) {
       console.error('Error handling drag:', error)
       toast.error('Errore nello spostamento del turno')
+      
+      // Revert su errore
+      if (onSave) {
+        onSave()
+      }
     }
   }
 
@@ -243,7 +261,7 @@ export function EmployeeGridView({
                   </div>
                   {stats && (
                     <div className="text-xs text-muted-foreground">
-                      {stats.plannedHours}h
+                      {formatHoursMinutes(stats.plannedHours)}
                     </div>
                   )}
                 </div>
@@ -289,10 +307,15 @@ export function EmployeeGridView({
       
       <DragOverlay>
         {activeShift && (
-          <Card className="p-2 opacity-80 cursor-grabbing">
+          <Card className="p-2 opacity-80 cursor-grabbing border-2 border-primary">
             <div className="text-xs font-medium">
               {format(new Date(activeShift.start_at), 'HH:mm')} - {format(new Date(activeShift.end_at), 'HH:mm')}
             </div>
+            {dropIndicator && (
+              <Badge variant={dropIndicator === 'duplicate' ? 'default' : 'secondary'} className="mt-1 text-xs">
+                {dropIndicator === 'duplicate' ? '📋 Duplica (Alt)' : '➡️ Sposta'}
+              </Badge>
+            )}
           </Card>
         )}
       </DragOverlay>
@@ -314,6 +337,12 @@ function getWeekBounds(weekStart: string) {
   return weekDays
 }
 
+function formatHoursMinutes(decimalHours: number): string {
+  const hours = Math.floor(decimalHours)
+  const minutes = Math.round((decimalHours % 1) * 60)
+  return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`
+}
+
 function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; onClick?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
@@ -329,15 +358,23 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     <Card
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
-      className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
+      className="p-2 hover:bg-accent/50 transition-colors cursor-pointer group"
       onClick={(e) => {
-        e.stopPropagation()
-        onClick?.()
+        if (!isDragging) {
+          e.stopPropagation()
+          onClick?.()
+        }
       }}
     >
       <div className="flex items-start justify-between gap-2">
+        <div 
+          {...listeners} 
+          {...attributes}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+        
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 text-xs font-medium">
             <Clock className="h-3 w-3 shrink-0" />
@@ -367,9 +404,35 @@ function DroppableCell({
   children: React.ReactNode
   onIndicatorChange?: (indicator: 'move' | 'duplicate' | null) => void
 }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: `${userId}_${date}`
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: `${userId}_${date}`,
+    data: { userId, date }
   })
+
+  // Rileva tasto Alt durante hover
+  useEffect(() => {
+    if (!isOver || !active) {
+      onIndicatorChange?.(null)
+      return
+    }
+
+    const handleKeyChange = (e: KeyboardEvent) => {
+      onIndicatorChange?.(e.altKey ? 'duplicate' : 'move')
+    }
+
+    // Listener per Alt key
+    window.addEventListener('keydown', handleKeyChange)
+    window.addEventListener('keyup', handleKeyChange)
+    
+    // Inizializza con stato corrente
+    onIndicatorChange?.('move')
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyChange)
+      window.removeEventListener('keyup', handleKeyChange)
+      onIndicatorChange?.(null)
+    }
+  }, [isOver, active, onIndicatorChange])
 
   return (
     <div
