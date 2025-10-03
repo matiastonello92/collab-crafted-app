@@ -430,21 +430,21 @@ export function EmployeeGridView({
       {activeShift && (
         <div 
           ref={deleteZone.setNodeRef}
-          className={`fixed bottom-0 left-0 right-0 h-20 flex items-center justify-center z-50 transition-all duration-200 ${
+          className={`fixed bottom-0 left-1/2 -translate-x-1/2 max-w-md w-full h-14 flex items-center justify-center z-[100] transition-all duration-200 rounded-t-lg ${
             deleteZone.isOver 
-              ? 'bg-red-600 shadow-2xl' 
-              : 'bg-red-500/80 backdrop-blur-sm'
+              ? 'bg-red-500/60 shadow-2xl scale-105' 
+              : 'bg-red-500/30 backdrop-blur-sm'
           }`}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Trash2 
               className={`transition-transform duration-200 ${
-                deleteZone.isOver ? 'scale-125' : 'scale-100'
+                deleteZone.isOver ? 'scale-110' : 'scale-100'
               }`}
-              size={32} 
+              size={20} 
               color="white" 
             />
-            <span className="text-white font-bold text-lg">
+            <span className="text-white font-semibold text-sm">
               {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
             </span>
           </div>
@@ -542,7 +542,7 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     >
       {shift.job_tag && (
         <div 
-          className="text-xs font-bold text-white mb-0.5 truncate"
+          className="text-xs font-bold text-white mb-0 truncate"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {shift.job_tag.label_it}
