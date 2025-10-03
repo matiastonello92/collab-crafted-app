@@ -271,23 +271,70 @@ export function CatalogoTagTab() {
             </div>
 
             <div>
-              <Label htmlFor="color">Colore (HEX)</Label>
-              <div className="flex gap-2">
+              <Label htmlFor="color">Colore</Label>
+              
+              {/* Color picker nativo + Input HEX + Preview */}
+              <div className="flex gap-2 items-center">
+                <input
+                  type="color"
+                  id="color-picker"
+                  value={formData.color || '#6B7280'}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value.toUpperCase() })}
+                  className="w-14 h-10 rounded border cursor-pointer"
+                  title="Seleziona colore"
+                />
+                
                 <Input
                   id="color"
                   value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value.toUpperCase() })}
                   placeholder="#10B981"
+                  className="flex-1 font-mono"
+                  maxLength={7}
                 />
+                
                 {formData.color && (
                   <div
-                    className="w-10 h-10 rounded border"
+                    className="w-10 h-10 rounded border shrink-0"
                     style={{ backgroundColor: formData.color }}
+                    title={formData.color}
                   />
                 )}
               </div>
+              
+              {/* Palette colori predefiniti */}
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground mb-2">Colori rapidi:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { name: 'Viola', hex: '#8B5CF6' },
+                    { name: 'Rosso', hex: '#EF4444' },
+                    { name: 'Verde', hex: '#10B981' },
+                    { name: 'Blu', hex: '#3B82F6' },
+                    { name: 'Giallo', hex: '#F59E0B' },
+                    { name: 'Rosa', hex: '#EC4899' },
+                    { name: 'Teal', hex: '#14B8A6' },
+                    { name: 'Arancione', hex: '#F97316' },
+                    { name: 'Indigo', hex: '#6366F1' },
+                    { name: 'Lime', hex: '#84CC16' },
+                  ].map((c) => (
+                    <button
+                      key={c.hex}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, color: c.hex })}
+                      className="w-9 h-9 rounded border-2 hover:scale-110 transition-transform"
+                      style={{ 
+                        backgroundColor: c.hex,
+                        borderColor: formData.color === c.hex ? '#000' : 'transparent'
+                      }}
+                      title={`${c.name} (${c.hex})`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
               {formData.categoria && !formData.color && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-2">
                   Verrà utilizzato il colore predefinito per {formData.categoria}
                 </p>
               )}
