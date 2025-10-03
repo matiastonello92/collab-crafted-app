@@ -23,8 +23,10 @@ export interface Location {
 
 export interface JobTag {
   id: string
-  name: string
-  label: string
+  key: string
+  label_it: string
+  color?: string | null
+  categoria?: string | null
   is_active: boolean
 }
 

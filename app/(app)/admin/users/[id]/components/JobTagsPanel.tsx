@@ -130,7 +130,7 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
                   variant="secondary" 
                   className="flex items-center gap-1"
                 >
-                  {tag.label}
+                  {tag.label_it}
                   <button
                     onClick={() => handleRemoveTag(tag.id)}
                     className="ml-1 hover:bg-destructive/20 rounded-sm p-0.5 transition-colors"
@@ -159,7 +159,7 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
               <SelectContent>
                 {getUnassignedTags().map(tag => (
                   <SelectItem key={tag.id} value={tag.id}>
-                    {tag.label}
+                    {tag.label_it}
                   </SelectItem>
                 ))}
               </SelectContent>

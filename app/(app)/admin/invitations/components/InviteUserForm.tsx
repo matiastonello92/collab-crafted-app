@@ -205,7 +205,7 @@ export function InviteUserForm() {
             selectedLocationIds.forEach(locationId => {
               jobTagsForLocations.push({
                 location_id: locationId,
-                tag_name: jobTag.name
+                tag_name: jobTag.key
               })
             })
           }
@@ -363,7 +363,7 @@ export function InviteUserForm() {
                 }}
               />
               <Label htmlFor={jobTag.id} className="flex-1 cursor-pointer text-sm">
-                {jobTag.label}
+                {jobTag.label_it}
               </Label>
             </div>
           ))}
@@ -374,7 +374,7 @@ export function InviteUserForm() {
               const tag = jobTags.find(t => t.id === tagId)
               return tag ? (
                 <Badge key={tagId} variant="secondary" className="text-xs">
-                  {tag.label}
+                  {tag.label_it}
                 </Badge>
               ) : null
             })}
