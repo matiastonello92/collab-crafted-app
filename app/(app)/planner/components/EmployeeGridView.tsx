@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
 interface Props {
@@ -174,8 +174,17 @@ export function EmployeeGridView({
 
   const unassignedShifts = shiftsByUser.unassigned || []
 
+  // ✅ Sensors con activationConstraint - richiede 5px di movimento per attivare drag
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Minimo 5px di movimento per attivare drag
+      }
+    })
+  )
+
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
           <div className="font-semibold text-sm">Dipendente</div>
@@ -336,9 +345,6 @@ function formatHoursMinutes(decimalHours: number): string {
 }
 
 function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; onClick?: () => void }) {
-  const [mouseDownPos, setMouseDownPos] = useState<{ x: number; y: number } | null>(null)
-  const [hasMoved, setHasMoved] = useState(false)
-  
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
     data: { shift }
@@ -349,59 +355,21 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     opacity: isDragging ? 0.5 : 1,
   } : undefined
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // Salva posizione iniziale
-    setMouseDownPos({ x: e.clientX, y: e.clientY })
-    setHasMoved(false)
-    // ✅ NON chiamare listeners qui - sarà chiamato solo se rileva drag
-  }
-  
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (mouseDownPos && !hasMoved) {
-      const deltaX = Math.abs(e.clientX - mouseDownPos.x)
-      const deltaY = Math.abs(e.clientY - mouseDownPos.y)
-      
-      // Se si muove più di 5px, è un drag - attiva dnd-kit
-      if (deltaX > 5 || deltaY > 5) {
-        setHasMoved(true)
-        
-        // ✅ Attiva dnd-kit SOLO quando è sicuramente un drag
-        const dndListener = listeners?.onPointerDown
-        if (dndListener) {
-          // Crea evento sintetico con posizione iniziale
-          const syntheticEvent = new PointerEvent('pointerdown', {
-            bubbles: true,
-            cancelable: true,
-            clientX: mouseDownPos.x,
-            clientY: mouseDownPos.y,
-            pointerId: e.pointerId,
-            pointerType: e.pointerType
-          })
-          dndListener(syntheticEvent as any)
-        }
-      }
-    }
-  }
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    // Click = rilascio senza movimento significativo
-    if (mouseDownPos && !hasMoved && !isDragging) {
+  const handleClick = (e: React.MouseEvent) => {
+    // ✅ Se non è in drag, è un click - dnd-kit gestisce il resto
+    if (!isDragging) {
       e.stopPropagation()
       onClick?.()
     }
-    
-    // Reset
-    setMouseDownPos(null)
-    setHasMoved(false)
   }
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
+      {...attributes}
+      {...listeners}
+      onClick={handleClick}
       className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
     >
       <div className="flex items-center gap-1 text-xs font-medium">
