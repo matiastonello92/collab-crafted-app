@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { User, Plus, Calendar, Trash2 } from 'lucide-react'
@@ -9,31 +9,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, MouseSensor, TouchSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
-// Custom collision detection che usa pointerWithin (più preciso) con fallback a closestCenter
-function customCollisionDetection(args: any) {
-  // 1. Usa pointerWithin - verifica dove è il POINTER, non il centro del drag
-  const pointerCollisions = pointerWithin(args)
-  
-  // 2. Se il pointer è sopra la delete zone, ritorna SOLO quella (priorità assoluta)
-  const deleteZoneCollision = pointerCollisions.find((collision: any) => 
-    collision.id === 'delete-zone'
-  )
-  
-  if (deleteZoneCollision) {
-    return [deleteZoneCollision]
-  }
-  
-  // 3. Se ci sono altre collisions da pointerWithin, ritorna quelle
-  if (pointerCollisions.length > 0) {
-    return pointerCollisions
-  }
-  
-  // 4. Fallback a closestCenter (più naturale per celle)
-  return closestCenter(args)
-}
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -65,6 +43,13 @@ export function EmployeeGridView({
   
   const weekDays = getWeekBounds(weekStart)
   const employeeStats = useEmployeeStats({ shifts, weekStart })
+
+  // Collision detection - prioritize delete zone, fallback to closestCenter
+  const collisionDetection = useCallback((args: any) => {
+    const pointer = pointerWithin(args);
+    if (pointer.length) return pointer;
+    return closestCenter(args);
+  }, []);
 
   // Delete zone droppable
   const deleteZone = useDroppable({
@@ -312,12 +297,13 @@ export function EmployeeGridView({
 
   const unassignedShifts = shiftsByUser.unassigned || []
 
-  // ✅ Sensors con activationConstraint - richiede 5px di movimento per attivare drag
+  // ✅ Sensors solidi (mouse + touch)
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5, // Minimo 5px di movimento per attivare drag
-      }
+    useSensor(MouseSensor, { 
+      activationConstraint: { distance: 4 } 
+    }),
+    useSensor(TouchSensor, { 
+      activationConstraint: { delay: 150, tolerance: 5 } 
     })
   )
 
@@ -328,43 +314,42 @@ export function EmployeeGridView({
       onDragStart={handleDragStart} 
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd} 
-      collisionDetection={customCollisionDetection}
+      collisionDetection={collisionDetection}
     >
       {/* Delete Zone - Bottom Center Bar */}
-      <div 
-        ref={deleteZone.setNodeRef}
-        title="Trascina qui uno shift per eliminarlo"
-        style={{ 
-          pointerEvents: activeShift ? 'auto' : 'none',
-          position: 'fixed',
-          bottom: 80,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 280,
-          height: 64,
-          zIndex: 100
-        }}
-        className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
-          !activeShift 
-            ? 'opacity-0 scale-95' 
-            : deleteZone.isOver 
+      {activeShift && (
+        <div 
+          ref={deleteZone.setNodeRef}
+          title="Trascina qui uno shift per eliminarlo"
+          style={{ 
+            position: 'fixed',
+            bottom: 80,
+            left: '50%',
+            marginLeft: -140,
+            width: 280,
+            height: 64,
+            zIndex: 1000
+          }}
+          className={`flex items-center justify-center transition-all duration-300 rounded-xl ${
+            deleteZone.isOver 
               ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-105 ring-4 ring-red-400/60 border-2' 
               : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
-        }`}
-      >
-        <div className="flex items-center gap-3 pointer-events-none">
-          <Trash2 
-            className={`transition-transform duration-200 ${
-              deleteZone.isOver ? 'scale-110' : 'scale-100'
-            }`}
-            size={28} 
-            color="white" 
-          />
-          <span className="text-white font-semibold text-sm tracking-wide">
-            {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
-          </span>
+          }`}
+        >
+          <div className="flex items-center gap-3 pointer-events-none">
+            <Trash2 
+              className={`transition-transform duration-200 ${
+                deleteZone.isOver ? 'scale-110' : 'scale-100'
+              }`}
+              size={28} 
+              color="white" 
+            />
+            <span className="text-white font-semibold text-sm tracking-wide">
+              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
