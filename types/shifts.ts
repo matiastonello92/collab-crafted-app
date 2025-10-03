@@ -219,6 +219,7 @@ export interface JobTag {
   id: string
   name: string
   label: string
+  label_it?: string
   color?: string | null
 }
 

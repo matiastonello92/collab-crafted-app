@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Clock, User, Plus, Calendar } from 'lucide-react'
+import { User, Plus, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -363,15 +363,24 @@ export function EmployeeGridView({
       
       <DragOverlay>
         {activeShift && (
-          <Card className="p-3 opacity-90 cursor-grabbing border-2 border-primary shadow-lg">
-            <div className="text-xs font-medium">
-              {format(new Date(activeShift.start_at), 'HH:mm')} - {format(new Date(activeShift.end_at), 'HH:mm')}
-            </div>
+          <Card 
+            className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
+            style={{
+              backgroundColor: hexToRgba(activeShift.job_tag?.color, 0.9),
+              borderColor: hexToRgba(activeShift.job_tag?.color, 1),
+              borderWidth: '3px'
+            }}
+          >
             {activeShift.job_tag && (
-              <Badge variant="outline" className="mt-1 text-xs">
-                {activeShift.job_tag.label}
-              </Badge>
+              <div className="text-xs font-semibold text-gray-900 mb-1 truncate">
+                {activeShift.job_tag.label_it || activeShift.job_tag.label}
+              </div>
             )}
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-800">
+              <span className="font-medium">
+                {formatTimeCombo(new Date(activeShift.start_at))} - {formatTimeCombo(new Date(activeShift.end_at))}
+              </span>
+            </div>
           </Card>
         )}
       </DragOverlay>
@@ -399,19 +408,52 @@ function formatHoursMinutes(decimalHours: number): string {
   return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`
 }
 
+// Formatta orario come "9h50" invece di "09:50"
+function formatTimeCombo(date: Date): string {
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+  return `${hours}h${minutes.toString().padStart(2, '0')}`
+}
+
+// Converte hex in rgba per opacità controllata
+function hexToRgba(hex: string | null | undefined, alpha: number = 1): string {
+  if (!hex) return `rgba(200, 200, 200, ${alpha})` // grigio default
+  
+  // Rimuove # se presente
+  const cleanHex = hex.replace('#', '')
+  
+  // Converte in RGB
+  const r = parseInt(cleanHex.substring(0, 2), 16)
+  const g = parseInt(cleanHex.substring(2, 4), 16)
+  const b = parseInt(cleanHex.substring(4, 6), 16)
+  
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; onClick?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
     data: { shift }
   })
   
+  const startTime = formatTimeCombo(new Date(shift.start_at))
+  const endTime = formatTimeCombo(new Date(shift.end_at))
+  const bgColor = hexToRgba(shift.job_tag?.color, 0.85)
+  const borderColor = hexToRgba(shift.job_tag?.color, 1)
+  
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     opacity: isDragging ? 0.5 : 1,
-  } : undefined
+    backgroundColor: bgColor,
+    borderColor: borderColor,
+    borderWidth: '2px'
+  } : {
+    backgroundColor: bgColor,
+    borderColor: borderColor,
+    borderWidth: '2px'
+  }
 
   const handleClick = (e: React.MouseEvent) => {
-    // ✅ Se non è in drag, è un click - dnd-kit gestisce il resto
     if (!isDragging) {
       e.stopPropagation()
       onClick?.()
@@ -425,19 +467,19 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
+      className="p-2 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
-      <div className="flex items-center gap-1 text-xs font-medium">
-        <Clock className="h-3 w-3 shrink-0" />
-        <span className="truncate">
-          {format(new Date(shift.start_at), 'HH:mm')} - {format(new Date(shift.end_at), 'HH:mm')}
+      {shift.job_tag && (
+        <div className="text-xs font-semibold text-gray-900 dark:text-gray-900 mb-1 truncate">
+          {shift.job_tag.label_it || shift.job_tag.label}
+        </div>
+      )}
+      
+      <div className="flex items-center justify-between gap-2 text-xs text-gray-800 dark:text-gray-800">
+        <span className="font-medium truncate">
+          {startTime} - {endTime}
         </span>
       </div>
-      {shift.job_tag && (
-        <Badge variant="outline" className="mt-1 text-xs">
-          {shift.job_tag.label}
-        </Badge>
-      )}
     </Card>
   )
 }
