@@ -23,7 +23,7 @@ export async function GET(
         submitted_by_profile:profiles!recipes_submitted_by_fkey(id, full_name),
         published_by_profile:profiles!recipes_published_by_fkey(id, full_name),
         location:locations(id, name),
-        recipe_ingredients(
+        recipe_ingredients!recipe_ingredients_recipe_id_fkey(
           *,
           catalog_item:inventory_catalog_items(id, name, category, uom),
           sub_recipe:recipes!recipe_ingredients_sub_recipe_id_fkey(id, title, servings, photo_url, status)

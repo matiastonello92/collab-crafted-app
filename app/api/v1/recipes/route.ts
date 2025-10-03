@@ -42,7 +42,7 @@ export async function GET(request: Request) {
         *,
         created_by_profile:profiles!recipes_created_by_fkey(id, full_name, avatar_url),
         location:locations(id, name),
-        recipe_ingredients(
+        recipe_ingredients!recipe_ingredients_recipe_id_fkey(
           id,
           quantity,
           unit,
