@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { format, parseISO } from 'date-fns'
+import { it } from 'date-fns/locale'
+import { Calendar } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -119,6 +122,16 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
   return (
     <div className="space-y-4 py-4">
+      {/* Data Selezionata */}
+      <div className="bg-muted/50 p-3 rounded-md border">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">
+            Data: {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}
+          </span>
+        </div>
+      </div>
+
       {/* Leave Type */}
       <div className="space-y-2">
         <Label className="font-medium text-foreground">Tipo di Assenza</Label>
