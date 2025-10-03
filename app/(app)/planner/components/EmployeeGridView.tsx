@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor, rectIntersection } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
 interface Props {
@@ -72,6 +72,12 @@ export function EmployeeGridView({
     
     // Parsare ID per estrarre userId, date, action
     const overId = over.id as string
+    
+    console.log('🔍 [DEBUG] Drop detected:', { 
+      overId, 
+      isDeleteZone: overId === 'delete-zone',
+      activeId: active.id 
+    })
 
     // Check se è stato trascinato sulla zona di eliminazione
     if (overId === 'delete-zone') {
@@ -280,7 +286,32 @@ export function EmployeeGridView({
   )
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={rectIntersection}>
+      {/* Zona eliminazione - PRIMA di tutto per priorità nella detection */}
+      {activeShift && (
+        <div 
+          ref={deleteZone.setNodeRef}
+          className={`fixed bottom-0 left-1/2 -translate-x-1/2 max-w-md w-full h-14 flex items-center justify-center z-[100] transition-all duration-200 rounded-t-lg ${
+            deleteZone.isOver 
+              ? 'bg-red-600/90 shadow-[0_0_40px_rgba(239,68,68,0.6)] scale-[1.15] ring-4 ring-red-400/50' 
+              : 'bg-red-500/30 backdrop-blur-sm'
+          }`}
+        >
+          <div className="flex items-center gap-2 pointer-events-none">
+            <Trash2 
+              className={`transition-transform duration-200 ${
+                deleteZone.isOver ? 'scale-125' : 'scale-100'
+              }`}
+              size={20} 
+              color="white" 
+            />
+            <span className="text-white font-semibold text-sm">
+              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+            </span>
+          </div>
+        </div>
+      )}
+      
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
           <div className="font-semibold text-sm">Dipendente</div>
@@ -425,31 +456,6 @@ export function EmployeeGridView({
           </Card>
         )}
       </DragOverlay>
-
-      {/* Zona eliminazione - appare solo durante drag */}
-      {activeShift && (
-        <div 
-          ref={deleteZone.setNodeRef}
-          className={`fixed bottom-0 left-1/2 -translate-x-1/2 max-w-md w-full h-14 flex items-center justify-center z-[100] transition-all duration-200 rounded-t-lg ${
-            deleteZone.isOver 
-              ? 'bg-red-600/90 shadow-[0_0_40px_rgba(239,68,68,0.6)] scale-[1.15] ring-4 ring-red-400/50' 
-              : 'bg-red-500/30 backdrop-blur-sm'
-          }`}
-        >
-          <div className="flex items-center gap-2 pointer-events-none">
-            <Trash2 
-              className={`transition-transform duration-200 ${
-                deleteZone.isOver ? 'scale-125' : 'scale-100'
-              }`}
-              size={20} 
-              color="white" 
-            />
-            <span className="text-white font-semibold text-sm">
-              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
-            </span>
-          </div>
-        </div>
-      )}
     </DndContext>
   )
 }
