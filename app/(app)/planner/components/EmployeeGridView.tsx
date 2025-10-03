@@ -336,7 +336,9 @@ function formatHoursMinutes(decimalHours: number): string {
 }
 
 function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; onClick?: () => void }) {
-  const [mouseDownTime, setMouseDownTime] = useState<number | null>(null)
+  const [mouseDownPos, setMouseDownPos] = useState<{ x: number; y: number } | null>(null)
+  const [hasMoved, setHasMoved] = useState(false)
+  
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: shift.id,
     data: { shift }
@@ -348,19 +350,39 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   } : undefined
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    setMouseDownTime(Date.now())
+    // Salva posizione iniziale
+    setMouseDownPos({ x: e.clientX, y: e.clientY })
+    setHasMoved(false)
+    
+    // Chiama listener dnd-kit
     const dndListener = listeners?.onPointerDown
     if (dndListener) {
       dndListener(e as any)
     }
   }
+  
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (mouseDownPos) {
+      const deltaX = Math.abs(e.clientX - mouseDownPos.x)
+      const deltaY = Math.abs(e.clientY - mouseDownPos.y)
+      
+      // Se si muove più di 5px, è un drag
+      if (deltaX > 5 || deltaY > 5) {
+        setHasMoved(true)
+      }
+    }
+  }
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (mouseDownTime && Date.now() - mouseDownTime < 200 && !isDragging) {
+    // Click = rilascio senza movimento significativo
+    if (mouseDownPos && !hasMoved && !isDragging) {
       e.stopPropagation()
       onClick?.()
     }
-    setMouseDownTime(null)
+    
+    // Reset
+    setMouseDownPos(null)
+    setHasMoved(false)
   }
 
   return (
@@ -369,6 +391,7 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       style={style}
       {...attributes}
       onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
     >
