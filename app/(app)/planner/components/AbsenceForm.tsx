@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar } from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -86,9 +86,9 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       const { start_at, end_at } = getTimeRange(timeSlot)
       const userIds = Array.from(selectedUsers)
 
-      // Create leave request for each selected user
+      // Create definitive leave for each selected user (manager action)
       const promises = userIds.map(userId =>
-        fetch('/api/v1/leave/requests', {
+        fetch('/api/v1/leaves', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -98,7 +98,6 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
             start_at,
             end_at,
             reason: notes || undefined,
-            status: 'approved' // Auto-approve from planner
           })
         })
       )
@@ -107,7 +106,12 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       const failed = results.filter(r => !r.ok)
 
       if (failed.length > 0) {
-        toast.error(`${failed.length} assenze non sono state create`)
+        const firstError = await failed[0].json()
+        if (firstError.error === 'LEAVE_COLLISION') {
+          toast.error('Esiste già un\'assenza per uno o più utenti in questo periodo. Rimuovi quella esistente o scegli un altro giorno.')
+        } else {
+          toast.error(`${failed.length} assenze non sono state create: ${firstError.message || firstError.error}`)
+        }
       } else {
         toast.success(`${userIds.length} assenza/e create con successo`)
         onSuccess()
@@ -125,7 +129,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       {/* Data Selezionata */}
       <div className="bg-muted/50 p-3 rounded-md border">
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-primary" />
+          <CalendarIcon className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-foreground">
             Data: {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}
           </span>

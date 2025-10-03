@@ -76,6 +76,23 @@ export interface LeaveRequest {
   approver_id?: string | null
   approved_at?: string | null
   notes?: string | null
+  converted_to_leave_id?: string | null // Tracks conversion to definitive leave
+  created_at: string
+  updated_at: string
+}
+
+export interface Leave {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  type_id: string
+  start_at: string
+  end_at: string
+  reason?: string | null
+  notes?: string | null
+  created_by: string // Manager or system (approval)
+  created_from_request_id?: string | null // Link to original request if converted
   created_at: string
   updated_at: string
 }

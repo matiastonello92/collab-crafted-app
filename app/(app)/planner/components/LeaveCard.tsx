@@ -15,23 +15,32 @@ interface LeaveType {
 interface LeaveProfile {
   id: string
   full_name: string | null
+  email?: string | null
+  avatar_url?: string | null
 }
 
-interface LeaveRequest {
+// Can be either a leave request OR a definitive leave
+interface LeaveData {
   id: string
   user_id: string
   type_id: string
   start_at: string
   end_at: string
-  status: string
   reason: string | null
   leave_types: LeaveType
-  profiles: LeaveProfile
+  user?: LeaveProfile
+  profiles?: LeaveProfile
+  // For leave requests
+  status?: string
+  // For leaves
+  created_by?: string
+  created_from_request_id?: string | null
 }
 
 interface LeaveCardProps {
-  leave: LeaveRequest
+  leave: LeaveData
   showUserName?: boolean
+  isDefinitive?: boolean // true = Leave (immutable), false = LeaveRequest
 }
 
 // Convert hex to rgba for controlled opacity
@@ -65,12 +74,13 @@ function getLeaveTimeDisplay(start: string, end: string): string {
   return 'Giornata intera'
 }
 
-export function LeaveCard({ leave, showUserName = false }: LeaveCardProps) {
+export function LeaveCard({ leave, showUserName = false, isDefinitive = true }: LeaveCardProps) {
   const bgColor = hexToRgba(leave.leave_types.color, 0.15)
   const borderColor = hexToRgba(leave.leave_types.color, 0.6)
   const textColor = hexToRgba(leave.leave_types.color, 1)
   
   const timeDisplay = getLeaveTimeDisplay(leave.start_at, leave.end_at)
+  const profile = leave.user || leave.profiles
   
   return (
     <Card
@@ -78,7 +88,7 @@ export function LeaveCard({ leave, showUserName = false }: LeaveCardProps) {
       style={{
         backgroundColor: bgColor,
         borderColor: borderColor,
-        borderStyle: 'dashed'
+        borderStyle: isDefinitive ? 'solid' : 'dashed' // Solid for leaves, dashed for requests
       }}
     >
       <div className="flex items-start gap-1.5">
@@ -95,14 +105,14 @@ export function LeaveCard({ leave, showUserName = false }: LeaveCardProps) {
             {leave.leave_types.label}
           </div>
           
-          {showUserName && leave.profiles.full_name && (
+          {showUserName && profile?.full_name && (
             <div className="flex items-center gap-1 mt-0.5">
               <User className="h-3 w-3" style={{ color: textColor }} />
               <span 
                 className="text-xs truncate"
                 style={{ color: textColor, opacity: 0.8 }}
               >
-                {leave.profiles.full_name}
+                {profile.full_name}
               </span>
             </div>
           )}

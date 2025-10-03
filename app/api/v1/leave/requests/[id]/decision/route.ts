@@ -57,7 +57,42 @@ export async function PUT(
 
     const newStatus = validated.decision === 'approve' ? 'approved' : 'rejected'
 
-    // Update leave request
+    // If approving, convert to definitive leave
+    let convertedLeaveId: string | null = null
+    if (validated.decision === 'approve') {
+      // Fetch full leave request data
+      const { data: fullRequest } = await supabase
+        .from('leave_requests')
+        .select('*, locations(org_id)')
+        .eq('id', params.id)
+        .single()
+
+      if (fullRequest) {
+        // Create definitive leave
+        const { data: newLeave, error: leaveError } = await supabase
+          .from('leaves')
+          .insert({
+            org_id: fullRequest.locations.org_id,
+            location_id: fullRequest.location_id,
+            user_id: fullRequest.user_id,
+            type_id: fullRequest.type_id,
+            start_at: fullRequest.start_at,
+            end_at: fullRequest.end_at,
+            reason: fullRequest.reason,
+            notes: validated.notes || fullRequest.notes,
+            created_by: user.id,
+            created_from_request_id: params.id,
+          })
+          .select('id')
+          .single()
+
+        if (!leaveError && newLeave) {
+          convertedLeaveId = newLeave.id
+        }
+      }
+    }
+
+    // Update leave request with conversion tracking
     const { data: updated, error } = await supabase
       .from('leave_requests')
       .update({
@@ -65,6 +100,7 @@ export async function PUT(
         approver_id: user.id,
         approved_at: new Date().toISOString(),
         notes: validated.notes || null,
+        converted_to_leave_id: convertedLeaveId,
         updated_at: new Date().toISOString(),
       })
       .eq('id', params.id)

@@ -933,6 +933,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approver_id: string | null
+          converted_to_leave_id: string | null
           created_at: string
           end_at: string
           id: string
@@ -949,6 +950,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approver_id?: string | null
+          converted_to_leave_id?: string | null
           created_at?: string
           end_at: string
           id?: string
@@ -965,6 +967,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approver_id?: string | null
+          converted_to_leave_id?: string | null
           created_at?: string
           end_at?: string
           id?: string
@@ -984,6 +987,13 @@ export type Database = {
             columns: ["approver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_converted_to_leave_id_fkey"
+            columns: ["converted_to_leave_id"]
+            isOneToOne: false
+            referencedRelation: "leaves"
             referencedColumns: ["id"]
           },
           {
@@ -1064,6 +1074,90 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      leaves: {
+        Row: {
+          created_at: string
+          created_by: string
+          created_from_request_id: string | null
+          end_at: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          reason: string | null
+          start_at: string
+          type_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          created_from_request_id?: string | null
+          end_at: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          reason?: string | null
+          start_at: string
+          type_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          created_from_request_id?: string | null
+          end_at?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          reason?: string | null
+          start_at?: string
+          type_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaves_created_from_request_id_fkey"
+            columns: ["created_from_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaves_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaves_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaves_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "leaves_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
           },
         ]
       }

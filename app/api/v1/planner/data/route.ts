@@ -51,16 +51,15 @@ export async function GET(request: Request) {
         .lt('start_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())
         .order('start_at', { ascending: true }),
       
-      // Leave requests with explicit relationship specification to avoid ambiguity
+      // Definitive leaves (approved or manager-created)
       supabase
-        .from('leave_requests')
+        .from('leaves')
         .select(`
           *,
           leave_types(id, key, label, color),
-          user:profiles!leave_requests_user_id_fkey(id, full_name)
+          user:profiles!leaves_user_id_fkey(id, full_name, email, avatar_url)
         `)
         .eq('location_id', locationId)
-        .eq('status', 'approved')
         .gte('start_at', weekStart)
         .lt('end_at', new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString())
     ])
