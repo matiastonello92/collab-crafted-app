@@ -335,7 +335,7 @@ export function EmployeeGridView({
         ref={deleteZone.setNodeRef}
         title="Trascina qui uno shift per eliminarlo"
         style={{ pointerEvents: activeShift ? 'auto' : 'none' }}
-        className={`fixed top-8 right-8 w-24 h-24 flex items-center justify-center z-[9999] transition-all duration-300 rounded-2xl ${
+        className={`fixed top-8 right-8 w-24 h-24 flex items-center justify-center z-[10001] transition-all duration-300 rounded-2xl ${
           !activeShift 
             ? 'opacity-0' 
             : deleteZone.isOver 
@@ -480,7 +480,7 @@ export function EmployeeGridView({
         })}
       </div>
       
-      <DragOverlay style={{ zIndex: 10000 }}>
+      <DragOverlay style={{ zIndex: 10000, pointerEvents: 'none' }}>
         {activeShift && (
           <Card 
             className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
