@@ -281,7 +281,7 @@ export function EmployeeGridView({
                   date={day.dateStr}
                 >
                   <div 
-                    className="p-2 space-y-2 cursor-pointer min-h-[80px]"
+                    className="p-2 space-y-2 cursor-pointer min-h-[60px]"
                     onClick={() => onCellClick?.('unassigned', day.dateStr)}
                   >
                     {dayShifts.map(shift => (
@@ -338,7 +338,7 @@ export function EmployeeGridView({
                     date={day.dateStr}
                   >
                     <div 
-                      className="p-2 space-y-2 cursor-pointer min-h-[80px]"
+                      className="p-2 space-y-2 cursor-pointer min-h-[60px]"
                       onClick={() => onCellClick?.(userId, day.dateStr)}
                     >
                       {dayShifts.map(shift => (
@@ -474,11 +474,11 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="p-2 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
+      className="p-1.5 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
       {shift.job_tag && (
         <div 
-          className="text-xs font-bold text-white mb-1 truncate"
+          className="text-xs font-bold text-white mb-0.5 truncate"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {shift.job_tag.label_it}
@@ -519,7 +519,7 @@ function DroppableCell({
   const isHovering = leftZone.isOver || rightZone.isOver
 
   return (
-    <div className="relative min-h-[80px] rounded border border-border overflow-hidden">
+    <div className="relative min-h-[60px] rounded border border-border overflow-hidden">
       {/* Zona sinistra - DUPLICA */}
       <div 
         ref={leftZone.setNodeRef}
