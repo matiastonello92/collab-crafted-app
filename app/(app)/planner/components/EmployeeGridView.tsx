@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Clock, User, Plus, Calendar, GripVertical } from 'lucide-react'
+import { Clock, User, Plus, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +32,6 @@ export function EmployeeGridView({
   onSave
 }: Props) {
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
-  const [dropIndicator, setDropIndicator] = useState<'move' | 'duplicate' | null>(null)
   
   const weekDays = getWeekBounds(weekStart)
   const employeeStats = useEmployeeStats({ shifts, weekStart })
@@ -48,7 +47,6 @@ export function EmployeeGridView({
     // Verifica che ci sia un drop target valido
     if (!over || !active) {
       setActiveShift(null)
-      setDropIndicator(null)
       return
     }
     
@@ -56,37 +54,33 @@ export function EmployeeGridView({
     const shift = shifts.find(s => s.id === active.id)
     if (!shift) {
       setActiveShift(null)
-      setDropIndicator(null)
       return
     }
     
-    const [userId, dateStr] = (over.id as string).split('_')
+    // Parsare ID per estrarre userId, date, action
+    const overId = over.id as string
+    const parts = overId.split('_')
+    
+    // Formato: userId_yyyy-MM-dd_action (es: "123_2025-10-15_duplicate")
+    const action = parts[parts.length - 1] as 'duplicate' | 'move'
+    const dateStr = parts[parts.length - 2]
+    const userId = parts.slice(0, -2).join('_')
+    
     const currentUserId = shift.assignments?.[0]?.user_id || 'unassigned'
     const currentDate = format(new Date(shift.start_at), 'yyyy-MM-dd')
     
     // Se la posizione non è cambiata, non fare nulla
     if (userId === currentUserId && dateStr === currentDate) {
       setActiveShift(null)
-      setDropIndicator(null)
       return
     }
     
-    console.log('🔄 [Drag] Moving shift:', {
-      from: { userId: currentUserId, date: currentDate },
-      to: { userId, date: dateStr },
-      indicator: dropIndicator
-    })
+    console.log('🔄 [Drag] Action:', { userId, date: dateStr, action })
 
-    const isDuplicate = dropIndicator === 'duplicate'
+    const isDuplicate = action === 'duplicate'
 
     // Aggiorna UI immediatamente (optimistic)
     setActiveShift(null)
-    setDropIndicator(null)
-    
-    // Chiama onSave PRIMA delle API calls per update immediato
-    if (onSave) {
-      onSave()
-    }
 
     try {
       if (isDuplicate) {
@@ -145,9 +139,9 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      // Secondo refetch per sincronizzare con server
+      // Refetch per sincronizzare con server
       if (onSave) {
-        onSave()
+        await onSave()
       }
     } catch (error) {
       console.error('Error handling drag:', error)
@@ -155,7 +149,7 @@ export function EmployeeGridView({
       
       // Revert su errore
       if (onSave) {
-        onSave()
+        await onSave()
       }
     }
   }
@@ -219,7 +213,6 @@ export function EmployeeGridView({
                   key={`unassigned-${day.dateStr}`}
                   userId="unassigned"
                   date={day.dateStr}
-                  onIndicatorChange={setDropIndicator}
                 >
                   <div 
                     className="p-2 space-y-2 cursor-pointer min-h-[80px]"
@@ -277,7 +270,6 @@ export function EmployeeGridView({
                     key={day.dateStr}
                     userId={userId}
                     date={day.dateStr}
-                    onIndicatorChange={setDropIndicator}
                   >
                     <div 
                       className="p-2 space-y-2 cursor-pointer min-h-[80px]"
@@ -307,15 +299,13 @@ export function EmployeeGridView({
       
       <DragOverlay>
         {activeShift && (
-          <Card className="p-2 opacity-80 cursor-grabbing border-2 border-primary">
-            <div className="text-xs font-medium">
+          <Card className="p-3 opacity-90 cursor-grabbing border-2 border-primary shadow-lg">
+            <div className="text-xs font-medium mb-1">
               {format(new Date(activeShift.start_at), 'HH:mm')} - {format(new Date(activeShift.end_at), 'HH:mm')}
             </div>
-            {dropIndicator && (
-              <Badge variant={dropIndicator === 'duplicate' ? 'default' : 'secondary'} className="mt-1 text-xs">
-                {dropIndicator === 'duplicate' ? '📋 Duplica (Alt)' : '➡️ Sposta'}
-              </Badge>
-            )}
+            <div className="text-xs text-muted-foreground">
+              ← Sinistra = Duplica | Destra = Sposta →
+            </div>
           </Card>
         )}
       </DragOverlay>
@@ -358,7 +348,9 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     <Card
       ref={setNodeRef}
       style={style}
-      className="p-2 hover:bg-accent/50 transition-colors cursor-pointer group"
+      {...listeners}
+      {...attributes}
+      className="p-2 hover:bg-accent/50 transition-colors cursor-grab active:cursor-grabbing"
       onClick={(e) => {
         if (!isDragging) {
           e.stopPropagation()
@@ -366,29 +358,17 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
         }
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div 
-          {...listeners} 
-          {...attributes}
-          className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 text-xs font-medium">
-            <Clock className="h-3 w-3 shrink-0" />
-            <span className="truncate">
-              {format(new Date(shift.start_at), 'HH:mm')} - {format(new Date(shift.end_at), 'HH:mm')}
-            </span>
-          </div>
-          {shift.job_tag && (
-            <Badge variant="outline" className="mt-1 text-xs">
-              {shift.job_tag.label}
-            </Badge>
-          )}
-        </div>
+      <div className="flex items-center gap-1 text-xs font-medium">
+        <Clock className="h-3 w-3 shrink-0" />
+        <span className="truncate">
+          {format(new Date(shift.start_at), 'HH:mm')} - {format(new Date(shift.end_at), 'HH:mm')}
+        </span>
       </div>
+      {shift.job_tag && (
+        <Badge variant="outline" className="mt-1 text-xs">
+          {shift.job_tag.label}
+        </Badge>
+      )}
     </Card>
   )
 }
@@ -396,52 +376,66 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
 function DroppableCell({ 
   userId, 
   date, 
-  children, 
-  onIndicatorChange 
+  children
 }: { 
   userId: string
   date: string
   children: React.ReactNode
-  onIndicatorChange?: (indicator: 'move' | 'duplicate' | null) => void
 }) {
-  const { setNodeRef, isOver, active } = useDroppable({
-    id: `${userId}_${date}`,
-    data: { userId, date }
+  const leftZone = useDroppable({
+    id: `${userId}_${date}_duplicate`,
+    data: { userId, date, action: 'duplicate' }
   })
-
-  // Rileva tasto Alt durante hover
-  useEffect(() => {
-    if (!isOver || !active) {
-      onIndicatorChange?.(null)
-      return
-    }
-
-    const handleKeyChange = (e: KeyboardEvent) => {
-      onIndicatorChange?.(e.altKey ? 'duplicate' : 'move')
-    }
-
-    // Listener per Alt key
-    window.addEventListener('keydown', handleKeyChange)
-    window.addEventListener('keyup', handleKeyChange)
-    
-    // Inizializza con stato corrente
-    onIndicatorChange?.('move')
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyChange)
-      window.removeEventListener('keyup', handleKeyChange)
-      onIndicatorChange?.(null)
-    }
-  }, [isOver, active, onIndicatorChange])
+  
+  const rightZone = useDroppable({
+    id: `${userId}_${date}_move`,
+    data: { userId, date, action: 'move' }
+  })
+  
+  const isHovering = leftZone.isOver || rightZone.isOver
 
   return (
-    <div
-      ref={setNodeRef}
-      className={`min-h-[80px] rounded border transition-colors ${
-        isOver ? 'border-primary bg-primary/10' : 'border-border'
-      }`}
-    >
-      {children}
+    <div className="relative min-h-[80px] rounded border border-border">
+      {/* Zona sinistra - DUPLICA */}
+      <div 
+        ref={leftZone.setNodeRef}
+        className={`absolute left-0 top-0 bottom-0 w-1/2 transition-all rounded-l ${
+          leftZone.isOver 
+            ? 'bg-blue-500/20 border-r-2 border-blue-500' 
+            : isHovering ? 'bg-blue-500/5' : ''
+        }`}
+      >
+        {leftZone.isOver && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Badge className="bg-blue-500 text-white font-bold text-xs">
+              📋 DUPLICA
+            </Badge>
+          </div>
+        )}
+      </div>
+      
+      {/* Zona destra - SPOSTA */}
+      <div 
+        ref={rightZone.setNodeRef}
+        className={`absolute right-0 top-0 bottom-0 w-1/2 transition-all rounded-r ${
+          rightZone.isOver 
+            ? 'bg-green-500/20 border-l-2 border-green-500' 
+            : isHovering ? 'bg-green-500/5' : ''
+        }`}
+      >
+        {rightZone.isOver && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Badge className="bg-green-500 text-white font-bold text-xs">
+              ➡️ SPOSTA
+            </Badge>
+          </div>
+        )}
+      </div>
+      
+      {/* Contenuto reale della cella */}
+      <div className="relative z-10">
+        {children}
+      </div>
     </div>
   )
 }
