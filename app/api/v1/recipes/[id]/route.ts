@@ -1,5 +1,6 @@
 import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+import { updateRecipeSchema } from '../schemas';
 
 // GET /api/v1/recipes/:id - Get recipe detail
 export async function GET(
@@ -29,28 +30,43 @@ export async function GET(
         recipe_steps(*),
         recipe_service_notes(
           *,
-          created_by_profile:profiles(id, full_name)
+          created_by_profile:profiles(id, full_name, avatar_url)
         ),
         recipe_favorites!left(user_id)
       `)
       .eq('id', params.id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
-    // Increment view count
-    await supabase
+    if (!recipe) {
+      return NextResponse.json(
+        { error: 'Recipe not found' },
+        { status: 404 }
+      );
+    }
+
+    // Increment view count (fire and forget)
+    supabase
       .from('recipes')
       .update({ view_count: (recipe.view_count || 0) + 1 })
-      .eq('id', params.id);
+      .eq('id', params.id)
+      .then();
 
-    // Add is_favorite flag
-    const recipeWithFavorite = {
+    // Add computed fields
+    const recipeWithMeta = {
       ...recipe,
-      is_favorite: recipe.recipe_favorites?.some((fav: any) => fav.user_id === user.id) || false
+      is_favorite: recipe.recipe_favorites?.some((fav: any) => fav.user_id === user.id) || false,
+      ingredient_count: recipe.recipe_ingredients?.length || 0,
+      steps_count: recipe.recipe_steps?.length || 0,
+      total_time_minutes: (recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0),
+      can_edit: recipe.status === 'draft' && (recipe.created_by === user.id || await canManageRecipe(supabase, recipe.org_id, recipe.location_id)),
+      can_submit: recipe.status === 'draft' && recipe.created_by === user.id,
+      can_publish: recipe.status === 'submitted' && await canManageRecipe(supabase, recipe.org_id, recipe.location_id),
+      can_archive: (recipe.status === 'published' || recipe.status === 'submitted') && await canManageRecipe(supabase, recipe.org_id, recipe.location_id)
     };
 
-    return NextResponse.json({ recipe: recipeWithFavorite });
+    return NextResponse.json({ recipe: recipeWithMeta });
   } catch (error: any) {
     console.error('[recipes/:id/GET]', error);
     return NextResponse.json(
@@ -74,28 +90,22 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      category,
-      cuisine_type,
-      servings,
-      prep_time_minutes,
-      cook_time_minutes,
-      photo_url,
-      allergens,
-      season,
-      tags
-    } = body;
+    
+    // Validate input
+    const validatedData = updateRecipeSchema.parse(body);
 
     // Check recipe status
     const { data: existingRecipe, error: checkError } = await supabase
       .from('recipes')
-      .select('status, created_by')
+      .select('status, created_by, org_id, location_id')
       .eq('id', params.id)
-      .single();
+      .maybeSingle();
 
     if (checkError) throw checkError;
+
+    if (!existingRecipe) {
+      return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
+    }
 
     if (existingRecipe.status !== 'draft') {
       return NextResponse.json(
@@ -104,23 +114,18 @@ export async function PATCH(
       );
     }
 
-    // Update recipe
-    const updateData: any = {};
-    if (title !== undefined) updateData.title = title;
-    if (description !== undefined) updateData.description = description;
-    if (category !== undefined) updateData.category = category;
-    if (cuisine_type !== undefined) updateData.cuisine_type = cuisine_type;
-    if (servings !== undefined) updateData.servings = servings;
-    if (prep_time_minutes !== undefined) updateData.prep_time_minutes = prep_time_minutes;
-    if (cook_time_minutes !== undefined) updateData.cook_time_minutes = cook_time_minutes;
-    if (photo_url !== undefined) updateData.photo_url = photo_url;
-    if (allergens !== undefined) updateData.allergens = allergens;
-    if (season !== undefined) updateData.season = season;
-    if (tags !== undefined) updateData.tags = tags;
+    // Check permissions
+    const canEdit = existingRecipe.created_by === user.id || 
+                    await canManageRecipe(supabase, existingRecipe.org_id, existingRecipe.location_id);
+    
+    if (!canEdit) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
+    // Update recipe
     const { data: recipe, error } = await supabase
       .from('recipes')
-      .update(updateData)
+      .update(validatedData)
       .eq('id', params.id)
       .select()
       .single();
@@ -130,6 +135,14 @@ export async function PATCH(
     return NextResponse.json({ recipe });
   } catch (error: any) {
     console.error('[recipes/:id/PATCH]', error);
+    
+    if (error.name === 'ZodError') {
+      return NextResponse.json(
+        { error: 'Invalid input data', details: error.errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || 'Failed to update recipe' },
       { status: 500 }
@@ -153,17 +166,29 @@ export async function DELETE(
     // Check recipe status
     const { data: existingRecipe, error: checkError } = await supabase
       .from('recipes')
-      .select('status, created_by')
+      .select('status, created_by, org_id, location_id')
       .eq('id', params.id)
-      .single();
+      .maybeSingle();
 
     if (checkError) throw checkError;
+
+    if (!existingRecipe) {
+      return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
+    }
 
     if (existingRecipe.status !== 'draft') {
       return NextResponse.json(
         { error: 'Can only delete draft recipes' },
         { status: 400 }
       );
+    }
+
+    // Check permissions
+    const canDelete = existingRecipe.created_by === user.id || 
+                      await canManageRecipe(supabase, existingRecipe.org_id, existingRecipe.location_id);
+    
+    if (!canDelete) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Soft delete
@@ -182,4 +207,19 @@ export async function DELETE(
       { status: 500 }
     );
   }
+}
+
+// Helper: Check if user can manage recipes
+async function canManageRecipe(supabase: any, orgId: string, locationId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('user_can_manage_recipes', {
+    p_org_id: orgId,
+    p_location_id: locationId
+  });
+  
+  if (error) {
+    console.error('[canManageRecipe]', error);
+    return false;
+  }
+  
+  return data === true;
 }
