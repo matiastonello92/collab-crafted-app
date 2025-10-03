@@ -1159,6 +1159,13 @@ export type Database = {
             referencedRelation: "leave_types"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "leaves_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       location_admins: {
