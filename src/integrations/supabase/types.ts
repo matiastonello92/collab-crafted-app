@@ -1885,6 +1885,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "recipe_service_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "recipe_service_notes_location_fk"
             columns: ["location_id"]
             isOneToOne: false

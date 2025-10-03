@@ -31,7 +31,7 @@ export async function GET(
         recipe_steps(*),
         recipe_service_notes(
           *,
-          created_by_profile:profiles(id, full_name, avatar_url)
+          created_by_profile:profiles!recipe_service_notes_created_by_fkey(id, full_name, avatar_url)
         ),
         recipe_favorites!left(user_id)
       `)
