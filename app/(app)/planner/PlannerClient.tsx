@@ -273,6 +273,7 @@ export function PlannerClient() {
             onShiftClick={setSelectedShift}
             onCellClick={handleCellClick}
             showUsersWithoutShifts={showUsersWithoutShifts}
+            onSave={mutate}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

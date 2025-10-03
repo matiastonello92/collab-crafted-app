@@ -95,23 +95,27 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       const newEndAt = new Date(`${startDate}T${endTime}:00`).toISOString()
       
       if (isNew) {
+        const requestBody = {
+          rota_id: shift.rota_id,
+          start_at: newStartAt,
+          end_at: newEndAt,
+          break_minutes: breakMinutes,
+          job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : undefined,
+          notes: notes || undefined
+        }
+        
+        console.log('🔵 [ShiftCreate] Request body:', requestBody)
+        
         const createResponse = await fetch(`/api/v1/shifts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            rota_id: shift.rota_id,
-            location_id: shift.location_id,
-            start_at: newStartAt,
-            end_at: newEndAt,
-            break_minutes: breakMinutes,
-            job_tag_id: jobTagId && jobTagId !== NONE_VALUE ? jobTagId : null,
-            notes: notes || null
-          })
+          body: JSON.stringify(requestBody)
         })
         
         if (!createResponse.ok) {
           const error = await createResponse.json()
-          toast.error(error.message || 'Errore durante la creazione')
+          console.error('❌ [ShiftCreate] Error response:', error)
+          toast.error(error.message || error.error || 'Errore durante la creazione')
           return
         }
         
@@ -208,7 +212,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>Modifica Turno</DialogTitle>
           </DialogHeader>

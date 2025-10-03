@@ -48,10 +48,17 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
         body: { shift_id: shiftId }
       })
 
+      console.log('🤖 [SmartAssign] Raw response:', { data, error })
+
       if (error) {
-        console.error('🤖 [SmartAssign] Error:', error)
-        if (error.message?.includes('LOVABLE_API_KEY')) {
-          toast.error('Configurazione AI mancante. Contatta l\'amministratore.')
+        console.error('🤖 [SmartAssign] Full error:', JSON.stringify(error, null, 2))
+        
+        if (error.message?.includes('FunctionsHttpError') || error.message?.includes('not found')) {
+          toast.error('Funzione AI non disponibile. Verifica che sia deployata su Supabase.')
+        } else if (error.message?.includes('LOVABLE_API_KEY') || error.message?.includes('API key')) {
+          toast.error('LOVABLE_API_KEY mancante. Configura in Supabase Edge Functions Secrets.')
+        } else {
+          toast.error(`Errore AI: ${error.message}`)
         }
         throw error
       }
@@ -63,7 +70,9 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
       const errorMessage = error instanceof Error ? error.message : String(error)
       
       if (errorMessage.includes('LOVABLE_API_KEY') || errorMessage.includes('API key')) {
-        toast.error('Configurazione AI mancante. Aggiungi LOVABLE_API_KEY nei Supabase Edge Functions Secrets.')
+        toast.error('LOVABLE_API_KEY mancante. Configura in Supabase Edge Functions Secrets.')
+      } else if (errorMessage.includes('FunctionsHttpError') || errorMessage.includes('not found')) {
+        toast.error('Funzione AI non disponibile. Verifica che sia deployata su Supabase.')
       } else {
         toast.error('Errore nel caricamento candidati')
       }

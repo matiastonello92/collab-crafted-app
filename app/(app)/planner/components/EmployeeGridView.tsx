@@ -19,6 +19,7 @@ interface Props {
   onShiftClick?: (shift: ShiftWithAssignments) => void
   onCellClick?: (userId: string, date: string) => void
   showUsersWithoutShifts?: boolean
+  onSave?: () => void
 }
 
 export function EmployeeGridView({ 
@@ -27,7 +28,8 @@ export function EmployeeGridView({
   weekStart, 
   onShiftClick, 
   onCellClick,
-  showUsersWithoutShifts = true
+  showUsersWithoutShifts = true,
+  onSave
 }: Props) {
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
   const [dropIndicator, setDropIndicator] = useState<'move' | 'duplicate' | null>(null)
@@ -45,12 +47,32 @@ export function EmployeeGridView({
     setActiveShift(null)
     setDropIndicator(null)
     
-    if (!over || !active.data.current) return
-
+    // Verifica che ci sia un drop target valido
+    if (!over || !active) {
+      console.log('🚫 [Drag] No valid drop target or active item')
+      return
+    }
+    
+    // Verifica che sia effettivamente cambiata la posizione
     const shift = shifts.find(s => s.id === active.id)
     if (!shift) return
-
+    
     const [userId, dateStr] = (over.id as string).split('_')
+    const currentUserId = shift.assignments?.[0]?.user_id || 'unassigned'
+    const currentDate = format(new Date(shift.start_at), 'yyyy-MM-dd')
+    
+    // Se la posizione non è cambiata, non fare nulla
+    if (userId === currentUserId && dateStr === currentDate) {
+      console.log('🚫 [Drag] Position unchanged, aborting')
+      return
+    }
+    
+    console.log('🔄 [Drag] Moving shift:', {
+      from: { userId: currentUserId, date: currentDate },
+      to: { userId, date: dateStr },
+      indicator: dropIndicator
+    })
+
     const isDuplicate = dropIndicator === 'duplicate'
 
     try {
@@ -63,12 +85,11 @@ export function EmployeeGridView({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             rota_id: shift.rota_id,
-            location_id: shift.location_id,
             start_at: newStartAt,
             end_at: newEndAt,
             break_minutes: shift.break_minutes,
-            job_tag_id: shift.job_tag_id,
-            notes: shift.notes
+            job_tag_id: shift.job_tag_id || undefined,
+            notes: shift.notes || undefined
           })
         })
         
@@ -100,7 +121,7 @@ export function EmployeeGridView({
         
         if (!response.ok) throw new Error('Failed to move shift')
         
-        if (userId !== 'unassigned' && userId !== shift.assignments?.[0]?.user_id) {
+        if (userId !== 'unassigned' && userId !== currentUserId) {
           await fetch(`/api/v1/shifts/${shift.id}/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -111,7 +132,10 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      window.location.reload()
+      // Chiama onSave per refresh dati invece di reload
+      if (onSave) {
+        onSave()
+      }
     } catch (error) {
       console.error('Error handling drag:', error)
       toast.error('Errore nello spostamento del turno')
