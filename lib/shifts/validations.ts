@@ -15,7 +15,8 @@ export const updateRotaStatusSchema = z.object({
 
 // Shifts
 export const createShiftSchema = z.object({
-  rota_id: z.string().uuid('Invalid rota_id'),
+  rota_id: z.string().uuid('Invalid rota_id').optional(),
+  location_id: z.string().uuid('Invalid location_id').optional(),
   job_tag_id: z.string().uuid('Invalid job_tag_id').optional(),
   start_at: z.string().datetime({ offset: true, message: 'start_at must be ISO datetime' }),
   end_at: z.string().datetime({ offset: true, message: 'end_at must be ISO datetime' }),
@@ -25,6 +26,10 @@ export const createShiftSchema = z.object({
 })
 .refine(data => new Date(data.end_at) > new Date(data.start_at), {
   message: "end_at must be after start_at"
+})
+.refine(data => data.rota_id || data.location_id, {
+  message: "Either rota_id or location_id must be provided",
+  path: ["rota_id"],
 })
 
 export const updateShiftSchema = z.object({

@@ -121,11 +121,6 @@ export function PlannerClient() {
   
   // Handle cell click to create new shift
   const handleCellClick = (userId: string, date: string) => {
-    if (!rota?.id) {
-      toast.error('Nessuna rota selezionata. Crea prima una rota per questa settimana.')
-      return
-    }
-
     if (!selectedLocation) {
       toast.error('Nessuna location attiva')
       return
@@ -134,9 +129,10 @@ export function PlannerClient() {
     const user = users.find(u => u.id === userId)
     
     // Pre-fill shift with user and date
+    // Backend will auto-create rota if needed using location_id
     setSelectedShift({
       id: 'new',
-      rota_id: rota.id,
+      rota_id: rota?.id || undefined,
       location_id: selectedLocation,
       org_id: orgId || '',
       start_at: `${date}T09:00:00`,

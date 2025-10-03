@@ -81,3 +81,29 @@ export function formatDayHeader(date: string): string {
 export function isToday(date: string): boolean {
   return date === format(new Date(), 'yyyy-MM-dd')
 }
+
+/**
+ * Returns the Monday of the week containing the given date
+ * @param date - Any date in the week
+ * @returns Date object set to Monday 00:00:00
+ */
+export function getMonday(date: Date | string): Date {
+  const d = typeof date === 'string' ? parseISO(date) : new Date(date)
+  const day = d.getDay() // 0 (Sunday) to 6 (Saturday)
+  
+  // Calculate difference to get to Monday (day 1)
+  // If it's Sunday (0), go back 6 days; otherwise go back (day - 1) days
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  
+  const monday = new Date(d.setDate(diff))
+  monday.setHours(0, 0, 0, 0) // Reset to midnight
+  
+  return monday
+}
+
+/**
+ * Format date as YYYY-MM-DD for database storage
+ */
+export function formatDateForDB(date: Date): string {
+  return format(date, 'yyyy-MM-dd')
+}

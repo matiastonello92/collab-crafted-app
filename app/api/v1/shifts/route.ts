@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { createShiftSchema } from '@/lib/shifts/validations'
 import { isDateInWeek } from '@/lib/shifts/timezone-utils'
+import { getMonday, formatDateForDB } from '@/lib/shifts/week-utils'
 import { ZodError } from 'zod'
 
 export async function GET(request: Request) {
@@ -87,32 +88,111 @@ export async function POST(request: Request) {
     
     const validated = createShiftSchema.parse(body)
 
-    // Derive org_id and location_id from rota (like inventory modules)
-    console.log('🔍 [SHIFTS POST] Deriving org_id from rota_id:', validated.rota_id);
-    
-    const { data: rota, error: rotaError } = await supabase
-      .from('rotas')
-      .select('org_id, location_id, week_start_date')
-      .eq('id', validated.rota_id)
-      .single()
+    // ===== AUTO-CREATE ROTA LOGIC =====
+    let rotaId = validated.rota_id
+    let orgId: string
+    let locationId: string
 
-    if (rotaError || !rota) {
-      console.error('❌ [SHIFTS POST] Rota not found:', rotaError);
-      return NextResponse.json(
-        { error: 'Rota not found' },
-        { status: 404 }
-      )
-    }
-    
-    console.log('✅ [SHIFTS POST] Derived org_id:', rota.org_id, 'location_id:', rota.location_id);
+    if (!rotaId && validated.location_id) {
+      // Calculate Monday of the week from shift start_at
+      const shiftDate = new Date(validated.start_at)
+      const weekMonday = getMonday(shiftDate)
+      const weekStartDate = formatDateForDB(weekMonday)
 
-    // Validate shift is within rota week
-    if (!isDateInWeek(validated.start_at, rota.week_start_date)) {
+      console.log('🗓️ [AUTO-ROTA] Week start (Monday):', weekStartDate, 'from shift date:', shiftDate.toISOString())
+
+      // Check if rota exists for this location + week
+      const { data: existingRota } = await supabase
+        .from('rotas')
+        .select('id, org_id, location_id')
+        .eq('location_id', validated.location_id)
+        .eq('week_start_date', weekStartDate)
+        .maybeSingle()
+
+      if (existingRota) {
+        console.log('✅ [AUTO-ROTA] Found existing rota:', existingRota.id)
+        rotaId = existingRota.id
+        orgId = existingRota.org_id
+        locationId = existingRota.location_id
+      } else {
+        // Auto-create new rota
+        console.log('🆕 [AUTO-ROTA] Creating new rota for week:', weekStartDate)
+        
+        const { data: location, error: locErr } = await supabase
+          .from('locations')
+          .select('org_id, id')
+          .eq('id', validated.location_id)
+          .single()
+
+        if (locErr || !location) {
+          console.error('❌ [AUTO-ROTA] Location not found:', locErr)
+          return NextResponse.json(
+            { error: 'Location not found' },
+            { status: 404 }
+          )
+        }
+
+        const { data: newRota, error: rotaErr } = await supabase
+          .from('rotas')
+          .insert({
+            org_id: location.org_id,
+            location_id: location.id,
+            week_start_date: weekStartDate,
+            status: 'draft',
+            created_by: user.id,
+          })
+          .select('id, org_id, location_id')
+          .single()
+
+        if (rotaErr || !newRota) {
+          console.error('❌ [AUTO-ROTA] Failed to create rota:', rotaErr)
+          return NextResponse.json(
+            { error: 'Failed to create rota for this week' },
+            { status: 500 }
+          )
+        }
+
+        console.log('✅ [AUTO-ROTA] Created new rota:', newRota.id)
+        rotaId = newRota.id
+        orgId = newRota.org_id
+        locationId = newRota.location_id
+      }
+    } else if (rotaId) {
+      // Existing flow: explicit rota_id provided
+      console.log('🔍 [SHIFTS POST] Using explicit rota_id:', rotaId)
+      
+      const { data: rota, error: rotaError } = await supabase
+        .from('rotas')
+        .select('org_id, location_id, week_start_date')
+        .eq('id', rotaId)
+        .single()
+
+      if (rotaError || !rota) {
+        console.error('❌ [SHIFTS POST] Rota not found:', rotaError)
+        return NextResponse.json(
+          { error: 'Rota not found' },
+          { status: 404 }
+        )
+      }
+
+      orgId = rota.org_id
+      locationId = rota.location_id
+
+      // Validate shift is within rota week
+      if (!isDateInWeek(validated.start_at, rota.week_start_date)) {
+        return NextResponse.json(
+          { 
+            error: 'Invalid shift date',
+            message: 'Shift start_at must be within the rota week'
+          },
+          { status: 400 }
+        )
+      }
+      
+      console.log('✅ [SHIFTS POST] Derived org_id:', orgId, 'location_id:', locationId)
+    } else {
       return NextResponse.json(
-        { 
-          error: 'Invalid shift date',
-          message: 'Shift start_at must be within the rota week'
-        },
+        { error: 'Either rota_id or location_id required' },
         { status: 400 }
       )
     }
@@ -120,9 +200,9 @@ export async function POST(request: Request) {
     // Create shift(s) - support batch creation with quantity
     const quantity = validated.quantity || 1
     const shiftsToCreate = Array.from({ length: quantity }, () => ({
-      org_id: rota.org_id,
-      location_id: rota.location_id,
-      rota_id: validated.rota_id,
+      org_id: orgId,
+      location_id: locationId,
+      rota_id: rotaId,
       job_tag_id: validated.job_tag_id,
       start_at: validated.start_at,
       end_at: validated.end_at,

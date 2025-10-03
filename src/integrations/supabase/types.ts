@@ -1881,6 +1881,7 @@ export type Database = {
           org_id: string
           status: string
           updated_at: string
+          updated_by: string | null
           week_start_date: string
         }
         Insert: {
@@ -1892,6 +1893,7 @@ export type Database = {
           org_id: string
           status?: string
           updated_at?: string
+          updated_by?: string | null
           week_start_date: string
         }
         Update: {
@@ -1903,6 +1905,7 @@ export type Database = {
           org_id?: string
           status?: string
           updated_at?: string
+          updated_by?: string | null
           week_start_date?: string
         }
         Relationships: [
@@ -1926,6 +1929,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "rotas_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
