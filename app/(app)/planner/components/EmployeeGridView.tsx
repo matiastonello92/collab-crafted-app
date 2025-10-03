@@ -399,7 +399,14 @@ export function EmployeeGridView({
                   userId="unassigned"
                   date={day.dateStr}
                 >
-                  <div className="relative p-2 space-y-2 min-h-[60px] group">
+                  <div 
+                    className="relative p-2 space-y-2 min-h-[80px] group"
+                    onClick={dayShifts.length === 0 ? (e) => {
+                      e.stopPropagation()
+                      onCellClick?.('unassigned', day.dateStr)
+                    } : undefined}
+                    style={dayShifts.length === 0 ? { cursor: 'pointer' } : undefined}
+                  >
                     {dayShifts.map(shift => (
                       <DraggableShiftCard
                         key={shift.id}
@@ -415,11 +422,12 @@ export function EmployeeGridView({
                         onCellClick?.('unassigned', day.dateStr)
                       }}
                       className="absolute bottom-1 left-1/2 -translate-x-1/2 
+                                 w-8 h-8 flex items-center justify-center
                                  opacity-0 group-hover:opacity-100 
                                  transition-opacity duration-200
                                  bg-primary text-primary-foreground 
                                  hover:bg-primary/90
-                                 rounded-full p-1.5 shadow-lg z-10"
+                                 rounded-full shadow-lg z-10"
                       title="Aggiungi turno o assenza"
                     >
                       <Plus className="h-4 w-4" />
@@ -470,7 +478,14 @@ export function EmployeeGridView({
                     userId={userId}
                     date={day.dateStr}
                   >
-                    <div className="relative p-2 space-y-2 min-h-[60px] group">
+                    <div 
+                      className="relative p-2 space-y-2 min-h-[80px] group"
+                      onClick={dayShifts.length === 0 ? (e) => {
+                        e.stopPropagation()
+                        onCellClick?.(userId, day.dateStr)
+                      } : undefined}
+                      style={dayShifts.length === 0 ? { cursor: 'pointer' } : undefined}
+                    >
                       {dayShifts.map(shift => (
                         <DraggableShiftCard
                           key={shift.id}
@@ -486,11 +501,12 @@ export function EmployeeGridView({
                           onCellClick?.(userId, day.dateStr)
                         }}
                         className="absolute bottom-1 left-1/2 -translate-x-1/2 
+                                   w-8 h-8 flex items-center justify-center
                                    opacity-0 group-hover:opacity-100 
                                    transition-opacity duration-200
                                    bg-primary text-primary-foreground 
                                    hover:bg-primary/90
-                                   rounded-full p-1.5 shadow-lg z-10"
+                                   rounded-full shadow-lg z-10"
                         title="Aggiungi turno o assenza"
                       >
                         <Plus className="h-4 w-4" />
