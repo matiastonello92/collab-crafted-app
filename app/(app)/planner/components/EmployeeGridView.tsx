@@ -287,27 +287,30 @@ export function EmployeeGridView({
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={rectIntersection}>
-      {/* Zona eliminazione - PRIMA di tutto per priorità nella detection */}
+      {/* Delete Zone - Top Right Corner */}
       {activeShift && (
         <div 
           ref={deleteZone.setNodeRef}
-          className={`fixed bottom-0 left-1/2 -translate-x-1/2 max-w-md w-full h-14 flex items-center justify-center z-[100] transition-all duration-200 rounded-t-lg ${
+          title="Trascina qui uno shift per eliminarlo"
+          className={`fixed top-4 right-4 w-16 h-16 flex items-center justify-center z-[100] transition-all duration-300 rounded-2xl ${
             deleteZone.isOver 
-              ? 'bg-red-600/90 shadow-[0_0_40px_rgba(239,68,68,0.6)] scale-[1.15] ring-4 ring-red-400/50' 
-              : 'bg-red-500/30 backdrop-blur-sm'
+              ? 'bg-red-600/95 border-red-400 shadow-[0_0_50px_rgba(239,68,68,0.8)] scale-[1.2] ring-4 ring-red-400/60 border-2' 
+              : 'bg-red-500/20 backdrop-blur-sm border-2 border-red-500/30'
           }`}
         >
-          <div className="flex items-center gap-2 pointer-events-none">
+          <div className="flex flex-col items-center gap-1 pointer-events-none">
             <Trash2 
               className={`transition-transform duration-200 ${
-                deleteZone.isOver ? 'scale-125' : 'scale-100'
+                deleteZone.isOver ? 'scale-110' : 'scale-100'
               }`}
-              size={20} 
+              size={28} 
               color="white" 
             />
-            <span className="text-white font-semibold text-sm">
-              {deleteZone.isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
-            </span>
+            {deleteZone.isOver && (
+              <span className="text-white font-bold text-xs tracking-wide animate-fade-in">
+                Elimina
+              </span>
+            )}
           </div>
         </div>
       )}
