@@ -480,7 +480,13 @@ export function EmployeeGridView({
         })}
       </div>
       
-      <DragOverlay style={{ zIndex: 9999, pointerEvents: 'none' }}>
+      <DragOverlay 
+        style={{ zIndex: 9999, pointerEvents: 'none' }}
+        dropAnimation={{
+          duration: 200,
+          easing: 'ease'
+        }}
+      >
         {activeShift && (
           <Card 
             className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
@@ -565,16 +571,12 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     console.warn('⚠️ Shift senza colore:', { id: shift.id, job_tag: shift.job_tag })
   }
   
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    opacity: isDragging ? 0.5 : 1,
+  const style = {
     backgroundColor: bgColor,
     borderColor: borderColor,
-    borderWidth: '1px'
-  } : {
-    backgroundColor: bgColor,
-    borderColor: borderColor,
-    borderWidth: '1px'
+    borderWidth: '1px',
+    opacity: isDragging ? 0 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab'
   }
 
   const handleClick = (e: React.MouseEvent) => {
