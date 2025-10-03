@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       .select(`
         *,
         leave_types(id, key, label, color),
-        user:profiles!leaves_user_id_fkey(id, full_name, email, avatar_url)
+        user:profiles(id, full_name, email, avatar_url)
       `)
       .eq('location_id', locationId)
 
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
       .select(`
         *,
         leave_types(id, key, label, color),
-        user:profiles!leaves_user_id_fkey(id, full_name, email, avatar_url)
+        user:profiles(id, full_name, email, avatar_url)
       `)
       .single()
 
