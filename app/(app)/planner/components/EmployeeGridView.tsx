@@ -139,17 +139,17 @@ export function EmployeeGridView({
         toast.success('Turno spostato con successo')
       }
       
-      // Refetch in background con debounce
+      // ✅ Refetch immediato per sincronizzare con server
       if (onSave) {
-        setTimeout(() => onSave(), 500)
+        onSave()
       }
     } catch (error) {
       console.error('Error handling drag:', error)
       toast.error('Errore nello spostamento del turno')
       
-      // Revert su errore
+      // ✅ Revert immediato su errore
       if (onSave) {
-        setTimeout(() => onSave(), 100)
+        onSave()
       }
     }
   }
@@ -353,22 +353,32 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     // Salva posizione iniziale
     setMouseDownPos({ x: e.clientX, y: e.clientY })
     setHasMoved(false)
-    
-    // Chiama listener dnd-kit
-    const dndListener = listeners?.onPointerDown
-    if (dndListener) {
-      dndListener(e as any)
-    }
+    // ✅ NON chiamare listeners qui - sarà chiamato solo se rileva drag
   }
   
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (mouseDownPos) {
+    if (mouseDownPos && !hasMoved) {
       const deltaX = Math.abs(e.clientX - mouseDownPos.x)
       const deltaY = Math.abs(e.clientY - mouseDownPos.y)
       
-      // Se si muove più di 5px, è un drag
+      // Se si muove più di 5px, è un drag - attiva dnd-kit
       if (deltaX > 5 || deltaY > 5) {
         setHasMoved(true)
+        
+        // ✅ Attiva dnd-kit SOLO quando è sicuramente un drag
+        const dndListener = listeners?.onPointerDown
+        if (dndListener) {
+          // Crea evento sintetico con posizione iniziale
+          const syntheticEvent = new PointerEvent('pointerdown', {
+            bubbles: true,
+            cancelable: true,
+            clientX: mouseDownPos.x,
+            clientY: mouseDownPos.y,
+            pointerId: e.pointerId,
+            pointerType: e.pointerType
+          })
+          dndListener(syntheticEvent as any)
+        }
       }
     }
   }
@@ -389,7 +399,6 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     <Card
       ref={setNodeRef}
       style={style}
-      {...attributes}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
