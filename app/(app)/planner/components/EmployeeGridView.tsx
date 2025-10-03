@@ -9,8 +9,32 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { useEmployeeStats } from '../hooks/useEmployeeStats'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, closestCenter } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection, getFirstCollision } from '@dnd-kit/core'
 import { toast } from 'sonner'
+
+// Custom collision detection che usa pointerWithin (più preciso)
+function customCollisionDetection(args: any) {
+  // 1. Usa pointerWithin - verifica dove è il POINTER, non il centro del drag
+  const pointerCollisions = pointerWithin(args)
+  
+  // 2. Se il pointer è sopra la delete zone, ritorna SOLO quella (priorità assoluta)
+  const deleteZoneCollision = pointerCollisions.find((collision: any) => 
+    collision.id === 'delete-zone'
+  )
+  
+  if (deleteZoneCollision) {
+    console.log('✅ Delete zone detected by pointerWithin!')
+    return [deleteZoneCollision]
+  }
+  
+  // 3. Se ci sono altre collisions da pointerWithin, ritorna quelle
+  if (pointerCollisions.length > 0) {
+    return pointerCollisions
+  }
+  
+  // 4. Fallback a rectIntersection (per edge cases)
+  return rectIntersection(args)
+}
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -304,7 +328,7 @@ export function EmployeeGridView({
       onDragStart={handleDragStart} 
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd} 
-      collisionDetection={closestCenter}
+      collisionDetection={customCollisionDetection}
     >
       {/* Delete Zone - Top Right Corner */}
       <div 
