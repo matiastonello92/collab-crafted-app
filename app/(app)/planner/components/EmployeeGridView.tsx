@@ -100,6 +100,7 @@ export function EmployeeGridView({
         id: tempId,
         start_at: newStartAt,
         end_at: newEndAt,
+        job_tag: shift.job_tag, // ✅ Preserve job_tag
         assignments: userId !== 'unassigned' ? [{
           id: `temp-assign-${Date.now()}`,
           shift_id: tempId,
@@ -121,6 +122,7 @@ export function EmployeeGridView({
             ...s,
             start_at: newStartAt,
             end_at: newEndAt,
+            job_tag: s.job_tag, // ✅ Preserve job_tag
             assignments: userId !== 'unassigned' ? [{
               id: shift.assignments?.[0]?.id || `temp-assign-${Date.now()}`,
               shift_id: shift.id,
@@ -438,8 +440,13 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   
   const startTime = formatTimeCombo(new Date(shift.start_at))
   const endTime = formatTimeCombo(new Date(shift.end_at))
-  const bgColor = hexToRgba(shift.job_tag?.color, 0.85)
+  const bgColor = hexToRgba(shift.job_tag?.color, 0.15) // ✅ Ridotto da 0.85 a 0.15 per colori più visibili
   const borderColor = hexToRgba(shift.job_tag?.color, 1)
+  
+  // Debug: verifica presenza colore job_tag
+  if (!shift.job_tag?.color) {
+    console.warn('⚠️ Shift senza colore:', { id: shift.id, job_tag: shift.job_tag })
+  }
   
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,

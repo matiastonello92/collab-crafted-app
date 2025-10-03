@@ -284,14 +284,6 @@ export function CatalogoTagTab() {
                   title="Seleziona colore"
                 />
                 
-                <Input
-                  id="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value.toUpperCase() })}
-                  placeholder="#10B981"
-                  className="flex-1 font-mono"
-                  maxLength={7}
-                />
                 
                 {formData.color && (
                   <div
