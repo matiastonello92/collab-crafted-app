@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Clock, Users, ChefHat, Archive, Send, CheckCircle, Trash2, Plus } from 'lucide-react';
+import { Clock, Users, ChefHat, Archive, Send, Trash2, Plus, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import { RecipeEditorDialog } from './components/RecipeEditorDialog';
+import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
 
 interface Recipe {
   id: string;
@@ -25,20 +26,6 @@ interface Recipe {
     full_name: string;
   };
 }
-
-const STATUS_COLORS = {
-  draft: 'bg-gray-500',
-  submitted: 'bg-yellow-500',
-  published: 'bg-green-500',
-  archived: 'bg-gray-400'
-};
-
-const STATUS_LABELS = {
-  draft: 'Bozza',
-  submitted: 'In Approvazione',
-  published: 'Pubblicata',
-  archived: 'Archiviata'
-};
 
 export function RecipesClient() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -85,32 +72,10 @@ export function RecipesClient() {
         throw new Error(data.error || 'Failed to submit');
       }
       
-      const data = await response.json();
       toast.success('Ricetta inviata per approvazione');
       loadRecipes();
     } catch (error: any) {
       toast.error('Errore invio ricetta', {
-        description: error.message
-      });
-    }
-  }
-
-  async function handlePublish(recipeId: string) {
-    try {
-      const response = await fetch(`/api/v1/recipes/${recipeId}/publish`, {
-        method: 'POST'
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to publish');
-      }
-      
-      const data = await response.json();
-      toast.success('Ricetta pubblicata');
-      loadRecipes();
-    } catch (error: any) {
-      toast.error('Errore pubblicazione', {
         description: error.message
       });
     }
@@ -200,7 +165,6 @@ export function RecipesClient() {
           {recipes.map((recipe) => {
             const isOwner = recipe.created_by === userId;
             const canSubmit = isOwner && recipe.status === 'draft';
-            const canPublish = recipe.status === 'submitted';
             const canArchive = recipe.status === 'published';
             const canDelete = isOwner && recipe.status === 'draft';
 
@@ -218,12 +182,16 @@ export function RecipesClient() {
                 
                 <div className="p-4 space-y-4">
                   <div>
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg">{recipe.title}</h3>
-                      <Badge className={STATUS_COLORS[recipe.status]}>
-                        {STATUS_LABELS[recipe.status]}
-                      </Badge>
+                    <div className="flex items-center justify-between mb-2">
+                      <RecipeWorkflowBadge status={recipe.status} />
+                      <Link href={`/recipes/${recipe.id}`} passHref>
+                        <Button variant="ghost" size="sm" className="gap-2">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </Link>
                     </div>
+                    
+                    <h3 className="font-semibold text-lg mb-1">{recipe.title}</h3>
                     
                     {recipe.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2">
@@ -254,22 +222,10 @@ export function RecipesClient() {
                         size="sm"
                         onClick={() => handleSubmit(recipe.id)}
                         className="flex-1"
+                        disabled={!recipe.photo_url}
                       >
                         <Send className="w-4 h-4 mr-1" />
-                        Invia per approvazione
-                      </Button>
-                    )}
-
-                    {canPublish && (
-                      <Button
-                        size="sm"
-                        onClick={() => handlePublish(recipe.id)}
-                        variant={recipe.photo_url ? "default" : "secondary"}
-                        disabled={!recipe.photo_url}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Pubblica
+                        Invia
                       </Button>
                     )}
 
@@ -295,9 +251,9 @@ export function RecipesClient() {
                       </Button>
                     )}
 
-                    {!recipe.photo_url && recipe.status === 'submitted' && (
+                    {!recipe.photo_url && recipe.status === 'draft' && (
                       <div className="w-full text-xs text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-1 rounded">
-                        ⚠️ Foto obbligatoria per pubblicare
+                        ⚠️ Foto obbligatoria per inviare
                       </div>
                     )}
                   </div>

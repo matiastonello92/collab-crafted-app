@@ -1766,7 +1766,7 @@ export type Database = {
       }
       recipe_ingredients: {
         Row: {
-          catalog_item_id: string
+          catalog_item_id: string | null
           created_at: string
           id: string
           is_optional: boolean
@@ -1777,10 +1777,11 @@ export type Database = {
           quantity: number
           recipe_id: string
           sort_order: number
+          sub_recipe_id: string | null
           unit: string
         }
         Insert: {
-          catalog_item_id: string
+          catalog_item_id?: string | null
           created_at?: string
           id?: string
           is_optional?: boolean
@@ -1791,10 +1792,11 @@ export type Database = {
           quantity?: number
           recipe_id: string
           sort_order?: number
+          sub_recipe_id?: string | null
           unit: string
         }
         Update: {
-          catalog_item_id?: string
+          catalog_item_id?: string | null
           created_at?: string
           id?: string
           is_optional?: boolean
@@ -1805,6 +1807,7 @@ export type Database = {
           quantity?: number
           recipe_id?: string
           sort_order?: number
+          sub_recipe_id?: string | null
           unit?: string
         }
         Relationships: [
@@ -1839,6 +1842,13 @@ export type Database = {
           {
             foreignKeyName: "recipe_ingredients_recipe_id_fkey"
             columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_ingredients_sub_recipe_id_fkey"
+            columns: ["sub_recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
             referencedColumns: ["id"]
@@ -3400,6 +3410,10 @@ export type Database = {
       }
       rate_limit_hit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
+        Returns: boolean
+      }
+      recipe_has_cycle: {
+        Args: { p_recipe_id: string; p_sub_recipe_id: string }
         Returns: boolean
       }
       set_my_default_location: {

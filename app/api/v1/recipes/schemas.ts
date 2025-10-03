@@ -50,14 +50,19 @@ export const updateRecipeSchema = z.object({
 
 // Ingredient schemas
 export const createIngredientSchema = z.object({
-  catalog_item_id: z.string().uuid(),
+  catalog_item_id: z.string().uuid().optional().nullable(),
+  sub_recipe_id: z.string().uuid().optional().nullable(),
   quantity: z.number().min(0),
   unit: z.string().min(1),
   item_name_snapshot: z.string().min(1),
   is_optional: z.boolean().default(false),
   notes: z.string().optional(),
   sort_order: z.number().int().min(0).default(0)
-});
+}).refine(
+  data => (data.catalog_item_id && !data.sub_recipe_id) || 
+          (!data.catalog_item_id && data.sub_recipe_id),
+  { message: "Specificare catalog_item_id O sub_recipe_id, non entrambi" }
+);
 
 export const updateIngredientSchema = z.object({
   quantity: z.number().min(0).optional(),

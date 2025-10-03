@@ -4,14 +4,26 @@
 
 export interface ScalableIngredient {
   id?: string;
-  catalog_item_id: string;
+  catalog_item_id?: string | null;
+  sub_recipe_id?: string | null;
   quantity: number;
   unit: string;
   item_name_snapshot: string;
   is_optional?: boolean;
   notes?: string;
   sort_order?: number;
+  
+  // Metadata sub-ricetta (caricato dal backend)
+  sub_recipe?: {
+    id: string;
+    title: string;
+    servings: number;
+    photo_url?: string;
+    status?: string;
+  };
 }
+
+export type IngredientType = 'catalog' | 'sub_recipe';
 
 export interface ScalingResult {
   originalServings: number;
@@ -89,4 +101,32 @@ export function formatTime(minutes: number): string {
   }
   
   return `${hours}h ${mins}min`;
+}
+
+/**
+ * Calcola quantità espansa per sub-ricette
+ * Se usi 2 porzioni di una ricetta da 4 porzioni = scale factor 0.5
+ */
+export function calculateSubRecipeScale(
+  requestedServings: number,
+  subRecipeBaseServings: number
+): number {
+  if (subRecipeBaseServings <= 0) return 1;
+  return requestedServings / subRecipeBaseServings;
+}
+
+/**
+ * Espande ingredienti di una sub-ricetta in base alla quantità richiesta
+ */
+export function expandSubRecipeIngredients(
+  subRecipeIngredients: ScalableIngredient[],
+  requestedServings: number,
+  subRecipeBaseServings: number
+): ScalableIngredient[] {
+  const scale = calculateSubRecipeScale(requestedServings, subRecipeBaseServings);
+  
+  return subRecipeIngredients.map(ing => ({
+    ...ing,
+    quantity: parseFloat((ing.quantity * scale).toFixed(2))
+  }));
 }

@@ -37,6 +37,24 @@ export async function POST(
     const body = await request.json();
     const validatedData = createIngredientSchema.parse(body);
 
+    // If sub-recipe, validate cycle
+    if (validatedData.sub_recipe_id) {
+      const { data: hasCycle, error: cycleError } = await supabase
+        .rpc('recipe_has_cycle', {
+          p_recipe_id: params.id,
+          p_sub_recipe_id: validatedData.sub_recipe_id
+        });
+
+      if (cycleError) throw cycleError;
+
+      if (hasCycle) {
+        return NextResponse.json(
+          { error: 'Loop rilevato: impossibile aggiungere questa sub-ricetta' },
+          { status: 400 }
+        );
+      }
+    }
+
     const { data: ingredient, error } = await supabase
       .from('recipe_ingredients')
       .insert({
@@ -47,7 +65,8 @@ export async function POST(
       })
       .select(`
         *,
-        catalog_item:inventory_catalog_items(id, name, category, uom)
+        catalog_item:inventory_catalog_items(id, name, category, uom),
+        sub_recipe:recipes!recipe_ingredients_sub_recipe_id_fkey(id, title, servings, photo_url)
       `)
       .single();
 

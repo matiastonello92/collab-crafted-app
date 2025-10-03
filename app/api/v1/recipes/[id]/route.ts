@@ -25,7 +25,8 @@ export async function GET(
         location:locations(id, name),
         recipe_ingredients(
           *,
-          catalog_item:inventory_catalog_items(id, name, category, uom)
+          catalog_item:inventory_catalog_items(id, name, category, uom),
+          sub_recipe:recipes!recipe_ingredients_sub_recipe_id_fkey(id, title, servings, photo_url, status)
         ),
         recipe_steps(*),
         recipe_service_notes(
