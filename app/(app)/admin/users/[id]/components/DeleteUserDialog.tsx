@@ -17,6 +17,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from 'sonner'
 import { Trash2, AlertTriangle } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   userId: string
@@ -33,7 +34,7 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
 
   const handleDelete = async () => {
     if (confirmEmail !== userEmail) {
-      toast.error('Email di conferma non corretta')
+      toast.error(t('admin.userManagement.deleteDialog.emailMismatch'))
       return
     }
 
@@ -50,16 +51,16 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
         const result = await response.json()
 
         if (!response.ok) {
-          throw new Error(result.error || 'Errore nella eliminazione')
+          throw new Error(result.error || t('admin.userManagement.deleteDialog.error'))
         }
 
-        toast.success('Utente eliminato con successo')
+        toast.success(t('admin.userManagement.deleteDialog.success'))
         setIsOpen(false)
         router.push('/admin/users')
         router.refresh()
       } catch (error: any) {
         console.error('Error deleting user:', error)
-        toast.error(error.message || 'Errore nella eliminazione dell\'utente')
+        toast.error(error.message || t('admin.userManagement.deleteDialog.error'))
       }
     })
   }
@@ -69,18 +70,17 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <Trash2 className="h-4 w-4 mr-2" />
-          Elimina Utente
+          {t('admin.userManagement.deleteDialog.title')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Elimina Utente
+            {t('admin.userManagement.deleteDialog.title')}
           </DialogTitle>
           <DialogDescription>
-            Questa azione è <strong>irreversibile</strong>. L'utente e tutti i suoi dati 
-            associati verranno eliminati permanentemente dal sistema.
+            {t('admin.userManagement.deleteDialog.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,13 +89,13 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-1">
-                <p className="font-medium">Verranno eliminati:</p>
+                <p className="font-medium">{t('admin.userManagement.deleteDialog.willBeDeleted')}</p>
                 <ul className="text-sm list-disc list-inside space-y-0.5">
-                  <li>Account utente</li>
-                  <li>Ruoli e permessi</li>
-                  <li>Job tags assegnati</li>
-                  <li>Sessioni attive</li>
-                  <li>Cronologia attività</li>
+                  <li>{t('admin.userManagement.deleteDialog.account')}</li>
+                  <li>{t('admin.userManagement.deleteDialog.rolesAndPermissions')}</li>
+                  <li>{t('admin.userManagement.deleteDialog.jobTags')}</li>
+                  <li>{t('admin.userManagement.deleteDialog.activeSessions')}</li>
+                  <li>{t('admin.userManagement.deleteDialog.activityHistory')}</li>
                 </ul>
               </div>
             </AlertDescription>
@@ -103,13 +103,13 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Per confermare, digita l'email dell'utente:
+              {t('admin.userManagement.deleteDialog.confirmLabel')}
             </Label>
             <div className="p-2 bg-muted rounded text-sm font-mono">
               {userEmail}
             </div>
             <Input
-              placeholder="Inserisci email per confermare"
+              placeholder={t('admin.userManagement.deleteDialog.emailPlaceholder')}
               value={confirmEmail}
               onChange={(e) => setConfirmEmail(e.target.value)}
               className="font-mono text-sm"
@@ -123,14 +123,14 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
             onClick={() => setIsOpen(false)}
             disabled={isPending}
           >
-            Annulla
+            {t('admin.userManagement.deleteDialog.cancel')}
           </Button>
           <Button 
             variant="destructive" 
             onClick={handleDelete}
             disabled={isPending || confirmEmail !== userEmail}
           >
-            {isPending ? 'Eliminazione...' : 'Elimina Definitivamente'}
+            {isPending ? t('admin.userManagement.deleteDialog.deleting') : t('admin.userManagement.deleteDialog.delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
