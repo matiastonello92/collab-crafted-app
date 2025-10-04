@@ -129,7 +129,7 @@ export default function ActivityPanel({ userId }: ActivityPanelProps) {
         {/* Note about audit system */}
         <div className="mt-4 p-3 bg-muted rounded-lg">
           <p className="text-xs text-muted-foreground">
-            ⚠️ Sistema di audit in sviluppo. I dati mostrati sono placeholder per dimostrare la struttura dell'interfaccia.
+            {t('common.auditSystemWarning')}
           </p>
         </div>
       </CardContent>

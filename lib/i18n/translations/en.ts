@@ -85,6 +85,9 @@ export const en = {
       addShiftOrAbsence: 'Add shift or absence',
       selectColor: 'Select color',
     },
+    auditSystemWarning: '⚠️ Audit system in development. The data shown are placeholders to demonstrate the interface structure.',
+    inDevelopment: 'In Development',
+    access: 'Access',
   },
   
   // User Profile & Overview
@@ -1902,6 +1905,16 @@ export const en = {
       selectCategory: 'Select a category',
       templateNameRequired: 'Template name is required',
       selectAtLeastOneProduct: 'Select at least one product',
+      comingSoon: 'Coming soon',
+      viewDetails: 'View details',
+      edit: 'Edit',
+      viewDetailsSoon: 'Detail view - Coming soon',
+      editInventorySoon: 'Edit inventory - Coming soon',
+      exportPdfSoon: 'PDF export - Coming soon',
+      sendEmailSoon: 'Send email - Coming soon',
+      noInventoriesFound: 'No inventories found',
+      exportPdf: 'Export PDF',
+      sendEmail: 'Send via email',
     },
     
     // Placeholders
@@ -2043,11 +2056,25 @@ export const en = {
   inventoryCategoryBarDesc: 'Manage bar products: wines, beers, soft drinks and consumables',
   inventoryCategoryCleaningDesc: 'Manage cleaning and maintenance products',
 
+  // Locations
+  locations: {
+    myLocations: 'My Locations',
+    manageSchedules: 'Manage schedules for locations you are responsible for',
+    manageScheduleButton: 'Manage Schedule',
+    archived: 'Archived',
+  },
+
   // Staff
   staff: {
     jobTags: {
       title: 'Job Tags Management',
-      description: 'Manage job tags and assignments by location',
+      description: 'Manage job tags and location assignments',
+      tabCatalog: 'Tag Catalog',
+      tabAssignments: 'Assignments',
+      catalogTitle: 'Roles Catalog',
+      catalogDescription: 'Create and manage available roles for your organization',
+      assignmentsTitle: 'Assignments by Location',
+      assignmentsDescription: 'Manage role assignments for each location',
       catalog: {
         title: 'Tag Catalog',
         description: 'Manage available job tags',

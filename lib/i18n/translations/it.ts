@@ -85,6 +85,9 @@ export const it = {
       addShiftOrAbsence: 'Aggiungi turno o assenza',
       selectColor: 'Seleziona colore',
     },
+    auditSystemWarning: '⚠️ Sistema di audit in sviluppo. I dati mostrati sono placeholder per dimostrare la struttura dell\'interfaccia.',
+    inDevelopment: 'In Sviluppo',
+    access: 'Accedi',
   },
   
   // User Profile & Overview
@@ -1967,6 +1970,16 @@ export const it = {
       selectCategory: 'Seleziona una categoria',
       templateNameRequired: 'Il nome del template è obbligatorio',
       selectAtLeastOneProduct: 'Seleziona almeno un prodotto',
+      comingSoon: 'Coming soon',
+      viewDetails: 'Visualizza dettagli',
+      edit: 'Modifica',
+      viewDetailsSoon: 'Vista dettaglio - Coming soon',
+      editInventorySoon: 'Modifica inventario - Coming soon',
+      exportPdfSoon: 'Export PDF - Coming soon',
+      sendEmailSoon: 'Invio email - Coming soon',
+      noInventoriesFound: 'Nessun inventario trovato',
+      exportPdf: 'Export PDF',
+      sendEmail: 'Invia per email',
     },
     
     // Placeholders
@@ -2108,11 +2121,25 @@ export const it = {
   inventoryCategoryBarDesc: 'Gestisci prodotti per il bar: vini, birre, soft drink e consumabili',
   inventoryCategoryCleaningDesc: 'Gestisci prodotti per la pulizia e manutenzione',
 
+  // Locations
+  locations: {
+    myLocations: 'Le Mie Locations',
+    manageSchedules: 'Gestisci gli orari delle location di cui sei responsabile',
+    manageScheduleButton: 'Gestisci Orari',
+    archived: 'Archiviato',
+  },
+
   // Staff
   staff: {
     jobTags: {
       title: 'Gestione Job Tags',
       description: 'Gestisci i job tags e le assegnazioni per location',
+      tabCatalog: 'Catalogo Tag',
+      tabAssignments: 'Assegnazioni',
+      catalogTitle: 'Catalogo Ruoli',
+      catalogDescription: 'Crea e gestisci i ruoli disponibili per la tua organizzazione',
+      assignmentsTitle: 'Assegnazioni per Location',
+      assignmentsDescription: 'Gestisci le assegnazioni dei ruoli per ogni location',
       catalog: {
         title: 'Catalogo Ruoli',
         description: 'Crea e gestisci i ruoli disponibili per la tua organizzazione',

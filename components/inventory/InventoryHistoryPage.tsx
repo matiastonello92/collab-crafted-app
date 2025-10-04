@@ -113,22 +113,22 @@ export function InventoryHistoryPage() {
 
   const exportToPDF = (inventoryId: string) => {
     // TODO: Implement PDF export
-    toast.info('Export PDF - Coming soon');
+    toast.info(t('inventory.toast.exportPdfSoon'));
   };
 
   const sendEmail = (inventoryId: string) => {
     // TODO: Implement email functionality  
-    toast.info('Invio email - Coming soon');
+    toast.info(t('inventory.toast.sendEmailSoon'));
   };
 
   const viewDetails = (inventoryId: string) => {
     // TODO: Navigate to detail view
-    toast.info('Vista dettaglio - Coming soon');
+    toast.info(t('inventory.toast.viewDetailsSoon'));
   };
 
   const editInventory = (inventoryId: string) => {
     // TODO: Navigate to edit view (only for managers/admins on approved inventories)
-    toast.info('Modifica inventario - Coming soon');
+    toast.info(t('inventory.toast.editInventorySoon'));
   };
 
   const getStatusColor = (status: string) => {
@@ -239,7 +239,7 @@ export function InventoryHistoryPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => viewDetails(item.id)}
-                          title="Visualizza dettagli"
+                          title={t('inventory.toast.viewDetails')}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -248,7 +248,7 @@ export function InventoryHistoryPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => exportToPDF(item.id)}
-                          title="Export PDF"
+                          title={t('inventory.toast.exportPdf')}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -257,7 +257,7 @@ export function InventoryHistoryPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => sendEmail(item.id)}
-                          title="Invia per email"
+                          title={t('inventory.toast.sendEmail')}
                         >
                           <Mail className="h-4 w-4" />
                         </Button>
@@ -267,7 +267,7 @@ export function InventoryHistoryPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => editInventory(item.id)}
-                            title="Modifica"
+                            title={t('inventory.toast.edit')}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -280,7 +280,7 @@ export function InventoryHistoryPage() {
                 {filteredInventories.length === 0 && !loading && (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      Nessun inventario trovato
+                      {t('inventory.toast.noInventoriesFound')}
                     </TableCell>
                   </TableRow>
                 )}

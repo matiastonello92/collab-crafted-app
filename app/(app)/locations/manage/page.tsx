@@ -59,9 +59,9 @@ export default async function LocationsManagePage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Le Mie Locations</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('locations.myLocations')}</h1>
         <p className="text-muted-foreground">
-          Gestisci gli orari delle location di cui sei responsabile
+          {t('locations.manageSchedules')}
         </p>
       </div>
 
@@ -80,12 +80,12 @@ export default async function LocationsManagePage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <Badge variant={location.is_active ? "default" : "secondary"}>
-                  {location.is_active ? "Attivo" : "Archiviato"}
+                  {location.is_active ? t('common.active') : t('locations.archived')}
                 </Badge>
                 <Link href={`/admin/locations/${location.id}?tab=schedule`}>
                   <Button variant="outline" size="sm">
                     <Clock className="mr-2 h-4 w-4" />
-                    Gestisci Orari
+                    {t('locations.manageScheduleButton')}
                   </Button>
                 </Link>
               </div>
