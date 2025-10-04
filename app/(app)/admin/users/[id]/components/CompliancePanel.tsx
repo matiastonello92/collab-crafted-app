@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import type { ViolationWithUser } from '@/types/compliance'
+import { useTranslation } from '@/lib/i18n'
 
 interface CompliancePanelProps {
   userId: string
@@ -28,6 +29,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
   const [loading, setLoading] = useState(true)
   const [silenceDialog, setSilenceDialog] = useState<{ open: boolean; violationId?: string }>({ open: false })
   const [silenceReason, setSilenceReason] = useState('')
+  const { t } = useTranslation()
 
   useEffect(() => {
     fetchViolations()
@@ -61,7 +63,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
       setViolations(data || [])
     } catch (err: any) {
       console.error('Error fetching violations:', err)
-      toast.error('Errore caricamento violazioni')
+      toast.error(t('admin.complianceErrorLoading'))
     } finally {
       setLoading(false)
     }
@@ -69,7 +71,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
 
   async function handleSilence() {
     if (!silenceDialog.violationId || !silenceReason.trim()) {
-      toast.error('Motivazione obbligatoria')
+      toast.error(t('admin.complianceMinRequired'))
       return
     }
 
@@ -82,13 +84,13 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
 
       if (!res.ok) throw new Error('Failed to silence violation')
 
-      toast.success('Violazione silenziata')
+      toast.success(t('toast.compliance.silenced'))
       setSilenceDialog({ open: false })
       setSilenceReason('')
       fetchViolations()
     } catch (err: any) {
       console.error('Error silencing violation:', err)
-      toast.error('Errore silenziamento')
+      toast.error(t('admin.complianceErrorSilencing'))
     }
   }
 
@@ -96,7 +98,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
   const silencedViolations = violations.filter(v => v.is_silenced)
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Caricamento...</div>
+    return <div className="text-sm text-muted-foreground">{t('admin.loading')}</div>
   }
 
   return (
@@ -105,14 +107,14 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-warning" />
-            Violazioni Attive ({activeViolations.length})
+            {t('admin.complianceViolations')} ({activeViolations.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {activeViolations.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4 text-success" />
-              Nessuna violazione attiva
+              {t('admin.complianceNoViolations')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -121,19 +123,19 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant={v.severity === 'critical' ? 'destructive' : 'secondary'}>
-                        {v.severity === 'critical' ? 'CRITICO' : 'WARNING'}
+                        {v.severity === 'critical' ? t('admin.complianceCritical') : t('admin.complianceWarning')}
                       </Badge>
                       <span className="font-medium">{v.rule?.display_name}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mb-1">
-                      Data: {new Date(v.violation_date).toLocaleDateString('it-IT')}
+                      {t('admin.complianceDate')}: {new Date(v.violation_date).toLocaleDateString('it-IT')}
                     </div>
                     <div className="text-sm">
                       {v.details.rest_hours !== undefined && (
-                        <span>Riposo: {v.details.rest_hours}h (min {v.details.threshold}h)</span>
+                        <span>{t('admin.complianceRest')}: {v.details.rest_hours}h (min {v.details.threshold}h)</span>
                       )}
                       {v.details.hours_worked !== undefined && (
-                        <span>Ore: {v.details.hours_worked}h (max {v.details.threshold}h)</span>
+                        <span>{t('admin.complianceHours')}: {v.details.hours_worked}h (max {v.details.threshold}h)</span>
                       )}
                     </div>
                   </div>
@@ -142,7 +144,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
                     variant="outline"
                     onClick={() => setSilenceDialog({ open: true, violationId: v.id })}
                   >
-                    Silenzia
+                    {t('admin.complianceSilence')}
                   </Button>
                 </div>
               ))}
@@ -156,7 +158,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-muted-foreground">
               <XCircle className="h-5 w-5" />
-              Violazioni Silenziate ({silencedViolations.length})
+              {t('admin.complianceViolationsSilenced')} ({silencedViolations.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -171,7 +173,7 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
                   </div>
                   {v.silence_reason && (
                     <div className="text-sm text-muted-foreground mt-1">
-                      Motivo: {v.silence_reason}
+                      {t('admin.complianceReason')}: {v.silence_reason}
                     </div>
                   )}
                 </div>
@@ -184,14 +186,14 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
       <Dialog open={silenceDialog.open} onOpenChange={(open) => setSilenceDialog({ open })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Silenzia Violazione</DialogTitle>
+            <DialogTitle>{t('admin.complianceSilenceTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm text-muted-foreground">
-              Questa azione silenzierà la violazione e richiede una motivazione per audit.
+              {t('admin.complianceSilenceDesc')}
             </p>
             <Textarea
-              placeholder="Inserisci motivazione (min 10 caratteri)..."
+              placeholder={t('admin.complianceSilencePlaceholder')}
               value={silenceReason}
               onChange={(e) => setSilenceReason(e.target.value)}
               rows={4}
@@ -199,10 +201,10 @@ export function CompliancePanel({ userId, locationId }: CompliancePanelProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSilenceDialog({ open: false })}>
-              Annulla
+              {t('admin.cancel')}
             </Button>
             <Button onClick={handleSilence} disabled={silenceReason.length < 10}>
-              Conferma
+              {t('admin.complianceSilenceConfirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

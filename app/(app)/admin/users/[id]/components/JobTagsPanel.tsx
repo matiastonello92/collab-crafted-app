@@ -15,6 +15,7 @@ import {
   removeJobTagFromUser,
   type JobTag 
 } from '@/lib/admin/data-fetchers'
+import { useTranslation } from '@/lib/i18n'
 
 interface JobTagsPanelProps {
   userId: string
@@ -28,6 +29,7 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
   const [selectedTagId, setSelectedTagId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
   const [isAssigning, setIsAssigning] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     loadData()
@@ -44,7 +46,7 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
       setAvailableJobTags(allTags)
     } catch (error) {
       console.error('Error loading job tags:', error)
-      toast.error('Errore nel caricamento dei job tags')
+      toast.error(t('toast.jobTag.errorLoading'))
     } finally {
       setIsLoading(false)
     }
@@ -64,10 +66,10 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
       }
       
       setSelectedTagId('')
-      toast.success('Job tag assegnato con successo')
+      toast.success(t('toast.jobTag.assigned'))
     } catch (error) {
       console.error('Error assigning job tag:', error)
-      toast.error('Errore nell\'assegnazione del job tag')
+      toast.error(t('toast.jobTag.errorAssigning'))
     } finally {
       setIsAssigning(false)
     }
@@ -79,10 +81,10 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
       
       // Update local state
       setUserJobTags(prev => prev.filter(tag => tag.id !== tagId))
-      toast.success('Job tag rimosso con successo')
+      toast.success(t('toast.jobTag.removed'))
     } catch (error) {
       console.error('Error removing job tag:', error)
-      toast.error('Errore nella rimozione del job tag')
+      toast.error(t('toast.jobTag.errorRemoving'))
     }
   }
 
@@ -92,94 +94,94 @@ export default function JobTagsPanel({ userId, locationId, locationName }: JobTa
   }
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tag className="h-5 w-5" />
-            Job Tags - {locationName}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>Caricamento...</div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Tag className="h-5 w-5" />
-          Job Tags - {locationName}
+          {t('admin.jobTags')} - {locationName}
         </CardTitle>
-        <CardDescription>
-          Gestisci i job titles assegnati all'utente per questa location
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Current Tags */}
-        <div className="space-y-2">
-          <Label>Job Tags Assegnati</Label>
-          {userJobTags.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {userJobTags.map(tag => (
-                <Badge 
-                  key={tag.id} 
-                  variant="secondary" 
-                  className="flex items-center gap-1"
-                >
-                  {tag.label_it}
-                  <button
-                    onClick={() => handleRemoveTag(tag.id)}
-                    className="ml-1 hover:bg-destructive/20 rounded-sm p-0.5 transition-colors"
-                    title="Rimuovi job tag"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Nessun job tag assegnato per questa location
-            </p>
-          )}
-        </div>
-
-        {/* Add New Tag */}
-        <div className="space-y-3 border-t pt-4">
-          <Label>Aggiungi Job Tag</Label>
-          <div className="flex gap-2">
-            <Select value={selectedTagId} onValueChange={setSelectedTagId}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Seleziona un job tag..." />
-              </SelectTrigger>
-              <SelectContent>
-                {getUnassignedTags().map(tag => (
-                  <SelectItem key={tag.id} value={tag.id}>
-                    {tag.label_it}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={handleAssignTag}
-              disabled={!selectedTagId || isAssigning}
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              {isAssigning ? 'Assegna...' : 'Aggiungi'}
-            </Button>
-          </div>
-          {getUnassignedTags().length === 0 && (
-            <p className="text-xs text-muted-foreground">
-              Tutti i job tags disponibili sono già assegnati
-            </p>
-          )}
-        </div>
+      <CardContent>
+        <div>{t('admin.loading')}</div>
       </CardContent>
     </Card>
+  )
+  }
+
+  return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Tag className="h-5 w-5" />
+            {t('admin.jobTags')} - {locationName}
+          </CardTitle>
+          <CardDescription>
+            {t('admin.jobTagsDesc')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Current Tags */}
+          <div className="space-y-2">
+            <Label>{t('admin.jobTagsAssigned')}</Label>
+            {userJobTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {userJobTags.map(tag => (
+                  <Badge 
+                    key={tag.id} 
+                    variant="secondary" 
+                    className="flex items-center gap-1"
+                  >
+                    {tag.label_it}
+                    <button
+                      onClick={() => handleRemoveTag(tag.id)}
+                      className="ml-1 hover:bg-destructive/20 rounded-sm p-0.5 transition-colors"
+                      title={t('admin.removeJobTag')}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t('admin.jobTagsNone')}
+              </p>
+            )}
+          </div>
+
+          {/* Add New Tag */}
+          <div className="space-y-3 border-t pt-4">
+            <Label>{t('admin.jobTagsAdd')}</Label>
+            <div className="flex gap-2">
+              <Select value={selectedTagId} onValueChange={setSelectedTagId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder={t('admin.jobTagsSelect')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {getUnassignedTags().map(tag => (
+                    <SelectItem key={tag.id} value={tag.id}>
+                      {tag.label_it}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleAssignTag}
+                disabled={!selectedTagId || isAssigning}
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {isAssigning ? t('admin.adding') : t('admin.add')}
+              </Button>
+            </div>
+            {getUnassignedTags().length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('admin.jobTagsAllAssigned')}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
   )
 }

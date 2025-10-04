@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface EmailLog {
   id: string;
@@ -38,6 +39,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const supabase = createSupabaseBrowserClient();
+  const { t } = useTranslation();
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -66,7 +68,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
       setLogs(data || []);
     } catch (error: any) {
       console.error('Error fetching email logs:', error);
-      toast.error('Errore nel caricamento dei log');
+      toast.error(t('admin.emailLogsErrorLoading'));
     } finally {
       setLoading(false);
     }
@@ -78,10 +80,10 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      sent: { icon: CheckCircle2, variant: 'default' as const, label: 'Inviata', color: 'text-green-600' },
-      pending: { icon: Clock, variant: 'secondary' as const, label: 'In attesa', color: 'text-yellow-600' },
-      failed: { icon: XCircle, variant: 'destructive' as const, label: 'Fallita', color: 'text-red-600' },
-      bounced: { icon: AlertTriangle, variant: 'destructive' as const, label: 'Rimbalzata', color: 'text-orange-600' }
+      sent: { icon: CheckCircle2, variant: 'default' as const, label: t('admin.emailLogsSent'), color: 'text-green-600' },
+      pending: { icon: Clock, variant: 'secondary' as const, label: t('admin.emailLogsPending'), color: 'text-yellow-600' },
+      failed: { icon: XCircle, variant: 'destructive' as const, label: t('admin.emailLogsFailed'), color: 'text-red-600' },
+      bounced: { icon: AlertTriangle, variant: 'destructive' as const, label: t('admin.emailLogsBounced'), color: 'text-orange-600' }
     };
 
     const { icon: Icon, variant, label, color } = config[status as keyof typeof config] || config.pending;
@@ -96,9 +98,9 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      rota_published: '📅 Planning pubblicato',
-      shift_assignment_change: '🔄 Modifica turno',
-      leave_decision: '✅ Decisione assenza'
+      rota_published: t('admin.emailLogsRotaPublished'),
+      shift_assignment_change: t('admin.emailLogsShiftChange'),
+      leave_decision: t('admin.emailLogsLeaveDecision')
     };
     return labels[type] || type;
   };
@@ -109,7 +111,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
         <Button variant="outline" size="sm" asChild>
           <Link href="/admin/settings">
             <ArrowLeft className="h-4 w-4" />
-            Torna alle Impostazioni
+            {t('admin.backToSettings')}
           </Link>
         </Button>
       </div>
@@ -120,10 +122,10 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                Log Email
+                {t('admin.emailLogs')}
               </CardTitle>
               <CardDescription>
-                Visualizza e filtra tutte le email inviate dal sistema
+                {t('admin.emailLogsDesc')}
               </CardDescription>
             </div>
             <Button
@@ -133,7 +135,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
               size="sm"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Aggiorna
+              {t('admin.emailLogsRefresh')}
             </Button>
           </div>
         </CardHeader>
@@ -144,7 +146,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Cerca per email o oggetto..."
+                  placeholder={t('admin.emailLogsSearch')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
@@ -157,26 +159,26 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Stato" />
+                <SelectValue placeholder={t('admin.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti gli stati</SelectItem>
-                <SelectItem value="sent">Inviata</SelectItem>
-                <SelectItem value="pending">In attesa</SelectItem>
-                <SelectItem value="failed">Fallita</SelectItem>
-                <SelectItem value="bounced">Rimbalzata</SelectItem>
+                <SelectItem value="all">{t('admin.emailLogsAllStatuses')}</SelectItem>
+                <SelectItem value="sent">{t('admin.emailLogsSent')}</SelectItem>
+                <SelectItem value="pending">{t('admin.emailLogsPending')}</SelectItem>
+                <SelectItem value="failed">{t('admin.emailLogsFailed')}</SelectItem>
+                <SelectItem value="bounced">{t('admin.emailLogsBounced')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[220px]">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Tipo" />
+                <SelectValue placeholder={t('admin.emailLogsType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti i tipi</SelectItem>
-                <SelectItem value="rota_published">Planning pubblicato</SelectItem>
-                <SelectItem value="shift_assignment_change">Modifica turno</SelectItem>
-                <SelectItem value="leave_decision">Decisione assenza</SelectItem>
+                <SelectItem value="all">{t('admin.emailLogsAllTypes')}</SelectItem>
+                <SelectItem value="rota_published">{t('admin.emailLogsRotaPublished')}</SelectItem>
+                <SelectItem value="shift_assignment_change">{t('admin.emailLogsShiftChange')}</SelectItem>
+                <SelectItem value="leave_decision">{t('admin.emailLogsLeaveDecision')}</SelectItem>
               </SelectContent>
             </Select>
             {(searchTerm || statusFilter !== 'all' || typeFilter !== 'all') && (
@@ -189,7 +191,7 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
                   setTypeFilter('all');
                 }}
               >
-                Reset filtri
+                {t('admin.emailLogsResetFilters')}
               </Button>
             )}
           </div>
@@ -199,25 +201,25 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data/Ora</TableHead>
-                  <TableHead>Destinatario</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Oggetto</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead className="text-right">Dettagli</TableHead>
+                  <TableHead>{t('admin.emailLogsDate')}</TableHead>
+                  <TableHead>{t('admin.emailLogsRecipient')}</TableHead>
+                  <TableHead>{t('admin.emailLogsType')}</TableHead>
+                  <TableHead>{t('admin.emailLogsSubject')}</TableHead>
+                  <TableHead>{t('admin.status')}</TableHead>
+                  <TableHead className="text-right">{t('admin.emailLogsDetails')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Caricamento...
+                      {t('admin.loading')}
                     </TableCell>
                   </TableRow>
                 ) : logs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Nessun log trovato
+                      {t('admin.emailLogsNone')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -257,25 +259,25 @@ export function EmailLogsClient({ orgId }: EmailLogsClientProps) {
               <div className="text-2xl font-bold text-green-600">
                 {logs.filter(l => l.status === 'sent').length}
               </div>
-              <div className="text-xs text-muted-foreground">Inviate</div>
+              <div className="text-xs text-muted-foreground">{t('admin.emailLogsSent')}</div>
             </div>
             <div className="p-4 border rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
                 {logs.filter(l => l.status === 'pending').length}
               </div>
-              <div className="text-xs text-muted-foreground">In attesa</div>
+              <div className="text-xs text-muted-foreground">{t('admin.emailLogsPending')}</div>
             </div>
             <div className="p-4 border rounded-lg">
               <div className="text-2xl font-bold text-red-600">
                 {logs.filter(l => l.status === 'failed').length}
               </div>
-              <div className="text-xs text-muted-foreground">Fallite</div>
+              <div className="text-xs text-muted-foreground">{t('admin.emailLogsFailed')}</div>
             </div>
             <div className="p-4 border rounded-lg">
               <div className="text-2xl font-bold text-orange-600">
                 {logs.filter(l => l.status === 'bounced').length}
               </div>
-              <div className="text-xs text-muted-foreground">Rimbalzate</div>
+              <div className="text-xs text-muted-foreground">{t('admin.emailLogsBounced')}</div>
             </div>
           </div>
         </CardContent>

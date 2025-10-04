@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LeaveRequestCard } from './LeaveRequestCard'
 import type { LeaveRequest } from '@/types/shifts'
 import { AlertCircle } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -32,6 +33,7 @@ interface LeaveRequestWithDetails extends LeaveRequest {
 
 export function LeaveInboxClient() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const { t } = useTranslation()
   
   const { data, error, mutate } = useSWR<{ requests: LeaveRequestWithDetails[] }>(
     selectedLocation 
@@ -53,7 +55,7 @@ export function LeaveInboxClient() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Errore nel caricamento delle richieste: {error.message}
+            {t('admin.leaveInboxErrorLoading')}: {error.message}
           </AlertDescription>
         </Alert>
       </div>
@@ -66,9 +68,9 @@ export function LeaveInboxClient() {
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Leave Inbox</h1>
+        <h1 className="text-3xl font-bold">{t('admin.leaveInbox')}</h1>
         <p className="text-muted-foreground">
-          Approva o rifiuta le richieste di permesso/ferie in attesa
+          {t('admin.leaveInboxDesc')}
         </p>
       </div>
 
@@ -85,9 +87,9 @@ export function LeaveInboxClient() {
       ) : requests.length === 0 ? (
         <Card className="p-12">
           <div className="text-center text-muted-foreground">
-            <p className="text-lg font-medium">Nessuna richiesta in attesa</p>
+            <p className="text-lg font-medium">{t('admin.leaveInboxNone')}</p>
             <p className="text-sm mt-2">
-              Tutte le richieste di permesso sono state gestite
+              {t('admin.leaveInboxNoneDesc')}
             </p>
           </div>
         </Card>

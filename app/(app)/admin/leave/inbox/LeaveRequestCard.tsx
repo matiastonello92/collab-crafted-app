@@ -11,6 +11,7 @@ import { it } from 'date-fns/locale'
 import { Check, X, Calendar, User, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import type { LeaveRequest } from '@/types/shifts'
+import { useTranslation } from '@/lib/i18n'
 
 interface LeaveRequestWithDetails extends LeaveRequest {
   profiles: {
@@ -34,6 +35,7 @@ interface Props {
 export function LeaveRequestCard({ request, onDecision }: Props) {
   const [notes, setNotes] = useState('')
   const [processing, setProcessing] = useState(false)
+  const { t } = useTranslation()
 
   const handleDecision = async (decision: 'approve' | 'reject') => {
     setProcessing(true)
@@ -51,13 +53,13 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
 
       toast.success(
         decision === 'approve' 
-          ? 'Richiesta approvata con successo' 
-          : 'Richiesta rifiutata'
+          ? t('toast.leave.approved')
+          : t('toast.leave.rejected')
       )
       onDecision()
     } catch (error: any) {
       console.error('Error processing leave request:', error)
-      toast.error(error.message || 'Errore durante l\'elaborazione')
+      toast.error(t('toast.leave.errorProcessing'))
     } finally {
       setProcessing(false)
     }
@@ -67,7 +69,7 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
   const endDate = format(new Date(request.end_at), 'dd MMM yyyy', { locale: it })
   const createdDate = format(new Date(request.created_at), 'dd MMM yyyy', { locale: it })
 
-  const userName = request.profiles.full_name || 'Utente sconosciuto'
+  const userName = request.profiles.full_name || t('admin.leaveInboxUserUnknown')
   const leaveType = request.leave_types.label
   const leaveColor = request.leave_types.color || '#6b7280'
 
@@ -86,7 +88,7 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
             <div>
               <p className="font-semibold">{userName}</p>
               <p className="text-sm text-muted-foreground">
-                Richiesta del {createdDate}
+                {t('admin.leaveInboxRequested')} {createdDate}
               </p>
             </div>
           </div>
@@ -113,9 +115,9 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
 
         {/* Notes Input */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Note (opzionali)</label>
+          <label className="text-sm font-medium">{t('admin.leaveInboxNotes')}</label>
           <Textarea
-            placeholder="Aggiungi una nota alla decisione..."
+            placeholder={t('admin.leaveInboxNotesPlaceholder')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
@@ -131,7 +133,7 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
             variant="default"
           >
             <Check className="h-4 w-4 mr-2" />
-            Approva
+            {t('admin.leaveInboxApprove')}
           </Button>
           <Button
             onClick={() => handleDecision('reject')}
@@ -140,7 +142,7 @@ export function LeaveRequestCard({ request, onDecision }: Props) {
             variant="destructive"
           >
             <X className="h-4 w-4 mr-2" />
-            Rifiuta
+            {t('admin.leaveInboxReject')}
           </Button>
         </div>
       </div>

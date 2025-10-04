@@ -13,6 +13,7 @@ import type { UserPermissionOverride } from '@/lib/data/admin'
 import type { Permission, Location } from '@/lib/admin/data-fetchers'
 import { setPermissionOverride, removePermissionOverride } from '@/lib/admin/mutations'
 import { fetchAvailablePermissions, fetchAvailableLocations } from '@/lib/admin/data-fetchers'
+import { useTranslation } from '@/lib/i18n'
 
 interface PermissionOverridesPanelProps {
   overrides: UserPermissionOverride[]
@@ -26,6 +27,7 @@ interface OptimisticOverride extends UserPermissionOverride {
 
 export default function PermissionOverridesPanel({ overrides, userId, onUpdate }: PermissionOverridesPanelProps) {
   const [isPending, startTransition] = useTransition()
+  const { t } = useTranslation()
   const [optimisticOverrides, addOptimisticOverride] = useOptimistic(
     overrides as OptimisticOverride[],
     (currentOverrides, action: { type: 'add' | 'remove' | 'update'; override: UserPermissionOverride }): OptimisticOverride[] => {
@@ -165,28 +167,28 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
         <CardTitle className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Key className="h-5 w-5" />
-            Override Permessi
+            {t('admin.permissionOverrides')}
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" onClick={handleDialogOpen}>
                 <Plus className="mr-2 h-4 w-4" />
-                Imposta
+                {t('admin.permissionOverridesSet')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Imposta Override Permesso</DialogTitle>
+                <DialogTitle>{t('admin.permissionOverridesSetTitle')}</DialogTitle>
                 <DialogDescription>
-                  Concedi o nega specificamente un permesso per questo utente
+                  {t('admin.permissionOverridesSetDesc')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Permesso</label>
+                  <label className="text-sm font-medium">{t('admin.permissionOverridesPermission')}</label>
                   <Select value={selectedPermission} onValueChange={setSelectedPermission}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleziona un permesso" />
+                      <SelectValue placeholder={t('admin.permissionOverridesSelectPermission')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availablePermissions.map((permission) => (
@@ -201,13 +203,13 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Location (opzionale)</label>
+                  <label className="text-sm font-medium">{t('admin.permissionOverridesLocation')}</label>
                   <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Globale (tutte le location)" />
+                      <SelectValue placeholder={t('admin.permissionOverridesGlobal')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__global__">Globale (tutte le location)</SelectItem>
+                      <SelectItem value="__global__">{t('admin.permissionOverridesGlobal')}</SelectItem>
                       {availableLocations.map((location) => (
                         <SelectItem key={location.id} value={location.id}>
                           {location.name}
@@ -223,7 +225,7 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
                     onCheckedChange={setIsGranted}
                   />
                   <label htmlFor="granted" className="text-sm font-medium">
-                    {isGranted ? 'Concedi permesso' : 'Nega permesso'}
+                    {isGranted ? t('admin.permissionOverridesGrant') : t('admin.permissionOverridesDeny')}
                   </label>
                 </div>
                 <div className="flex justify-end gap-2">
@@ -232,14 +234,14 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
                     onClick={() => setIsDialogOpen(false)}
                     disabled={isPending}
                   >
-                    Annulla
+                    {t('admin.cancel')}
                   </Button>
                   <Button 
                     onClick={handleSetOverride} 
                     disabled={!selectedPermission || isPending}
                   >
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isGranted ? 'Concedi' : 'Nega'}
+                    {isGranted ? t('admin.permissionOverridesGranted') : t('admin.permissionOverridesDenied')}
                   </Button>
                 </div>
               </div>
@@ -247,14 +249,14 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
           </Dialog>
         </CardTitle>
         <CardDescription>
-          Permessi specificatamente concessi o negati ({optimisticOverrides.length})
+          {t('admin.permissionOverridesDesc')} ({optimisticOverrides.length})
         </CardDescription>
       </CardHeader>
       <CardContent>
         {optimisticOverrides.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Key className="mx-auto h-8 w-8 mb-2" />
-            <p>Nessun override specifico</p>
+            <p>{t('admin.permissionOverridesNone')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -295,12 +297,12 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
                           )}
                           <span className="text-xs font-medium">
                             {override._optimistic === 'removing' 
-                              ? 'Rimuovendo...'
+                              ? t('admin.removing')
                               : override._optimistic === 'updating'
-                              ? 'Aggiornando...'
+                              ? t('admin.updating')
                               : override._optimistic === 'adding'
-                              ? 'Aggiungendo...'
-                              : override.granted ? 'Concesso' : 'Negato'
+                              ? t('admin.adding')
+                              : override.granted ? t('admin.permissionOverridesGranted') : t('admin.permissionOverridesDenied')
                             }
                           </span>
                         </div>

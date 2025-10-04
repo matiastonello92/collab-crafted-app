@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Shield, Star, Info } from 'lucide-react'
 import { normalizeSet } from '@/lib/permissions'
+import { useTranslation } from '@/lib/i18n'
 
 interface EffectivePermissionsProps {
   userId: string
@@ -21,6 +22,7 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
   const [permissions, setPermissions] = useState<UserPermissions | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -67,13 +69,13 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Permessi Effettivi
+            {t('admin.effectivePermissions')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
             <AlertDescription>
-              Errore nel caricamento dei permessi: {error}
+              {t('admin.effectivePermissionsError')}: {error}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -97,11 +99,11 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Permessi Effettivi
+          {t('admin.effectivePermissions')}
           {isAdmin && (
             <Badge variant="destructive" className="ml-2">
               <Star className="h-3 w-3 mr-1" />
-              Admin
+              {t('admin.effectivePermissionsAdmin')}
             </Badge>
           )}
         </CardTitle>
@@ -111,8 +113,7 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
           <Alert>
             <Star className="h-4 w-4" />
             <AlertDescription>
-              Questo utente ha privilegi amministrativi completi (wildcard "*"). 
-              Può accedere a tutte le funzionalità del sistema.
+              {t('admin.effectivePermissionsAdminDesc')}
             </AlertDescription>
           </Alert>
         )}
@@ -121,7 +122,7 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              Nessun permesso assegnato. L'utente può accedere solo alle funzionalità base.
+              {t('admin.effectivePermissionsNone')}
             </AlertDescription>
           </Alert>
         ) : (
@@ -129,12 +130,12 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
             {Object.entries(groupedPermissions).map(([module, actions]) => (
               <div key={module} className="space-y-2">
                 <h4 className="font-medium capitalize text-sm">
-                  {module === '*' ? 'Amministratore' : module}
+                  {module === '*' ? t('admin.effectivePermissionsAdminTitle') : module}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {actions.map((action, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
-                      {action === 'all' ? 'Tutti i permessi' : action}
+                      {action === 'all' ? t('admin.effectivePermissionsAll') : action}
                     </Badge>
                   ))}
                 </div>
@@ -143,7 +144,7 @@ export function EffectivePermissions({ userId }: EffectivePermissionsProps) {
             
             <div className="pt-4 border-t">
               <p className="text-xs text-muted-foreground">
-                Totale permessi: {normalizedPermissions.length}
+                {t('admin.effectivePermissionsTotal')}: {normalizedPermissions.length}
               </p>
             </div>
           </div>

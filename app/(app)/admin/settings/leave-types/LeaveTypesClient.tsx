@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertCircle, Edit, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { LeaveType } from '@/types/shifts'
+import { useTranslation } from '@/lib/i18n'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -30,6 +31,7 @@ const fetcher = async (url: string) => {
 export function LeaveTypesClient() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingType, setEditingType] = useState<LeaveType | null>(null)
+  const { t } = useTranslation()
 
   const { data, error, mutate } = useSWR<{ leaveTypes: LeaveType[] }>(
     '/api/v1/admin/leave-types',
@@ -50,7 +52,7 @@ export function LeaveTypesClient() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questa tipologia? Questa azione è irreversibile.')) {
+    if (!confirm(t('admin.leaveTypesDeleteConfirm'))) {
       return
     }
 
@@ -64,11 +66,11 @@ export function LeaveTypesClient() {
         throw new Error(error.error || 'Failed to delete')
       }
 
-      toast.success('Tipologia eliminata con successo')
+      toast.success(t('toast.leaveType.deleted'))
       mutate()
     } catch (error: any) {
       console.error('Error deleting leave type:', error)
-      toast.error(error.message || 'Errore durante l\'eliminazione')
+      toast.error(t('toast.leaveType.errorDeleting'))
     }
   }
 
@@ -84,11 +86,11 @@ export function LeaveTypesClient() {
         throw new Error('Failed to update')
       }
 
-      toast.success(type.is_active ? 'Tipologia disattivata' : 'Tipologia attivata')
+      toast.success(type.is_active ? t('admin.leaveTypesDeactivated') : t('admin.leaveTypesActivated'))
       mutate()
     } catch (error: any) {
       console.error('Error toggling leave type:', error)
-      toast.error('Errore durante l\'aggiornamento')
+      toast.error(t('toast.leaveType.errorUpdating'))
     }
   }
 
@@ -104,7 +106,7 @@ export function LeaveTypesClient() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Errore nel caricamento delle tipologie: {error.message}
+            {t('admin.leaveTypesErrorLoading')}: {error.message}
           </AlertDescription>
         </Alert>
       </div>
@@ -118,14 +120,14 @@ export function LeaveTypesClient() {
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Leave Types</h1>
+          <h1 className="text-3xl font-bold">{t('admin.leaveTypes')}</h1>
           <p className="text-muted-foreground">
-            Gestisci le tipologie di ferie/permessi della tua organizzazione
+            {t('admin.leaveTypesDesc')}
           </p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="h-4 w-4 mr-2" />
-          Nuova Tipologia
+          {t('admin.leaveTypesNew')}
         </Button>
       </div>
 
@@ -138,21 +140,21 @@ export function LeaveTypesClient() {
           </div>
         ) : leaveTypes.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">
-            <p className="text-lg font-medium">Nessuna tipologia configurata</p>
+            <p className="text-lg font-medium">{t('admin.leaveTypesNone')}</p>
             <p className="text-sm mt-2">
-              Crea la prima tipologia di ferie/permessi per la tua organizzazione
+              {t('admin.leaveTypesNoneDesc')}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Label</TableHead>
-                <TableHead>Key</TableHead>
-                <TableHead>Color</TableHead>
-                <TableHead>Requires Approval</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('admin.leaveTypesLabel')}</TableHead>
+                <TableHead>{t('admin.leaveTypesKey')}</TableHead>
+                <TableHead>{t('admin.leaveTypesColor')}</TableHead>
+                <TableHead>{t('admin.leaveTypesRequiresApproval')}</TableHead>
+                <TableHead>{t('admin.status')}</TableHead>
+                <TableHead className="text-right">{t('admin.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -177,9 +179,9 @@ export function LeaveTypesClient() {
                   </TableCell>
                   <TableCell>
                     {type.requires_approval ? (
-                      <Badge variant="outline">Yes</Badge>
+                      <Badge variant="outline">{t('admin.leaveTypesYes')}</Badge>
                     ) : (
-                      <Badge variant="secondary">No</Badge>
+                      <Badge variant="secondary">{t('admin.leaveTypesNo')}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
@@ -189,9 +191,9 @@ export function LeaveTypesClient() {
                       onClick={() => handleToggleActive(type)}
                     >
                       {type.is_active ? (
-                        <Badge variant="default">Active</Badge>
+                        <Badge variant="default">{t('admin.leaveTypesActive')}</Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary">{t('admin.leaveTypesInactive')}</Badge>
                       )}
                     </Button>
                   </TableCell>
@@ -224,7 +226,7 @@ export function LeaveTypesClient() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingType ? 'Modifica Tipologia' : 'Nuova Tipologia'}
+              {editingType ? t('admin.leaveTypesEdit') : t('admin.leaveTypesNew')}
             </DialogTitle>
           </DialogHeader>
           <LeaveTypeForm

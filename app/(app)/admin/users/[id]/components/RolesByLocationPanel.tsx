@@ -13,6 +13,7 @@ import type { UserRolesByLocation } from '@/lib/data/admin'
 import type { Role, Location } from '@/lib/admin/data-fetchers'
 import { assignRole, revokeRole } from '@/lib/admin/mutations'
 import { fetchAvailableRoles, fetchAvailableLocations } from '@/lib/admin/data-fetchers'
+import { useTranslation } from '@/lib/i18n'
 
 interface RolesByLocationPanelProps {
   roles: UserRolesByLocation[]
@@ -26,6 +27,7 @@ interface OptimisticRole extends UserRolesByLocation {
 
 export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesByLocationPanelProps) {
   const [isPending, startTransition] = useTransition()
+  const { t } = useTranslation()
   const [optimisticRoles, addOptimisticRole] = useOptimistic(
     roles as OptimisticRole[],
     (currentRoles, action: { type: 'add' | 'remove'; role: UserRolesByLocation }): OptimisticRole[] => {
@@ -134,46 +136,46 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
         <CardTitle className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Ruoli per Location
+            {t('admin.rolesByLocation')}
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" onClick={handleDialogOpen}>
                 <Plus className="mr-2 h-4 w-4" />
-                Assegna
+                {t('admin.rolesByLocationAssign')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Assegna Ruolo</DialogTitle>
+                <DialogTitle>{t('admin.rolesByLocationAssignTitle')}</DialogTitle>
                 <DialogDescription>
-                  Seleziona un ruolo e opzionalmente una location specifica
+                  {t('admin.rolesByLocationAssignDesc')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Ruolo</label>
+                  <label className="text-sm font-medium">{t('admin.rolesByLocationRole')}</label>
                   <Select value={selectedRole} onValueChange={setSelectedRole}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleziona un ruolo" />
+                      <SelectValue placeholder={t('admin.rolesByLocationSelectRole')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableRoles.map((role) => (
                         <SelectItem key={role.id} value={role.id}>
-                          {role.display_name} (Livello {role.level})
+                          {role.display_name} ({t('admin.rolesByLocationLevel')} {role.level})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Location (opzionale)</label>
+                  <label className="text-sm font-medium">{t('admin.permissionOverridesLocation')}</label>
                   <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Globale (tutte le location)" />
+                      <SelectValue placeholder={t('admin.permissionOverridesGlobal')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__global__">Globale (tutte le location)</SelectItem>
+                      <SelectItem value="__global__">{t('admin.permissionOverridesGlobal')}</SelectItem>
                       {availableLocations.map((location) => (
                         <SelectItem key={location.id} value={location.id}>
                           {location.name}
@@ -188,14 +190,14 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
                     onClick={() => setIsDialogOpen(false)}
                     disabled={isPending}
                   >
-                    Annulla
+                    {t('admin.cancel')}
                   </Button>
                   <Button 
                     onClick={handleAssignRole} 
                     disabled={!selectedRole || isPending}
                   >
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Assegna
+                    {t('admin.rolesByLocationAssign')}
                   </Button>
                 </div>
               </div>
@@ -203,25 +205,25 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
           </Dialog>
         </CardTitle>
         <CardDescription>
-          Ruoli assegnati per ciascuna location ({optimisticRoles.length})
+          {t('admin.rolesByLocationDesc')} ({optimisticRoles.length})
         </CardDescription>
       </CardHeader>
       <CardContent>
         {optimisticRoles.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Shield className="mx-auto h-8 w-8 mb-2" />
-            <p>Nessun ruolo assegnato</p>
+            <p>{t('admin.rolesByLocationNone')}</p>
           </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Location</TableHead>
-                <TableHead>Ruolo</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('admin.permissionOverridesLocation')}</TableHead>
+                  <TableHead>{t('admin.rolesByLocationRole')}</TableHead>
+                  <TableHead>{t('admin.status')}</TableHead>
+                  <TableHead>{t('admin.actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {optimisticRoles.map((role, index) => (
                 <TableRow 
@@ -234,7 +236,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
                     </div>
                     {role.assigned_at && (
                       <div className="text-xs text-muted-foreground">
-                        Dal {new Date(role.assigned_at).toLocaleDateString('it-IT')}
+                        {t('admin.rolesByLocationFrom')} {new Date(role.assigned_at).toLocaleDateString('it-IT')}
                       </div>
                     )}
                   </TableCell>
@@ -244,7 +246,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
                         {role.role_display_name}
                       </Badge>
                       <div className="text-xs text-muted-foreground">
-                        Livello {role.role_level}
+                        {t('admin.rolesByLocationLevel')} {role.role_level}
                       </div>
                     </div>
                   </TableCell>
@@ -254,10 +256,10 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
                       className="text-xs"
                     >
                       {role._optimistic === 'removing' 
-                        ? 'Rimuovendo...' 
+                        ? t('admin.removing')
                         : role._optimistic === 'adding'
-                        ? 'Assegnando...'
-                        : role.is_active ? 'Attivo' : 'Inattivo'
+                        ? t('admin.assigning')
+                        : role.is_active ? t('admin.active') : t('admin.inactive')
                       }
                     </Badge>
                   </TableCell>
@@ -273,7 +275,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
                       ) : (
                         <>
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Rimuovi
+                          {t('admin.remove')}
                         </>
                       )}
                     </Button>
