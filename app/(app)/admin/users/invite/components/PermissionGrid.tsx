@@ -9,6 +9,7 @@ import { Key, RotateCcw, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchAvailablePermissions } from '@/lib/admin/data-fetchers'
 import type { Permission } from '@/lib/admin/data-fetchers'
+import { useTranslation } from '@/lib/i18n'
 
 interface PermissionGridProps {
   selectedPermissions: string[]
@@ -17,6 +18,7 @@ interface PermissionGridProps {
 }
 
 export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId }: PermissionGridProps) {
+  const { t } = useTranslation()
   const [availablePermissions, setAvailablePermissions] = useState<Permission[]>([])
   const [rolePresetPermissions, setRolePresetPermissions] = useState<string[]>([])
   const [isLoadingPresets, setIsLoadingPresets] = useState(false)
@@ -30,7 +32,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
         setAvailablePermissions(data)
       } catch (error) {
         console.error('Failed to load permissions:', error)
-        toast.error('Errore nel caricamento dei permessi')
+        toast.error(t('userManagement.permissionGrid.loadError'))
       } finally {
         setIsLoadingPermissions(false)
       }
@@ -64,7 +66,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
 
       } catch (error) {
         console.error('Failed to load role presets:', error)
-        toast.error('Errore nel caricamento dei preset ruolo')
+        toast.error(t('userManagement.permissionGrid.loadPresetsError'))
         setRolePresetPermissions([])
       } finally {
         setIsLoadingPresets(false)
@@ -84,7 +86,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
 
   const resetToPresets = () => {
     onPermissionChange([...rolePresetPermissions])
-    toast.success('Permessi ripristinati ai default del ruolo')
+    toast.success(t('userManagement.permissionGrid.resetSuccess'))
   }
 
   const groupedPermissions = availablePermissions.reduce((acc, permission) => {
@@ -103,7 +105,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
           <CardTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />
             <Loader2 className="h-4 w-4 animate-spin" />
-            Caricamento permessi...
+            {t('userManagement.permissionGrid.loading')}
           </CardTitle>
         </CardHeader>
       </Card>
@@ -116,7 +118,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
         <CardTitle className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Key className="h-5 w-5" />
-            Permessi
+            {t('userManagement.permissionGrid.title')}
             {isLoadingPresets && <Loader2 className="h-4 w-4 animate-spin" />}
           </div>
           {roleId && rolePresetPermissions.length > 0 && (
@@ -127,15 +129,15 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
               disabled={isLoadingPresets}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              Reset ai default
+              {t('userManagement.permissionGrid.resetToDefaults')}
             </Button>
           )}
         </CardTitle>
         <CardDescription>
-          Seleziona i permessi specifici per questo utente ({selectedPermissions.length} selezionati)
+          {t('userManagement.permissionGrid.description')} ({selectedPermissions.length} {t('userManagement.permissionGrid.selected')})
           {roleId && rolePresetPermissions.length > 0 && (
             <Badge variant="secondary" className="ml-2">
-              {rolePresetPermissions.length} default dal ruolo
+              {rolePresetPermissions.length} {t('userManagement.permissionGrid.defaultFromRole')}
             </Badge>
           )}
         </CardDescription>
@@ -144,7 +146,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
         {Object.keys(groupedPermissions).length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Key className="mx-auto h-8 w-8 mb-2" />
-            <p>Nessun permesso disponibile</p>
+            <p>{t('userManagement.permissionGrid.noPermissions')}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -184,7 +186,7 @@ export function PermissionGrid({ selectedPermissions, onPermissionChange, roleId
                             {permission.display_name}
                             {isPreset && (
                               <Badge variant="outline" className="ml-2 text-xs">
-                                Default
+                                {t('userManagement.permissionGrid.defaultBadge')}
                               </Badge>
                             )}
                           </label>

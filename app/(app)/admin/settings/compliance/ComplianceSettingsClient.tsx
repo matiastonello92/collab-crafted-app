@@ -10,8 +10,10 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { AlertTriangle, Save } from 'lucide-react'
 import type { ComplianceRule } from '@/types/compliance'
+import { useTranslation } from '@/lib/i18n'
 
 export function ComplianceSettingsClient() {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const [rules, setRules] = useState<ComplianceRule[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,7 +44,7 @@ export function ComplianceSettingsClient() {
       setRules(data || [])
     } catch (err: any) {
       console.error('Error fetching rules:', err)
-      toast.error('Errore caricamento regole')
+      toast.error(t('toast.compliance.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -58,11 +60,11 @@ export function ComplianceSettingsClient() {
 
       if (error) throw error
 
-      toast.success('Regola aggiornata')
+      toast.success(t('toast.compliance.ruleUpdated'))
       fetchRules()
     } catch (err: any) {
       console.error('Error updating rule:', err)
-      toast.error('Errore aggiornamento')
+      toast.error(t('toast.compliance.errorUpdating'))
     } finally {
       setSaving(false)
     }
@@ -74,16 +76,15 @@ export function ComplianceSettingsClient() {
   }
 
   if (loading) {
-    return <div className="text-muted-foreground">Caricamento...</div>
+    return <div className="text-muted-foreground">{t('compliance.loading')}</div>
   }
 
   return (
     <div className="container max-w-4xl py-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Compliance Settings</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('compliance.title')}</h1>
         <p className="text-muted-foreground">
-          Configura le soglie delle regole di compliance francesi (soft warnings). 
-          Queste non bloccano operazioni ma generano warning visibili.
+          {t('compliance.description')}
         </p>
       </div>
 
@@ -92,11 +93,9 @@ export function ComplianceSettingsClient() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-warning mt-1" />
             <div>
-              <CardTitle>Disclaimer Legale</CardTitle>
+              <CardTitle>{t('compliance.legalDisclaimerTitle')}</CardTitle>
               <CardDescription className="mt-1">
-                Queste impostazioni non costituiscono consulenza legale. Le soglie sono configurabili 
-                per adattarsi a convenzioni collettive specifiche. Consultare un consulente del lavoro 
-                per la conformità esatta al Code du travail francese.
+                {t('compliance.legalDisclaimerDescription')}
               </CardDescription>
             </div>
           </div>
@@ -122,7 +121,7 @@ export function ComplianceSettingsClient() {
               <div className="flex items-end gap-4">
                 <div className="flex-1">
                   <Label htmlFor={`threshold-${rule.id}`}>
-                    Soglia (ore)
+                    {t('compliance.thresholdLabel')}
                   </Label>
                   <Input
                     id={`threshold-${rule.id}`}
@@ -140,7 +139,7 @@ export function ComplianceSettingsClient() {
                   disabled={saving || !rule.is_active}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Salva
+                  {t('compliance.save')}
                 </Button>
               </div>
             </CardContent>

@@ -16,6 +16,7 @@ import { X, Plus, Send } from 'lucide-react'
 import { fetchAvailableLocations, fetchAvailableRoles } from '@/lib/admin/data-fetchers'
 import type { Location, Role } from '@/lib/admin/data-fetchers'
 import { PermissionGrid } from './PermissionGrid'
+import { useTranslation } from '@/lib/i18n'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -34,6 +35,7 @@ interface LocationRole {
 }
 
 export function InviteUserForm() {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [locations, setLocations] = useState<Location[]>([])
@@ -79,7 +81,7 @@ export function InviteUserForm() {
 
     // Check if this combination already exists
     if (locationRoles.some(lr => lr.locationId === selectedLocationId && lr.roleId === selectedRoleId)) {
-      toast.error('Questa combinazione esiste già')
+      toast.error(t('userManagement.inviteForm.alreadyExists'))
       return
     }
 
@@ -125,14 +127,14 @@ export function InviteUserForm() {
       }
 
       const result = await response.json()
-      toast.success('Invito inviato con successo!')
+      toast.success(t('userManagement.inviteForm.success'))
       
       startTransition(() => {
         router.push('/admin/users')
       })
     } catch (error) {
       console.error('Error sending invitation:', error)
-      toast.error(error instanceof Error ? error.message : 'Errore durante l\'invito')
+      toast.error(error instanceof Error ? error.message : t('userManagement.inviteForm.error'))
     }
   }
 
@@ -270,10 +272,10 @@ export function InviteUserForm() {
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label htmlFor="notes">Note (opzionale)</Label>
+        <Label htmlFor="notes">{t('userManagement.inviteForm.notes')}</Label>
         <Textarea
           id="notes"
-          placeholder="Note aggiuntive sull'utente..."
+          placeholder={t('userManagement.inviteForm.notesPlaceholder')}
           rows={3}
           {...register('notes')}
         />
@@ -287,7 +289,7 @@ export function InviteUserForm() {
           className="flex-1"
         >
           <Send className="h-4 w-4 mr-2" />
-          {isPending ? 'Invio in corso...' : 'Invia Invito'}
+          {isPending ? t('userManagement.inviteForm.sending') : t('userManagement.inviteForm.sendInvite')}
         </Button>
         
         <Button
@@ -296,7 +298,7 @@ export function InviteUserForm() {
           onClick={() => router.push('/admin/users')}
           disabled={isPending}
         >
-          Annulla
+          {t('userManagement.inviteForm.cancel')}
         </Button>
       </div>
     </form>
