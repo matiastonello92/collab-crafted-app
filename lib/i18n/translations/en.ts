@@ -1250,6 +1250,23 @@ export const en = {
       noRecipes: 'No published recipes available',
       errorLoading: 'Error loading recipes',
     },
+    
+    // Recipe Summary Card
+    summary: {
+      title: 'Recipe Preview',
+      noPhoto: 'No photo',
+      defaultTitle: 'Recipe title',
+      completion: 'Completion',
+      fields: {
+        title: 'Title',
+        category: 'Category',
+        servings: 'Servings',
+        photo: 'Photo',
+        ingredients: 'Ingredients',
+        steps: 'Steps'
+      },
+      missingFields: 'Missing fields: complete all fields to submit the recipe'
+    },
   },
 
   // Dashboard
@@ -2179,6 +2196,12 @@ export const en = {
     logoutSuccess: 'Logout successful',
     signingUp: 'Signing up...',
     emailConfirmationRequired: 'Email confirmation required',
+    acceptance: {
+      loggingIn: 'Signing in...',
+      loginRequired: 'Login Required',
+      loginWithInvite: "Sign in with the invitation account",
+      loginAndAccept: 'Sign In and Accept'
+    }
   },
 
   // Complete Profile
@@ -2310,5 +2333,57 @@ export const en = {
     errorEmailPassword: 'Please enter email and password',
     errorLogin: 'Login error',
     poweredBy: 'Staff Management System • Powered by Supabase',
+    pageTitle: 'Login - Staff Management',
+    pageDescription: 'Sign in to the staff management system',
+  },
+
+  // Profile page
+  profile: {
+    title: 'My Profile',
+    description: 'View your personal information and assignments',
+    personalInfo: {
+      title: 'Personal Information',
+      description: 'Your personal and contact details',
+      fullName: 'Full Name',
+      email: 'Email',
+      phone: 'Phone',
+      updateInfo: 'Update your personal information'
+    },
+    roles: {
+      title: 'Assigned Roles',
+      description: 'Active roles for each location',
+      noRoles: 'No roles assigned at the moment',
+      active: 'Active',
+      global: 'Global',
+      since: 'Since',
+      location: 'Location'
+    },
+    locations: {
+      title: 'Assigned Locations',
+      description: 'Locations you have access to',
+      noLocations: 'No locations assigned',
+      roleCount: 'role',
+      roleCountPlural: 'roles'
+    }
+  },
+  
+  // Error pages
+  errors: {
+    global: {
+      title: 'An error occurred',
+      description: 'Please try again later.'
+    }
+  },
+  
+  // QA Tools
+  qa: {
+    accessTool: 'Access'
+  },
+  
+  // Platform
+  platform: {
+    stats: {
+      registeredUsers: 'Registered users'
+    }
   },
 } as const;

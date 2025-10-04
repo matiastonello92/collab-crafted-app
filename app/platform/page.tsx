@@ -98,7 +98,7 @@ export default async function PlatformAdminPage() {
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              Utenti registrati
+              {t('platform.stats.registeredUsers')}
             </p>
           </CardContent>
         </Card>

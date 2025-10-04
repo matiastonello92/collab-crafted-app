@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ChefHat, CheckCircle2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeSummaryCardProps {
   title: string;
@@ -23,13 +24,15 @@ export function RecipeSummaryCard({
   ingredientsCount,
   stepsCount,
 }: RecipeSummaryCardProps) {
+  const { t } = useTranslation();
+  
   const fields = [
-    { label: 'Titolo', value: title, isComplete: !!title },
-    { label: 'Categoria', value: category, isComplete: !!category },
-    { label: 'Porzioni', value: servings, isComplete: servings > 0 },
-    { label: 'Foto', value: photoUrl, isComplete: !!photoUrl },
-    { label: 'Ingredienti', value: ingredientsCount, isComplete: ingredientsCount > 0 },
-    { label: 'Step', value: stepsCount, isComplete: stepsCount > 0 },
+    { label: t('recipes.summary.fields.title'), value: title, isComplete: !!title },
+    { label: t('recipes.summary.fields.category'), value: category, isComplete: !!category },
+    { label: t('recipes.summary.fields.servings'), value: servings, isComplete: servings > 0 },
+    { label: t('recipes.summary.fields.photo'), value: photoUrl, isComplete: !!photoUrl },
+    { label: t('recipes.summary.fields.ingredients'), value: ingredientsCount, isComplete: ingredientsCount > 0 },
+    { label: t('recipes.summary.fields.steps'), value: stepsCount, isComplete: stepsCount > 0 },
   ];
 
   const completedFields = fields.filter((f) => f.isComplete).length;
@@ -39,7 +42,7 @@ export function RecipeSummaryCard({
   return (
     <Card className="sticky top-6">
       <CardHeader>
-        <CardTitle className="text-lg">Anteprima Ricetta</CardTitle>
+        <CardTitle className="text-lg">{t('recipes.summary.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Photo Preview */}
@@ -54,7 +57,7 @@ export function RecipeSummaryCard({
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <ImageIcon className="w-12 h-12" />
-              <span className="text-sm">Nessuna foto</span>
+              <span className="text-sm">{t('recipes.summary.noPhoto')}</span>
             </div>
           )}
         </div>
@@ -62,7 +65,7 @@ export function RecipeSummaryCard({
         {/* Title & Category */}
         <div className="space-y-2">
           <h3 className="font-semibold text-lg line-clamp-2">
-            {title || 'Titolo ricetta'}
+            {title || t('recipes.summary.defaultTitle')}
           </h3>
           {category && (
             <Badge variant="secondary" className="w-fit">
@@ -74,7 +77,7 @@ export function RecipeSummaryCard({
         {/* Progress */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">Completamento</span>
+            <span className="font-medium">{t('recipes.summary.completion')}</span>
             <span className="text-muted-foreground">
               {completedFields}/{totalFields}
             </span>
@@ -106,10 +109,12 @@ export function RecipeSummaryCard({
                 {field.label}
               </span>
               <span className="text-xs">
-                {field.label === 'Ingredienti' && `${ingredientsCount}`}
-                {field.label === 'Step' && `${stepsCount}`}
-                {field.label === 'Porzioni' && servings > 0 && `${servings}`}
-                {(field.label === 'Titolo' || field.label === 'Categoria' || field.label === 'Foto') &&
+                {field.label === t('recipes.summary.fields.ingredients') && `${ingredientsCount}`}
+                {field.label === t('recipes.summary.fields.steps') && `${stepsCount}`}
+                {field.label === t('recipes.summary.fields.servings') && servings > 0 && `${servings}`}
+                {(field.label === t('recipes.summary.fields.title') || 
+                  field.label === t('recipes.summary.fields.category') || 
+                  field.label === t('recipes.summary.fields.photo')) &&
                   (field.isComplete ? '✓' : '—')}
               </span>
             </div>
@@ -120,7 +125,7 @@ export function RecipeSummaryCard({
         {completedFields < totalFields && (
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              <strong>Campi mancanti:</strong> completa tutti i campi per inviare la ricetta
+              <strong>{t('recipes.summary.missingFields')}</strong>
             </p>
           </div>
         )}

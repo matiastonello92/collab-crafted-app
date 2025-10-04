@@ -251,9 +251,9 @@ export default async function MePage() {
           {locations.length === 0 ? (
             <div className="text-center py-8">
               <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Nessuna location assegnata
-              </p>
+            <p className="text-muted-foreground">
+              {t('profile.locations.noLocations')}
+            </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

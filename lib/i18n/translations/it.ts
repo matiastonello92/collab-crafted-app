@@ -1192,6 +1192,23 @@ export const it = {
       noRecipes: 'Nessuna ricetta pubblicata disponibile',
       errorLoading: 'Errore caricamento ricette',
     },
+    
+    // Recipe Summary Card
+    summary: {
+      title: 'Anteprima Ricetta',
+      noPhoto: 'Nessuna foto',
+      defaultTitle: 'Titolo ricetta',
+      completion: 'Completamento',
+      fields: {
+        title: 'Titolo',
+        category: 'Categoria',
+        servings: 'Porzioni',
+        photo: 'Foto',
+        ingredients: 'Ingredienti',
+        steps: 'Step'
+      },
+      missingFields: 'Campi mancanti: completa tutti i campi per inviare la ricetta'
+    },
   },
 
   // Allergens
@@ -2223,6 +2240,12 @@ export const it = {
     logoutSuccess: 'Logout effettuato',
     signingUp: 'Registrazione...',
     emailConfirmationRequired: 'Conferma email richiesta',
+    acceptance: {
+      loggingIn: 'Accesso...',
+      loginRequired: 'Login Richiesto',
+      loginWithInvite: "Accedi con l'account dell'invito",
+      loginAndAccept: 'Accedi e Accetta'
+    }
   },
 
   // Complete Profile
@@ -2354,5 +2377,57 @@ export const it = {
     errorEmailPassword: 'Inserisci email e password',
     errorLogin: 'Errore durante il login',
     poweredBy: 'Staff Management System • Powered by Supabase',
+    pageTitle: 'Login - Staff Management',
+    pageDescription: 'Accedi al sistema di gestione del personale',
+  },
+
+  // Profile page
+  profile: {
+    title: 'Il Mio Profilo',
+    description: 'Visualizza le tue informazioni personali e le tue assegnazioni',
+    personalInfo: {
+      title: 'Informazioni Personali',
+      description: 'I tuoi dati personali e di contatto',
+      fullName: 'Nome Completo',
+      email: 'Email',
+      phone: 'Telefono',
+      updateInfo: 'Aggiorna le tue informazioni personali'
+    },
+    roles: {
+      title: 'Ruoli Assegnati',
+      description: 'I ruoli attivi per ogni location',
+      noRoles: 'Nessun ruolo assegnato al momento',
+      active: 'Attivo',
+      global: 'Globale',
+      since: 'Dal',
+      location: 'Location'
+    },
+    locations: {
+      title: 'Location Assegnate',
+      description: 'Le location a cui hai accesso',
+      noLocations: 'Nessuna location assegnata',
+      roleCount: 'ruolo',
+      roleCountPlural: 'ruoli'
+    }
+  },
+  
+  // Error pages
+  errors: {
+    global: {
+      title: 'Si è verificato un errore',
+      description: 'Riprova più tardi.'
+    }
+  },
+  
+  // QA Tools
+  qa: {
+    accessTool: 'Accedi'
+  },
+  
+  // Platform
+  platform: {
+    stats: {
+      registeredUsers: 'Utenti registrati'
+    }
   },
 } as const;

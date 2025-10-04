@@ -112,7 +112,7 @@ export default async function QAPage() {
                 ) : (
                   <Button asChild className="w-full">
                     <Link href={tool.href}>
-                      Accedi
+                      {t('qa.accessTool')}
                     </Link>
                   </Button>
                 )}

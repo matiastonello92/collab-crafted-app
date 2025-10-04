@@ -147,7 +147,7 @@ export default async function UserDetailPage({ params }: Props) {
             {userLocations.length === 0 && (
               <Card>
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  L'utente non è assegnato a nessuna location
+                  {t('admin.userNotAssignedToLocation')}
                 </CardContent>
               </Card>
             )}

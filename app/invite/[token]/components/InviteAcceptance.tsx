@@ -509,7 +509,7 @@ export function InviteAcceptance({ token }: Props) {
               className="bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200"
             >
               <LogIn className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Accesso...' : 'Accedi ora'}
+              {isSubmitting ? t('invite.acceptance.loggingIn') : t('invite.loginNow')}
             </Button>
           </div>
         )}
@@ -611,8 +611,8 @@ export function InviteAcceptance({ token }: Props) {
         {step === 'login' && emailMismatch && (
           <div className="space-y-4">
             <div className="text-center">
-              <h4 className="font-medium">Login Richiesto</h4>
-              <p className="text-sm text-muted-foreground">Accedi con l'account dell'invito</p>
+              <h4 className="font-medium">{t('invite.acceptance.loginRequired')}</h4>
+              <p className="text-sm text-muted-foreground">{t('invite.acceptance.loginWithInvite')}</p>
             </div>
 
             <div className="flex gap-2">
@@ -700,7 +700,7 @@ function LoginForm({
 
       <Button type="submit" disabled={isPending} className="w-full">
         <LogIn className="h-4 w-4 mr-2" />
-        {isPending ? 'Login...' : 'Accedi e Accetta'}
+        {isPending ? 'Login...' : t('invite.acceptance.loginAndAccept')}
       </Button>
     </form>
   )
