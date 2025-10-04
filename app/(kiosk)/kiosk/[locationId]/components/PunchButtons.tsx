@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { LogIn, LogOut, Coffee, Play, User } from 'lucide-react'
 import { getTodaySessionSummary } from '@/lib/shifts/time-clock-logic'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { useTranslation } from '@/lib/i18n'
 
 interface PunchButtonsProps {
   locationId: string
@@ -24,6 +25,7 @@ export function PunchButtons({
   kioskToken,
   onLogout
 }: PunchButtonsProps) {
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [sessionSummary, setSessionSummary] = useState<{
     totalMinutes: number
@@ -64,18 +66,11 @@ export function PunchButtons({
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error.error || 'Errore durante la timbratura')
+        toast.error(error.error || t('kiosk.errors.punchError'))
         return
       }
 
-      const kindLabels = {
-        clock_in: 'Ingresso registrato',
-        clock_out: 'Uscita registrata',
-        break_start: 'Inizio pausa registrato',
-        break_end: 'Fine pausa registrata'
-      }
-
-      toast.success(kindLabels[kind])
+      toast.success(t(`kiosk.punchSuccess.${kind}`))
 
       // Auto-logout after 3 seconds
       setTimeout(() => {
@@ -83,7 +78,7 @@ export function PunchButtons({
       }, 3000)
     } catch (error) {
       console.error('Punch error:', error)
-      toast.error('Errore durante la timbratura. Riprova.')
+      toast.error(t('kiosk.errors.punchError'))
     } finally {
       setIsLoading(false)
     }
@@ -97,19 +92,19 @@ export function PunchButtons({
           <User className="w-10 h-10 text-primary" />
         </div>
         <h2 className="text-3xl font-bold text-foreground">{userName}</h2>
-        <p className="text-muted-foreground">Scegli un'azione</p>
+        <p className="text-muted-foreground">{t('kiosk.chooseAction')}</p>
       </div>
 
       {/* Session Summary */}
       {sessionSummary && sessionSummary.status !== 'not_started' && (
         <div className="bg-muted/50 rounded-lg p-4 text-center space-y-1">
-          <p className="text-sm text-muted-foreground">Ore lavorate oggi</p>
+          <p className="text-sm text-muted-foreground">{t('kiosk.hoursToday')}</p>
           <p className="text-2xl font-bold text-foreground">
             {Math.floor(sessionSummary.totalMinutes / 60)}h {sessionSummary.totalMinutes % 60}m
           </p>
           {sessionSummary.breakMinutes > 0 && (
             <p className="text-xs text-muted-foreground">
-              Pause: {sessionSummary.breakMinutes}m
+              {t('kiosk.breaks')}: {sessionSummary.breakMinutes}m
             </p>
           )}
         </div>
@@ -125,7 +120,7 @@ export function PunchButtons({
           className="h-28 text-xl flex-col gap-3 bg-primary hover:bg-primary/90"
         >
           <LogIn className="w-10 h-10" />
-          Ingresso
+          {t('kiosk.clockIn')}
         </Button>
 
         <Button
@@ -136,7 +131,7 @@ export function PunchButtons({
           className="h-28 text-xl flex-col gap-3 bg-destructive hover:bg-destructive/90"
         >
           <LogOut className="w-10 h-10" />
-          Uscita
+          {t('kiosk.clockOut')}
         </Button>
 
         <Button
@@ -147,7 +142,7 @@ export function PunchButtons({
           className="h-28 text-xl flex-col gap-3 border-2"
         >
           <Coffee className="w-10 h-10" />
-          Inizio Pausa
+          {t('kiosk.breakStart')}
         </Button>
 
         <Button
@@ -158,7 +153,7 @@ export function PunchButtons({
           className="h-28 text-xl flex-col gap-3 border-2"
         >
           <Play className="w-10 h-10" />
-          Fine Pausa
+          {t('kiosk.breakEnd')}
         </Button>
       </div>
 
@@ -170,7 +165,7 @@ export function PunchButtons({
           disabled={isLoading}
           className="text-muted-foreground"
         >
-          Non sei {userName}? Cambia utente
+          {t('kiosk.changeUser').replace('{name}', userName)}
         </Button>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import type { UserLookupResponse } from '@/types/timeclock'
 import { Loader2, User } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface PinInputProps {
   locationId: string
@@ -19,6 +20,7 @@ export function PinInput({
   isLoading,
   setIsLoading
 }: PinInputProps) {
+  const { t } = useTranslation()
   const [pin, setPin] = useState<string[]>(['', '', '', ''])
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -60,7 +62,7 @@ export function PinInput({
 
   const handleLookup = async (fullPin: string) => {
     if (fullPin.length !== 4) {
-      toast.error('Inserisci un PIN di 4 cifre')
+      toast.error(t('kiosk.errors.invalidPin'))
       return
     }
 
@@ -75,18 +77,18 @@ export function PinInput({
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error.error || 'PIN non valido')
+        toast.error(error.error || t('kiosk.errors.pinNotValid'))
         setPin(['', '', '', ''])
         inputRefs[0].current?.focus()
         return
       }
 
       const user: UserLookupResponse = await res.json()
-      toast.success(`Benvenuto, ${user.full_name}!`)
+      toast.success(t('kiosk.welcome').replace('{name}', user.full_name))
       onUserIdentified(user)
     } catch (error) {
       console.error('Lookup error:', error)
-      toast.error('Errore durante la ricerca. Riprova.')
+      toast.error(t('kiosk.errors.lookupError'))
       setPin(['', '', '', ''])
       inputRefs[0].current?.focus()
     } finally {
@@ -103,8 +105,8 @@ export function PinInput({
     <div className="space-y-8">
       <div className="text-center space-y-2">
         <User className="w-16 h-16 mx-auto text-primary" />
-        <h2 className="text-2xl font-bold text-foreground">Inserisci il tuo PIN</h2>
-        <p className="text-muted-foreground">Usa il codice PIN a 4 cifre</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('kiosk.enterPin')}</h2>
+        <p className="text-muted-foreground">{t('kiosk.pinDescription')}</p>
       </div>
 
       {/* PIN Input Fields */}
@@ -137,10 +139,10 @@ export function PinInput({
           {isLoading ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Verifica...
+              {t('kiosk.verifying')}
             </>
           ) : (
-            'Cancella'
+            t('kiosk.clear')
           )}
         </Button>
       </div>

@@ -8,6 +8,7 @@ import { AlertCircle, Calendar as CalendarIcon } from 'lucide-react'
 import { format, startOfWeek, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface Step2Props {
   locationId: string
@@ -24,6 +25,7 @@ export function Step2SelectWeek({
   onBack,
   checkRota,
 }: Step2Props) {
+  const { t } = useTranslation()
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [existingRota, setExistingRota] = useState<any>(null)
   const [checking, setChecking] = useState(false)
@@ -52,7 +54,7 @@ export function Step2SelectWeek({
     
     // Validate location_id only - backend will derive org_id
     if (!locationId || locationId === 'null') {
-      toast.error('Location mancante. Ricarica la pagina.')
+      toast.error(t('onboardingWeek.errorMissingLocation'))
       console.error('Invalid locationId:', locationId)
       return
     }
@@ -80,16 +82,16 @@ export function Step2SelectWeek({
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         console.error('❌ [Step2SelectWeek] Failed to create rota:', { status: res.status, error: errorData })
-        throw new Error(errorData.error || 'Errore nella creazione della rota')
+        throw new Error(errorData.error || t('onboardingWeek.errorCreating'))
       }
 
       const data = await res.json()
       console.log('✅ [Step2SelectWeek] Rota created:', data.rota?.id)
-      toast.success('Rota creata con successo')
+      toast.success(t('onboardingWeek.success'))
       onRotaCreated(data.rota.id, weekStart)
     } catch (error: any) {
       console.error('❌ [Step2SelectWeek] Exception:', error)
-      toast.error(error.message || 'Errore nella creazione della rota')
+      toast.error(error.message || t('onboardingWeek.errorCreating'))
     } finally {
       setCreating(false)
     }
@@ -104,9 +106,9 @@ export function Step2SelectWeek({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Seleziona Settimana</h2>
+        <h2 className="text-2xl font-semibold mb-2">{t('onboardingWeek.selectWeek')}</h2>
         <p className="text-muted-foreground">
-          Scegli la settimana di riferimento. La settimana inizia sempre di lunedì.
+          {t('onboardingWeek.description')}
         </p>
       </div>
 
@@ -123,7 +125,7 @@ export function Step2SelectWeek({
       {checking && (
         <Alert>
           <CalendarIcon className="h-4 w-4" />
-          <AlertDescription>Controllo rota esistente...</AlertDescription>
+          <AlertDescription>{t('onboardingWeek.checking')}</AlertDescription>
         </Alert>
       )}
 
@@ -131,27 +133,26 @@ export function Step2SelectWeek({
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Esiste già una rota per questa settimana (stato: {existingRota.status}).
-            Puoi aprirla o crearne una nuova.
+            {t('onboardingWeek.existingRota').replace('{status}', existingRota.status)}
           </AlertDescription>
         </Alert>
       )}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
-          Indietro
+          {t('onboardingWeek.back')}
         </Button>
         <div className="flex gap-2">
           {existingRota && (
             <Button variant="secondary" onClick={handleUseExisting}>
-              Apri Esistente
+              {t('onboardingWeek.openExisting')}
             </Button>
           )}
           <Button
             onClick={handleCreateRota}
             disabled={!selectedDate || creating || (existingRota && existingRota.status !== 'draft')}
           >
-            {creating ? 'Creazione...' : existingRota ? 'Crea Nuova' : 'Crea Rota'}
+            {creating ? t('onboardingWeek.creating') : existingRota ? t('onboardingWeek.createNew') : t('onboardingWeek.createRota')}
           </Button>
         </div>
       </div>
