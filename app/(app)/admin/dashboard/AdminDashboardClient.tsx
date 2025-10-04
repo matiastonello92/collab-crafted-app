@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Users, Building2, Mail, Activity, Shield, AlertTriangle, RefreshCw, Plus, Settings, UserPlus } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface AdminDashboardData {
   tenant: {
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function AdminDashboardClient({ orgId }: Props) {
+  const { t } = useTranslation()
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -114,11 +116,11 @@ export function AdminDashboardClient({ orgId }: Props) {
         <Card className="rounded-3xl border border-destructive/50 bg-destructive/10 shadow-sm backdrop-blur">
           <CardContent className="flex flex-col items-center gap-4 px-6 py-10 text-center">
             <AlertTriangle className="size-12 text-destructive" />
-            <h3 className="text-xl font-semibold text-destructive">Error Loading Admin Dashboard</h3>
+            <h3 className="text-xl font-semibold text-destructive">{t('adminDashboard.errorLoading')}</h3>
             <p className="max-w-md text-sm text-muted-foreground">{error}</p>
             <Button onClick={fetchData} variant="outline" className="rounded-full">
               <RefreshCw className="mr-2 size-4" />
-              Try Again
+              {t('adminDashboard.tryAgain')}
             </Button>
           </CardContent>
         </Card>
@@ -130,7 +132,7 @@ export function AdminDashboardClient({ orgId }: Props) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 py-12 text-center">
         <Shield className="size-16 text-muted-foreground" />
-        <p className="text-base text-muted-foreground">No data available</p>
+        <p className="text-base text-muted-foreground">{t('adminDashboard.noData')}</p>
       </div>
     )
   }
@@ -149,20 +151,20 @@ export function AdminDashboardClient({ orgId }: Props) {
             </div>
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Admin Dashboard
+                {t('adminDashboard.title')}
               </h1>
               <p className="text-sm text-muted-foreground sm:text-base">
-                Organization management and monitoring
+                {t('adminDashboard.subtitle')}
               </p>
               <p className="font-mono text-xs text-muted-foreground/80">
-                Org ID: {orgId.slice(0, 8)}...
+                {t('adminDashboard.orgId')}: {orgId.slice(0, 8)}...
               </p>
             </div>
           </div>
           {isClient && lastUpdate && (
             <div className="flex flex-col items-start gap-2 text-sm text-muted-foreground lg:items-end">
               <span>
-                Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago
+                {t('adminDashboard.updated')} {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago
               </span>
               <Button
                 onClick={fetchData}
@@ -171,7 +173,7 @@ export function AdminDashboardClient({ orgId }: Props) {
                 className="rounded-full border border-primary/40 text-primary hover:bg-primary/10"
               >
                 <RefreshCw className="mr-2 size-4" />
-                Refresh
+                {t('adminDashboard.refresh')}
               </Button>
             </div>
           )}
@@ -182,40 +184,40 @@ export function AdminDashboardClient({ orgId }: Props) {
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card className="group rounded-2xl border border-border/60 bg-card/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Team Members</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.teamMembers')}</CardTitle>
             <div className="rounded-full bg-primary/10 p-2 text-primary">
               <Users className="size-5" />
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-semibold text-foreground">{data.tenant.users_total}</div>
-            <p className="text-xs text-muted-foreground">Active users</p>
+            <p className="text-xs text-muted-foreground">{t('adminDashboard.activeUsers')}</p>
           </CardContent>
         </Card>
 
         <Card className="group rounded-2xl border border-border/60 bg-card/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Locations</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.locations')}</CardTitle>
             <div className="rounded-full bg-green-500/10 p-2 text-green-500">
               <Building2 className="size-5" />
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-semibold text-foreground">{data.tenant.locations_total}</div>
-            <p className="text-xs text-muted-foreground">Managed locations</p>
+            <p className="text-xs text-muted-foreground">{t('adminDashboard.managedLocations')}</p>
           </CardContent>
         </Card>
 
         <Card className="group rounded-2xl border border-border/60 bg-card/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Invites</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('adminDashboard.pendingInvites')}</CardTitle>
             <div className="rounded-full bg-orange-500/10 p-2 text-orange-500">
               <Mail className="size-5" />
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-semibold text-foreground">{data.tenant.invites_pending}</div>
-            <p className="text-xs text-muted-foreground">Awaiting acceptance</p>
+            <p className="text-xs text-muted-foreground">{t('adminDashboard.awaitingAcceptance')}</p>
           </CardContent>
         </Card>
       </section>
@@ -225,7 +227,7 @@ export function AdminDashboardClient({ orgId }: Props) {
         <Card className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3 text-xl">
-              System Health
+              {t('adminDashboard.systemHealth')}
               <Badge
                 variant={data.ops.health.status === 'ok' ? 'default' : 'destructive'}
                 className="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
@@ -243,7 +245,7 @@ export function AdminDashboardClient({ orgId }: Props) {
 
         <Card className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Recent Activity</CardTitle>
+            <CardTitle className="text-xl">{t('adminDashboard.recentActivity')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -269,7 +271,7 @@ export function AdminDashboardClient({ orgId }: Props) {
               ) : (
                 <div className="flex flex-col items-center gap-2 py-8 text-center text-sm text-muted-foreground">
                   <Activity className="size-8" />
-                  <p>No recent activity</p>
+                  <p>{t('adminDashboard.noActivity')}</p>
                 </div>
               )}
             </div>
@@ -280,7 +282,7 @@ export function AdminDashboardClient({ orgId }: Props) {
       {/* Quick Actions */}
       <Card className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Quick Actions</CardTitle>
+          <CardTitle className="text-xl">{t('adminDashboard.quickActions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -289,21 +291,21 @@ export function AdminDashboardClient({ orgId }: Props) {
               className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-6 text-center text-sm font-medium shadow-sm transition-transform hover:-translate-y-1 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <UserPlus className="size-6 text-blue-500" />
-              <span>Invite User</span>
+              <span>{t('adminDashboard.inviteUser')}</span>
             </a>
             <a
               href="/admin/locations/create"
               className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-6 text-center text-sm font-medium shadow-sm transition-transform hover:-translate-y-1 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Plus className="size-6 text-green-500" />
-              <span>Add Location</span>
+              <span>{t('adminDashboard.addLocation')}</span>
             </a>
             <a
               href="/admin/users"
               className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-muted/40 p-6 text-center text-sm font-medium shadow-sm transition-transform hover:-translate-y-1 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Users className="size-6 text-purple-500" />
-              <span>Manage Users</span>
+              <span>{t('adminDashboard.manageUsers')}</span>
             </a>
           </div>
         </CardContent>

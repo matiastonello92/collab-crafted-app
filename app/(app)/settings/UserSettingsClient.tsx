@@ -118,25 +118,25 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
           <Button variant="outline" size="sm" asChild>
             <Link href="/">
               <ArrowLeft className="h-4 w-4" />
-              Torna alla Dashboard
+              {t('settings.backToDashboard')}
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Impostazioni</h1>
-            <p className="text-muted-foreground">Completa la configurazione del tuo account</p>
+            <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
+            <p className="text-muted-foreground">{t('settings.completeSetup')}</p>
           </div>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Configura la tua organizzazione</CardTitle>
+            <CardTitle>{t('settings.setupOrg')}</CardTitle>
             <CardDescription>
-              Per accedere alle impostazioni del profilo, devi prima unirti o creare un&apos;organizzazione.
+              {t('settings.setupOrgDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/admin">Vai al pannello amministratore</Link>
+              <Link href="/admin">{t('settings.goToAdmin')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -152,19 +152,19 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
           <Button variant="outline" size="sm" asChild>
             <Link href="/">
               <ArrowLeft className="h-4 w-4" />
-              Torna alla Dashboard
+              {t('settings.backToDashboard')}
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Impostazioni</h1>
+            <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
             <p className="text-muted-foreground">
-              Gestisci il tuo profilo e le tue preferenze
+              {t('settings.manageProfile')}
             </p>
           </div>
         </div>
         <Button onClick={handleSave} disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
-          {isSaving ? 'Salvataggio...' : 'Salva modifiche'}
+          {isSaving ? t('settings.saving') : t('settings.saveChanges')}
         </Button>
       </div>
 
@@ -174,24 +174,24 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              Profilo
+              {t('settings.profile')}
             </TabsTrigger>
             <TabsTrigger value="preferences" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Preferenze
+              {t('settings.preferences')}
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Notifiche
+              {t('settings.notifications')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Informazioni Profilo</CardTitle>
+                <CardTitle>{t('settings.profileInfo')}</CardTitle>
                 <CardDescription>
-                  Aggiorna le tue informazioni personali
+                  {t('settings.updatePersonalInfo')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -208,25 +208,25 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                 {/* Profile Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="full_name">Nome completo</Label>
+                    <Label htmlFor="full_name">{t('settings.fullName')}</Label>
                     <Input
                       id="full_name"
                       value={profile.full_name || ''}
                       onChange={(e) => updateProfile('full_name', e.target.value)}
-                      placeholder="Mario Rossi"
+                      placeholder={t('settings.fullNamePlaceholder')}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="phone">Telefono</Label>
+                    <Label htmlFor="phone">{t('settings.phone')}</Label>
                     <Input
                       id="phone"
                       value={profile.phone || ''}
                       onChange={(e) => updateProfile('phone', e.target.value)}
-                      placeholder="+39 123 456 7890"
+                      placeholder={t('settings.phonePlaceholder')}
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('settings.email')}</Label>
                     <Input
                       id="email"
                       value={user.email}
@@ -234,7 +234,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                       className="bg-muted"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      L&apos;email non può essere modificata da qui
+                      {t('settings.emailCannotChange')}
                     </p>
                   </div>
                 </div>
@@ -245,9 +245,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
           <TabsContent value="preferences" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Preferenze</CardTitle>
+                <CardTitle>{t('settings.preferences')}</CardTitle>
                 <CardDescription>
-                  Personalizza la tua esperienza nell&apos;app
+                  {t('settings.customizeExperience')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -272,7 +272,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="timezone">Fuso orario</Label>
+                  <Label htmlFor="timezone">{t('settings.timezone')}</Label>
                   <Select
                     value={profile.timezone || 'Europe/Rome'}
                     onValueChange={(value) => updateProfile('timezone', value)}
@@ -281,20 +281,20 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Europe/Rome">Europa/Roma</SelectItem>
-                      <SelectItem value="Europe/Paris">Europa/Parigi</SelectItem>
-                      <SelectItem value="Europe/London">Europa/Londra</SelectItem>
-                      <SelectItem value="America/New_York">America/New York</SelectItem>
-                      <SelectItem value="America/Los_Angeles">America/Los Angeles</SelectItem>
-                      <SelectItem value="Asia/Tokyo">Asia/Tokyo</SelectItem>
+                      <SelectItem value="Europe/Rome">{t('timezones.Europe/Rome')}</SelectItem>
+                      <SelectItem value="Europe/Paris">{t('timezones.Europe/Paris')}</SelectItem>
+                      <SelectItem value="Europe/London">{t('timezones.Europe/London')}</SelectItem>
+                      <SelectItem value="America/New_York">{t('timezones.America/New_York')}</SelectItem>
+                      <SelectItem value="America/Los_Angeles">{t('timezones.America/Los_Angeles')}</SelectItem>
+                      <SelectItem value="Asia/Tokyo">{t('timezones.Asia/Tokyo')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Marketing</Label>
+                    <Label>{t('settings.marketing')}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Ricevi email promozionali e aggiornamenti
+                      {t('settings.marketingDescription')}
                     </p>
                   </div>
                   <Switch
@@ -307,9 +307,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                 <div className="pt-4 border-t">
                   <div className="space-y-4">
                     <div>
-                      <Label>Test configurazione email</Label>
+                      <Label>{t('settings.testEmailConfig')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Invia una email di test per verificare che tutto funzioni
+                        {t('settings.testEmailDescription')}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -324,11 +324,11 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                         ) : (
                           <Mail className="h-4 w-4 mr-2" />
                         )}
-                        {isTestingEmail ? 'Invio...' : 'Invia email di test'}
+                        {isTestingEmail ? t('settings.sending') : t('settings.sendTestEmail')}
                       </Button>
                       {lastEmailTest && (
                         <p className="text-sm text-muted-foreground">
-                          Ultimo test: {lastEmailTest}
+                          {t('settings.lastTest')}: {lastEmailTest}
                         </p>
                       )}
                     </div>
@@ -341,18 +341,18 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
           <TabsContent value="notifications" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Preferenze Notifiche</CardTitle>
+                <CardTitle>{t('settings.notificationPreferences')}</CardTitle>
                 <CardDescription>
-                  Controlla quando e come ricevere le notifiche
+                  {t('settings.controlNotifications')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Email notifiche</Label>
+                      <Label>{t('settings.emailNotifications')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Ricevi notifiche via email
+                        {t('settings.receiveEmailNotif')}
                       </p>
                     </div>
                     <Switch
@@ -362,9 +362,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Notifiche sistema</Label>
+                      <Label>{t('settings.systemNotifications')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Aggiornamenti importanti del sistema
+                        {t('settings.systemNotifDescription')}
                       </p>
                     </div>
                     <Switch
@@ -374,9 +374,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Notifiche attività</Label>
+                      <Label>{t('settings.activityNotifications')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Modifiche e aggiornamenti sui tuoi dati
+                        {t('settings.activityNotifDescription')}
                       </p>
                     </div>
                     <Switch
@@ -387,16 +387,16 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                 </div>
 
                 <div className="border-t pt-6">
-                  <h4 className="text-sm font-semibold mb-4">Preferenze Email Dettagliate</h4>
+                  <h4 className="text-sm font-semibold mb-4">{t('settings.detailedEmailPreferences')}</h4>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Scegli quali email ricevere per ogni tipo di evento
+                    {t('settings.chooseEmailTypes')}
                   </p>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>Planning pubblicato</Label>
+                        <Label>{t('settings.rotaPublished')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Email quando un nuovo planning settimanale viene pubblicato
+                          {t('settings.rotaPublishedDescription')}
                         </p>
                       </div>
                       <Switch
@@ -406,9 +406,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>Modifiche turni</Label>
+                        <Label>{t('settings.shiftChanges')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Email quando ti viene assegnato o modificato un turno
+                          {t('settings.shiftChangesDescription')}
                         </p>
                       </div>
                       <Switch
@@ -418,9 +418,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>Decisioni assenze</Label>
+                        <Label>{t('settings.leaveDecisions')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Email quando le tue richieste di assenza vengono approvate o rifiutate
+                          {t('settings.leaveDecisionsDescription')}
                         </p>
                       </div>
                       <Switch
@@ -432,7 +432,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                 </div>
 
                 <div>
-                  <Label htmlFor="notif_json">Configurazione avanzata (JSON)</Label>
+                  <Label htmlFor="notif_json">{t('settings.advancedConfig')}</Label>
                   <Textarea
                     id="notif_json"
                     value={JSON.stringify(profile.notif_prefs || {}, null, 2)}

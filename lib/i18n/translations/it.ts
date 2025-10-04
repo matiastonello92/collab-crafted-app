@@ -635,11 +635,60 @@ export const it = {
     selectValidImage: 'Seleziona un file immagine valido',
   },
 
+  // Dashboard
+  dashboard: {
+    title: 'Dashboard',
+    welcome: 'Benvenuto nella tua dashboard',
+    systemOperational: 'Sistema Operativo',
+    quickActions: 'Azioni Rapide',
+    quickActionsDesc: 'Accedi rapidamente alle funzionalità principali della piattaforma',
+    inviteUser: 'Invita Utente',
+    manageLocations: 'Gestisci Sedi',
+    adminPanel: 'Pannello Admin',
+    myProfile: 'Il Mio Profilo',
+    myLocations: 'Le Mie Sedi',
+    settings: 'Impostazioni',
+    systemStatus: 'Stato Sistema',
+    systemStatusDesc: 'Tutti i servizi sono operativi',
+    systemOperationalStatus: 'Sistema operativo',
+    debugInfo: 'Debug Info',
+    permissions: 'Permissions',
+    location: 'Location',
+    canManageUsers: 'Can Manage Users',
+    canViewAdmin: 'Can View Admin',
+  },
+
+  // Admin Dashboard
+  adminDashboard: {
+    title: 'Admin Dashboard',
+    subtitle: 'Organization management and monitoring',
+    errorLoading: 'Error Loading Admin Dashboard',
+    tryAgain: 'Try Again',
+    noData: 'No data available',
+    orgId: 'Org ID',
+    updated: 'Updated',
+    refresh: 'Refresh',
+    teamMembers: 'Team Members',
+    activeUsers: 'Active users',
+    locations: 'Locations',
+    managedLocations: 'Managed locations',
+    pendingInvites: 'Pending Invites',
+    awaitingAcceptance: 'Awaiting acceptance',
+    systemHealth: 'System Health',
+    recentActivity: 'Recent Activity',
+    noActivity: 'No recent activity',
+    quickActions: 'Quick Actions',
+    inviteUser: 'Invite User',
+    addLocation: 'Add Location',
+    manageUsers: 'Manage Users',
+  },
+
   // Settings
   settings: {
     title: 'Impostazioni',
     manageProfile: 'Gestisci il tuo profilo e le tue preferenze',
     saveChanges: 'Salva modifiche',
+    saving: 'Salvataggio...',
     backToDashboard: 'Torna alla Dashboard',
     
     // Organization setup

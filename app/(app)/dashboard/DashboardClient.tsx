@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Users, MapPin, Settings, UserPlus, Building2, Shield, Activity } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslation } from '@/lib/i18n'
 
 export default function DashboardClient() {
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
   const [permissions, setPermissions] = useState<string[]>([])
   const [location_name, setLocationName] = useState<string | null>(null)
@@ -89,15 +91,15 @@ export default function DashboardClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
           <p className="text-muted-foreground">
-            Benvenuto nella tua dashboard
+            {t('dashboard.welcome')}
             {location_name && <span> • {location_name}</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-green-500" />
-          <Badge variant="secondary">Sistema Operativo</Badge>
+          <Badge variant="secondary">{t('dashboard.systemOperational')}</Badge>
         </div>
       </div>
 
@@ -106,10 +108,10 @@ export default function DashboardClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
-            Azioni Rapide
+            {t('dashboard.quickActions')}
           </CardTitle>
           <CardDescription>
-            Accedi rapidamente alle funzionalità principali della piattaforma
+            {t('dashboard.quickActionsDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,7 +120,7 @@ export default function DashboardClient() {
               <Link href="/admin/users/invite">
                 <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                   <UserPlus className="w-6 h-6" />
-                  <span>Invita Utente</span>
+                  <span>{t('dashboard.inviteUser')}</span>
                 </Button>
               </Link>
             )}
@@ -127,7 +129,7 @@ export default function DashboardClient() {
               <Link href="/admin/locations">
                 <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                   <Building2 className="w-6 h-6" />
-                  <span>Gestisci Sedi</span>
+                  <span>{t('dashboard.manageLocations')}</span>
                 </Button>
               </Link>
             )}
@@ -136,7 +138,7 @@ export default function DashboardClient() {
               <Link href="/admin">
                 <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                   <Shield className="w-6 h-6" />
-                  <span>Pannello Admin</span>
+                  <span>{t('dashboard.adminPanel')}</span>
                 </Button>
               </Link>
             )}
@@ -144,21 +146,21 @@ export default function DashboardClient() {
             <Link href="/me">
               <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                 <Users className="w-6 h-6" />
-                <span>Il Mio Profilo</span>
+                <span>{t('dashboard.myProfile')}</span>
               </Button>
             </Link>
 
             <Link href="/locations/manage">
               <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                 <MapPin className="w-6 h-6" />
-                <span>Le Mie Sedi</span>
+                <span>{t('dashboard.myLocations')}</span>
               </Button>
             </Link>
 
             <Link href="/settings">
               <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
                 <Settings className="w-6 h-6" />
-                <span>Impostazioni</span>
+                <span>{t('dashboard.settings')}</span>
               </Button>
             </Link>
           </div>
@@ -168,15 +170,15 @@ export default function DashboardClient() {
       {/* Simple Status Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Stato Sistema</CardTitle>
+          <CardTitle>{t('dashboard.systemStatus')}</CardTitle>
           <CardDescription>
-            Tutti i servizi sono operativi
+            {t('dashboard.systemStatusDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm font-medium">Sistema operativo</span>
+            <span className="text-sm font-medium">{t('dashboard.systemOperationalStatus')}</span>
           </div>
         </CardContent>
       </Card>
@@ -185,13 +187,13 @@ export default function DashboardClient() {
       {process.env.NODE_ENV === 'development' && (
         <Card className="border-dashed">
           <CardHeader>
-            <CardTitle className="text-sm">Debug Info</CardTitle>
+            <CardTitle className="text-sm">{t('dashboard.debugInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs">
-            <div>Permissions: {permissions.length > 0 ? permissions.join(', ') : 'None'}</div>
-            <div>Location: {location_name || 'Not set'}</div>
-            <div>Can Manage Users: {canManageUsers ? 'Yes' : 'No'}</div>
-            <div>Can View Admin: {canViewAdmin ? 'Yes' : 'No'}</div>
+            <div>{t('dashboard.permissions')}: {permissions.length > 0 ? permissions.join(', ') : 'None'}</div>
+            <div>{t('dashboard.location')}: {location_name || 'Not set'}</div>
+            <div>{t('dashboard.canManageUsers')}: {canManageUsers ? 'Yes' : 'No'}</div>
+            <div>{t('dashboard.canViewAdmin')}: {canViewAdmin ? 'Yes' : 'No'}</div>
           </CardContent>
         </Card>
       )}
