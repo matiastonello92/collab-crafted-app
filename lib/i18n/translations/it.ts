@@ -336,6 +336,11 @@ export const it = {
     openLocation: 'Apri',
     planLimit: 'Hai raggiunto il limite del piano',
     planLimitDesc: 'Aggiorna il tuo piano per aggiungerne altre.',
+    locationTabs: {
+      info: 'Informazioni',
+      schedule: 'Orari',
+      managers: 'Responsabili'
+    },
     
     // Users & Permissions
     jobTags: 'Job Tags',
@@ -916,6 +921,10 @@ export const it = {
     clone: {
       cloning: 'Clonazione...',
       cloneRecipe: 'Clona Ricetta',
+    },
+    timer: {
+      completed: 'Timer completato!',
+      reset: 'Reset'
     },
     // Filters
     filters: {
@@ -1659,6 +1668,27 @@ export const it = {
     catalog: 'Catalogo Prodotti',
     history: 'Storico Inventari',
     templates: 'Template',
+  },
+  
+  // Catalog
+  catalog: {
+    description: 'Gestisci i prodotti per ogni reparto della tua location',
+    openCatalog: 'Apri Catalogo',
+    categories: {
+      kitchen: {
+        name: 'Cucina',
+        description: 'Gestisci prodotti per la cucina: carne, pesce, vegetali, latticini e altro'
+      },
+      bar: {
+        name: 'Bar',
+        description: 'Gestisci prodotti per il bar: vini, birre, soft drink e consumabili'
+      },
+      cleaning: {
+        name: 'Pulizie',
+        description: 'Gestisci prodotti per la pulizia e manutenzione'
+      }
+    }
+  },
     
     // Categories
     categories: {
@@ -1850,6 +1880,31 @@ export const it = {
       noTemplates: 'Nessun template disponibile',
       startInventory: 'Inizia creando il tuo primo inventario',
       addProducts: 'Aggiungi prodotti per iniziare',
+      createFirst: 'Crea il primo inventario',
+      noInventoriesFound: 'Nessun inventario trovato',
+    },
+    
+    // History
+    historyPage: {
+      title: 'Storico Inventari',
+      loading: 'Caricamento storico inventari...',
+      table: {
+        startDate: 'Data Inizio',
+        category: 'Categoria',
+        location: 'Location',
+        status: 'Stato',
+        totalValue: 'Valore Totale',
+        startedBy: 'Iniziato da',
+        approvedBy: 'Approvato da',
+        approvalDate: 'Data Approvazione',
+        actions: 'Azioni',
+        createdBy: 'Creato da',
+        notes: 'Note',
+        user: 'Utente'
+      },
+      actions: {
+        sendEmail: 'Invia per email'
+      }
     },
     
     // Loading states
@@ -1899,8 +1954,8 @@ export const it = {
       title: 'Gestione Job Tags',
       description: 'Gestisci i job tags e le assegnazioni per location',
       catalog: {
-        title: 'Catalogo Tag',
-        description: 'Gestisci i job tags disponibili',
+        title: 'Catalogo Ruoli',
+        description: 'Crea e gestisci i ruoli disponibili per la tua organizzazione',
         newTag: 'Nuovo Tag',
         editTag: 'Modifica Tag',
         deleteTag: 'Elimina Tag',
@@ -2391,7 +2446,9 @@ export const it = {
       fullName: 'Nome Completo',
       email: 'Email',
       phone: 'Telefono',
-      updateInfo: 'Aggiorna le tue informazioni personali'
+      updateInfo: 'Aggiorna le tue informazioni personali',
+      editProfile: 'Modifica Profilo',
+      comingSoon: 'Coming Soon'
     },
     roles: {
       title: 'Ruoli Assegnati',

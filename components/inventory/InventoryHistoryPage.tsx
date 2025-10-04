@@ -204,20 +204,20 @@ export function InventoryHistoryPage() {
         
         <CardContent>
           {loading || permissionsLoading ? (
-            <div className="text-center py-8">Caricamento storico inventari...</div>
+            <div className="text-center py-8">{t('inventory.historyPage.loading')}</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data Inizio</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Valore Totale</TableHead>
-                  <TableHead>Iniziato da</TableHead>
-                  <TableHead>Approvato da</TableHead>
-                  <TableHead>Data Approvazione</TableHead>
-                  <TableHead>Azioni</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.startDate')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.category')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.location')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.status')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.totalValue')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.startedBy')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.approvedBy')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.approvalDate')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -266,7 +266,7 @@ export function InventoryHistoryPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => sendEmail(item.id)}
-                          title="Invia per email"
+                          title={t('inventory.historyPage.actions.sendEmail')}
                         >
                           <Mail className="h-4 w-4" />
                         </Button>

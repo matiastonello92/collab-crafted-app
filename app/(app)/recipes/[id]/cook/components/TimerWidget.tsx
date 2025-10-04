@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Play, Pause, RotateCcw, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface TimerWidgetProps {
   minutes: number;
@@ -13,6 +14,7 @@ interface TimerWidgetProps {
 }
 
 export function TimerWidget({ minutes, stepNumber }: TimerWidgetProps) {
+  const { t } = useTranslation()
   const totalSeconds = minutes * 60;
   const [secondsRemaining, setSecondsRemaining] = useState(totalSeconds);
   const [isRunning, setIsRunning] = useState(false);
@@ -36,7 +38,7 @@ export function TimerWidget({ minutes, stepNumber }: TimerWidgetProps) {
             setIsRunning(false);
             setHasCompleted(true);
             playAlert();
-            toast.success('Timer completato!', {
+            toast.success(t('recipes.timer.completed'), {
               icon: <Bell className="h-4 w-4" />
             });
             return 0;
@@ -122,14 +124,14 @@ export function TimerWidget({ minutes, stepNumber }: TimerWidgetProps) {
             className="gap-2"
           >
             <RotateCcw className="h-5 w-5" />
-            Reset
+            {t('recipes.timer.reset')}
           </Button>
         </div>
 
         {hasCompleted && (
           <div className="text-center text-green-600 font-medium flex items-center justify-center gap-2">
             <Bell className="h-5 w-5" />
-            Timer completato!
+            {t('recipes.timer.completed')}
           </div>
         )}
       </CardContent>

@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { LocationInfoTab } from './components/LocationInfoTab'
 import { LocationScheduleTab } from './components/LocationScheduleTab' 
 import { LocationManagersTab } from './components/LocationManagersTab'
+import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
   params: { id: string }
@@ -18,6 +19,7 @@ interface Props {
 
 export default async function LocationDetailPage({ params, searchParams }: Props) {
   await requireOrgAdmin()
+  const t = await getTranslation()
 
   const supabase = await createSupabaseServerClient()
 
@@ -64,9 +66,9 @@ export default async function LocationDetailPage({ params, searchParams }: Props
       {/* Tabs */}
       <Tabs defaultValue={activeTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="info">Informazioni</TabsTrigger>
-          <TabsTrigger value="schedule">Orari</TabsTrigger>
-          <TabsTrigger value="managers">Responsabili</TabsTrigger>
+          <TabsTrigger value="info">{t('admin.locationTabs.info')}</TabsTrigger>
+          <TabsTrigger value="schedule">{t('admin.locationTabs.schedule')}</TabsTrigger>
+          <TabsTrigger value="managers">{t('admin.locationTabs.managers')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="mt-6">

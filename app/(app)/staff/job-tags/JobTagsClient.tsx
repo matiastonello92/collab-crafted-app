@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CatalogoTagTab } from './CatalogoTagTab'
 import { AssegnazioniTab } from './AssegnazioniTab'
 import { Tags, UserCog } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 export function JobTagsClient() {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('catalogo')
 
   return (
@@ -34,9 +36,9 @@ export function JobTagsClient() {
         <TabsContent value="catalogo" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Catalogo Ruoli</CardTitle>
+              <CardTitle>{t('staff.jobTags.catalog.title')}</CardTitle>
               <CardDescription>
-                Crea e gestisci i ruoli disponibili per la tua organizzazione
+                {t('staff.jobTags.catalog.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>

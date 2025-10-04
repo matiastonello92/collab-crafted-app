@@ -329,6 +329,11 @@ export const en = {
     openLocation: 'Open',
     planLimit: 'You have reached the plan limit',
     planLimitDesc: 'Upgrade your plan to add more.',
+    locationTabs: {
+      info: 'Information',
+      schedule: 'Schedule',
+      managers: 'Managers'
+    },
     
     // Users & Permissions
     jobTags: 'Job Tags',
@@ -974,6 +979,10 @@ export const en = {
     clone: {
       cloning: 'Cloning...',
       cloneRecipe: 'Clone Recipe',
+    },
+    timer: {
+      completed: 'Timer completed!',
+      reset: 'Reset'
     },
     // Filters
     filters: {
@@ -1806,6 +1815,31 @@ export const en = {
       noTemplates: 'No templates available',
       startInventory: 'Start by creating your first inventory',
       addProducts: 'Add products to get started',
+      createFirst: 'Create first inventory',
+      noInventoriesFound: 'No inventories found',
+    },
+    
+    // History
+    historyPage: {
+      title: 'Inventory History',
+      loading: 'Loading inventory history...',
+      table: {
+        startDate: 'Start Date',
+        category: 'Category',
+        location: 'Location',
+        status: 'Status',
+        totalValue: 'Total Value',
+        startedBy: 'Started By',
+        approvedBy: 'Approved By',
+        approvalDate: 'Approval Date',
+        actions: 'Actions',
+        createdBy: 'Created By',
+        notes: 'Notes',
+        user: 'User'
+      },
+      actions: {
+        sendEmail: 'Send by email'
+      }
     },
     
     // Loading states

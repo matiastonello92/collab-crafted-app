@@ -565,11 +565,11 @@ export function InviteAcceptance({ token }: Props) {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="confirmPassword" className="text-sm">Conferma Password *</Label>
+                <Label htmlFor="confirmPassword" className="text-sm">{t('invitePage.confirmPassword')} *</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="Ripeti password"
+                  placeholder={t('invitePage.repeatPassword')}
                   className="text-sm"
                   {...register('confirmPassword')}
                 />

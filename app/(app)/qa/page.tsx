@@ -109,7 +109,7 @@ export default async function QAPage() {
               <CardContent>
                 {tool.disabled ? (
                   <Button variant="outline" className="w-full" disabled>
-                    In Sviluppo
+                    {t('common.comingSoon')}
                   </Button>
                 ) : (
                   <Button asChild className="w-full">

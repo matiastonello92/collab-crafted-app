@@ -11,8 +11,10 @@ import { useMyLeaveRequests } from './hooks/useMyLeaveRequests'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CalendarDays, Clock, Palmtree } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 export function MyWeekClient() {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('shifts')
   const { shifts, loading: shiftsLoading, error: shiftsError, mutate: mutateShifts } = useMyShifts()
   const { availability, loading: availLoading, mutate: mutateAvail } = useMyAvailability()
@@ -33,9 +35,9 @@ export function MyWeekClient() {
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">I miei Turni</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('myShifts.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Gestisci i tuoi turni, disponibilità e richieste di permesso
+          {t('myShifts.description')}
         </p>
       </div>
 
