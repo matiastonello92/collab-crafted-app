@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { AlertCircle, Send } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface TimeCorrectionRequestFormProps {
   eventId?: string
@@ -27,6 +28,7 @@ export function TimeCorrectionRequestForm({
   originalTime,
   onSuccess
 }: TimeCorrectionRequestFormProps) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -38,12 +40,12 @@ export function TimeCorrectionRequestForm({
     e.preventDefault()
 
     if (!formData.requested_time || !formData.reason) {
-      toast.error('Compila tutti i campi')
+      toast.error(t('myShifts.timeCorrection.errorAllFields'))
       return
     }
 
     if (formData.reason.length < 10) {
-      toast.error('La motivazione deve essere di almeno 10 caratteri')
+      toast.error(t('myShifts.timeCorrection.errorMinLength'))
       return
     }
 
@@ -64,17 +66,17 @@ export function TimeCorrectionRequestForm({
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error.error || 'Errore nella richiesta')
+        toast.error(error.error || t('myShifts.timeCorrection.errorRequest'))
         return
       }
 
-      toast.success('Richiesta di correzione inviata')
+      toast.success(t('myShifts.timeCorrection.success'))
       setIsOpen(false)
       setFormData({ requested_time: '', reason: '' })
       onSuccess?.()
     } catch (error) {
       console.error('Correction request error:', error)
-      toast.error('Errore durante l\'invio')
+      toast.error(t('myShifts.timeCorrection.errorSending'))
     } finally {
       setIsSubmitting(false)
     }
@@ -85,22 +87,21 @@ export function TimeCorrectionRequestForm({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <AlertCircle className="w-4 h-4 mr-2" />
-          Richiedi Correzione
+          {t('myShifts.timeCorrection.requestButton')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Richiedi Correzione Timbratura</DialogTitle>
+          <DialogTitle>{t('myShifts.timeCorrection.title')}</DialogTitle>
           <DialogDescription>
-            Compila il modulo per richiedere una correzione della timbratura.
-            Il tuo manager riceverà la richiesta.
+            {t('myShifts.timeCorrection.description')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {originalTime && (
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
-              <p className="text-muted-foreground">Orario originale:</p>
+              <p className="text-muted-foreground">{t('myShifts.timeCorrection.originalTime')}</p>
               <p className="font-mono text-foreground">
                 {new Date(originalTime).toLocaleString('it-IT')}
               </p>
@@ -108,7 +109,7 @@ export function TimeCorrectionRequestForm({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="requested_time">Orario Corretto</Label>
+            <Label htmlFor="requested_time">{t('myShifts.timeCorrection.correctedTime')}</Label>
             <Input
               id="requested_time"
               type="datetime-local"
@@ -124,21 +125,21 @@ export function TimeCorrectionRequestForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason">Motivazione (minimo 10 caratteri)</Label>
+            <Label htmlFor="reason">{t('myShifts.timeCorrection.reason')}</Label>
             <Textarea
               id="reason"
               value={formData.reason}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, reason: e.target.value }))
               }
-              placeholder="Spiega il motivo della correzione..."
+              placeholder={t('myShifts.timeCorrection.reasonPlaceholder')}
               rows={4}
               required
               minLength={10}
               maxLength={500}
             />
             <p className="text-xs text-muted-foreground">
-              {formData.reason.length}/500 caratteri
+              {formData.reason.length}/500 {t('myShifts.timeCorrection.characters')}
             </p>
           </div>
 
@@ -150,7 +151,7 @@ export function TimeCorrectionRequestForm({
               disabled={isSubmitting}
               className="flex-1"
             >
-              Annulla
+              {t('myShifts.timeCorrection.cancel')}
             </Button>
             <Button
               type="submit"
@@ -158,11 +159,11 @@ export function TimeCorrectionRequestForm({
               className="flex-1"
             >
               {isSubmitting ? (
-                'Invio...'
+                t('myShifts.timeCorrection.sending')
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  Invia Richiesta
+                  {t('myShifts.timeCorrection.send')}
                 </>
               )}
             </Button>

@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Check, X, RefreshCw, Clock, MapPin } from 'lucide-react'
+import { Check, X, RefreshCw, Clock } from 'lucide-react'
 import type { ShiftWithAssignments } from '@/types/shifts'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function MyShiftsList({ shifts, onUpdate }: Props) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState<string | null>(null)
 
   const handleAccept = async (assignmentId: string) => {
@@ -30,10 +32,10 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
 
       if (!res.ok) throw new Error(await res.text())
 
-      toast.success('Turno accettato con successo')
+      toast.success(t('myShifts.toast.shiftAccepted'))
       onUpdate()
     } catch (error) {
-      toast.error('Errore nell\'accettazione del turno')
+      toast.error(t('myShifts.toast.errorAccept'))
       console.error(error)
     } finally {
       setLoading(null)
@@ -51,10 +53,10 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
 
       if (!res.ok) throw new Error(await res.text())
 
-      toast.success('Turno rifiutato')
+      toast.success(t('myShifts.toast.shiftDeclined'))
       onUpdate()
     } catch (error) {
-      toast.error('Errore nel rifiuto del turno')
+      toast.error(t('myShifts.toast.errorDecline'))
       console.error(error)
     } finally {
       setLoading(null)
@@ -65,7 +67,7 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
     return (
       <Alert>
         <AlertDescription>
-          Nessun turno assegnato al momento. I turni pubblicati appariranno qui.
+          {t('myShifts.shiftsList.noShifts')}
         </AlertDescription>
       </Alert>
     )
@@ -84,7 +86,7 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
       {Object.entries(shiftsByWeek).map(([weekStart, weekShifts]) => (
         <div key={weekStart}>
           <h3 className="text-lg font-semibold mb-3">
-            Settimana del {format(parseISO(weekStart), 'd MMMM yyyy', { locale: it })}
+            {t('myShifts.shiftsList.weekOf')} {format(parseISO(weekStart), 'd MMMM yyyy', { locale: it })}
           </h3>
           <div className="space-y-3">
             {weekShifts.map((shift) => {
@@ -105,7 +107,9 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                             {format(parseISO(shift.start_at), 'HH:mm')} - {format(parseISO(shift.end_at), 'HH:mm')}
                           </span>
                           {shift.break_minutes > 0 && (
-                            <span className="text-xs">Pausa: {shift.break_minutes}min</span>
+                            <span className="text-xs">
+                              {t('myShifts.shiftsList.breakMinutes')}: {shift.break_minutes}{t('myShifts.shiftsList.min')}
+                            </span>
                           )}
                         </CardDescription>
                       </div>
@@ -117,10 +121,10 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                             'secondary'
                           }
                         >
-                          {assignment?.status === 'accepted' && 'Accettato'}
-                          {assignment?.status === 'declined' && 'Rifiutato'}
-                          {assignment?.status === 'assigned' && 'Assegnato'}
-                          {assignment?.status === 'proposed' && 'Proposto'}
+                          {assignment?.status === 'accepted' && t('myShifts.shiftsList.statusAccepted')}
+                          {assignment?.status === 'declined' && t('myShifts.shiftsList.statusDeclined')}
+                          {assignment?.status === 'assigned' && t('myShifts.shiftsList.statusAssigned')}
+                          {assignment?.status === 'proposed' && t('myShifts.shiftsList.statusProposed')}
                         </Badge>
                         {shift.job_tag && (
                           <Badge variant="outline">{shift.job_tag.label_it}</Badge>
@@ -149,7 +153,7 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                           ) : (
                             <>
                               <Check className="h-4 w-4 mr-1" />
-                              Accetta
+                              {t('myShifts.shiftsList.accept')}
                             </>
                           )}
                         </Button>
@@ -161,7 +165,7 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                           className="flex-1"
                         >
                           <X className="h-4 w-4 mr-1" />
-                          Rifiuta
+                          {t('myShifts.shiftsList.decline')}
                         </Button>
                       </div>
                     </CardContent>

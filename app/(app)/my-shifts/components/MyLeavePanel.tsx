@@ -8,12 +8,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Calendar } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import type { LeaveRequest } from '@/types/shifts'
 import { toast } from 'sonner'
 import { useLeaveTypes } from '../hooks/useLeaveTypes'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   leaveRequests: LeaveRequest[]
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
+  const { t } = useTranslation()
   const [isAdding, setIsAdding] = useState(false)
   const { leaveTypes, loading: typesLoading } = useLeaveTypes()
   const [newRequest, setNewRequest] = useState({
@@ -32,7 +34,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
 
   const handleSubmit = async () => {
     if (!newRequest.type_id || !newRequest.start_at || !newRequest.end_at) {
-      toast.error('Compila tutti i campi obbligatori')
+      toast.error(t('myShifts.leave.errorAllFields'))
       return
     }
 
@@ -47,7 +49,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       if (!res.ok) {
         const error = await res.json()
         if (error.error === 'LEAVE_COLLISION') {
-          toast.error('Hai già una richiesta di permesso per questo periodo')
+          toast.error(t('myShifts.leave.errorCollision'))
         } else {
           throw new Error(error.message || 'Failed to create request')
         }
@@ -59,14 +61,14 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       if (data.warning) {
         toast.warning(data.warning, { duration: 5000 })
       } else {
-        toast.success('Richiesta permesso inviata')
+        toast.success(t('myShifts.toast.leaveRequested'))
       }
       
       setIsAdding(false)
       setNewRequest({ start_at: '', end_at: '', reason: '', type_id: '' })
       onUpdate()
     } catch (error) {
-      toast.error('Errore nell\'invio della richiesta')
+      toast.error(t('myShifts.toast.errorLeave'))
       console.error(error)
     }
   }
@@ -81,7 +83,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       {approved.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-success">Permessi Approvati</CardTitle>
+            <CardTitle className="text-success">{t('myShifts.leave.approved')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {approved.map(req => (
@@ -92,7 +94,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
                   </p>
                   {req.reason && <p className="text-sm text-muted-foreground mt-1">{req.reason}</p>}
                 </div>
-                <Badge variant="default">Approvato</Badge>
+                <Badge variant="default">{t('myShifts.leave.statusApproved')}</Badge>
               </div>
             ))}
           </CardContent>
@@ -103,7 +105,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       {pending.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Richieste in Attesa</CardTitle>
+            <CardTitle>{t('myShifts.leave.pending')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {pending.map(req => (
@@ -114,7 +116,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
                   </p>
                   {req.reason && <p className="text-sm text-muted-foreground mt-1">{req.reason}</p>}
                 </div>
-                <Badge variant="secondary">In attesa</Badge>
+                <Badge variant="secondary">{t('myShifts.leave.statusPending')}</Badge>
               </div>
             ))}
           </CardContent>
@@ -125,7 +127,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       {rejected.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-destructive">Richieste Rifiutate</CardTitle>
+            <CardTitle className="text-destructive">{t('myShifts.leave.rejected')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {rejected.map(req => (
@@ -134,9 +136,9 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
                   <p className="font-medium">
                     {format(parseISO(req.start_at), 'd MMM', { locale: it })} - {format(parseISO(req.end_at), 'd MMM yyyy', { locale: it })}
                   </p>
-                  {req.notes && <p className="text-sm text-destructive mt-1">Motivo: {req.notes}</p>}
+                  {req.notes && <p className="text-sm text-destructive mt-1">{t('myShifts.leave.reason')} {req.notes}</p>}
                 </div>
-                <Badge variant="destructive">Rifiutato</Badge>
+                <Badge variant="destructive">{t('myShifts.leave.statusRejected')}</Badge>
               </div>
             ))}
           </CardContent>
@@ -146,7 +148,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       {leaveRequests.length === 0 && !isAdding && (
         <Alert>
           <AlertDescription>
-            Nessuna richiesta di permesso. Puoi crearne una nuova cliccando il pulsante sotto.
+            {t('myShifts.leave.noRequests')}
           </AlertDescription>
         </Alert>
       )}
@@ -155,21 +157,21 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       {isAdding ? (
         <Card>
           <CardHeader>
-            <CardTitle>Nuova Richiesta Permesso</CardTitle>
+            <CardTitle>{t('myShifts.leave.newRequestTitle')}</CardTitle>
             <CardDescription>
-              Compila i dettagli della tua richiesta di permesso
+              {t('myShifts.leave.newRequestDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Tipo Permesso</Label>
+              <Label>{t('myShifts.leave.leaveType')}</Label>
               <Select
                 value={newRequest.type_id}
                 onValueChange={(value) => setNewRequest(prev => ({ ...prev, type_id: value }))}
                 disabled={typesLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona tipo..." />
+                  <SelectValue placeholder={t('myShifts.leave.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {leaveTypes.map((type) => (
@@ -183,7 +185,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Data inizio</Label>
+                <Label>{t('myShifts.leave.startDate')}</Label>
                 <input 
                   type="date" 
                   value={newRequest.start_at.split('T')[0] || ''}
@@ -196,7 +198,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
               </div>
 
               <div>
-                <Label>Data fine</Label>
+                <Label>{t('myShifts.leave.endDate')}</Label>
                 <input 
                   type="date" 
                   value={newRequest.end_at.split('T')[0] || ''}
@@ -210,11 +212,11 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
             </div>
 
             <div>
-              <Label>Motivazione (opzionale)</Label>
+              <Label>{t('myShifts.leave.reasonOptional')}</Label>
               <Textarea 
                 value={newRequest.reason}
                 onChange={(e) => setNewRequest(prev => ({ ...prev, reason: e.target.value }))}
-                placeholder="Descrivi brevemente il motivo della richiesta..."
+                placeholder={t('myShifts.leave.reasonPlaceholder')}
                 rows={3}
               />
             </div>
@@ -225,10 +227,10 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
                 className="flex-1"
                 disabled={!newRequest.type_id || !newRequest.start_at || !newRequest.end_at || typesLoading}
               >
-                Invia Richiesta
+                {t('myShifts.leave.submit')}
               </Button>
               <Button variant="outline" onClick={() => setIsAdding(false)} className="flex-1">
-                Annulla
+                {t('myShifts.leave.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -236,7 +238,7 @@ export function MyLeavePanel({ leaveRequests, onUpdate }: Props) {
       ) : (
         <Button onClick={() => setIsAdding(true)} className="w-full">
           <Plus className="h-4 w-4 mr-2" />
-          Nuova Richiesta Permesso
+          {t('myShifts.leave.add')}
         </Button>
       )}
     </div>

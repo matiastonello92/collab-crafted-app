@@ -10,29 +10,15 @@ import { Plus, Trash2 } from 'lucide-react'
 import type { Availability } from '@/types/shifts'
 import { toast } from 'sonner'
 import { formatTimeRangeDisplay } from '@/lib/shifts/time-utils'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   availability: Availability[]
   onUpdate: () => void
 }
 
-const WEEKDAYS = [
-  { value: 1, label: 'Lunedì' },
-  { value: 2, label: 'Martedì' },
-  { value: 3, label: 'Mercoledì' },
-  { value: 4, label: 'Giovedì' },
-  { value: 5, label: 'Venerdì' },
-  { value: 6, label: 'Sabato' },
-  { value: 0, label: 'Domenica' },
-]
-
-const PREFERENCES = [
-  { value: 'preferred', label: 'Preferito', variant: 'default' as const },
-  { value: 'ok', label: 'OK', variant: 'secondary' as const },
-  { value: 'unavailable', label: 'Non disponibile', variant: 'destructive' as const },
-]
-
 export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
+  const { t } = useTranslation()
   const [isAdding, setIsAdding] = useState(false)
   const [newEntry, setNewEntry] = useState({
     weekday: 1,
@@ -40,6 +26,22 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
     end_time: '17:00',
     preference: 'ok' as const
   })
+
+  const WEEKDAYS = [
+    { value: 1, label: t('myShifts.availability.monday') },
+    { value: 2, label: t('myShifts.availability.tuesday') },
+    { value: 3, label: t('myShifts.availability.wednesday') },
+    { value: 4, label: t('myShifts.availability.thursday') },
+    { value: 5, label: t('myShifts.availability.friday') },
+    { value: 6, label: t('myShifts.availability.saturday') },
+    { value: 0, label: t('myShifts.availability.sunday') },
+  ]
+
+  const PREFERENCES = [
+    { value: 'preferred', label: t('myShifts.availability.preferred'), variant: 'default' as const },
+    { value: 'ok', label: t('myShifts.availability.ok'), variant: 'secondary' as const },
+    { value: 'unavailable', label: t('myShifts.availability.unavailable'), variant: 'destructive' as const },
+  ]
 
   const handleAdd = async () => {
     try {
@@ -52,12 +54,12 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
 
       if (!res.ok) throw new Error(await res.text())
 
-      toast.success('Disponibilità aggiunta')
+      toast.success(t('myShifts.toast.availabilityAdded'))
       setIsAdding(false)
       setNewEntry({ weekday: 1, start_time: '09:00', end_time: '17:00', preference: 'ok' })
       onUpdate()
     } catch (error) {
-      toast.error('Errore nell\'aggiunta della disponibilità')
+      toast.error(t('myShifts.toast.errorAvailabilityAdd'))
       console.error(error)
     }
   }
@@ -71,10 +73,10 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
 
       if (!res.ok) throw new Error(await res.text())
 
-      toast.success('Disponibilità rimossa')
+      toast.success(t('myShifts.toast.availabilityRemoved'))
       onUpdate()
     } catch (error) {
-      toast.error('Errore nella rimozione')
+      toast.error(t('myShifts.toast.errorAvailabilityRemove'))
       console.error(error)
     }
   }
@@ -90,9 +92,9 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Le mie Disponibilità</CardTitle>
+          <CardTitle>{t('myShifts.availability.title')}</CardTitle>
           <CardDescription>
-            Indica quando sei disponibile per lavorare. Il manager utilizzerà queste informazioni per assegnarti i turni.
+            {t('myShifts.availability.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -123,7 +125,7 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
                   )
                 })}
                 {(!byWeekday[value] || byWeekday[value].length === 0) && (
-                  <p className="text-sm text-muted-foreground">Nessuna disponibilità impostata</p>
+                  <p className="text-sm text-muted-foreground">{t('myShifts.availability.noAvailability')}</p>
                 )}
               </div>
             </div>
@@ -134,12 +136,12 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
       {isAdding ? (
         <Card>
           <CardHeader>
-            <CardTitle>Aggiungi Disponibilità</CardTitle>
+            <CardTitle>{t('myShifts.availability.addTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Giorno</Label>
+                <Label>{t('myShifts.availability.day')}</Label>
                 <Select 
                   value={String(newEntry.weekday)} 
                   onValueChange={(v) => setNewEntry(prev => ({ ...prev, weekday: Number(v) }))}
@@ -158,7 +160,7 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
               </div>
 
               <div>
-                <Label>Preferenza</Label>
+                <Label>{t('myShifts.availability.preference')}</Label>
                 <Select 
                   value={newEntry.preference} 
                   onValueChange={(v: any) => setNewEntry(prev => ({ ...prev, preference: v }))}
@@ -177,7 +179,7 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
               </div>
 
               <div>
-                <Label>Ora inizio</Label>
+                <Label>{t('myShifts.availability.startTime')}</Label>
                 <input 
                   type="time" 
                   value={newEntry.start_time}
@@ -187,7 +189,7 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
               </div>
 
               <div>
-                <Label>Ora fine</Label>
+                <Label>{t('myShifts.availability.endTime')}</Label>
                 <input 
                   type="time" 
                   value={newEntry.end_time}
@@ -198,9 +200,9 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={handleAdd} className="flex-1">Salva</Button>
+              <Button onClick={handleAdd} className="flex-1">{t('myShifts.availability.save')}</Button>
               <Button variant="outline" onClick={() => setIsAdding(false)} className="flex-1">
-                Annulla
+                {t('myShifts.availability.cancel')}
               </Button>
             </div>
           </CardContent>
@@ -208,7 +210,7 @@ export function MyAvailabilityPanel({ availability, onUpdate }: Props) {
       ) : (
         <Button onClick={() => setIsAdding(true)} className="w-full">
           <Plus className="h-4 w-4 mr-2" />
-          Aggiungi Disponibilità
+          {t('myShifts.availability.add')}
         </Button>
       )}
     </div>
