@@ -449,7 +449,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                     placeholder="{}"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Formato JSON per configurazioni avanzate
+                    {t('settings.advancedConfigDescription')}
                   </p>
                 </div>
               </CardContent>

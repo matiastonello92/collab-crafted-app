@@ -1571,6 +1571,7 @@ export const en = {
     leaveDecisions: 'Leave decisions',
     leaveDecisionsDescription: 'Email when your leave requests are approved or rejected',
     advancedConfig: 'Advanced configuration (JSON)',
+    advancedConfigDescription: 'JSON format for advanced configurations',
     
     // Success/error
     profileUpdated: 'Profile updated successfully!',

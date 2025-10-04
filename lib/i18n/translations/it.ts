@@ -1636,6 +1636,7 @@ export const it = {
     leaveDecisions: 'Decisioni assenze',
     leaveDecisionsDescription: 'Email quando le tue richieste di assenza vengono approvate o rifiutate',
     advancedConfig: 'Configurazione avanzata (JSON)',
+    advancedConfigDescription: 'Formato JSON per configurazioni avanzate',
     
     // Success/error
     profileUpdated: 'Profilo aggiornato con successo!',
