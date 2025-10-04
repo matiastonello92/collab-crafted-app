@@ -2567,4 +2567,16 @@ export const en = {
     errorLogin: 'Login error',
     poweredBy: 'Staff Management System • Powered by Supabase',
   },
+
+  // Error Messages
+  errorMessages: {
+    failedToUpdate: 'Failed to update',
+    failedToSave: 'Failed to save',
+    failedToDelete: 'Failed to delete',
+    failedToCreate: 'Failed to create',
+    failedToLoad: 'Failed to load',
+    uploadFailed: 'Upload failed',
+    networkError: 'Network error',
+    unknownError: 'Unknown error',
+  },
 } as const;

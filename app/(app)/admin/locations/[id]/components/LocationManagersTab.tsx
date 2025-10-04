@@ -67,7 +67,7 @@ export function LocationManagersTab({ locationId }: Props) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to add manager')
+        throw new Error(error.error || t('errorMessages.failedToSave'))
       }
 
       toast.success(t('toast.location.managerAdded'))
@@ -90,7 +90,7 @@ export function LocationManagersTab({ locationId }: Props) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to remove manager')
+        throw new Error(t('errorMessages.failedToDelete'))
       }
 
       toast.success(t('toast.location.managerRemoved'))

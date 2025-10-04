@@ -61,7 +61,7 @@ export function LocationScheduleTab({ location }: Props) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update schedule')
+        throw new Error(t('errorMessages.failedToUpdate'))
       }
 
       toast.success(t('toast.location.scheduleUpdated'))

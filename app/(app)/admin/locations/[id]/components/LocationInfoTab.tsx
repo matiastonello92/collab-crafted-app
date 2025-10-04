@@ -44,7 +44,7 @@ export function LocationInfoTab({ location }: Props) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update location')
+        throw new Error(t('errorMessages.failedToUpdate'))
       }
 
       toast.success(t('toast.location.updated'))

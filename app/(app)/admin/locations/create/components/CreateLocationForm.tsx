@@ -44,7 +44,7 @@ export function CreateLocationForm() {
       })
 
       if (!response.ok) {
-        throw new Error('Upload failed')
+        throw new Error(t('errorMessages.uploadFailed'))
       }
 
       const data = await response.json()
@@ -75,7 +75,7 @@ export function CreateLocationForm() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create location')
+        throw new Error(t('errorMessages.failedToCreate'))
       }
 
       const data = await response.json()

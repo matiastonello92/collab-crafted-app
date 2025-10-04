@@ -2691,4 +2691,16 @@ export const it = {
     errorLogin: 'Errore durante il login',
     poweredBy: 'Staff Management System • Powered by Supabase',
   },
+
+  // Error Messages
+  errorMessages: {
+    failedToUpdate: 'Aggiornamento fallito',
+    failedToSave: 'Salvataggio fallito',
+    failedToDelete: 'Eliminazione fallita',
+    failedToCreate: 'Creazione fallita',
+    failedToLoad: 'Caricamento fallito',
+    uploadFailed: 'Caricamento file fallito',
+    networkError: 'Errore di connessione',
+    unknownError: 'Errore sconosciuto',
+  },
 } as const;
