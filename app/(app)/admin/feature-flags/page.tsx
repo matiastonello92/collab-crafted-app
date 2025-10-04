@@ -16,12 +16,12 @@ export default async function FeatureFlagsPage() {
 
   // Mock data for the placeholder
   const mockFlags = [
-    { name: 'inventory_advanced_search', status: 'active', scope: 'global', description: 'Ricerca avanzata nell\'inventario' },
-    { name: 'supplier_integration', status: 'active', scope: 'lyon', description: 'Integrazione fornitori automatica' },
-    { name: 'task_automation', status: 'inactive', scope: 'global', description: 'Automazione task ricorrenti' },
-    { name: 'mobile_notifications', status: 'active', scope: 'menton', description: 'Notifiche push mobile' },
-    { name: 'advanced_reporting', status: 'inactive', scope: 'global', description: 'Report avanzati e analytics' },
-    { name: 'chat_integration', status: 'active', scope: 'global', description: 'Sistema chat integrato' },
+    { name: 'inventory_advanced_search', status: 'active', scope: 'global', description: t('featureFlagsMock.inventorySearch') },
+    { name: 'supplier_integration', status: 'active', scope: 'lyon', description: t('featureFlagsMock.supplierIntegration') },
+    { name: 'task_automation', status: 'inactive', scope: 'global', description: t('featureFlagsMock.taskAutomation') },
+    { name: 'mobile_notifications', status: 'active', scope: 'menton', description: t('featureFlagsMock.mobileNotifications') },
+    { name: 'advanced_reporting', status: 'inactive', scope: 'global', description: t('featureFlagsMock.advancedReporting') },
+    { name: 'chat_integration', status: 'active', scope: 'global', description: t('featureFlagsMock.chatIntegration') },
   ]
 
   const totalFlags = mockFlags.length

@@ -50,13 +50,13 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
   const getStatusLabel = () => {
     switch (rotaStatus) {
       case 'draft':
-        return t('planner.publish.draft') || 'Bozza'
+        return t('planner.publish.draft')
       case 'published':
-        return t('planner.publish.published') || 'Pubblicata'
+        return t('planner.publish.published')
       case 'locked':
-        return t('planner.publish.locked') || 'Bloccata'
+        return t('planner.publish.locked')
       default:
-        return t('planner.publish.noRota') || 'Nessuna Rota'
+        return t('planner.publish.noRota')
     }
   }
   
@@ -114,12 +114,12 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             {showUsersWithoutShifts ? (
               <>
                 <EyeOff className="h-4 w-4 mr-2" />
-                {t('planner.dragDrop.hideUsersWithoutShifts') || 'Nascondi utenti senza turni'}
+                {t('planner.dragDrop.hideUsersWithoutShifts')}
               </>
             ) : (
               <>
                 <Eye className="h-4 w-4 mr-2" />
-                {t('planner.dragDrop.showAllUsers') || 'Mostra tutti gli utenti'}
+                {t('planner.dragDrop.showAllUsers')}
               </>
             )}
           </Button>

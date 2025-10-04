@@ -2672,4 +2672,20 @@ export const en = {
     conflictError: 'Conflict error',
     conflictWarning: 'Conflict warning',
   },
+
+  // Feature Flags Mock Descriptions
+  featureFlagsMock: {
+    inventorySearch: 'Advanced inventory search',
+    supplierIntegration: 'Automatic supplier integration',
+    taskAutomation: 'Recurring task automation',
+    mobileNotifications: 'Mobile push notifications',
+    advancedReporting: 'Advanced reporting and analytics',
+    chatIntegration: 'Integrated chat system',
+  },
+
+  // Dialog UI
+  dialogUI: {
+    closeDialog: 'Close dialog',
+    close: 'Close',
+  },
 } as const;

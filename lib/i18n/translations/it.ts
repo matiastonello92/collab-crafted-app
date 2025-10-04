@@ -2796,4 +2796,20 @@ export const it = {
     conflictError: 'Errore conflitto',
     conflictWarning: 'Avviso conflitto',
   },
+
+  // Feature Flags Mock Descriptions
+  featureFlagsMock: {
+    inventorySearch: 'Ricerca avanzata nell\'inventario',
+    supplierIntegration: 'Integrazione fornitori automatica',
+    taskAutomation: 'Automazione task ricorrenti',
+    mobileNotifications: 'Notifiche push mobile',
+    advancedReporting: 'Report avanzati e analytics',
+    chatIntegration: 'Sistema chat integrato',
+  },
+
+  // Dialog UI
+  dialogUI: {
+    closeDialog: 'Chiudi dialog',
+    close: 'Chiudi',
+  },
 } as const;

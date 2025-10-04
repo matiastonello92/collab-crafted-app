@@ -119,8 +119,13 @@ export const ShiftCard = memo(function ShiftCard({
       tabIndex={isLocked ? -1 : 0}
       aria-label={
         assignment 
-          ? t('shiftCard.ariaLabelAssigned').replace('{start}', startTime).replace('{end}', endTime).replace('{name}', assignment.user?.full_name || '')
-          : t('shiftCard.ariaLabelUnassigned').replace('{start}', startTime).replace('{end}', endTime)
+          ? t('shiftCard.ariaLabelAssigned')
+              .replaceAll('{start}', startTime)
+              .replaceAll('{end}', endTime)
+              .replaceAll('{name}', assignment.user?.full_name || '')
+          : t('shiftCard.ariaLabelUnassigned')
+              .replaceAll('{start}', startTime)
+              .replaceAll('{end}', endTime)
       }
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -146,7 +151,7 @@ export const ShiftCard = memo(function ShiftCard({
       {shift.break_minutes > 0 && (
         <Badge 
           className="absolute top-2 right-2 bg-muted-foreground/90 text-white font-bold border-none px-2 py-0.5"
-          aria-label={t('shiftCard.breakAriaLabel').replace('{minutes}', shift.break_minutes.toString())}
+          aria-label={t('shiftCard.breakAriaLabel').replaceAll('{minutes}', shift.break_minutes.toString())}
         >
           -{shift.break_minutes}mn
         </Badge>
