@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Flag, Plus, Settings, MapPin, Globe } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { useRequireSession } from '@/lib/useRequireSession'
+import { useTranslation } from '@/lib/i18n'
 
 // Mock data for demonstration
 const mockFlags = [
@@ -68,6 +69,7 @@ const mockModules = [
 ]
 
 export default function FeatureFlagsPage() {
+  const { t } = useTranslation()
   const { hasPermission } = useHydratedStore()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
@@ -83,9 +85,9 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <Flag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Accesso Negato</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('admin.featureFlagsAccessDenied')}</h3>
               <p className="text-muted-foreground">
-                Non hai i permessi necessari per gestire i feature flags.
+                {t('admin.featureFlagsAccessDeniedDesc')}
               </p>
             </div>
           </CardContent>
@@ -112,32 +114,32 @@ export default function FeatureFlagsPage() {
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Feature Flags</h1>
+          <h1 className="text-3xl font-bold">{t('admin.featureFlags')}</h1>
           <p className="text-muted-foreground">
-            Gestisci le funzionalità attive per moduli e location
+            {t('admin.featureFlagsDesc')}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Nuovo Flag
+              {t('admin.featureFlagsNew')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Crea Nuovo Feature Flag</DialogTitle>
+              <DialogTitle>{t('admin.featureFlagsCreateTitle')}</DialogTitle>
               <DialogDescription>
-                Configura un nuovo feature flag per controllare le funzionalità
+                {t('admin.featureFlagsCreateDesc')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="module">Modulo</Label>
+                  <Label htmlFor="module">{t('admin.featureFlagsModule')}</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleziona modulo" />
+                      <SelectValue placeholder={t('admin.featureFlagsAllModules')} />
                     </SelectTrigger>
                     <SelectContent>
                       {mockModules.map((module) => (
@@ -149,45 +151,45 @@ export default function FeatureFlagsPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="flag_code">Codice Flag</Label>
+                  <Label htmlFor="flag_code">{t('admin.featureFlagsFlagCode')}</Label>
                   <Input id="flag_code" placeholder="es. advanced_feature" />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="name">Nome</Label>
-                <Input id="name" placeholder="Nome descrittivo del flag" />
+                <Label htmlFor="name">{t('admin.featureFlagsName')}</Label>
+                <Input id="name" placeholder={t('admin.featureFlagsName')} />
               </div>
               
               <div>
-                <Label htmlFor="description">Descrizione</Label>
-                <Textarea id="description" placeholder="Descrizione della funzionalità" />
+                <Label htmlFor="description">{t('admin.featureFlagsDescription')}</Label>
+                <Textarea id="description" placeholder={t('admin.featureFlagsDescription')} />
               </div>
               
               <div>
-                <Label htmlFor="scope">Ambito</Label>
+                <Label htmlFor="scope">{t('admin.featureFlagsScope')}</Label>
                 <Select>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleziona ambito" />
+                    <SelectValue placeholder={t('admin.featureFlagsScope')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="global">Globale (tutta l&apos;organizzazione)</SelectItem>
-                    <SelectItem value="location">Per Location</SelectItem>
+                    <SelectItem value="global">{t('admin.featureFlagsScopeGlobal')}</SelectItem>
+                    <SelectItem value="location">{t('admin.featureFlagsScopeLocation')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="flex items-center space-x-2">
                 <Switch id="enabled" />
-                <Label htmlFor="enabled">Attivo di default</Label>
+                <Label htmlFor="enabled">{t('admin.featureFlagsEnabledDefault')}</Label>
               </div>
               
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Annulla
+                  {t('common.cancel')}
                 </Button>
                 <Button onClick={() => setIsCreateDialogOpen(false)}>
-                  Crea Flag
+                  {t('common.create')}
                 </Button>
               </div>
             </div>

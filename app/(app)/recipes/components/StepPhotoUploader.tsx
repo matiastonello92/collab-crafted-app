@@ -5,6 +5,7 @@ import { Upload, Loader2, ImageIcon, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { useTranslation } from '@/lib/i18n'
 
 interface StepPhotoUploaderProps {
   recipeId: string
@@ -21,6 +22,7 @@ export function StepPhotoUploader({
   onPhotoUpdate, 
   disabled 
 }: StepPhotoUploaderProps) {
+  const { t } = useTranslation()
   const [photoUrl, setPhotoUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,12 +32,12 @@ export function StepPhotoUploader({
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Seleziona un file immagine valido')
+      toast.error(t('recipePhoto.invalidType'))
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Il file è troppo grande. Max 5MB.')
+      toast.error(t('recipePhoto.tooLarge'))
       return
     }
 
@@ -59,11 +61,11 @@ export function StepPhotoUploader({
       const { url } = await response.json()
       setPhotoUrl(url)
       onPhotoUpdate(url)
-      toast.success('Foto caricata con successo!')
+      toast.success(t('recipePhoto.uploadSuccess'))
 
     } catch (error: any) {
       console.error('Photo upload error:', error)
-      toast.error(`Errore caricamento: ${error.message}`)
+      toast.error(t('recipePhoto.uploadError').replace('{error}', error.message))
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {
@@ -107,7 +109,7 @@ export function StepPhotoUploader({
         <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden border-2 border-dashed border-border">
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <ImageIcon className="w-8 h-8" />
-            <p className="text-xs">Foto opzionale</p>
+            <p className="text-xs">{t('recipePhoto.formats')}</p>
           </div>
         </div>
       )}
@@ -133,7 +135,7 @@ export function StepPhotoUploader({
         ) : (
           <Upload className="h-3 w-3 mr-2" />
         )}
-        {isUploading ? 'Caricamento...' : photoUrl ? 'Cambia foto' : 'Carica foto'}
+        {isUploading ? t('recipePhoto.uploading') : photoUrl ? t('recipePhoto.change') : t('recipePhoto.upload')}
       </Button>
     </div>
   )

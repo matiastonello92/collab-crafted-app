@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Home } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeBreadcrumbProps {
   recipeTitle?: string;
@@ -17,6 +18,8 @@ interface RecipeBreadcrumbProps {
 }
 
 export function RecipeBreadcrumb({ recipeTitle, mode }: RecipeBreadcrumbProps) {
+  const { t } = useTranslation()
+  
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -24,20 +27,20 @@ export function RecipeBreadcrumb({ recipeTitle, mode }: RecipeBreadcrumbProps) {
           <BreadcrumbLink asChild>
             <Link href="/" className="flex items-center gap-1">
               <Home className="w-4 h-4" />
-              Home
+              {t('recipeBreadcrumb.home')}
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/recipes">Ricette</Link>
+            <Link href="/recipes">{t('recipeBreadcrumb.recipes')}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbPage>
-            {mode === 'create' ? 'Nuova Ricetta' : recipeTitle || 'Modifica Ricetta'}
+            {mode === 'create' ? t('recipeBreadcrumb.newRecipe') : recipeTitle || t('recipeBreadcrumb.editRecipe')}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>

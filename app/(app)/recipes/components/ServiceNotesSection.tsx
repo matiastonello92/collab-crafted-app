@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useTranslation } from '@/lib/i18n';
 
 interface ServiceNote {
   id: string;
@@ -27,6 +28,7 @@ interface ServiceNotesSectionProps {
 }
 
 export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded }: ServiceNotesSectionProps) {
+  const { t } = useTranslation()
   const [notes, setNotes] = useState<ServiceNote[]>(initialNotes || []);
   const [newNoteText, setNewNoteText] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -53,12 +55,12 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
       setIsAdding(false);
       onNoteAdded?.(newNote);
 
-      toast.success('Nota aggiunta', {
-        description: 'La nota di servizio è stata aggiunta con successo'
+      toast.success(t('serviceNotes.noteAdded'), {
+        description: t('serviceNotes.noteAddedDesc')
       });
     } catch (error) {
       console.error('Error adding service note:', error);
-      toast.error('Impossibile aggiungere la nota');
+      toast.error(t('serviceNotes.errorAdding'));
     } finally {
       setLoading(false);
     }
@@ -71,9 +73,9 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-warning" />
             <div>
-              <CardTitle className="text-lg">Note di Servizio</CardTitle>
+              <CardTitle className="text-lg">{t('serviceNotes.title')}</CardTitle>
               <CardDescription>
-                Informazioni importanti per il servizio e la preparazione
+                {t('serviceNotes.description')}
               </CardDescription>
             </div>
           </div>
@@ -85,7 +87,7 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
               className="gap-2"
             >
               <Plus className="w-4 h-4" />
-              Aggiungi Nota
+              {t('serviceNotes.addNote')}
             </Button>
           )}
         </div>
@@ -95,7 +97,7 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
         {isAdding && (
           <div className="space-y-2 p-4 border rounded-lg bg-background">
             <Textarea
-              placeholder="Scrivi una nota di servizio..."
+              placeholder={t('serviceNotes.writeNote')}
               value={newNoteText}
               onChange={(e) => setNewNoteText(e.target.value)}
               rows={3}
@@ -111,14 +113,14 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
                 }}
                 disabled={loading}
               >
-                Annulla
+                {t('serviceNotes.cancel')}
               </Button>
               <Button
                 size="sm"
                 onClick={handleAddNote}
                 disabled={!newNoteText.trim() || loading}
               >
-                {loading ? 'Salvataggio...' : 'Salva Nota'}
+                {loading ? t('serviceNotes.saving') : t('serviceNotes.save')}
               </Button>
             </div>
           </div>
@@ -127,7 +129,7 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
         {notes.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <StickyNote className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>Nessuna nota di servizio</p>
+            <p>{t('serviceNotes.noNotes')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -145,7 +147,7 @@ export function ServiceNotesSection({ recipeId, notes: initialNotes, onNoteAdded
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-medium">
-                      {note.created_by_profile?.full_name || 'Utente'}
+                      {note.created_by_profile?.full_name || t('serviceNotes.user')}
                     </span>
                     <span className="text-muted-foreground">
                       {formatDistanceToNow(new Date(note.created_at), {
