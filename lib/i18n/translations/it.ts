@@ -585,6 +585,8 @@ export const it = {
       accepting: 'Accettazione...',
       declining: 'Rifiuto...',
       week: 'Settimana del',
+      breakMinutes: 'Pausa',
+      min: 'min',
       status: {
         accepted: 'Accettato',
         declined: 'Rifiutato',
@@ -612,13 +614,13 @@ export const it = {
       availabilitySaved: 'Disponibilità salvata',
       availabilityDeleted: 'Disponibilità eliminata',
       leaveSubmitted: 'Richiesta permesso inviata',
-      shiftAccepted: 'Turno accettato',
+      shiftAccepted: 'Turno accettato con successo',
       shiftDeclined: 'Turno rifiutato',
       correctionSubmitted: 'Richiesta di correzione inviata',
       errorSaving: 'Errore durante il salvataggio',
       errorSubmitting: "Errore durante l'invio",
-      errorAccepting: "Errore nell'accettazione",
-      errorDeclining: 'Errore nel rifiuto',
+      errorAccept: 'Errore nell\'accettazione del turno',
+      errorDecline: 'Errore nel rifiuto del turno',
       errorLoading: 'Errore nel caricamento',
     },
   },
@@ -630,6 +632,40 @@ export const it = {
     plannerDesc: 'Pianifica e gestisci i turni del tuo team',
     myShiftsTitle: 'I Miei Turni',
     myShiftsDesc: 'Visualizza i tuoi turni assegnati',
+  },
+
+  // Feature Flags
+  featureFlags: {
+    title: 'Feature Flags',
+    description: 'Gestisci le funzionalità attive per location e moduli',
+    stats: {
+      total: 'Flag Totali',
+      active: 'Attivi',
+      inactive: 'Inattivi',
+    },
+    buttons: {
+      new: 'Nuovo Flag',
+      edit: 'Modifica',
+      filters: 'Filtri',
+    },
+    search: {
+      placeholder: 'Cerca feature flags...',
+    },
+    table: {
+      name: 'Nome Flag',
+      status: 'Stato',
+      scope: 'Scope',
+      description: 'Descrizione',
+      actions: 'Azioni',
+    },
+    badges: {
+      active: 'Attivo',
+      inactive: 'Inattivo',
+      global: 'Globale',
+    },
+    placeholder: {
+      notice: 'Questa è una versione dimostrativa. Le funzionalità di modifica e creazione flag saranno implementate nel prossimo step.',
+    },
   },
 
   // Aria labels

@@ -526,12 +526,79 @@ export const en = {
     },
   },
 
+  // My Shifts
+  myShifts: {
+    title: 'My Shifts',
+    description: 'Manage your shifts, availability and leave requests',
+    tabs: {
+      shifts: 'Shifts',
+      availability: 'Availability',
+      leave: 'Leave',
+    },
+    shifts: {
+      noShifts: 'No shifts assigned',
+      accept: 'Accept',
+      decline: 'Decline',
+      accepting: 'Accepting...',
+      declining: 'Declining...',
+      week: 'Week of',
+      breakMinutes: 'Break',
+      min: 'min',
+      status: {
+        accepted: 'Accepted',
+        declined: 'Declined',
+        assigned: 'Assigned',
+        proposed: 'Proposed',
+      },
+    },
+    toast: {
+      shiftAccepted: 'Shift accepted successfully',
+      shiftDeclined: 'Shift declined',
+      errorAccept: 'Error accepting shift',
+      errorDecline: 'Error declining shift',
+    },
+  },
+
   // Metadata (page titles/descriptions)
   metadata: {
     plannerTitle: 'Shift Planner',
     plannerDesc: 'Plan and manage your team\'s shifts',
     myShiftsTitle: 'My Shifts',
     myShiftsDesc: 'View your assigned shifts',
+  },
+
+  // Feature Flags
+  featureFlags: {
+    title: 'Feature Flags',
+    description: 'Manage active features for locations and modules',
+    stats: {
+      total: 'Total Flags',
+      active: 'Active',
+      inactive: 'Inactive',
+    },
+    buttons: {
+      new: 'New Flag',
+      edit: 'Edit',
+      filters: 'Filters',
+    },
+    search: {
+      placeholder: 'Search feature flags...',
+    },
+    table: {
+      name: 'Flag Name',
+      status: 'Status',
+      scope: 'Scope',
+      description: 'Description',
+      actions: 'Actions',
+    },
+    badges: {
+      active: 'Active',
+      inactive: 'Inactive',
+      global: 'Global',
+    },
+    placeholder: {
+      notice: 'This is a demo version. Edit and create flag features will be implemented in the next step.',
+    },
   },
 
   // Aria labels
