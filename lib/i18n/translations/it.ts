@@ -321,7 +321,7 @@ export const it = {
     
     // Common Admin Labels
     flagCodePlaceholder: 'es. advanced_feature',
-    nameNotAvailable: 'Nome non disponibile',
+    noName: 'Nome non disponibile',
     edit: 'Modifica',
     save: 'Salva',
     saving: 'Salvataggio...',
@@ -653,6 +653,9 @@ export const it = {
 
   // Planner & Shifts
   planner: {
+    unassignedPool: {
+      allAssigned: 'Tutti i turni sono assegnati',
+    },
     common: {
       addShift: 'Aggiungi turno',
       addAbsence: 'Aggiungi assenza',

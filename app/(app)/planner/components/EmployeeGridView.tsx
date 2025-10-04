@@ -179,7 +179,7 @@ export function EmployeeGridView({
       try {
         const response = await fetch(`/api/v1/shifts/${shift.id}`, { method: 'DELETE' })
         
-        if (!response.ok) throw new Error('Failed to delete shift')
+        if (!response.ok) throw new Error(t('errorMessages.failedToDelete'))
         
         toast.success(t('planner.grid.toast.shiftDeleted'))
         
@@ -290,7 +290,7 @@ export function EmployeeGridView({
           })
         })
         
-        if (!response.ok) throw new Error('Failed to duplicate shift')
+        if (!response.ok) throw new Error(t('errorMessages.failedToCreate'))
         
         const { shift: newShift } = await response.json()
         
@@ -316,7 +316,7 @@ export function EmployeeGridView({
           })
         })
         
-        if (!response.ok) throw new Error('Failed to move shift')
+        if (!response.ok) throw new Error(t('errorMessages.failedToUpdate'))
         
         if (userId !== 'unassigned' && userId !== currentUserId) {
           await fetch(`/api/v1/shifts/${shift.id}/assign`, {

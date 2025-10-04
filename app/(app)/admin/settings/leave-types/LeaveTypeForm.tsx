@@ -47,7 +47,7 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || 'Failed to save')
+        throw new Error(error.error || t('errorMessages.failedToSave'))
       }
 
       toast.success(leaveType ? t('admin.leaveTypeForm.toast.typeUpdated') : t('admin.leaveTypeForm.toast.typeCreated'))

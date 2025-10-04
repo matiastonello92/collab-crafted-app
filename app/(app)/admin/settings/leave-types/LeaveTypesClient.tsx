@@ -63,7 +63,7 @@ export function LeaveTypesClient() {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || 'Failed to delete')
+        throw new Error(error.error || t('errorMessages.failedToDelete'))
       }
 
       toast.success(t('toast.leaveType.deleted'))
@@ -83,7 +83,7 @@ export function LeaveTypesClient() {
       })
 
       if (!res.ok) {
-        throw new Error('Failed to update')
+        throw new Error(t('errorMessages.failedToUpdate'))
       }
 
       toast.success(type.is_active ? t('admin.leaveTypesDeactivated') : t('admin.leaveTypesActivated'))

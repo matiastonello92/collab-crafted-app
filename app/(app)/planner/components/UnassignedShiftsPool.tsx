@@ -7,6 +7,7 @@ import { Clock, UserPlus, Calendar } from 'lucide-react'
 import type { ShiftWithAssignments } from '@/types/shifts'
 import { format, parseISO, differenceInHours } from 'date-fns'
 import { it } from 'date-fns/locale'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function UnassignedShiftsPool({ shifts, onAssignClick, onShiftClick }: Props) {
+  const { t } = useTranslation()
+  
   // Filter unassigned shifts
   const unassignedShifts = shifts.filter(
     shift => !shift.assignments || shift.assignments.length === 0
@@ -25,7 +28,7 @@ export function UnassignedShiftsPool({ shifts, onAssignClick, onShiftClick }: Pr
       <Card className="p-4">
         <div className="text-center text-muted-foreground text-sm">
           <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>Tutti i turni sono assegnati</p>
+          <p>{t('planner.unassignedPool.allAssigned')}</p>
         </div>
       </Card>
     )

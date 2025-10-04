@@ -94,7 +94,7 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
         body: JSON.stringify({ user_id: userId, status: 'assigned' })
       })
 
-      if (!res.ok) throw new Error('Failed to assign')
+      if (!res.ok) throw new Error(t('errorMessages.failedToSave'))
 
       toast.success(t('planner.smartAssign.assignSuccess'))
       onAssign()

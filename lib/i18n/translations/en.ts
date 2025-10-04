@@ -136,6 +136,7 @@ export const en = {
 
   // Admin
   admin: {
+    noName: 'No Name',
     pageTitle: 'Admin Dashboard',
     pageDescription: 'System administration overview',
     users: {
@@ -655,6 +656,9 @@ export const en = {
 
   // Planner & Shifts
   planner: {
+    unassignedPool: {
+      allAssigned: 'All shifts are assigned',
+    },
     common: {
       addShift: 'Add shift',
       addAbsence: 'Add absence',

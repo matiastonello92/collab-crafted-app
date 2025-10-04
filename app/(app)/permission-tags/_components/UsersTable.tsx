@@ -287,7 +287,7 @@ export function UsersTable({
                     <TableCell>
                       <div className="flex flex-col">
                         <div className="font-medium">
-                          {user.full_name || 'No Name'}
+                          {user.full_name || t('admin.noName')}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {user.email}
