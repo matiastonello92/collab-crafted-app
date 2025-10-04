@@ -2771,4 +2771,19 @@ export const it = {
       noRecentEvents: 'Nessun evento audit recente',
     },
   },
+
+  // Error Boundary
+  errorBoundary: {
+    applicationError: 'Errore Applicazione',
+    pageError: 'Qualcosa è andato storto durante il caricamento di questa pagina.',
+    errorId: 'ID Errore',
+    maxRetriesReached: 'Numero massimo di tentativi raggiunto',
+    retryCount: 'Riprova ({count}/{max})',
+    reloadPage: 'Ricarica Pagina',
+    sectionError: 'Errore Sezione',
+    sectionFailedToLoad: 'Questa sezione non è riuscita a caricarsi',
+    retry: 'Riprova',
+    componentError: 'Errore Componente',
+    errorDetails: 'Dettagli Errore',
+  },
 } as const;

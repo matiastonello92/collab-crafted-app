@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
+import { t, getCurrentLocale } from '@/lib/i18n'
 
 interface Props {
   children: ReactNode
@@ -209,6 +210,8 @@ function PageLevelError({
   retryCount: number
   maxRetries: number
 }) {
+  const locale = getCurrentLocale()
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-2xl rounded-3xl border-destructive/20 bg-card shadow-lg">
@@ -217,16 +220,16 @@ function PageLevelError({
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <CardTitle className="text-2xl text-destructive">
-            Application Error
+            {t('errorBoundary.applicationError', locale)}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 text-center">
           <div className="space-y-2">
             <p className="text-muted-foreground">
-              Something went wrong while loading this page.
+              {t('errorBoundary.pageError', locale)}
             </p>
             <div className="text-xs font-mono text-muted-foreground/80">
-              Error ID: {errorId}
+              {t('errorBoundary.errorId', locale)}: {errorId}
             </div>
           </div>
           
@@ -239,10 +242,13 @@ function PageLevelError({
               className="flex items-center gap-2"
             >
               <RefreshCw className="h-4 w-4" />
-              {retryCount >= maxRetries ? 'Max retries reached' : `Retry (${retryCount}/${maxRetries})`}
+              {retryCount >= maxRetries 
+                ? t('errorBoundary.maxRetriesReached', locale)
+                : t('errorBoundary.retryCount', locale).replace('{count}', retryCount.toString()).replace('{max}', maxRetries.toString())
+              }
             </Button>
             <Button variant="outline" onClick={onReload}>
-              Reload Page
+              {t('errorBoundary.reloadPage', locale)}
             </Button>
           </div>
         </CardContent>
@@ -265,15 +271,17 @@ function SectionLevelError({
   retryCount: number
   maxRetries: number
 }) {
+  const locale = getCurrentLocale()
+  
   return (
     <Card className="border-destructive/20 bg-destructive/5">
       <CardContent className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
           <AlertTriangle className="h-5 w-5 text-destructive" />
           <div>
-            <p className="font-medium text-destructive">Section Error</p>
+            <p className="font-medium text-destructive">{t('errorBoundary.sectionError', locale)}</p>
             <p className="text-sm text-muted-foreground">
-              This section failed to load
+              {t('errorBoundary.sectionFailedToLoad', locale)}
             </p>
           </div>
         </div>
@@ -284,7 +292,7 @@ function SectionLevelError({
           disabled={retryCount >= maxRetries}
         >
           <RefreshCw className="h-4 w-4 mr-2" />
-          Retry
+          {t('errorBoundary.retry', locale)}
         </Button>
       </CardContent>
     </Card>
@@ -305,13 +313,15 @@ function ComponentLevelError({
   retryCount: number
   maxRetries: number
 }) {
+  const locale = getCurrentLocale()
+  
   return (
     <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bug className="h-4 w-4 text-destructive" />
           <span className="text-sm font-medium text-destructive">
-            Component Error
+            {t('errorBoundary.componentError', locale)}
           </span>
         </div>
         <Button 
@@ -321,7 +331,7 @@ function ComponentLevelError({
           disabled={retryCount >= maxRetries}
           className="h-8 text-xs"
         >
-          Retry
+          {t('errorBoundary.retry', locale)}
         </Button>
       </div>
     </div>
@@ -331,6 +341,7 @@ function ComponentLevelError({
 // Error details component with collapsible stack trace
 function ErrorDetails({ error }: { error: Error | null }) {
   const [showDetails, setShowDetails] = useState(false)
+  const locale = getCurrentLocale()
   
   if (!error) return null
 
@@ -343,7 +354,7 @@ function ErrorDetails({ error }: { error: Error | null }) {
         className="mb-2 h-8 px-2 text-xs"
       >
         {showDetails ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
-        Error Details
+        {t('errorBoundary.errorDetails', locale)}
       </Button>
       
       {showDetails && (

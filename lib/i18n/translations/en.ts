@@ -2647,4 +2647,19 @@ export const en = {
       noRecentEvents: 'No recent audit events',
     },
   },
+
+  // Error Boundary
+  errorBoundary: {
+    applicationError: 'Application Error',
+    pageError: 'Something went wrong while loading this page.',
+    errorId: 'Error ID',
+    maxRetriesReached: 'Max retries reached',
+    retryCount: 'Retry ({count}/{max})',
+    reloadPage: 'Reload Page',
+    sectionError: 'Section Error',
+    sectionFailedToLoad: 'This section failed to load',
+    retry: 'Retry',
+    componentError: 'Component Error',
+    errorDetails: 'Error Details',
+  },
 } as const;
