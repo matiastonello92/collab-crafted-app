@@ -18,6 +18,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { withRetry } from '@/lib/utils/retry'
 import { getEmailRedirectTo } from '@/lib/url'
+import { useTranslation } from '@/lib/i18n'
 
 const passwordSchema = z.object({
   password: z.string().min(6, 'Password deve essere di almeno 6 caratteri'),
@@ -52,6 +53,7 @@ type UiState =
   | { status: 'error'; note: string }
 
 export function InviteAcceptance({ token }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [invitationData, setInvitationData] = useState<InvitationData | null>(null)
@@ -83,7 +85,7 @@ export function InviteAcceptance({ token }: Props) {
         if (error) throw error
 
         if (!data || data.length === 0) {
-          setError('Invito non trovato o non valido')
+          setError(t('invite.notFound'))
           return
         }
 
@@ -91,9 +93,9 @@ export function InviteAcceptance({ token }: Props) {
         
         if (!inviteData.is_valid) {
           if (new Date() > new Date(inviteData.expires_at)) {
-            setError('Questo invito è scaduto')
+            setError(t('invite.expired'))
           } else {
-            setError('Questo invito non è più valido (potrebbe essere già stato utilizzato o revocato)')
+            setError(t('invite.invalid'))
           }
           return
         }
@@ -118,14 +120,14 @@ export function InviteAcceptance({ token }: Props) {
         }
       } catch (error: any) {
         console.error('Error validating invitation:', error)
-        setError('Errore nella validazione dell\'invito')
+        setError(t('invite.errorValidating'))
       } finally {
         setIsLoading(false)
       }
     }
 
     validateInvitation()
-  }, [token])
+  }, [token, t])
 
   const handleSignup = async (data: PasswordForm) => {
     if (!invitationData) return
@@ -150,7 +152,7 @@ export function InviteAcceptance({ token }: Props) {
         console.error('Signup error:', se)
         if (se.message?.includes('User already registered')) {
           setStep('login')
-          toast.info('Utente già registrato. Effettua il login per accettare l\'invito.')
+          toast.info(t('invite.alreadyRegistered') + '. ' + t('invite.useExistingAccount'))
           setIsSubmitting(false)
           return
         }
@@ -175,7 +177,7 @@ export function InviteAcceptance({ token }: Props) {
         })
         
         if (!response.ok) {
-          toast.error('Errore creazione account (server)')
+          toast.error(t('invite.errorCreatingAccount'))
           setIsSubmitting(false)
           return
         }
@@ -187,10 +189,9 @@ export function InviteAcceptance({ token }: Props) {
         })
         
         if (le || !si?.session) {
-          const note = `Ti abbiamo inviato un'email di conferma a ${invitationData.email}. ` +
-            `Apri il link per completare l'attivazione, poi torna qui e premi "Accedi ora".`
+          const note = t('invite.emailConfirmNote').replace('{email}', invitationData.email)
           setUiState({ status: 'pending-email-confirm', note })
-          toast.info('Email di conferma inviata. Controlla la casella di posta.')
+          toast.info(t('invite.emailSent'))
           setIsSubmitting(false)
           return
         }
@@ -202,15 +203,15 @@ export function InviteAcceptance({ token }: Props) {
         if (ae) throw ae
         if (!result?.ok) {
           const errorMsg = result?.code === 'INVITE_NO_ROLES' 
-            ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
-            : result?.code || 'Errore sconosciuto'
+            ? t('invite.noRoles')
+            : result?.code || t('invite.errorAccepting')
           throw new Error(errorMsg)
         }
         return true
       })
 
       setStep('success')
-      toast.success('Account creato e invito accettato!')
+      toast.success(t('invite.accountCreated'))
       
       // Redirect to profile completion
       setTimeout(() => {
@@ -218,7 +219,7 @@ export function InviteAcceptance({ token }: Props) {
       }, 800)
     } catch (error: any) {
       console.error('Error during signup:', error)
-      setUiState({ status: 'error', note: error.message || 'Errore durante la registrazione' })
+      setUiState({ status: 'error', note: error.message || t('invite.errorAccepting') })
     } finally {
       setIsSubmitting(false)
     }
@@ -235,7 +236,7 @@ export function InviteAcceptance({ token }: Props) {
       const password = passwordElement?.value || ''
       
       if (!password) {
-        toast.error('Inserisci la password per continuare')
+        toast.error(t('invite.enterPassword'))
         return
       }
       
@@ -245,7 +246,7 @@ export function InviteAcceptance({ token }: Props) {
       })
       
       if (le || !si?.session) {
-        toast.error('Accesso non riuscito. Verifica di aver cliccato il link nella mail.')
+        toast.error(t('invite.loginFailed'))
         return
       }
       
@@ -256,17 +257,17 @@ export function InviteAcceptance({ token }: Props) {
       }
       if (!result?.ok) {
         const errorMsg = result?.code === 'INVITE_NO_ROLES' 
-          ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
-          : result?.code || 'Errore sconosciuto'
+          ? t('invite.noRoles')
+          : result?.code || t('invite.errorAccepting')
         toast.error(errorMsg)
         return
       }
       
-      toast.success('Invito accettato! Benvenuto 👋')
+      toast.success(t('invite.accepted'))
       router.push(`/invite/${token}/complete`)
     } catch (error: any) {
       console.error('Error in handleLoginAfterConfirm:', error)
-      toast.error('Errore durante l\'accesso')
+      toast.error(t('invite.errorAccepting'))
     } finally {
       setIsSubmitting(false)
     }
@@ -296,18 +297,18 @@ export function InviteAcceptance({ token }: Props) {
           await withRetry(async () => {
             const { data: result, error: acceptError } = await supabase
               .rpc('invitation_accept_v2', { p_token: token })
-            if (acceptError) throw acceptError
+          if (acceptError) throw acceptError
             if (!result?.ok) {
               const errorMsg = result?.code === 'INVITE_NO_ROLES' 
-                ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
-                : result?.code || 'Errore sconosciuto'
+                ? t('invite.noRoles')
+                : result?.code || t('invite.errorAccepting')
               throw new Error(errorMsg)
             }
             return true
           })
 
           setStep('success')
-          toast.success('Invito accettato!')
+          toast.success(t('invite.accepted'))
           
           // Redirect to profile completion
           setTimeout(() => {
@@ -316,7 +317,7 @@ export function InviteAcceptance({ token }: Props) {
         }
       } catch (error: any) {
         console.error('Error during login:', error)
-        toast.error(error.message || 'Errore durante il login')
+        toast.error(error.message || t('invite.errorAccepting'))
       }
     })
   }
@@ -335,15 +336,15 @@ export function InviteAcceptance({ token }: Props) {
           if (acceptError) throw acceptError
           if (!result?.ok) {
             const errorMsg = result?.code === 'INVITE_NO_ROLES' 
-              ? 'L\'invito non ha ruoli/sedi associati. Contatta l\'amministratore.'
-              : result?.code || 'Errore sconosciuto'
+              ? t('invite.noRoles')
+              : result?.code || t('invite.errorAccepting')
             throw new Error(errorMsg)
           }
           return true
         })
 
         setStep('success')
-        toast.success('Invito accettato!')
+        toast.success(t('invite.accepted'))
         
         // Redirect to profile completion
         setTimeout(() => {
@@ -351,7 +352,7 @@ export function InviteAcceptance({ token }: Props) {
         }, 800)
       } catch (error: any) {
         console.error('Error accepting invitation:', error)
-        toast.error(error.message || 'Errore nell\'accettazione dell\'invito')
+        toast.error(error.message || t('invite.errorAccepting'))
       }
     })
   }
@@ -363,10 +364,10 @@ export function InviteAcceptance({ token }: Props) {
       setCurrentUser(null)
       setEmailMismatch(false)
       setStep('signup')
-      toast.info('Logout effettuato')
+      toast.info(t('invite.logoutSuccess'))
     } catch (error: any) {
       console.error('Error during logout:', error)
-      toast.error('Errore durante il logout')
+      toast.error(t('invite.errorAccepting'))
     }
   }
 
@@ -391,7 +392,7 @@ export function InviteAcceptance({ token }: Props) {
     return (
       <Alert variant="destructive">
         <XCircle className="h-4 w-4" />
-        <AlertDescription>Dati invito non disponibili</AlertDescription>
+        <AlertDescription>{t('invite.dataUnavailable')}</AlertDescription>
       </Alert>
     )
   }
@@ -405,9 +406,9 @@ export function InviteAcceptance({ token }: Props) {
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-green-800">Invito Accettato!</h3>
+            <h3 className="text-xl font-semibold text-green-800">{t('invite.inviteAccepted')}</h3>
             <p className="text-muted-foreground">
-              Completamento profilo in corso...
+              {t('invite.completingProfile')}
             </p>
           </div>
         </CardContent>
@@ -420,10 +421,10 @@ export function InviteAcceptance({ token }: Props) {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <User className="h-6 w-6" />
-          Invito al Sistema
+          {t('invite.systemTitle')}
         </CardTitle>
         <CardDescription>
-          Benvenuto, {invitationData.email}!
+          {t('invite.welcome').replace('{email}', invitationData.email)}
         </CardDescription>
       </CardHeader>
 

@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { User, Phone, Globe, ArrowRight, CheckCircle } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { useTranslation } from '@/lib/i18n'
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Nome completo è richiesto').max(100, 'Nome troppo lungo'),
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export function CompleteProfileForm({ token, user, initialProfile, inviteData }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -106,33 +108,33 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
       {/* Welcome message with invite details */}
       <div className="text-center space-y-4 p-4 bg-muted rounded-lg">
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Benvenuto, {user.email}!</h3>
+          <h3 className="text-lg font-semibold">{t('completeProfile.welcomeMessage').replace('{email}', user.email)}</h3>
           <p className="text-sm text-muted-foreground">
-            Hai accettato l'invito con successo. Completa il tuo profilo per iniziare.
+            {t('completeProfile.successMessage')}
           </p>
         </div>
         
         {inviteData?.role_name && (
           <div className="flex items-center justify-center gap-2">
             <Badge variant="outline">
-              Ruolo: {inviteData.role_name}
+              {t('invite.role')}: {inviteData.role_name}
             </Badge>
           </div>
         )}
       </div>
 
       {/* Profile completion form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" role="form" aria-label="Completa profilo">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" role="form" aria-label={t('completeProfile.title')}>
         {/* Full Name */}
         <div className="space-y-2">
           <Label htmlFor="full_name" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            Nome completo *
+            {t('completeProfile.fullName')} *
           </Label>
           <Input
             id="full_name"
             type="text"
-            placeholder="Mario Rossi"
+            placeholder={t('completeProfile.fullNamePlaceholder')}
             disabled={isPending || isSubmitting}
             aria-describedby={errors.full_name ? 'full_name-error' : undefined}
             aria-invalid={!!errors.full_name}
@@ -149,12 +151,12 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
         <div className="space-y-2">
           <Label htmlFor="phone" className="flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            Telefono (opzionale)
+            {t('completeProfile.phone')}
           </Label>
           <Input
             id="phone"
             type="tel"
-            placeholder="+39 123 456 7890"
+            placeholder={t('completeProfile.phonePlaceholder')}
             disabled={isPending || isSubmitting}
             {...register('phone')}
           />
@@ -164,7 +166,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
-            Lingua preferita
+            {t('completeProfile.language')}
           </Label>
           <Select
             value={selectedLocale}
@@ -186,7 +188,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
 
         {/* Timezone */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Fuso orario</Label>
+          <Label className="text-sm font-medium">{t('completeProfile.timezone')}</Label>
           <Select
             value={selectedTimezone}
             onValueChange={setSelectedTimezone}
@@ -218,12 +220,12 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
             {isPending || isSubmitting ? (
               <>
                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Salvando...
+                {t('completeProfile.completing')}
               </>
             ) : (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Completa profilo
+                {t('completeProfile.complete')}
               </>
             )}
           </Button>
@@ -235,14 +237,14 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
             disabled={isPending || isSubmitting}
             className="sm:w-auto"
           >
-            Salta per ora
+            {t('completeProfile.skip')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
 
         {/* Help text */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>Potrai modificare queste informazioni in qualsiasi momento dalle impostazioni del profilo.</p>
+          <p>{t('completeProfile.helpText')}</p>
         </div>
       </form>
     </div>

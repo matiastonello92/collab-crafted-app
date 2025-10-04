@@ -72,11 +72,11 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
       const errorMessage = error instanceof Error ? error.message : String(error)
       
       if (errorMessage.includes('LOVABLE_API_KEY') || errorMessage.includes('API key')) {
-        toast.error('LOVABLE_API_KEY mancante. Configura in Supabase Edge Functions Secrets.')
+        toast.error(t('planner.smartAssign.apiKeyMissing'))
       } else if (errorMessage.includes('FunctionsHttpError') || errorMessage.includes('not found')) {
-        toast.error('Funzione AI non disponibile. Verifica che sia deployata su Supabase.')
+        toast.error(t('planner.smartAssign.functionUnavailable'))
       } else {
-        toast.error('Errore nel caricamento candidati')
+        toast.error(t('planner.smartAssign.errorLoading'))
       }
     } finally {
       setLoading(false)
