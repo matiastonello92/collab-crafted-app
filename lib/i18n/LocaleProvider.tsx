@@ -18,19 +18,26 @@ interface LocaleProviderProps {
 
 export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProviderProps) {
   const [locale, setLocaleState] = useState<Locale>(() => {
+    let initialLoc: Locale = initialLocale;
+    
     // Initialize from localStorage if available (client-side only)
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('klyra-locale') as Locale;
       if (stored && (stored === 'it' || stored === 'en')) {
-        return stored;
+        initialLoc = stored;
       }
     }
-    return initialLocale;
+    
+    // Synchronize global locale immediately before first render
+    setCurrentLocale(initialLoc);
+    
+    return initialLoc;
   });
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    // Keep for subsequent locale changes
     setCurrentLocale(locale);
   }, [locale]);
 
