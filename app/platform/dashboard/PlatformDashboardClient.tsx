@@ -16,6 +16,7 @@ import {
 import { SectionHeader } from '@/components/platform/SectionHeader'
 import { KpiCard } from '@/components/platform/KpiCard'
 import { SkeletonCard } from '@/components/platform/SkeletonCard'
+import { useTranslation } from '@/lib/i18n'
 
 interface DashboardData {
   tenant: {
@@ -48,6 +49,7 @@ interface DashboardData {
 }
 
 export function PlatformDashboardClient() {
+  const { t } = useTranslation()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -78,7 +80,7 @@ export function PlatformDashboardClient() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <SectionHeader title="Platform Dashboard" subtitle="Loading..." />
+        <SectionHeader title={t('platform.dashboard.title')} subtitle={t('platform.dashboard.loading')} />
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/5 opacity-60"></div>
           <div className="relative grid-bg rounded-3xl p-8 border border-border/50 backdrop-blur-sm">
@@ -94,18 +96,18 @@ export function PlatformDashboardClient() {
   if (error) {
     return (
       <div className="space-y-8">
-        <SectionHeader title="Platform Dashboard" subtitle="Error occurred" />
+        <SectionHeader title={t('platform.dashboard.title')} subtitle={t('platform.dashboard.error')} />
         <div className="flex items-center justify-center min-h-[400px]">
           <Card className="w-full max-w-md rounded-3xl border-border/60 bg-card/90 text-center shadow-lg shadow-primary/10">
             <CardContent className="space-y-6 p-8">
               <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-foreground">Dashboard Error</h3>
+                <h3 className="text-xl font-semibold text-foreground">{t('platform.dashboard.error')}</h3>
                 <p className="text-muted-foreground">{error}</p>
               </div>
               <Button onClick={fetchData} className="mx-auto inline-flex items-center">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Retry
+                {t('platform.dashboard.retry')}
               </Button>
             </CardContent>
           </Card>
@@ -119,9 +121,9 @@ export function PlatformDashboardClient() {
   return (
     <div className="space-y-8 animate-fade-in">
       <SectionHeader 
-        title="Platform Dashboard"
-        subtitle="Global platform oversight and monitoring"
-        description="Real-time metrics and insights across all tenants and system operations."
+        title={t('platform.dashboard.title')}
+        subtitle={t('platform.dashboard.subtitle')}
+        description={t('platform.dashboard.description')}
       />
 
       <div className="relative">
@@ -143,11 +145,11 @@ export function PlatformDashboardClient() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
                     <Shield size={20} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">System Health</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t('platform.dashboard.systemHealth')}</h3>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span className="text-sm text-muted-foreground">{t('platform.dashboard.status')}</span>
                     <span
                       className={`rounded-full border px-3 py-1 text-xs font-medium ${
                         data.ops.health.status === 'ok'
@@ -171,7 +173,7 @@ export function PlatformDashboardClient() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground">
                     <Activity size={20} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">Plans Distribution</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t('platform.dashboard.plansDistribution')}</h3>
                 </div>
                 <div className="space-y-3">
                   {Object.entries(data.plans.plans_by_tier).map(([tier, count]) => (
@@ -188,9 +190,9 @@ export function PlatformDashboardClient() {
           <Card className="rounded-3xl border-border/60 bg-card/80 shadow-lg shadow-primary/10 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">Recent Audit Events</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t('platform.dashboard.recentAuditEvents')}</h3>
                 <span className="text-xs text-muted-foreground">
-                  Updated: {lastUpdate?.toLocaleTimeString()}
+                  {t('platform.dashboard.updated')}: {lastUpdate?.toLocaleTimeString()}
                 </span>
               </div>
 
@@ -198,7 +200,7 @@ export function PlatformDashboardClient() {
                 {data.security.audit_recent.length === 0 ? (
                   <div className="py-8 text-center">
                     <Activity className="mb-2 h-8 w-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">No recent audit events</p>
+                    <p className="text-sm text-muted-foreground">{t('platform.dashboard.noRecentEvents')}</p>
                   </div>
                 ) : (
                   data.security.audit_recent.map((event) => (

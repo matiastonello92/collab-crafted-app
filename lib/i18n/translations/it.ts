@@ -2753,4 +2753,22 @@ export const it = {
     failedToFetch: 'Recupero dati fallito',
     failedToRevoke: 'Revoca fallita',
   },
+
+  // Platform Dashboard
+  platform: {
+    dashboard: {
+      title: 'Platform Dashboard',
+      subtitle: 'Monitoraggio e supervisione globale della piattaforma',
+      description: 'Metriche in tempo reale e analisi su tutti i tenant e le operazioni di sistema.',
+      loading: 'Caricamento...',
+      error: 'Errore Dashboard',
+      retry: 'Riprova',
+      systemHealth: 'Stato del Sistema',
+      status: 'Stato',
+      plansDistribution: 'Distribuzione Piani',
+      recentAuditEvents: 'Eventi Audit Recenti',
+      updated: 'Aggiornato',
+      noRecentEvents: 'Nessun evento audit recente',
+    },
+  },
 } as const;

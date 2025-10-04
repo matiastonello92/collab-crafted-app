@@ -2629,4 +2629,22 @@ export const en = {
     failedToFetch: 'Failed to fetch data',
     failedToRevoke: 'Failed to revoke',
   },
+
+  // Platform Dashboard
+  platform: {
+    dashboard: {
+      title: 'Platform Dashboard',
+      subtitle: 'Global platform oversight and monitoring',
+      description: 'Real-time metrics and insights across all tenants and system operations.',
+      loading: 'Loading...',
+      error: 'Dashboard Error',
+      retry: 'Retry',
+      systemHealth: 'System Health',
+      status: 'Status',
+      plansDistribution: 'Plans Distribution',
+      recentAuditEvents: 'Recent Audit Events',
+      updated: 'Updated',
+      noRecentEvents: 'No recent audit events',
+    },
+  },
 } as const;
