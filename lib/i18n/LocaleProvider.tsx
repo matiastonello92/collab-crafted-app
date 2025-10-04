@@ -17,23 +17,34 @@ interface LocaleProviderProps {
 
 export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProviderProps) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Load locale from localStorage on mount
-    const stored = localStorage.getItem('klyra-locale') as Locale;
-    if (stored && (stored === 'it' || stored === 'en')) {
-      setLocaleState(stored);
-      setCurrentLocale(stored);
-    } else {
-      setCurrentLocale(initialLocale);
+    setMounted(true);
+    // Safe localStorage access only on client
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('klyra-locale') as Locale;
+      if (stored && (stored === 'it' || stored === 'en')) {
+        setLocaleState(stored);
+        setCurrentLocale(stored);
+      } else {
+        setCurrentLocale(initialLocale);
+      }
     }
   }, [initialLocale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
     setCurrentLocale(newLocale);
-    localStorage.setItem('klyra-locale', newLocale);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('klyra-locale', newLocale);
+    }
   };
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
