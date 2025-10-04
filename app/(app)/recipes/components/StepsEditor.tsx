@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Save, X, Clock, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepPhotoUploader } from './StepPhotoUploader';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeStep {
   id?: string;
@@ -29,6 +30,7 @@ interface StepsEditorProps {
 }
 
 export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }: StepsEditorProps) {
+  const { t } = useTranslation();
   const [editingStep, setEditingStep] = useState<Partial<RecipeStep> | null>(null);
   const [checklistInput, setChecklistInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,13 +59,13 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
   async function handleSave() {
     if (!editingStep?.instruction) {
-      toast.error('Inserisci le istruzioni');
+      toast.error(t('recipes.steps.enterInstructions'));
       return;
     }
 
     // Check step_number uniqueness
     if (steps.some(s => s.id !== editingStep.id && s.step_number === editingStep.step_number)) {
-      toast.error('Numero step già esistente');
+      toast.error(t('recipes.steps.stepNumberExists'));
       return;
     }
 
@@ -88,22 +90,22 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         })
       });
 
-      if (!response.ok) throw new Error('Errore salvataggio step');
+      if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
 
-      toast.success(editingStep.id ? 'Step aggiornato' : 'Step aggiunto');
+      toast.success(editingStep.id ? t('recipes.steps.stepUpdated') : t('recipes.steps.stepAdded'));
       setEditingStep(null);
       setChecklistInput('');
       onStepsChange?.();
     } catch (error) {
       console.error('Error saving step:', error);
-      toast.error('Errore salvataggio step');
+      toast.error(t('recipes.steps.errorSaving'));
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete(stepId: string) {
-    if (!confirm('Eliminare questo step?')) return;
+    if (!confirm(t('recipes.steps.deleteConfirm'))) return;
 
     setLoading(true);
     try {
@@ -111,13 +113,13 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         method: 'DELETE'
       });
 
-      if (!response.ok) throw new Error('Errore eliminazione');
+      if (!response.ok) throw new Error(t('recipes.steps.errorDeleting'));
 
-      toast.success('Step eliminato');
+      toast.success(t('recipes.steps.stepDeleted'));
       onStepsChange?.();
     } catch (error) {
       console.error('Error deleting step:', error);
-      toast.error('Errore eliminazione step');
+      toast.error(t('recipes.steps.errorDeleting'));
     } finally {
       setLoading(false);
     }
@@ -146,11 +148,11 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Procedimento</CardTitle>
+          <CardTitle>{t('recipes.steps.title')}</CardTitle>
           {!readOnly && !editingStep && (
             <Button onClick={handleStartAdd} size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
-              Aggiungi Step
+              {t('recipes.steps.addStep')}
             </Button>
           )}
         </div>
@@ -162,7 +164,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
             <CardContent className="pt-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="step_number">Numero Step *</Label>
+                  <Label htmlFor="step_number">{t('recipes.steps.stepNumber')} *</Label>
                   <Input
                     id="step_number"
                     type="number"
@@ -172,7 +174,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                   />
                 </div>
                 <div>
-                  <Label htmlFor="timer_minutes">Timer (minuti)</Label>
+                  <Label htmlFor="timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <Input
@@ -187,29 +189,29 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               </div>
 
               <div>
-                <Label htmlFor="title">Titolo (opzionale)</Label>
+                <Label htmlFor="title">{t('recipes.steps.stepTitle')}</Label>
                 <Input
                   id="title"
                   value={editingStep.title || ''}
                   onChange={e => setEditingStep({ ...editingStep, title: e.target.value })}
-                  placeholder="es. Preparazione impasto"
+                  placeholder={t('recipes.steps.titlePlaceholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="instruction">Istruzioni *</Label>
+                <Label htmlFor="instruction">{t('recipes.steps.instruction')} *</Label>
                 <Textarea
                   id="instruction"
                   value={editingStep.instruction || ''}
                   onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
-                  placeholder="Descrivi il passaggio..."
+                  placeholder={t('recipes.steps.instructionPlaceholder')}
                   rows={4}
                 />
               </div>
 
               {/* Photo Upload */}
               <div className="space-y-2">
-                <Label>Foto Step (Opzionale)</Label>
+                <Label>{t('recipes.steps.photoLabel')}</Label>
                 <StepPhotoUploader
                   recipeId={recipeId}
                   stepId={editingStep.id || 'temp'}
@@ -222,14 +224,14 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               <div>
                 <Label className="flex items-center gap-2">
                   <ListChecks className="h-4 w-4" />
-                  Checklist (opzionale)
+                  {t('recipes.steps.checklist')}
                 </Label>
                 <div className="flex gap-2 mt-2">
                   <Input
                     value={checklistInput}
                     onChange={e => setChecklistInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleAddChecklistItem()}
-                    placeholder="Aggiungi item e premi Invio"
+                    placeholder={t('recipes.steps.checklistPlaceholder')}
                   />
                   <Button type="button" onClick={handleAddChecklistItem} size="sm">
                     <Plus className="h-4 w-4" />
@@ -257,10 +259,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               <div className="flex gap-2 pt-4">
                 <Button onClick={handleSave} disabled={loading} className="gap-2">
                   <Save className="h-4 w-4" />
-                  Salva
+                  {t('recipes.steps.save')}
                 </Button>
                 <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                  Annulla
+                  {t('recipes.steps.cancel')}
                 </Button>
               </div>
             </CardContent>
@@ -283,13 +285,13 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                   {step.timer_minutes && step.timer_minutes > 0 && (
                     <Badge variant="secondary" className="gap-1">
                       <Clock className="h-3 w-3" />
-                      {step.timer_minutes} min
+                      {step.timer_minutes} {t('recipes.steps.min')}
                     </Badge>
                   )}
                   {step.checklist_items && step.checklist_items.length > 0 && (
                     <Badge variant="secondary" className="gap-1">
                       <ListChecks className="h-3 w-3" />
-                      {step.checklist_items.length} items
+                      {step.checklist_items.length} {t('recipes.steps.items')}
                     </Badge>
                   )}
                 </div>
@@ -302,7 +304,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                     onClick={() => handleStartEdit(step)}
                     disabled={loading || !!editingStep}
                   >
-                    Modifica
+                    {t('recipes.steps.edit')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -318,7 +320,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           ))
         ) : (
           <p className="text-sm text-muted-foreground text-center py-8">
-            {readOnly ? 'Nessun passaggio disponibile' : 'Aggiungi il primo passaggio'}
+            {readOnly ? t('recipes.steps.noSteps') : t('recipes.steps.addFirstStep')}
           </p>
         )}
       </CardContent>

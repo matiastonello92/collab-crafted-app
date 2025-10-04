@@ -543,16 +543,6 @@ export const en = {
     toggleLanguage: 'Change language',
   },
 
-  // Recipe Categories
-  categories: {
-    appetizer: 'Appetizer',
-    main_course: 'Main Course',
-    second_course: 'Second Course',
-    side_dish: 'Side Dish',
-    dessert: 'Dessert',
-    beverage: 'Beverage',
-  },
-
   // Allergens
   allergens: {
     gluten: 'Gluten',
@@ -653,6 +643,128 @@ export const en = {
     saveError: 'Error saving recipe',
     uploadError: 'Error uploading photo',
     selectValidImage: 'Select a valid image file',
+  },
+
+  // Recipe Categories
+  categories: {
+    appetizer: 'Appetizer',
+    main_course: 'Main Course',
+    second_course: 'Second Course',
+    side_dish: 'Side Dish',
+    dessert: 'Dessert',
+    beverage: 'Beverage',
+    sauce: 'Sauce',
+    other: 'Other',
+  },
+
+  // Recipes Module
+  recipes: {
+    // Filters
+    filters: {
+      searchPlaceholder: 'Search recipes...',
+      allStatuses: 'All statuses',
+      allCategories: 'All categories',
+      status: 'Status',
+      category: 'Category',
+      sortBy: 'Sort by',
+      recent: 'Most recent',
+      favorites: 'Favorites',
+      mostUsed: 'Most used',
+      nameAsc: 'Name A-Z',
+      nameDesc: 'Name Z-A',
+      mostCloned: 'Most cloned',
+      onlyFavorites: 'Favorites only',
+      includeIngredients: 'Include Ingredients',
+      excludeIngredients: 'Exclude Ingredients',
+      withoutAllergens: 'Without Allergens',
+      withoutAllergensDesc: 'Show only recipes without these allergens',
+      seasonMonths: 'Season months',
+      filterByMonth: 'Filter by month...',
+      inSeasonNow: 'In season now',
+      clearFilters: 'Clear filters',
+      search: 'Search',
+      including: 'Include',
+      excluding: 'Exclude',
+      without: 'Without',
+      selectedCount: '{count} selected',
+    },
+    
+    // Item Selector
+    itemSelector: {
+      searchPlaceholder: 'Search ingredient...',
+      loading: 'Loading...',
+      noItems: 'No ingredients found',
+      selected: '{count} selected',
+    },
+    
+    // Allergen Selector
+    allergenSelector: {
+      label: 'Allergens',
+      placeholder: 'Select allergens...',
+      searchPlaceholder: 'Search allergen...',
+      noAllergens: 'No allergen found.',
+      selected: '{count} selected',
+    },
+    
+    // Season Selector
+    seasonSelector: {
+      label: 'Seasonality',
+      placeholder: 'Select months...',
+      searchPlaceholder: 'Search month...',
+      noMonths: 'No month found.',
+      selectedCount: '{count} months selected',
+    },
+    
+    // Ingredients Form
+    ingredients: {
+      title: 'Ingredients',
+      addProduct: 'Product',
+      addSubRecipe: 'Sub-Recipe',
+      noIngredients: 'No ingredients. Click "Product" or "Sub-Recipe" to start.',
+      type: 'Type',
+      product: 'Product',
+      subRecipe: 'Sub-Recipe',
+      selectProduct: 'Select product',
+      servingsNeeded: 'Servings needed',
+      quantity: 'Quantity',
+      unit: 'Unit',
+      notes: 'Notes (optional)',
+      optional: 'Optional ingredient',
+      remove: 'Remove',
+      errorLoading: 'Error loading products',
+      loadingProducts: 'Loading products...',
+    },
+    
+    // Steps Editor
+    steps: {
+      title: 'Procedure',
+      addStep: 'Add Step',
+      stepNumber: 'Step Number',
+      timerMinutes: 'Timer (minutes)',
+      stepTitle: 'Title (optional)',
+      titlePlaceholder: 'e.g. Dough preparation',
+      instruction: 'Instructions',
+      instructionPlaceholder: 'Describe the step...',
+      photoLabel: 'Step Photo (Optional)',
+      checklist: 'Checklist (optional)',
+      checklistPlaceholder: 'Add item and press Enter',
+      save: 'Save',
+      cancel: 'Cancel',
+      edit: 'Edit',
+      delete: 'Delete',
+      deleteConfirm: 'Delete this step?',
+      noSteps: 'No steps available',
+      addFirstStep: 'Add the first step',
+      enterInstructions: 'Enter instructions',
+      stepNumberExists: 'Step number already exists',
+      stepUpdated: 'Step updated',
+      stepAdded: 'Step added',
+      stepDeleted: 'Step deleted',
+      errorSaving: 'Error saving step',
+      errorDeleting: 'Error deleting step',
+      items: 'items',
+      min: 'min',
+    },
   },
 
   // Dashboard

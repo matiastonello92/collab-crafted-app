@@ -649,6 +649,118 @@ export const it = {
     side_dish: 'Contorno',
     dessert: 'Dessert',
     beverage: 'Bevanda',
+    sauce: 'Salsa',
+    other: 'Altro',
+  },
+
+  // Recipes Module
+  recipes: {
+    // Filters
+    filters: {
+      searchPlaceholder: 'Cerca ricette...',
+      allStatuses: 'Tutti gli stati',
+      allCategories: 'Tutte le categorie',
+      status: 'Stato',
+      category: 'Categoria',
+      sortBy: 'Ordina per',
+      recent: 'Più recenti',
+      favorites: 'Preferiti',
+      mostUsed: 'Più usate',
+      nameAsc: 'Nome A-Z',
+      nameDesc: 'Nome Z-A',
+      mostCloned: 'Più clonate',
+      onlyFavorites: 'Solo preferiti',
+      includeIngredients: 'Includi Ingredienti',
+      excludeIngredients: 'Escludi Ingredienti',
+      withoutAllergens: 'Senza Allergeni',
+      withoutAllergensDesc: 'Mostra solo ricette senza questi allergeni',
+      seasonMonths: 'Mesi di stagione',
+      filterByMonth: 'Filtra per mese...',
+      inSeasonNow: 'In stagione ora',
+      clearFilters: 'Pulisci filtri',
+      search: 'Ricerca',
+      including: 'Includi',
+      excluding: 'Escludi',
+      without: 'Senza',
+      selectedCount: '{count} selezionati',
+    },
+    
+    // Item Selector
+    itemSelector: {
+      searchPlaceholder: 'Cerca ingrediente...',
+      loading: 'Caricamento...',
+      noItems: 'Nessun ingrediente trovato',
+      selected: '{count} selezionati',
+    },
+    
+    // Allergen Selector
+    allergenSelector: {
+      label: 'Allergeni',
+      placeholder: 'Seleziona allergeni...',
+      searchPlaceholder: 'Cerca allergene...',
+      noAllergens: 'Nessun allergene trovato.',
+      selected: '{count} selezionati',
+    },
+    
+    // Season Selector
+    seasonSelector: {
+      label: 'Stagionalità',
+      placeholder: 'Seleziona mesi...',
+      searchPlaceholder: 'Cerca mese...',
+      noMonths: 'Nessun mese trovato.',
+      selectedCount: '{count} mesi selezionati',
+    },
+    
+    // Ingredients Form
+    ingredients: {
+      title: 'Ingredienti',
+      addProduct: 'Prodotto',
+      addSubRecipe: 'Sub-Ricetta',
+      noIngredients: 'Nessun ingrediente. Clicca su "Prodotto" o "Sub-Ricetta" per iniziare.',
+      type: 'Tipo',
+      product: 'Prodotto',
+      subRecipe: 'Sub-Ricetta',
+      selectProduct: 'Seleziona prodotto',
+      servingsNeeded: 'Porzioni necessarie',
+      quantity: 'Quantità',
+      unit: 'Unità',
+      notes: 'Note (opzionale)',
+      optional: 'Ingrediente opzionale',
+      remove: 'Rimuovi',
+      errorLoading: 'Errore caricamento prodotti',
+      loadingProducts: 'Caricamento prodotti...',
+    },
+    
+    // Steps Editor
+    steps: {
+      title: 'Procedimento',
+      addStep: 'Aggiungi Step',
+      stepNumber: 'Numero Step',
+      timerMinutes: 'Timer (minuti)',
+      stepTitle: 'Titolo (opzionale)',
+      titlePlaceholder: 'es. Preparazione impasto',
+      instruction: 'Istruzioni',
+      instructionPlaceholder: 'Descrivi il passaggio...',
+      photoLabel: 'Foto Step (Opzionale)',
+      checklist: 'Checklist (opzionale)',
+      checklistPlaceholder: 'Aggiungi item e premi Invio',
+      save: 'Salva',
+      cancel: 'Annulla',
+      edit: 'Modifica',
+      delete: 'Elimina',
+      deleteConfirm: 'Eliminare questo step?',
+      noSteps: 'Nessun passaggio disponibile',
+      addFirstStep: 'Aggiungi il primo passaggio',
+      enterInstructions: 'Inserisci le istruzioni',
+      stepNumberExists: 'Numero step già esistente',
+      stepUpdated: 'Step aggiornato',
+      stepAdded: 'Step aggiunto',
+      stepDeleted: 'Step eliminato',
+      errorSaving: 'Errore salvataggio step',
+      errorDeleting: 'Errore eliminazione step',
+      items: 'items',
+      min: 'min',
+    },
   },
 
   // Allergens

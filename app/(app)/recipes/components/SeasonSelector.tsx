@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Check, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { MONTHS, getMonthLabel } from '../constants/seasons';
+import { useTranslation } from '@/lib/i18n';
 
 interface SeasonSelectorProps {
   selectedMonths: string[];
@@ -19,10 +20,14 @@ interface SeasonSelectorProps {
 export function SeasonSelector({
   selectedMonths,
   onMonthsChange,
-  label = 'Stagionalità',
-  placeholder = 'Seleziona mesi...'
+  label,
+  placeholder
 }: SeasonSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  
+  const displayLabel = label || t('recipes.seasonSelector.label');
+  const displayPlaceholder = placeholder || t('recipes.seasonSelector.placeholder');
 
   const toggleMonth = (monthKey: string) => {
     if (selectedMonths.includes(monthKey)) {
@@ -38,7 +43,7 @@ export function SeasonSelector({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label>{displayLabel}</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -47,15 +52,15 @@ export function SeasonSelector({
           >
             <Calendar className="mr-2 h-4 w-4" />
             {selectedMonths.length > 0
-              ? `${selectedMonths.length} mesi selezionati`
-              : placeholder}
+              ? t('recipes.seasonSelector.selectedCount').replace('{count}', selectedMonths.length.toString())
+              : displayPlaceholder}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Cerca mese..." />
+            <CommandInput placeholder={t('recipes.seasonSelector.searchPlaceholder')} />
             <CommandList>
-              <CommandEmpty>Nessun mese trovato.</CommandEmpty>
+              <CommandEmpty>{t('recipes.seasonSelector.noMonths')}</CommandEmpty>
               <CommandGroup>
                 {MONTHS.map((month) => {
                   const isSelected = selectedMonths.includes(month.key);

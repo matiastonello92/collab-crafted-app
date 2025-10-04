@@ -19,6 +19,7 @@ import { SeasonSelector } from './SeasonSelector';
 import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
 import { MONTHS, getMonthLabel } from '../constants/seasons';
 import { AlertTriangle, Calendar } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface RecipeFiltersState {
   q: string;
@@ -40,31 +41,32 @@ interface RecipeFiltersProps {
   itemNames: Map<string, string>; // Map<itemId, itemName>
 }
 
-const STATUSES = [
-  { value: 'all', label: 'Tutti gli stati' },
-  { value: 'draft', label: 'Bozza' },
-  { value: 'submitted', label: 'In Revisione' },
-  { value: 'published', label: 'Pubblicata' },
-  { value: 'archived', label: 'Archiviata' },
-];
-
-const CATEGORIES = [
-  { value: 'all', label: 'Tutte le categorie' },
-  { value: 'main_course', label: 'Primi' },
-  { value: 'appetizer', label: 'Antipasti' },
-  { value: 'side_dish', label: 'Contorni' },
-  { value: 'dessert', label: 'Dolci' },
-  { value: 'beverage', label: 'Bevande' },
-  { value: 'sauce', label: 'Salse' },
-  { value: 'other', label: 'Altro' },
-];
-
 export function RecipeFilters({
   filters,
   onFiltersChange,
   locationId,
   itemNames,
 }: RecipeFiltersProps) {
+  const { t } = useTranslation();
+
+  const STATUSES = [
+    { value: 'all', label: t('recipes.filters.allStatuses') },
+    { value: 'draft', label: t('recipeStatus.draft') },
+    { value: 'submitted', label: t('recipeStatus.submitted') },
+    { value: 'published', label: t('recipeStatus.published') },
+    { value: 'archived', label: t('recipeStatus.archived') },
+  ];
+
+  const CATEGORIES = [
+    { value: 'all', label: t('recipes.filters.allCategories') },
+    { value: 'main_course', label: t('categories.main_course') },
+    { value: 'appetizer', label: t('categories.appetizer') },
+    { value: 'side_dish', label: t('categories.side_dish') },
+    { value: 'dessert', label: t('categories.dessert') },
+    { value: 'beverage', label: t('categories.beverage') },
+    { value: 'sauce', label: t('categories.sauce') },
+    { value: 'other', label: t('categories.other') },
+  ];
   const updateFilter = (key: keyof RecipeFiltersState, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
   };
@@ -111,7 +113,7 @@ export function RecipeFilters({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Cerca ricette..."
+            placeholder={t('recipes.filters.searchPlaceholder')}
             value={filters.q}
             onChange={(e) => updateFilter('q', e.target.value)}
             className="pl-9"
@@ -124,7 +126,7 @@ export function RecipeFilters({
           onValueChange={(value) => updateFilter('status', value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Stato" />
+            <SelectValue placeholder={t('recipes.filters.status')} />
           </SelectTrigger>
           <SelectContent>
             {STATUSES.map((status) => (
@@ -141,7 +143,7 @@ export function RecipeFilters({
           onValueChange={(value) => updateFilter('category', value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Categoria" />
+            <SelectValue placeholder={t('recipes.filters.category')} />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((cat) => (
@@ -159,15 +161,15 @@ export function RecipeFilters({
         >
           <SelectTrigger className="gap-2">
             <ArrowUpDown className="w-4 h-4" />
-            <SelectValue placeholder="Più recenti" />
+            <SelectValue placeholder={t('recipes.filters.recent')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="recent">Più recenti</SelectItem>
-              <SelectItem value="favorites">Preferiti</SelectItem>
-              <SelectItem value="most_used">Più usate</SelectItem>
-            <SelectItem value="name_asc">Nome A-Z</SelectItem>
-            <SelectItem value="name_desc">Nome Z-A</SelectItem>
-            <SelectItem value="most_cloned">Più clonate</SelectItem>
+            <SelectItem value="recent">{t('recipes.filters.recent')}</SelectItem>
+            <SelectItem value="favorites">{t('recipes.filters.favorites')}</SelectItem>
+            <SelectItem value="most_used">{t('recipes.filters.mostUsed')}</SelectItem>
+            <SelectItem value="name_asc">{t('recipes.filters.nameAsc')}</SelectItem>
+            <SelectItem value="name_desc">{t('recipes.filters.nameDesc')}</SelectItem>
+            <SelectItem value="most_cloned">{t('recipes.filters.mostCloned')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -180,7 +182,7 @@ export function RecipeFilters({
           />
           <Label htmlFor="favorites" className="flex items-center gap-1 cursor-pointer">
             <Star className={filters.favorites ? 'w-4 h-4 fill-yellow-400 text-yellow-400' : 'w-4 h-4'} />
-            Solo preferiti
+            {t('recipes.filters.onlyFavorites')}
           </Label>
         </div>
       </div>
@@ -191,14 +193,14 @@ export function RecipeFilters({
           locationId={locationId}
           selectedItems={filters.includeItems}
           onItemsChange={(items) => updateFilter('includeItems', items)}
-          label="Includi Ingredienti"
+          label={t('recipes.filters.includeIngredients')}
           icon={<CheckCircle2 className="h-4 w-4" />}
         />
         <ItemSelector
           locationId={locationId}
           selectedItems={filters.excludeItems}
           onItemsChange={(items) => updateFilter('excludeItems', items)}
-          label="Escludi Ingredienti"
+          label={t('recipes.filters.excludeIngredients')}
           icon={<XCircle className="h-4 w-4" />}
         />
       </div>
@@ -210,11 +212,11 @@ export function RecipeFilters({
           onAllergensChange={(allergens) =>
             updateFilter('allergens', allergens.length > 0 ? allergens : undefined)
           }
-          label="Senza Allergeni"
-          placeholder="Escludi allergeni..."
+          label={t('recipes.filters.withoutAllergens')}
+          placeholder={t('recipes.allergenSelector.placeholder')}
         />
         <p className="text-xs text-muted-foreground">
-          Mostra solo ricette senza questi allergeni
+          {t('recipes.filters.withoutAllergensDesc')}
         </p>
       </div>
 
@@ -224,8 +226,8 @@ export function RecipeFilters({
           <SeasonSelector
             selectedMonths={filters.seasonMonths || []}
             onMonthsChange={(months) => updateFilter('seasonMonths', months.length > 0 ? months : undefined)}
-            label="Mesi di stagione"
-            placeholder="Filtra per mese..."
+            label={t('recipes.filters.seasonMonths')}
+            placeholder={t('recipes.filters.filterByMonth')}
           />
         </div>
         
@@ -237,7 +239,7 @@ export function RecipeFilters({
           />
           <Label htmlFor="in-season-now" className="flex items-center gap-1 cursor-pointer">
             <Calendar className="w-4 h-4" />
-            In stagione ora
+            {t('recipes.filters.inSeasonNow')}
           </Label>
         </div>
       </div>
@@ -247,7 +249,7 @@ export function RecipeFilters({
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           {filters.q && (
             <Badge variant="secondary" className="gap-1">
-              Ricerca: {filters.q}
+              {t('recipes.filters.search')}: {filters.q}
               <X
                 className="h-3 w-3 cursor-pointer"
                 onClick={() => clearFilter('q')}
@@ -256,7 +258,7 @@ export function RecipeFilters({
           )}
           {filters.status && filters.status !== 'all' && (
             <Badge variant="secondary" className="gap-1">
-              Stato: {STATUSES.find((s) => s.value === filters.status)?.label}
+              {t('recipes.filters.status')}: {STATUSES.find((s) => s.value === filters.status)?.label}
               <X
                 className="h-3 w-3 cursor-pointer"
                 onClick={() => clearFilter('status')}
@@ -265,7 +267,7 @@ export function RecipeFilters({
           )}
           {filters.category && filters.category !== 'all' && (
             <Badge variant="secondary" className="gap-1">
-              Categoria:{' '}
+              {t('recipes.filters.category')}:{' '}
               {CATEGORIES.find((c) => c.value === filters.category)?.label}
               <X
                 className="h-3 w-3 cursor-pointer"
@@ -276,7 +278,7 @@ export function RecipeFilters({
           {filters.includeItems.length > 0 && (
             <Badge variant="secondary" className="gap-1">
               <CheckCircle2 className="h-3 w-3" />
-              Includi: {filters.includeItems.map((id) => itemNames.get(id) || id).join(', ')}
+              {t('recipes.filters.including')}: {filters.includeItems.map((id) => itemNames.get(id) || id).join(', ')}
               <X
                 className="h-3 w-3 cursor-pointer"
                 onClick={() => clearFilter('includeItems')}
@@ -286,7 +288,7 @@ export function RecipeFilters({
           {filters.excludeItems.length > 0 && (
             <Badge variant="secondary" className="gap-1">
               <XCircle className="h-3 w-3" />
-              Escludi: {filters.excludeItems.map((id) => itemNames.get(id) || id).join(', ')}
+              {t('recipes.filters.excluding')}: {filters.excludeItems.map((id) => itemNames.get(id) || id).join(', ')}
               <X
                 className="h-3 w-3 cursor-pointer"
                 onClick={() => clearFilter('excludeItems')}
@@ -313,7 +315,7 @@ export function RecipeFilters({
                 }}
               >
                 <AlertTriangle className="h-3 w-3" />
-                Senza {getAllergenLabel(allergen.key)}
+                {t('recipes.filters.without')} {getAllergenLabel(allergen.key)}
                 <X className="h-3 w-3" />
               </Badge>
             ) : null;
@@ -351,7 +353,7 @@ export function RecipeFilters({
               onClick={() => updateFilter('inSeasonNow', false)}
             >
               <Calendar className="w-3 h-3" />
-              In stagione ora
+              {t('recipes.filters.inSeasonNow')}
               <X className="w-3 w-3" />
             </Badge>
           )}
@@ -359,7 +361,7 @@ export function RecipeFilters({
           {filters.favorites && (
             <Badge variant="secondary" className="gap-1">
               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              Solo preferiti
+              {t('recipes.filters.onlyFavorites')}
               <X
                 className="w-3 w-3 ml-1 cursor-pointer hover:text-destructive"
                 onClick={() => updateFilter('favorites', false)}

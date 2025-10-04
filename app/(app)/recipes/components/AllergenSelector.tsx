@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
+import { useTranslation } from '@/lib/i18n';
 
 interface AllergenSelectorProps {
   selectedAllergens: string[];
@@ -29,10 +30,14 @@ interface AllergenSelectorProps {
 export function AllergenSelector({
   selectedAllergens,
   onAllergensChange,
-  label = 'Allergeni',
-  placeholder = 'Seleziona allergeni...'
+  label,
+  placeholder
 }: AllergenSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  
+  const displayLabel = label || t('recipes.allergenSelector.label');
+  const displayPlaceholder = placeholder || t('recipes.allergenSelector.placeholder');
 
   const handleToggle = (allergenKey: string) => {
     if (selectedAllergens.includes(allergenKey)) {
@@ -53,10 +58,10 @@ export function AllergenSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">{label}</label>
+        <label className="text-sm font-medium">{displayLabel}</label>
         {selectedAllergens.length > 0 && (
           <span className="text-xs text-muted-foreground">
-            {selectedAllergens.length} selezionati
+            {t('recipes.allergenSelector.selected').replace('{count}', selectedAllergens.length.toString())}
           </span>
         )}
       </div>
@@ -70,14 +75,14 @@ export function AllergenSelector({
             className="w-full justify-start text-left font-normal"
           >
             <AlertTriangle className="mr-2 h-4 w-4 shrink-0" />
-            {placeholder}
+            {displayPlaceholder}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
           <Command>
-            <CommandInput placeholder="Cerca allergene..." />
+            <CommandInput placeholder={t('recipes.allergenSelector.searchPlaceholder')} />
             <CommandList>
-              <CommandEmpty>Nessun allergene trovato.</CommandEmpty>
+              <CommandEmpty>{t('recipes.allergenSelector.noAllergens')}</CommandEmpty>
               <CommandGroup>
                 {COMMON_ALLERGENS.map((allergen) => {
                   const isSelected = selectedAllergens.includes(allergen.key);

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -39,6 +40,7 @@ export function ItemSelector({
   label,
   icon,
 }: ItemSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -90,7 +92,7 @@ export function ItemSelector({
             {icon}
             <span className="truncate">
               {selectedItems.length > 0
-                ? `${selectedItems.length} selezionati`
+                ? t('recipes.itemSelector.selected').replace('{count}', selectedItems.length.toString())
                 : label}
             </span>
           </span>
@@ -98,9 +100,9 @@ export function ItemSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Cerca ingrediente..." />
+          <CommandInput placeholder={t('recipes.itemSelector.searchPlaceholder')} />
           <CommandEmpty>
-            {loading ? 'Caricamento...' : 'Nessun ingrediente trovato'}
+            {loading ? t('recipes.itemSelector.loading') : t('recipes.itemSelector.noItems')}
           </CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-auto">
             {items.map((item) => (

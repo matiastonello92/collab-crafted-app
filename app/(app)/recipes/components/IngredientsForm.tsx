@@ -21,6 +21,7 @@ import { Plus, Trash2, ChefHat, Package } from 'lucide-react';
 import { SubRecipePicker } from './SubRecipePicker';
 import { SubRecipeCard } from './SubRecipeCard';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -42,6 +43,7 @@ export function IngredientsForm({
   readOnly = false,
   currentRecipeId
 }: IngredientsFormProps) {
+  const { t } = useTranslation();
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +66,7 @@ export function IngredientsForm({
       setCatalogItems(data || []);
     } catch (error: any) {
       console.error('Failed to load catalog items:', error);
-      toast.error('Errore caricamento prodotti');
+      toast.error(t('recipes.ingredients.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -145,7 +147,7 @@ export function IngredientsForm({
   if (loading) {
     return (
       <div className="text-sm text-muted-foreground p-4 text-center">
-        Caricamento prodotti...
+        {t('recipes.ingredients.loadingProducts')}
       </div>
     );
   }
@@ -153,16 +155,16 @@ export function IngredientsForm({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Ingredienti</h3>
+        <h3 className="text-lg font-semibold">{t('recipes.ingredients.title')}</h3>
         {!readOnly && (
           <div className="flex gap-2">
             <Button onClick={() => addIngredient('catalog')} size="sm" variant="outline">
               <Package className="h-4 w-4 mr-2" />
-              Prodotto
+              {t('recipes.ingredients.addProduct')}
             </Button>
             <Button onClick={() => addIngredient('sub_recipe')} size="sm" variant="outline">
               <ChefHat className="h-4 w-4 mr-2" />
-              Sub-Ricetta
+              {t('recipes.ingredients.addSubRecipe')}
             </Button>
           </div>
         )}
@@ -171,7 +173,7 @@ export function IngredientsForm({
       {ingredients.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
-            Nessun ingrediente. Clicca su &quot;Prodotto&quot; o &quot;Sub-Ricetta&quot; per iniziare.
+            {t('recipes.ingredients.noIngredients')}
           </CardContent>
         </Card>
       ) : (
@@ -186,15 +188,15 @@ export function IngredientsForm({
                   {readOnly ? (
                     <>
                       <div className="flex items-center gap-2">
-                        {isSubRecipe ? (
+                      {isSubRecipe ? (
                           <Badge variant="default" className="gap-1">
                             <ChefHat className="h-3 w-3" />
-                            Sub-Ricetta
+                            {t('recipes.ingredients.subRecipe')}
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="gap-1">
                             <Package className="h-3 w-3" />
-                            Prodotto
+                            {t('recipes.ingredients.product')}
                           </Badge>
                         )}
                       </div>
@@ -207,17 +209,17 @@ export function IngredientsForm({
                       ) : (
                         <>
                           <div>
-                            <Label className="text-sm text-muted-foreground">Prodotto</Label>
+                            <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.product')}</Label>
                             <p className="font-medium">{ingredient.item_name_snapshot}</p>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label className="text-sm text-muted-foreground">Quantità</Label>
+                              <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.quantity')}</Label>
                               <p>{ingredient.quantity} {ingredient.unit}</p>
                             </div>
                             {ingredient.is_optional && (
                               <div>
-                                <Badge variant="secondary">Opzionale</Badge>
+                                <Badge variant="secondary">{t('common.optional')}</Badge>
                               </div>
                             )}
                           </div>
@@ -226,7 +228,7 @@ export function IngredientsForm({
                       
                       {ingredient.notes && (
                         <div>
-                          <Label className="text-sm text-muted-foreground">Note</Label>
+                          <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.notes')}</Label>
                           <p className="text-sm">{ingredient.notes}</p>
                         </div>
                       )}
@@ -234,7 +236,7 @@ export function IngredientsForm({
                   ) : (
                     <>
                       <div className="flex items-center gap-2">
-                        <Label>Tipo</Label>
+                        <Label>{t('recipes.ingredients.type')}</Label>
                         <Select
                           value={ingredientType}
                           onValueChange={(value: IngredientType) => updateIngredientType(index, value)}
@@ -246,13 +248,13 @@ export function IngredientsForm({
                             <SelectItem value="catalog">
                               <div className="flex items-center gap-2">
                                 <Package className="h-4 w-4" />
-                                Prodotto
+                                {t('recipes.ingredients.product')}
                               </div>
                             </SelectItem>
                             <SelectItem value="sub_recipe">
                               <div className="flex items-center gap-2">
                                 <ChefHat className="h-4 w-4" />
-                                Sub-Ricetta
+                                {t('recipes.ingredients.subRecipe')}
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -268,7 +270,7 @@ export function IngredientsForm({
                           />
                           
                           <div>
-                            <Label>Porzioni necessarie</Label>
+                            <Label>{t('recipes.ingredients.servingsNeeded')}</Label>
                             <Input
                               type="number"
                               step="1"
@@ -288,13 +290,13 @@ export function IngredientsForm({
                       ) : (
                         <>
                           <div>
-                            <Label>Prodotto</Label>
+                            <Label>{t('recipes.ingredients.product')}</Label>
                             <Select
                               value={ingredient.catalog_item_id || ''}
                               onValueChange={(value) => updateIngredient(index, 'catalog_item_id', value)}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Seleziona prodotto" />
+                                <SelectValue placeholder={t('recipes.ingredients.selectProduct')} />
                               </SelectTrigger>
                               <SelectContent>
                                 {catalogItems.map((item) => (
@@ -308,7 +310,7 @@ export function IngredientsForm({
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label>Quantità</Label>
+                              <Label>{t('recipes.ingredients.quantity')}</Label>
                               <Input
                                 type="number"
                                 step="0.01"
@@ -317,7 +319,7 @@ export function IngredientsForm({
                               />
                             </div>
                             <div>
-                              <Label>Unità</Label>
+                              <Label>{t('recipes.ingredients.unit')}</Label>
                               <Input
                                 value={ingredient.unit}
                                 onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
@@ -329,7 +331,7 @@ export function IngredientsForm({
                       )}
 
                       <div>
-                        <Label>Note (opzionale)</Label>
+                        <Label>{t('recipes.ingredients.notes')}</Label>
                         <Textarea
                           value={ingredient.notes || ''}
                           onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
@@ -348,7 +350,7 @@ export function IngredientsForm({
                             htmlFor={`optional-${index}`}
                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                           >
-                            Ingrediente opzionale
+                            {t('recipes.ingredients.optional')}
                           </label>
                         </div>
                       )}
@@ -359,7 +361,7 @@ export function IngredientsForm({
                         onClick={() => removeIngredient(index)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Rimuovi
+                        {t('recipes.ingredients.remove')}
                       </Button>
                     </>
                   )}
