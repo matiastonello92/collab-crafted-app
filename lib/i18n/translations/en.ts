@@ -181,6 +181,38 @@ export const en = {
     accessDeniedDesc: 'You do not have the necessary permissions to access this admin section.',
     adminRequired: 'Administrator role is required to view this page.',
     
+    // Feature Flags UI (specific to flags page)
+    flag: 'Flag',
+    module: 'Module',
+    scope: 'Scope',
+    global: 'Global',
+    modify: 'Edit',
+    totalFlags: 'Total Flags',
+    activeFlags: 'Active Flags',
+    globalFlags: 'Global Flags',
+    perLocation: 'Per Location',
+    activeFlagsTitle: 'Active Feature Flags',
+    manageFeaturesDesc: 'Manage active features for your organization',
+    
+    // User Detail Page
+    resendInvite: 'Resend Invite',
+    manageRoles: 'Manage Roles',
+    overview: 'Overview',
+    rolesAndLocation: 'Roles & Location',
+    compliance: 'Compliance',
+    activity: 'Activity',
+    security: 'Security',
+    userNotAssignedToLocation: 'User is not assigned to any location',
+    loadingRoles: 'Loading roles...',
+    loadingActivity: 'Loading activity...',
+    accountSecurity: 'Account Security',
+    activeSessions: 'Active Sessions',
+    manageActiveSessionsDesc: 'Manage user\'s active sessions',
+    revokeAll: 'Revoke All',
+    resetPassword: 'Reset Password',
+    sendResetEmail: 'Send password reset email',
+    sendReset: 'Send Reset',
+    
     // Common Admin Labels
     edit: 'Edit',
     save: 'Save',

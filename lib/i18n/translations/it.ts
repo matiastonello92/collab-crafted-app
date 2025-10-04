@@ -180,6 +180,38 @@ export const it = {
     accessDeniedDesc: 'Non hai i permessi necessari per accedere a questa sezione amministrativa.',
     adminRequired: 'È richiesto il ruolo di amministratore per visualizzare questa pagina.',
     
+    // Feature Flags UI (specific to flags page)
+    flag: 'Flag',
+    module: 'Modulo',
+    scope: 'Ambito',
+    global: 'Globale',
+    modify: 'Modifica',
+    totalFlags: 'Flags Totali',
+    activeFlags: 'Flags Attivi',
+    globalFlags: 'Flags Globali',
+    perLocation: 'Per Location',
+    activeFlagsTitle: 'Feature Flags Attivi',
+    manageFeaturesDesc: 'Gestisci le funzionalità attive per la tua organizzazione',
+    
+    // User Detail Page
+    resendInvite: 'Resend Invito',
+    manageRoles: 'Gestisci Ruoli',
+    overview: 'Overview',
+    rolesAndLocation: 'Ruoli & Location',
+    compliance: 'Compliance',
+    activity: 'Attività',
+    security: 'Sicurezza',
+    userNotAssignedToLocation: 'L\'utente non è assegnato a nessuna location',
+    loadingRoles: 'Caricamento ruoli...',
+    loadingActivity: 'Caricamento attività...',
+    accountSecurity: 'Sicurezza Account',
+    activeSessions: 'Sessioni Attive',
+    manageActiveSessionsDesc: 'Gestisci le sessioni attive dell\'utente',
+    revokeAll: 'Revoca Tutte',
+    resetPassword: 'Reset Password',
+    sendResetEmail: 'Invia email per reset password',
+    sendReset: 'Invia Reset',
+    
     // Common Admin Labels
     edit: 'Modifica',
     save: 'Salva',
