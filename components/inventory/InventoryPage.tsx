@@ -47,7 +47,7 @@ const statusColors = {
 };
 
 export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
-  const { t } = useTranslation();
+  const { t, isMounted } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
@@ -109,7 +109,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const canApprove = isAdmin;
   const canComplete = true;
 
-  if (!selectedLocation || permissionsLoading || isLoading) {
+  if (!selectedLocation || permissionsLoading || isLoading || !isMounted) {
     return (
       <div className="container mx-auto py-8 space-y-6">
         <Card>
@@ -155,7 +155,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         
         <Card>
           <CardHeader>
-            <CardTitle>{t('inventory.title')} {t(`inventory.categories.${category}`)}</CardTitle>
+            <CardTitle>{t(`inventory.fullTitles.${category}`)}</CardTitle>
             <CardDescription>
               {t('inventory.empty.noInventories')}
             </CardDescription>
@@ -163,7 +163,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           <CardContent>
             {canCreateInventory ? (
               <Button onClick={() => setShowCreateModal(true)}>
-                {t('inventory.buttons.createInventory')} {t(`inventory.categories.${category}`)}
+                {t('inventory.buttons.createInventory')}
               </Button>
             ) : (
               <div className="text-muted-foreground">
@@ -204,13 +204,13 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                {t('inventory.title')} {t(`inventory.categories.${category}`)}
+                {t(`inventory.fullTitles.${category}`)}
                 <Badge className={`${statusColors[header.status]} text-white`}>
                   {t(`inventory.status.${header.status === 'in_progress' ? 'inProgress' : header.status}`)}
                 </Badge>
                 {header.creation_mode && (
                   <Badge variant="outline">
-                    {t(`inventory.createModes.${header.creation_mode === 'template' ? 'template' : header.creation_mode === 'last' ? 'last' : 'empty'}`).split(' ')[0]}
+                    {t(`inventory.createModesShort.${header.creation_mode}`)}
                   </Badge>
                 )}
               </CardTitle>

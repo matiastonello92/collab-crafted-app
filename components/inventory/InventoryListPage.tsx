@@ -52,7 +52,7 @@ interface InventoryHeader {
 }
 
 export function InventoryListPage({ category }: InventoryListPageProps) {
-  const { t } = useTranslation();
+  const { t, isMounted } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -125,7 +125,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
-  if (!selectedLocation || permissionsLoading || isLoading) {
+  if (!selectedLocation || permissionsLoading || isLoading || !isMounted) {
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">
@@ -156,8 +156,8 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">{t('inventory.title')} {t(`inventory.categories.${category}`)}</h1>
-          <p className="text-muted-foreground">Gestisci gli inventari per questa categoria</p>
+          <h1 className="text-3xl font-bold">{t(`inventory.fullTitles.${category}`)}</h1>
+          <p className="text-muted-foreground">{t('inventory.descriptions.manageInventories')}</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)} size="lg">
           <Plus className="mr-2 h-5 w-5" />
@@ -170,7 +170,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>{t('inventory.history')}</CardTitle>
-              <CardDescription>Tutti gli inventari per {t(`inventory.categories.${category}`)}</CardDescription>
+              <CardDescription>{t('inventory.descriptions.manageInventories')}</CardDescription>
             </div>
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
               <TabsList>

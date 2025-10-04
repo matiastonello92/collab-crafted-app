@@ -1710,6 +1710,25 @@ export const it = {
         cleaning: 'Pulizie',
       },
       
+      // Full page titles (composite)
+      fullTitles: {
+        kitchen: 'Inventario Cucina',
+        bar: 'Inventario Bar',
+        cleaning: 'Inventario Pulizie',
+      },
+      
+      // Descriptions
+      descriptions: {
+        manageInventories: 'Gestisci gli inventari per questa categoria',
+      },
+      
+      // Create mode short labels
+      createModesShort: {
+        template: 'Template',
+        last: 'Ultimo',
+        empty: 'Vuoto',
+      },
+      
       // Product Categories (sottocategorie)
       productCategories: {
         kitchen: {

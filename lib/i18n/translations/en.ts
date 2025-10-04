@@ -1674,6 +1674,25 @@ export const en = {
         cleaning: 'Cleaning',
       },
       
+      // Full page titles (composite)
+      fullTitles: {
+        kitchen: 'Kitchen Inventory',
+        bar: 'Bar Inventory',
+        cleaning: 'Cleaning Inventory',
+      },
+      
+      // Descriptions
+      descriptions: {
+        manageInventories: 'Manage inventories for this category',
+      },
+      
+      // Create mode short labels
+      createModesShort: {
+        template: 'Template',
+        last: 'Last',
+        empty: 'Empty',
+      },
+      
       // Product Categories (subcategories)
       productCategories: {
         kitchen: {

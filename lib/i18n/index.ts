@@ -51,11 +51,12 @@ export function t(key: string, locale?: Locale): string {
  * React hook for translations - use this in components for reactive locale changes
  */
 export function useTranslation() {
-  const { locale } = useLocaleContext();
+  const { locale, isMounted } = useLocaleContext();
   
   return {
     t: (key: string) => t(key, locale),
     locale,
+    isMounted,
   };
 }
 

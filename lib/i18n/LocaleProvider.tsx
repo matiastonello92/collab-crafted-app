@@ -6,6 +6,7 @@ import { Locale, setCurrentLocale } from './index';
 interface LocaleContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
+  isMounted: boolean;
 }
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
@@ -16,22 +17,22 @@ interface LocaleProviderProps {
 }
 
 export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProviderProps) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    // Safe localStorage access only on client
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    // Initialize from localStorage if available (client-side only)
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('klyra-locale') as Locale;
       if (stored && (stored === 'it' || stored === 'en')) {
-        setLocaleState(stored);
-        setCurrentLocale(stored);
-      } else {
-        setCurrentLocale(initialLocale);
+        return stored;
       }
     }
-  }, [initialLocale]);
+    return initialLocale;
+  });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    setCurrentLocale(locale);
+  }, [locale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -43,7 +44,7 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
 
   // Always provide context, even during SSR
   return (
-    <LocaleContext.Provider value={{ locale, setLocale }}>
+    <LocaleContext.Provider value={{ locale, setLocale, isMounted }}>
       {children}
     </LocaleContext.Provider>
   );
