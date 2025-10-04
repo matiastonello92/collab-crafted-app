@@ -1851,15 +1851,6 @@ export const it = {
       bar: 'Bar',
       cleaning: 'Pulizie',
     },
-  },
-  
-  // Inventory category descriptions
-  inventoryCategoryKitchenDesc: 'Gestisci prodotti per la cucina: carne, pesce, vegetali, latticini e altro',
-  inventoryCategoryBarDesc: 'Gestisci prodotti per il bar: vini, birre, soft drink e consumabili',
-  inventoryCategoryCleaningDesc: 'Gestisci prodotti per la pulizia e manutenzione',
-      bar: 'Bar',
-      cleaning: 'Pulizie',
-    },
     
     // Full page titles (composite)
     fullTitles: {
@@ -2111,6 +2102,11 @@ export const it = {
       showInactive: 'Mostra anche inattivi',
     },
   },
+  
+  // Inventory category descriptions
+  inventoryCategoryKitchenDesc: 'Gestisci prodotti per la cucina: carne, pesce, vegetali, latticini e altro',
+  inventoryCategoryBarDesc: 'Gestisci prodotti per il bar: vini, birre, soft drink e consumabili',
+  inventoryCategoryCleaningDesc: 'Gestisci prodotti per la pulizia e manutenzione',
 
   // Staff
   staff: {

@@ -1786,9 +1786,6 @@ export const en = {
       bar: 'Bar',
       cleaning: 'Cleaning',
     },
-      bar: 'Bar',
-      cleaning: 'Cleaning',
-    },
     
     // Full page titles (composite)
     fullTitles: {
@@ -2040,6 +2037,11 @@ export const en = {
       showInactive: 'Show inactive also',
     },
   },
+  
+  // Inventory category descriptions
+  inventoryCategoryKitchenDesc: 'Manage kitchen products: meat, fish, vegetables, dairy and more',
+  inventoryCategoryBarDesc: 'Manage bar products: wines, beers, soft drinks and consumables',
+  inventoryCategoryCleaningDesc: 'Manage cleaning and maintenance products',
 
   // Staff
   staff: {
