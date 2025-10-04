@@ -141,11 +141,11 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
     <div className="space-y-4 py-4">
       {/* Date Range Selection */}
       <div className="space-y-2">
-        <Label className="font-medium text-foreground">Periodo Assenza</Label>
+        <Label className="font-medium text-foreground">{t('planner.absence.absencePeriod')}</Label>
         <div className="grid grid-cols-2 gap-4">
           {/* Start Date */}
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Data Inizio</Label>
+            <Label className="text-sm text-muted-foreground">{t('planner.absence.startDate')}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -173,7 +173,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
           {/* End Date */}
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Data Fine</Label>
+            <Label className="text-sm text-muted-foreground">{t('planner.absence.endDate')}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button

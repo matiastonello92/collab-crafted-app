@@ -30,6 +30,8 @@ export const it = {
     irreversibleAction: 'Questa azione è irreversibile',
     cannotBeUndone: 'Questa azione non può essere annullata.',
     confirmDelete: 'Sei sicuro di voler eliminare questo elemento?',
+    errorOccurred: 'Si è verificato un errore',
+    tryAgainLater: 'Riprova più tardi.',
     errorBoundary: {
       title: 'Errore dell\'applicazione',
       description: 'Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.',
@@ -356,6 +358,7 @@ export const it = {
     sendReset: 'Invia Reset',
     
     // Common Admin Labels
+    flagCodePlaceholder: 'es. advanced_feature',
     edit: 'Modifica',
     save: 'Salva',
     saving: 'Salvataggio...',
@@ -828,6 +831,17 @@ export const it = {
       addShiftOrAbsence: 'Aggiungi turno o assenza',
       hideUsersWithoutShifts: 'Nascondi utenti senza turni',
       showAllUsers: 'Mostra tutti gli utenti',
+    },
+    stats: {
+      weekStats: 'Statistiche Settimana',
+      shiftCoverage: 'Copertura Turni',
+      totalHours: 'Ore Totali',
+      activeEmployees: 'Impiegati Attivi',
+      budget: 'Budget',
+      assigned: 'assegnati',
+      toAssign: 'da assegnare',
+      unassigned: 'Non Assegnati',
+      shifts: 'Turni',
     },
   },
 
@@ -1826,12 +1840,23 @@ export const it = {
     // Page titles
     title: 'Inventario',
     catalog: 'Catalogo Prodotti',
+    catalogDescription: 'Gestisci i prodotti per ogni reparto della tua location',
+    openCatalog: 'Apri Catalogo',
     history: 'Storico Inventari',
     templates: 'Template',
     
     // Categories
     categories: {
       kitchen: 'Cucina',
+      bar: 'Bar',
+      cleaning: 'Pulizie',
+    },
+  },
+  
+  // Inventory category descriptions
+  inventoryCategoryKitchenDesc: 'Gestisci prodotti per la cucina: carne, pesce, vegetali, latticini e altro',
+  inventoryCategoryBarDesc: 'Gestisci prodotti per il bar: vini, birre, soft drink e consumabili',
+  inventoryCategoryCleaningDesc: 'Gestisci prodotti per la pulizia e manutenzione',
       bar: 'Bar',
       cleaning: 'Pulizie',
     },

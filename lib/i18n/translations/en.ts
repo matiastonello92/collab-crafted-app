@@ -30,6 +30,8 @@ export const en = {
     irreversibleAction: 'This action is irreversible',
     cannotBeUndone: 'This action cannot be undone.',
     confirmDelete: 'Are you sure you want to delete this item?',
+    errorOccurred: 'An error occurred',
+    tryAgainLater: 'Please try again later.',
     errorBoundary: {
       title: 'Application Error',
       description: 'An unexpected error has occurred. Reload the page to try again.',
@@ -357,6 +359,7 @@ export const en = {
     sendReset: 'Send Reset',
     
     // Common Admin Labels
+    flagCodePlaceholder: 'e.g. advanced_feature',
     edit: 'Edit',
     save: 'Save',
     saving: 'Saving...',
@@ -830,6 +833,17 @@ export const en = {
       addShiftOrAbsence: 'Add shift or absence',
       hideUsersWithoutShifts: 'Hide users without shifts',
       showAllUsers: 'Show all users',
+    },
+    stats: {
+      weekStats: 'Week Statistics',
+      shiftCoverage: 'Shift Coverage',
+      totalHours: 'Total Hours',
+      activeEmployees: 'Active Employees',
+      budget: 'Budget',
+      assigned: 'assigned',
+      toAssign: 'to assign',
+      unassigned: 'Unassigned',
+      shifts: 'Shifts',
     },
   },
 
@@ -1761,12 +1775,17 @@ export const en = {
     // Page titles
     title: 'Inventory',
     catalog: 'Product Catalog',
+    catalogDescription: 'Manage products for each department of your location',
+    openCatalog: 'Open Catalog',
     history: 'Inventory History',
     templates: 'Templates',
     
     // Categories
     categories: {
       kitchen: 'Kitchen',
+      bar: 'Bar',
+      cleaning: 'Cleaning',
+    },
       bar: 'Bar',
       cleaning: 'Cleaning',
     },

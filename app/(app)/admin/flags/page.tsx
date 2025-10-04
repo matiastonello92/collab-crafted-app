@@ -152,7 +152,7 @@ export default function FeatureFlagsPage() {
                 </div>
                 <div>
                   <Label htmlFor="flag_code">{t('admin.featureFlagsFlagCode')}</Label>
-                  <Input id="flag_code" placeholder="es. advanced_feature" />
+                  <Input id="flag_code" placeholder={t('admin.flagCodePlaceholder')} />
                 </div>
               </div>
               

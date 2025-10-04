@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Clock, Users, Calendar, TrendingUp } from 'lucide-react'
 import type { ShiftWithAssignments, Rota } from '@/types/shifts'
 import { differenceInHours, parseISO } from 'date-fns'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   shifts: ShiftWithAssignments[]
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function PlannerStats({ shifts, rota }: Props) {
+  const { t } = useTranslation()
   const stats = useMemo(() => {
     const totalShifts = shifts.length
     const assignedShifts = shifts.filter(s => s.assignments && s.assignments.length > 0).length
@@ -56,7 +58,7 @@ export function PlannerStats({ shifts, rota }: Props) {
   
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-sm">Statistiche Settimana</h3>
+      <h3 className="font-semibold text-sm">{t('planner.stats.weekStats')}</h3>
       
       {/* Coverage */}
       <Card className="p-3">
@@ -64,14 +66,14 @@ export function PlannerStats({ shifts, rota }: Props) {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" />
-              <span className="font-medium">Copertura Turni</span>
+              <span className="font-medium">{t('planner.stats.shiftCoverage')}</span>
             </div>
             <span className="font-bold">{stats.coveragePercent}%</span>
           </div>
           <Progress value={parseFloat(stats.coveragePercent)} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{stats.assignedShifts} assegnati</span>
-            <span>{stats.unassignedShifts} da assegnare</span>
+            <span>{stats.assignedShifts} {t('planner.stats.assigned')}</span>
+            <span>{stats.unassignedShifts} {t('planner.stats.toAssign')}</span>
           </div>
         </div>
       </Card>
@@ -82,7 +84,7 @@ export function PlannerStats({ shifts, rota }: Props) {
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
             <div>
-              <div className="text-xs text-muted-foreground">Ore Totali</div>
+              <div className="text-xs text-muted-foreground">{t('planner.stats.totalHours')}</div>
               <div className="text-lg font-bold">{stats.totalHours}h</div>
             </div>
           </div>
@@ -95,7 +97,7 @@ export function PlannerStats({ shifts, rota }: Props) {
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-primary" />
             <div>
-              <div className="text-xs text-muted-foreground">Impiegati Attivi</div>
+              <div className="text-xs text-muted-foreground">{t('planner.stats.activeEmployees')}</div>
               <div className="text-lg font-bold">{stats.uniqueUsers}</div>
             </div>
           </div>
@@ -109,7 +111,7 @@ export function PlannerStats({ shifts, rota }: Props) {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="font-medium">Budget</span>
+                <span className="font-medium">{t('planner.stats.budget')}</span>
               </div>
               <span className="font-bold">{stats.budgetPercent}%</span>
             </div>
@@ -118,7 +120,7 @@ export function PlannerStats({ shifts, rota }: Props) {
               className={`h-2 ${parseFloat(stats.budgetPercent) > 100 ? 'bg-destructive' : ''}`}
             />
             <div className="text-xs text-muted-foreground">
-              Budget: €{rota.labor_budget_eur}
+              {t('planner.stats.budget')}: €{rota.labor_budget_eur}
             </div>
           </div>
         </Card>
@@ -127,11 +129,11 @@ export function PlannerStats({ shifts, rota }: Props) {
       {/* Status badges */}
       <div className="flex flex-wrap gap-2">
         <Badge variant="secondary" className="text-xs">
-          {stats.totalShifts} Turni
+          {stats.totalShifts} {t('planner.stats.shifts')}
         </Badge>
         {stats.unassignedShifts > 0 && (
           <Badge variant="destructive" className="text-xs">
-            {stats.unassignedShifts} Non Assegnati
+            {stats.unassignedShifts} {t('planner.stats.unassigned')}
           </Badge>
         )}
       </div>
