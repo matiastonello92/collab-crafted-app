@@ -141,7 +141,7 @@ export function CreateInventoryModal({
             ) : (
               <div className="text-center text-muted-foreground py-4">
                 <p>{t('inventory.empty.noTemplates')}</p>
-                <p className="text-sm">Contatta il tuo Manager per crearne uno.</p>
+                <p className="text-sm">{t('common.contactManager')}</p>
               </div>
             )}
           </TabsContent>

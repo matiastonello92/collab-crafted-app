@@ -296,7 +296,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('inventory.confirmations.deleteInventory')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler eliminare questo inventario? Questa azione è irreversibile e verranno eliminati anche tutti i dati associati.
+              {t('inventory.confirmations.deleteInventoryDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

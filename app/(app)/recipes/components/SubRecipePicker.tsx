@@ -12,6 +12,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ChefHat } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface SubRecipe {
   id: string;
@@ -33,6 +34,7 @@ export function SubRecipePicker({
   excludeRecipeId,
   disabled = false 
 }: SubRecipePickerProps) {
+  const { t } = useTranslation();
   const [recipes, setRecipes] = useState<SubRecipe[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +63,7 @@ export function SubRecipePicker({
       if (error) throw error;
       setRecipes(data || []);
     } catch (error) {
-      console.error('Errore caricamento ricette:', error);
+      console.error(t('recipes.subRecipe.errorLoading'), error);
     } finally {
       setLoading(false);
     }
@@ -74,14 +76,14 @@ export function SubRecipePicker({
 
   return (
     <div className="space-y-2">
-      <Label>Sub-Ricetta</Label>
+      <Label>{t('recipes.subRecipe.label')}</Label>
       <Select
         value={value || ''}
         onValueChange={handleValueChange}
         disabled={disabled || loading}
       >
         <SelectTrigger>
-          <SelectValue placeholder={loading ? "Caricamento..." : "Seleziona una ricetta pubblicata"} />
+          <SelectValue placeholder={loading ? t('recipes.subRecipe.loading') : t('recipes.subRecipe.selectPlaceholder')} />
         </SelectTrigger>
         <SelectContent>
           {recipes.map((recipe) => (
@@ -100,7 +102,7 @@ export function SubRecipePicker({
           ))}
           {recipes.length === 0 && !loading && (
             <SelectItem value="_none" disabled>
-              Nessuna ricetta pubblicata disponibile
+              {t('recipes.subRecipe.noRecipes')}
             </SelectItem>
           )}
         </SelectContent>

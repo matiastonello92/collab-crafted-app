@@ -554,9 +554,9 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('planner.edit.delete')} - Conferma</AlertDialogTitle>
+            <AlertDialogTitle>{t('planner.edit.delete')} - {t('planner.edit.confirm')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Questa azione non può essere annullata. Il turno verrà eliminato definitivamente.
+              {t('common.cannotBeUndone')} {t('planner.edit.deleteConfirmDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

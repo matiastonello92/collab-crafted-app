@@ -19,6 +19,13 @@ export const en = {
     step: 'Step',
     of: 'of',
     actions: 'Actions',
+    filter: 'Filter',
+    noData: 'No data available',
+    noResults: 'No results found',
+    contactManager: 'Contact your Manager to create one.',
+    irreversibleAction: 'This action is irreversible',
+    cannotBeUndone: 'This action cannot be undone.',
+    confirmDelete: 'Are you sure you want to delete this item?',
     errorBoundary: {
       title: 'Application Error',
       description: 'An unexpected error has occurred. Reload the page to try again.',
@@ -472,6 +479,20 @@ export const en = {
     leaveInboxReject: 'Reject',
     leaveInboxUserUnknown: 'Unknown user',
     leaveInboxErrorLoading: 'Error loading requests',
+    
+    // Timesheets
+    timesheets: {
+      title: 'Timesheets',
+      description: 'Summary of worked hours and pay periods',
+      loading: 'Loading...',
+      noTimesheets: 'No timesheets found',
+      notFound: 'Timesheet not found',
+      filter: 'Filter',
+      exportCSV: 'Export CSV',
+      exportTitle: 'Export Timesheets CSV',
+      totalHours: 'Total Hours',
+      breakdown: 'Breaks',
+    },
     
     // Feature Flags
     featureFlags: 'Feature Flags',
@@ -1220,6 +1241,15 @@ export const en = {
       nextAriaLabel: 'Next step (right arrow)',
       loadError: 'Error loading recipe',
     },
+    
+    // Sub-Recipe Picker
+    subRecipe: {
+      label: 'Sub-Recipe',
+      loading: 'Loading...',
+      selectPlaceholder: 'Select a published recipe',
+      noRecipes: 'No published recipes available',
+      errorLoading: 'Error loading recipes',
+    },
   },
 
   // Dashboard
@@ -1744,6 +1774,7 @@ export const en = {
     // Confirmations
     confirmations: {
       deleteInventory: 'Are you sure you want to delete this inventory?',
+      deleteInventoryDesc: 'This action is irreversible and all associated data will be deleted.',
       deleteProduct: 'Are you sure you want to delete this product?',
       bulkDeleteProducts: 'Are you sure you want to delete {count} products?',
       deleteItem: 'Do you want to remove this item from the inventory?',

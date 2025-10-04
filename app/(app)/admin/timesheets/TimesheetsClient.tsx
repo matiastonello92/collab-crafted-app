@@ -168,8 +168,8 @@ export default function TimesheetsClient() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Timesheets</h1>
-          <p className="text-muted-foreground">Riepilogo ore lavorate e periodi paga</p>
+          <h1 className="text-3xl font-bold">{t('admin.timesheets.title')}</h1>
+          <p className="text-muted-foreground">{t('admin.timesheets.description')}</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={exportOpen} onOpenChange={setExportOpen}>

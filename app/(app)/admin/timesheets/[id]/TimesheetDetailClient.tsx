@@ -149,7 +149,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Ore Totali</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('admin.timesheets.totalHours')}</div>
           <div className="text-3xl font-bold">{formatMinutesToHours(totalHours)}h</div>
         </Card>
         <Card className="p-4">

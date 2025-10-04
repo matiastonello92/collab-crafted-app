@@ -19,6 +19,13 @@ export const it = {
     step: 'Passo',
     of: 'di',
     actions: 'Azioni',
+    filter: 'Filtra',
+    noData: 'Nessun dato disponibile',
+    noResults: 'Nessun risultato trovato',
+    contactManager: 'Contatta il tuo Manager per crearne uno.',
+    irreversibleAction: 'Questa azione è irreversibile',
+    cannotBeUndone: 'Questa azione non può essere annullata.',
+    confirmDelete: 'Sei sicuro di voler eliminare questo elemento?',
     errorBoundary: {
       title: 'Errore dell\'applicazione',
       description: 'Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.',
@@ -441,6 +448,20 @@ export const it = {
     leaveInboxReject: 'Rifiuta',
     leaveInboxUserUnknown: 'Utente sconosciuto',
     leaveInboxErrorLoading: 'Errore nel caricamento delle richieste',
+    
+    // Timesheets
+    timesheets: {
+      title: 'Timesheets',
+      description: 'Riepilogo ore lavorate e periodi paga',
+      loading: 'Caricamento...',
+      noTimesheets: 'Nessun timesheet trovato',
+      notFound: 'Timesheet non trovato',
+      filter: 'Filtra',
+      exportCSV: 'Export CSV',
+      exportTitle: 'Export Timesheets CSV',
+      totalHours: 'Ore Totali',
+      breakdown: 'Pause',
+    },
     
     // Feature Flags
     featureFlags: 'Feature Flags',
@@ -1154,6 +1175,15 @@ export const it = {
       nextAriaLabel: 'Passaggio successivo (freccia destra)',
       loadError: 'Errore caricamento ricetta',
     },
+    
+    // Sub-Recipe Picker
+    subRecipe: {
+      label: 'Sub-Ricetta',
+      loading: 'Caricamento...',
+      selectPlaceholder: 'Seleziona una ricetta pubblicata',
+      noRecipes: 'Nessuna ricetta pubblicata disponibile',
+      errorLoading: 'Errore caricamento ricette',
+    },
   },
 
   // Allergens
@@ -1780,6 +1810,7 @@ export const it = {
     // Confirmations
     confirmations: {
       deleteInventory: 'Sei sicuro di voler eliminare questo inventario?',
+      deleteInventoryDesc: 'Questa azione è irreversibile e verranno eliminati anche tutti i dati associati.',
       deleteProduct: 'Sei sicuro di voler eliminare questo prodotto?',
       bulkDeleteProducts: 'Sei sicuro di voler eliminare {count} prodotti?',
       deleteItem: 'Vuoi rimuovere questo articolo dall\'inventario?',
