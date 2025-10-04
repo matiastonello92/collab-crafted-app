@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslation } from '@/lib/i18n/server'
 
 export default async function LocationsManagePage() {
   const supabase = await createSupabaseServerClient()
+  const t = await getTranslation()
   
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {

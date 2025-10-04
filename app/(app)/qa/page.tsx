@@ -15,10 +15,12 @@ import {
   AlertCircle 
 } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslation } from '@/lib/i18n/server'
 
 export default async function QAPage() {
   // Only admins can access QA tools
   await requireOrgAdmin()
+  const t = await getTranslation()
 
   const qaTools = [
     {

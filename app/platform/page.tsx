@@ -4,10 +4,12 @@ import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Shield, Users, Building2, Mail, Activity, AlertTriangle } from 'lucide-react'
+import { getTranslation } from '@/lib/i18n/server'
 
 export default async function PlatformAdminPage() {
   // Platform admin guard
   await requirePlatformAdmin()
+  const t = await getTranslation()
 
   const supabase = await createSupabaseServerClient()
 

@@ -645,6 +645,7 @@ function LoginForm({
   isPending: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false)
+  const { t } = useTranslation()
   
   const loginSchema = z.object({
     email: z.string().email(),
@@ -679,7 +680,7 @@ function LoginForm({
           <Input
             id="loginPassword"
             type={showPassword ? "text" : "password"}
-            placeholder="Inserisci password"
+            placeholder={t('invitePage.enterPassword')}
             className="text-sm pr-10"
             {...register('password')}
           />

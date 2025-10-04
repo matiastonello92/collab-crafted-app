@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { User, Mail, MapPin, Shield, Settings, Building } from 'lucide-react'
 import Link from 'next/link'
 import ClientOnly from '@/components/ClientOnly'
+import { getTranslation } from '@/lib/i18n/server'
 
 export const runtime = 'nodejs'
 
@@ -98,6 +99,7 @@ async function getUserData(): Promise<{
 }
 
 export default async function MePage() {
+  const t = await getTranslation()
   const { profile, roles, locations } = await getUserData()
 
   const displayName = profile.first_name && profile.last_name

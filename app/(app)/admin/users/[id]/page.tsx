@@ -17,6 +17,7 @@ import { DeleteUserDialog } from './components/DeleteUserDialog'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
+import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
   params: {
@@ -27,6 +28,7 @@ interface Props {
 export default async function UserDetailPage({ params }: Props) {
   // Guard: require admin permissions
   await requireOrgAdmin()
+  const t = await getTranslation()
   
   const user = await getUserById(params.id)
   
