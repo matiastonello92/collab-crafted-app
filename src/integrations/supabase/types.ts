@@ -3423,6 +3423,16 @@ export type Database = {
         Args: { p_recipe_id: string; p_sub_recipe_id: string }
         Returns: boolean
       }
+      search_recipes_by_items: {
+        Args: {
+          p_exclude_items?: string[]
+          p_include_items?: string[]
+          p_location_id: string
+        }
+        Returns: {
+          recipe_id: string
+        }[]
+      }
       set_my_default_location: {
         Args: { p_location: string }
         Returns: undefined

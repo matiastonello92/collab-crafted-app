@@ -9,6 +9,7 @@ import { Clock, Users, ChefHat, Archive, Send, Trash2, Plus, ExternalLink } from
 import Link from 'next/link';
 import { RecipeEditorDialog } from './components/RecipeEditorDialog';
 import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
+import { RecipeFilters, RecipeFiltersState } from './components/RecipeFilters';
 
 interface Recipe {
   id: string;
@@ -32,22 +33,57 @@ export function RecipesClient() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [defaultLocationId, setDefaultLocationId] = useState<string>('');
+  const [itemNames, setItemNames] = useState<Map<string, string>>(new Map());
+  const [filters, setFilters] = useState<RecipeFiltersState>({
+    q: '',
+    status: 'all',
+    category: 'all',
+    includeItems: [],
+    excludeItems: [],
+  });
 
   useEffect(() => {
-    loadRecipes();
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (defaultLocationId) {
+      loadRecipes();
+      loadItemNames();
+    }
+  }, [filters, defaultLocationId]);
 
   async function loadUser() {
     const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
     setUserId(user?.id || null);
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('default_location_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.default_location_id) {
+        setDefaultLocationId(profile.default_location_id);
+      }
+    }
   }
 
   async function loadRecipes() {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/recipes');
+      const params = new URLSearchParams();
+      if (filters.q) params.set('search', filters.q);
+      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+      if (filters.category && filters.category !== 'all') params.set('category', filters.category);
+      if (filters.includeItems.length > 0) params.set('includeItems', filters.includeItems.join(','));
+      if (filters.excludeItems.length > 0) params.set('excludeItems', filters.excludeItems.join(','));
+      if (defaultLocationId) params.set('locationId', defaultLocationId);
+
+      const response = await fetch(`/api/v1/recipes?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to load recipes');
       
       const data = await response.json();
@@ -58,6 +94,22 @@ export function RecipesClient() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadItemNames() {
+    if (!defaultLocationId) return;
+    try {
+      const response = await fetch(`/api/v1/inventory/catalog?locationId=${defaultLocationId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const names = new Map<string, string>(
+          (data.items || []).map((item: any) => [item.id as string, item.name as string])
+        );
+        setItemNames(names);
+      }
+    } catch (error) {
+      console.error('Failed to load item names:', error);
     }
   }
 
@@ -138,13 +190,24 @@ export function RecipesClient() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Klyra Recipes</h1>
-          <p className="text-muted-foreground">Gestione ricette con workflow approvativo</p>
+          <p className="text-muted-foreground">
+            {recipes.length} {recipes.length === 1 ? 'ricetta trovata' : 'ricette trovate'}
+          </p>
         </div>
         <Button onClick={() => setEditorOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nuova Ricetta
         </Button>
       </div>
+
+      {defaultLocationId && (
+        <RecipeFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          locationId={defaultLocationId}
+          itemNames={itemNames}
+        />
+      )}
 
       <RecipeEditorDialog
         open={editorOpen}

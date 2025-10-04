@@ -120,21 +120,23 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
-    // Post-process: filter by ingredients if needed
+    // Use RPC for item filtering if needed
     let filteredRecipes = recipes || [];
-
-    if (params.includeItems && params.includeItems.length > 0) {
-      filteredRecipes = filteredRecipes.filter((recipe: any) => {
-        const recipeItemIds = recipe.recipe_ingredients?.map((ing: any) => ing.catalog_item?.id) || [];
-        return params.includeItems!.some(itemId => recipeItemIds.includes(itemId));
+    
+    if ((params.includeItems && params.includeItems.length > 0) || (params.excludeItems && params.excludeItems.length > 0)) {
+      const { data: filteredIds, error: rpcError } = await supabase.rpc('search_recipes_by_items', {
+        p_location_id: params.locationId,
+        p_include_items: params.includeItems || null,
+        p_exclude_items: params.excludeItems || null
       });
-    }
 
-    if (params.excludeItems && params.excludeItems.length > 0) {
-      filteredRecipes = filteredRecipes.filter((recipe: any) => {
-        const recipeItemIds = recipe.recipe_ingredients?.map((ing: any) => ing.catalog_item?.id) || [];
-        return !params.excludeItems!.some(itemId => recipeItemIds.includes(itemId));
-      });
+      if (rpcError) {
+        console.error('RPC search_recipes_by_items error:', rpcError);
+        return NextResponse.json({ error: 'Failed to filter recipes by items' }, { status: 500 });
+      }
+
+      const allowedIds = new Set((filteredIds || []).map((row: any) => row.recipe_id));
+      filteredRecipes = filteredRecipes.filter((r: any) => allowedIds.has(r.id));
     }
 
     // Filter favorites only
