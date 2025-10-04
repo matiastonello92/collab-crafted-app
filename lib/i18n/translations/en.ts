@@ -153,20 +153,21 @@ export const en = {
       create: 'Create Location',
     },
     accessDenied: {
-      title: 'Access Denied',
-      subtitle: 'Platform Administrator access required',
-      description: 'Platform admin access is required to view this resource',
-      whyTitle: 'Why am I seeing this?',
-      reason1: '• This area requires Platform Administrator privileges',
-      reason2: '• Your current account does not have the required permissions',
-      reason3: '• Contact your system administrator for access',
-      goBack: 'Go Back',
-      dashboard: 'Dashboard',
-      errorMessage: 'If you believe this is an error, please contact your administrator.',
-      platformAccessDenied: 'Platform Access Denied',
-      platformDescription: 'Platform admin access is required to view this page.',
-      platformContact: 'Contact your system administrator if you believe this is an error.',
+      title: 'Admin Access Denied',
+      description: 'Organization admin access is required to view this page.',
+      makeSure: 'Make sure you\'re in the correct organization and have admin permissions.',
       backToHome: 'Back to Home',
+    },
+    
+    // Invitations Page
+    invitationsPage: {
+      usersLink: 'Users',
+      title: 'Invitation Management',
+      description: 'Create and manage multi-location invitations with custom permissions',
+      createTitle: 'Create New Invitation',
+      createDescription: 'Invite a user with specific roles and permissions for locations',
+      listTitle: 'Active Invitations',
+      listDescription: 'List of sent invitations and their status',
     },
     userManagement: 'User Management',
     userManagementDesc: 'Manage users, roles, and permissions',
@@ -339,6 +340,36 @@ export const en = {
     leaveTypesDeactivated: 'Type deactivated',
     leaveTypesErrorLoading: 'Error loading types',
     
+    // Leave Type Form
+    leaveTypeForm: {
+      labels: {
+        label: 'Label',
+        key: 'Key',
+        color: 'Color',
+        requiresApproval: 'Requires Approval',
+      },
+      placeholders: {
+        labelExample: 'e.g. Annual Leave',
+        keyExample: 'e.g. annual_leave',
+        colorCode: '#6b7280',
+      },
+      descriptions: {
+        keyImmutable: 'Key cannot be modified after creation',
+        requiresApprovalDescription: 'If active, requests must be approved by a manager',
+      },
+      buttons: {
+        cancel: 'Cancel',
+        saving: 'Saving...',
+        update: 'Update',
+        create: 'Create',
+      },
+      toast: {
+        typeUpdated: 'Type updated',
+        typeCreated: 'Type created successfully',
+        errorSaving: 'Error saving',
+      },
+    },
+    
     // Leave Inbox
     leaveInbox: 'Leave Inbox',
     leaveInboxDesc: 'Approve or reject pending leave/time-off requests',
@@ -499,11 +530,11 @@ export const en = {
       assignSuccess: 'Shift assigned successfully',
       assignError: 'Error assigning shift',
       qualified: 'Qualified',
-      notQualified: 'Not qualified',
-      preferred: '✓ Preferred',
+      notQualified: 'Not Qualified',
+      preferred: 'Preferred',
       available: 'Available',
-      unavailable: '✗ Unavailable',
-      recentHours: 'h last 7 days',
+      unavailable: 'Unavailable',
+      recentHours: 'h last 7d',
     },
     templates: {
       title: 'Template Library',
@@ -570,14 +601,14 @@ export const en = {
   // Feature Flags
   featureFlags: {
     title: 'Feature Flags',
-    description: 'Manage active features for locations and modules',
+    description: 'Manage active platform features and control access to features per organization.',
     stats: {
       total: 'Total Flags',
       active: 'Active',
       inactive: 'Inactive',
     },
     buttons: {
-      new: 'New Flag',
+      newFlag: 'New Flag',
       edit: 'Edit',
       filters: 'Filters',
     },
@@ -595,9 +626,85 @@ export const en = {
       active: 'Active',
       inactive: 'Inactive',
       global: 'Global',
+      perOrg: 'Per Org',
     },
     placeholder: {
-      notice: 'This is a demo version. Edit and create flag features will be implemented in the next step.',
+      notice: 'Placeholder UI: This is a demo version of the Feature Flags module. Full implementation will require backend integration.',
+    },
+  },
+
+  // Onboarding Rota Module
+  onboarding: {
+    wizard: {
+      title: 'Rota Onboarding',
+      description: 'Create your first weekly rota and assign shifts to users.',
+    },
+    shiftForm: {
+      labels: {
+        day: 'Day',
+        role: 'Role',
+        startTime: 'Start Time',
+        endTime: 'End Time',
+        breakMinutes: 'Break (minutes)',
+        quantity: 'Quantity',
+        assignTo: 'Assign to (optional)',
+        notes: 'Notes (optional)',
+      },
+      placeholders: {
+        selectRole: 'Select role',
+        noAssignment: 'No assignment',
+        additionalNotes: 'Additional notes...',
+      },
+      buttons: {
+        cancel: 'Cancel',
+        creating: 'Creating...',
+        createShift: 'Create Shift',
+      },
+      validation: {
+        selectRole: 'Select a role',
+        endTimeAfterStart: 'End time must be after start time',
+      },
+      toast: {
+        shiftCreated: 'Shift created successfully',
+        errorCreating: 'Error creating shift',
+      },
+    },
+    step3: {
+      title: 'Add Shifts',
+      description: 'Create shifts for the week and assign registered users.',
+      weekShifts: 'Weekly Shifts',
+      closeForm: 'Close Form',
+      newShift: 'New Shift',
+      deleteConfirm: 'Are you sure you want to delete this shift?',
+      shiftDeleted: 'Shift deleted',
+      errorDeleting: 'Error deleting shift',
+      buttons: {
+        back: 'Back',
+        next: 'Next',
+      },
+    },
+    step4: {
+      title: 'Review & Publish',
+      description: 'Review the summary and publish the rota to send emails to users.',
+      totalShifts: 'Total Shifts',
+      usersInvolved: 'Users Involved',
+      assignedReady: 'shifts assigned and ready for publishing.',
+      unassignedWarning: 'shifts not yet assigned. You can still publish and assign later.',
+      whatHappens: 'What happens after publishing?',
+      step1: 'The rota will be marked as "published" and can no longer be modified',
+      step2: 'Each assigned user will receive an email with their shift details',
+      step3: 'Users will be able to view their shifts in the "My Shifts" section',
+      step4: 'You can monitor the rota from the Planner and dashboard',
+      unassignedConfirm: 'There are {count} unassigned shifts. Do you want to proceed with publishing anyway?',
+      buttons: {
+        back: 'Back',
+        publishing: 'Publishing...',
+        publish: 'Publish Rota',
+      },
+      toast: {
+        publishSuccess: 'Rota published successfully! Emails sent to assigned users.',
+        publishError: 'Error publishing rota',
+      },
     },
   },
 
