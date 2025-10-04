@@ -163,7 +163,8 @@ export function RecipeFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="recent">Più recenti</SelectItem>
-            <SelectItem value="favorites">Preferiti</SelectItem>
+              <SelectItem value="favorites">Preferiti</SelectItem>
+              <SelectItem value="most_used">Più usate</SelectItem>
             <SelectItem value="name_asc">Nome A-Z</SelectItem>
             <SelectItem value="name_desc">Nome Z-A</SelectItem>
             <SelectItem value="most_cloned">Più clonate</SelectItem>

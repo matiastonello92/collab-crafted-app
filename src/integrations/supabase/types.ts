@@ -1992,6 +1992,47 @@ export type Database = {
           },
         ]
       }
+      recipe_usage_logs: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          location_id: string
+          metadata: Json | null
+          org_id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          location_id: string
+          metadata?: Json | null
+          org_id: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          location_id?: string
+          metadata?: Json | null
+          org_id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_usage_logs_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           allergens: string[] | null
@@ -3177,6 +3218,26 @@ export type Database = {
           },
         ]
       }
+      recipe_usage_stats: {
+        Row: {
+          cook_count: number | null
+          last_cooked_at: string | null
+          last_printed_at: string | null
+          last_used_at: string | null
+          print_count: number | null
+          recipe_id: string | null
+          total_uses: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_usage_logs_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       _count_null_org: {
@@ -3422,6 +3483,10 @@ export type Database = {
       recipe_has_cycle: {
         Args: { p_recipe_id: string; p_sub_recipe_id: string }
         Returns: boolean
+      }
+      refresh_recipe_usage_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       search_recipes_by_items: {
         Args: {

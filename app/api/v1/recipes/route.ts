@@ -35,6 +35,10 @@ export async function GET(request: Request) {
       offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
     });
 
+    // Check sortBy param for telemetry
+    const sortBy = searchParams.get('sortBy') || 'created_desc';
+    const sortByMostUsed = sortBy === 'most_used';
+
     // Base query
     let query = supabase
       .from('recipes')
@@ -51,10 +55,9 @@ export async function GET(request: Request) {
           catalog_item:inventory_catalog_items(id, name, category)
         ),
         recipe_steps(id, step_number, title),
-        recipe_favorites!left(user_id)
+        recipe_favorites!left(user_id)${sortByMostUsed ? ',recipe_usage_stats(total_uses)' : ''}
       `, { count: 'exact' })
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+      .eq('is_active', true);
 
     // Apply filters
     if (params.locationId) {

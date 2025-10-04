@@ -14,10 +14,14 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check recipe status
+    // Check recipe status and validation
     const { data: existingRecipe, error: checkError } = await supabase
       .from('recipes')
-      .select('status, created_by, title')
+      .select(`
+        status, created_by, title, servings,
+        recipe_ingredients(id, quantity),
+        recipe_steps(id, instruction)
+      `)
       .eq('id', params.id)
       .single();
 
@@ -26,6 +30,30 @@ export async function POST(
     if (existingRecipe.status !== 'draft') {
       return NextResponse.json(
         { error: `Cannot submit recipe with status: ${existingRecipe.status}` },
+        { status: 400 }
+      );
+    }
+
+    // P1: Server-side validation
+    if (!existingRecipe.servings || existingRecipe.servings < 1) {
+      return NextResponse.json(
+        { error: 'Servings must be at least 1' },
+        { status: 400 }
+      );
+    }
+
+    const ingredients = existingRecipe.recipe_ingredients || [];
+    if (ingredients.length === 0 || !ingredients.some((ing: any) => ing.quantity > 0)) {
+      return NextResponse.json(
+        { error: 'Recipe must have at least one ingredient with quantity > 0' },
+        { status: 400 }
+      );
+    }
+
+    const steps = existingRecipe.recipe_steps || [];
+    if (steps.length === 0 || !steps.some((step: any) => step.instruction?.trim())) {
+      return NextResponse.json(
+        { error: 'Recipe must have at least one step with instructions' },
         { status: 400 }
       );
     }

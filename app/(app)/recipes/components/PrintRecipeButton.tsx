@@ -40,6 +40,16 @@ export function PrintRecipeButton({
       window.open(url, '_blank');
       setIsOpen(false);
       toast.success(variant === 'full' ? 'Scheda completa aperta' : 'Scheda stazione aperta');
+      
+      // Log print usage
+      fetch(`/api/v1/recipes/${recipeId}/log-usage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          eventType: 'recipe_printed',
+          metadata: { variant, servings: parseInt(servings) }
+        })
+      }).catch(err => console.error('Failed to log usage:', err));
     } catch (error) {
       console.error('Print error:', error);
       toast.error('Errore durante la stampa');
@@ -49,7 +59,7 @@ export function PrintRecipeButton({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" aria-label="Stampa ricetta">
           <Printer className="h-4 w-4 mr-2" />
           Stampa
         </Button>

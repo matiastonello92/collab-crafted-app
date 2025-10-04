@@ -106,17 +106,34 @@ export function RecipeEditorDialog({
   };
 
   const handleSave = async () => {
-    // Validazione base
+    // P1: Enhanced validation
     if (!title.trim()) {
       toast.error('Il titolo è obbligatorio');
       return;
     }
-
+    if (!category) {
+      toast.error('La categoria è obbligatoria');
+      return;
+    }
+    if (!servings || servings < 1) {
+      toast.error('Le porzioni devono essere almeno 1');
+      return;
+    }
+    if (ingredients.length === 0) {
+      toast.error('Aggiungi almeno un ingrediente');
+      return;
+    }
+    const hasValidIngredient = ingredients.some(ing => 
+      ing.quantity && parseFloat(ing.quantity.toString()) > 0
+    );
+    if (!hasValidIngredient) {
+      toast.error('Almeno un ingrediente deve avere quantità > 0');
+      return;
+    }
     if (!photoUrl) {
       toast.error('Carica una foto per la ricetta');
       return;
     }
-
     if (!orgId || !locationId) {
       toast.error('Contesto organizzazione mancante');
       return;

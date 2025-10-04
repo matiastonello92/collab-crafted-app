@@ -58,6 +58,13 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
 
   useEffect(() => {
     loadRecipe();
+    
+    // Log Cook Mode usage
+    fetch(`/api/v1/recipes/${recipeId}/log-usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventType: 'cook_mode_opened' })
+    }).catch(err => console.error('Failed to log usage:', err));
   }, [recipeId]);
 
   async function loadRecipe() {
@@ -98,6 +105,24 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
       setCurrentStepIndex(currentStepIndex + 1);
     }
   }
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevStep();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextStep();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleExit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStepIndex, recipe]);
 
   if (loading) {
     return (
@@ -261,6 +286,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           onClick={handlePrevStep}
           disabled={currentStepIndex === 0}
           className="gap-2 min-w-[120px]"
+          aria-label="Passaggio precedente (freccia sinistra)"
         >
           <ArrowLeft className="h-5 w-5" />
           Precedente
@@ -269,6 +295,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           onClick={handleNextStep}
           disabled={currentStepIndex === recipe.recipe_steps.length - 1}
           className="gap-2 min-w-[120px]"
+          aria-label="Passaggio successivo (freccia destra)"
         >
           Successivo
           <ArrowRight className="h-5 w-5" />
