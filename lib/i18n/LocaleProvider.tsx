@@ -41,11 +41,7 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
     }
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide context, even during SSR
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
       {children}
