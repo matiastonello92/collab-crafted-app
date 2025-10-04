@@ -15,16 +15,17 @@ import { IngredientsForm } from './IngredientsForm';
 import { StepsEditor } from './StepsEditor';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { COMMON_ALLERGENS } from '../constants/allergens';
-import { MONTHS } from '../constants/seasons';
+import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
+import { MONTHS, getMonthLabel } from '../constants/seasons';
+import { t } from '@/lib/i18n';
 
 const CATEGORIES = [
-  { value: 'antipasto', label: 'Antipasto' },
-  { value: 'primo', label: 'Primo' },
-  { value: 'secondo', label: 'Secondo' },
-  { value: 'contorno', label: 'Contorno' },
+  { value: 'appetizer', label: 'Antipasto' },
+  { value: 'main_course', label: 'Primo' },
+  { value: 'second_course', label: 'Secondo' },
+  { value: 'side_dish', label: 'Contorno' },
   { value: 'dessert', label: 'Dessert' },
-  { value: 'bevanda', label: 'Bevanda' },
+  { value: 'beverage', label: 'Bevanda' },
 ];
 
 interface RecipeEditorFormProps {
@@ -147,7 +148,7 @@ export function RecipeEditorForm({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Seleziona un file immagine valido');
+      toast.error(t('recipe.selectValidImage'));
       return;
     }
 
@@ -171,10 +172,10 @@ export function RecipeEditorForm({
         .getPublicUrl(filePath);
 
       setPhotoUrl(publicUrl);
-      toast.success('Foto caricata');
+      toast.success(t('recipe.photoUploaded'));
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error('Errore caricamento foto');
+      toast.error(t('recipe.uploadError'));
     } finally {
       setUploading(false);
     }
@@ -204,22 +205,22 @@ export function RecipeEditorForm({
   async function handleSave() {
     // Validation
     if (!title.trim()) {
-      toast.error('Inserisci un titolo');
+      toast.error(t('recipe.enterTitle'));
       setCurrentTab('info');
       return;
     }
     if (!category) {
-      toast.error('Seleziona una categoria');
+      toast.error(t('recipe.selectCategoryError'));
       setCurrentTab('info');
       return;
     }
     if (servings < 1) {
-      toast.error('Le porzioni devono essere almeno 1');
+      toast.error(t('recipe.servingsMin'));
       setCurrentTab('info');
       return;
     }
     if (ingredients.length === 0) {
-      toast.error('Aggiungi almeno un ingrediente');
+      toast.error(t('recipe.addIngredient'));
       setCurrentTab('ingredients');
       return;
     }
@@ -229,25 +230,25 @@ export function RecipeEditorForm({
       ing => !ing.quantity || ing.quantity <= 0
     );
     if (incompleteIngredients.length > 0) {
-      toast.error('Alcuni ingredienti hanno quantità mancanti o non valide');
+      toast.error(t('recipe.incompleteIngredients'));
       setCurrentTab('ingredients');
       return;
     }
 
     if (!orgId || !locationId) {
-      toast.error('Contesto utente mancante');
+      toast.error(t('recipe.missingContext'));
       return;
     }
 
     // Warning for missing photo
     if (!photoUrl) {
-      const proceed = confirm('La ricetta non ha una foto. Vuoi comunque salvare?');
+      const proceed = confirm(t('recipe.noPhotoWarning'));
       if (!proceed) return;
     }
 
     // Warning for missing steps (only if creating new recipe)
     if (mode === 'create' && steps.length === 0) {
-      toast.info('Potrai aggiungere gli step di preparazione dopo il salvataggio');
+      toast.info(t('recipe.addStepsLater'));
     }
 
     setSaving(true);
@@ -300,7 +301,7 @@ export function RecipeEditorForm({
       const data = await response.json();
       const savedRecipeId = data.recipe?.id || recipeId;
 
-      toast.success(mode === 'edit' ? 'Ricetta aggiornata' : 'Ricetta creata! Aggiungi ora gli step di preparazione');
+      toast.success(mode === 'edit' ? t('recipe.recipeUpdated') : t('recipe.recipeCreated'));
       setIsDirty(false);
 
       if (onSuccess) {
@@ -308,7 +309,7 @@ export function RecipeEditorForm({
       }
     } catch (error: any) {
       console.error('Save error:', error);
-      toast.error(error.message || 'Errore salvataggio ricetta');
+      toast.error(error.message || t('recipe.saveError'));
     } finally {
       setSaving(false);
     }
@@ -318,9 +319,9 @@ export function RecipeEditorForm({
     <div className="space-y-6">
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="info">Informazioni Base</TabsTrigger>
+          <TabsTrigger value="info">{t('recipe.basicInfo')}</TabsTrigger>
           <TabsTrigger value="ingredients">
-            Ingredienti
+            {t('recipe.ingredients')}
             {ingredients.length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {ingredients.length}
@@ -328,7 +329,7 @@ export function RecipeEditorForm({
             )}
           </TabsTrigger>
           <TabsTrigger value="steps" disabled={!recipeId}>
-            Preparazione
+            {t('recipe.preparation')}
             {recipeId && steps.length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {steps.length}
@@ -340,33 +341,33 @@ export function RecipeEditorForm({
         <TabsContent value="info" className="space-y-6">
           <Card className="p-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Titolo *</Label>
+              <Label htmlFor="title">{t('recipe.title')} *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Es: Carbonara tradizionale"
+                placeholder={t('recipe.titlePlaceholder')}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrizione</Label>
+              <Label htmlFor="description">{t('recipe.description')}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Breve descrizione della ricetta..."
+                placeholder={t('recipe.descriptionPlaceholder')}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Categoria *</Label>
+                <Label htmlFor="category">{t('recipe.category')} *</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="Seleziona..." />
+                    <SelectValue placeholder={t('recipe.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
@@ -379,7 +380,7 @@ export function RecipeEditorForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="servings">Porzioni *</Label>
+                <Label htmlFor="servings">{t('recipe.servings')} *</Label>
                 <Input
                   id="servings"
                   type="number"
@@ -392,7 +393,7 @@ export function RecipeEditorForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="prepTime">Tempo Preparazione (min)</Label>
+                <Label htmlFor="prepTime">{t('recipe.prepTime')}</Label>
                 <Input
                   id="prepTime"
                   type="number"
@@ -403,7 +404,7 @@ export function RecipeEditorForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cookTime">Tempo Cottura (min)</Label>
+                <Label htmlFor="cookTime">{t('recipe.cookTime')}</Label>
                 <Input
                   id="cookTime"
                   type="number"
@@ -415,7 +416,7 @@ export function RecipeEditorForm({
             </div>
 
             <div className="space-y-2">
-              <Label>Foto Ricetta</Label>
+              <Label>{t('recipe.photo')}</Label>
               {photoUrl ? (
                 <div className="relative inline-block">
                   <img
@@ -448,7 +449,7 @@ export function RecipeEditorForm({
             </div>
 
             <div className="space-y-2">
-              <Label>Allergeni</Label>
+              <Label>{t('recipe.allergensLabel')}</Label>
               <div className="flex flex-wrap gap-2">
                 {COMMON_ALLERGENS.map((allergen) => (
                   <div key={allergen.key} className="flex items-center gap-2">
@@ -461,7 +462,7 @@ export function RecipeEditorForm({
                       htmlFor={`allergen-${allergen.key}`}
                       className="text-sm cursor-pointer"
                     >
-                      {allergen.label}
+                      {getAllergenLabel(allergen.key)}
                     </Label>
                   </div>
                 ))}
@@ -469,7 +470,7 @@ export function RecipeEditorForm({
             </div>
 
             <div className="space-y-2">
-              <Label>Stagionalità (mesi consigliati)</Label>
+              <Label>{t('recipe.seasonality')}</Label>
               <div className="flex flex-wrap gap-2">
                 {MONTHS.map((month) => (
                   <div key={month.key} className="flex items-center gap-2">
@@ -482,7 +483,7 @@ export function RecipeEditorForm({
                       htmlFor={`month-${month.key}`}
                       className="text-sm cursor-pointer"
                     >
-                      {month.label}
+                      {getMonthLabel(month.key)}
                     </Label>
                   </div>
                 ))}
@@ -525,12 +526,12 @@ export function RecipeEditorForm({
             type="button"
             variant="ghost"
             onClick={() => {
-              if (!isDirty || confirm('Hai modifiche non salvate. Vuoi davvero uscire?')) {
+              if (!isDirty || confirm(t('recipe.unsavedChanges'))) {
                 onCancel();
               }
             }}
           >
-            Annulla
+            {t('common.cancel')}
           </Button>
         )}
         
@@ -542,10 +543,10 @@ export function RecipeEditorForm({
             {saving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvataggio...
+                {t('common.saving')}
               </>
             ) : (
-              mode === 'edit' ? 'Salva Modifiche' : 'Salva Bozza'
+              mode === 'edit' ? t('common.save') + ' ' + t('common.edit') : t('common.save')
             )}
           </Button>
         </div>

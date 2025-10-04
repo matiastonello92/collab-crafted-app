@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { COMMON_ALLERGENS } from '../constants/allergens';
+import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
 
 interface AllergenSelectorProps {
   selectedAllergens: string[];
@@ -96,7 +96,7 @@ export function AllergenSelector({
                       >
                         {isSelected && <Check className="h-3 w-3" />}
                       </div>
-                      <span>{allergen.label}</span>
+                      <span>{getAllergenLabel(allergen.key)}</span>
                     </CommandItem>
                   );
                 })}
@@ -125,7 +125,7 @@ export function AllergenSelector({
                 }}
               >
                 <AlertTriangle className="h-3 w-3" />
-                {info.label}
+                {getAllergenLabel(info.key)}
                 <button
                   type="button"
                   onClick={(e) => {

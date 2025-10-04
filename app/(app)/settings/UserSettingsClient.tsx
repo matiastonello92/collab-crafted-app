@@ -15,6 +15,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { AvatarUploader } from '@/components/AvatarUploader'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { t } from '@/lib/i18n'
 
 interface UserSettingsClientProps {
   user: any
@@ -31,6 +33,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
   const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
   const supabase = createSupabaseBrowserClient()
+  const { locale, setLocale } = useLocale()
 
 
   const handleSave = async () => {
@@ -58,9 +61,9 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
       
       if (error) throw error
       
-      toast.success('Profilo aggiornato con successo!')
+      toast.success(t('settings.profileUpdated'))
     } catch (error: any) {
-      toast.error(`Errore nel salvataggio: ${error.message}`)
+      toast.error(`${t('settings.saveError')}: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -97,10 +100,10 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
         throw new Error(data.error || 'Failed to send test email')
       }
       
-      toast.success('Email di test inviata con successo!')
+      toast.success(t('settings.testEmailSent'))
       setLastEmailTest(new Date().toLocaleString('it-IT'))
     } catch (error: any) {
-      toast.error(`Errore nell'invio: ${error.message}`)
+      toast.error(`${t('settings.testEmailError')}: ${error.message}`)
     } finally {
       setIsTestingEmail(false)
     }
@@ -248,19 +251,22 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="locale">Lingua</Label>
+                  <Label htmlFor="locale">{t('settings.language')}</Label>
                   <Select
-                    value={profile.locale || 'it'}
-                    onValueChange={(value) => updateProfile('locale', value)}
+                    value={profile.locale || locale}
+                    onValueChange={(value) => {
+                      updateProfile('locale', value);
+                      setLocale(value as 'it' | 'en');
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="it">Italiano</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="it">{t('languages.it')}</SelectItem>
+                      <SelectItem value="en">{t('languages.en')}</SelectItem>
+                      <SelectItem value="fr">{t('languages.fr')}</SelectItem>
+                      <SelectItem value="es">{t('languages.es')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

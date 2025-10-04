@@ -10,6 +10,7 @@ import { RecipeEditorForm } from '../../components/RecipeEditorForm';
 import { RecipeBreadcrumb } from '../../components/RecipeBreadcrumb';
 import { RecipeProgressStepper } from '../../components/RecipeProgressStepper';
 import { RecipeSummaryCard } from '../../components/RecipeSummaryCard';
+import { t } from '@/lib/i18n';
 
 interface RecipeEditPageProps {
   recipeId: string;
@@ -32,20 +33,20 @@ export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
   async function loadRecipe() {
     try {
       const response = await fetch(`/api/v1/recipes/${recipeId}`);
-      if (!response.ok) throw new Error('Ricetta non trovata');
+      if (!response.ok) throw new Error(t('recipe.notFound'));
       
       const data = await response.json();
       const recipeData = data.recipe;
 
       // Check permissions
       if (recipeData.status !== 'draft') {
-        toast.error('Solo le bozze possono essere modificate');
+        toast.error(t('recipe.cannotEdit'));
         router.push(`/recipes/${recipeId}`);
         return;
       }
 
       if (!data.recipe.can_edit) {
-        toast.error('Non hai i permessi per modificare questa ricetta');
+        toast.error(t('recipe.noPermission'));
         router.push(`/recipes/${recipeId}`);
         return;
       }
@@ -54,7 +55,7 @@ export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
       setCanEdit(true);
     } catch (error: any) {
       console.error('Load error:', error);
-      toast.error(error.message || 'Errore caricamento ricetta');
+      toast.error(error.message || t('recipe.loadError'));
       router.push('/recipes');
     } finally {
       setLoading(false);
@@ -92,12 +93,12 @@ export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
           variant="ghost"
           size="icon"
           onClick={() => router.push(`/recipes/${recipeId}`)}
-          aria-label="Torna alla ricetta"
+          aria-label={t('recipe.backToRecipe')}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Modifica Ricetta</h1>
+          <h1 className="text-3xl font-bold">{t('recipe.editRecipe')}</h1>
           <p className="text-sm text-muted-foreground">{recipe.title}</p>
         </div>
       </div>

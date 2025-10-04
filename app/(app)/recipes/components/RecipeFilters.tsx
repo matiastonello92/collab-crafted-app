@@ -16,8 +16,8 @@ import { Label } from '@/components/ui/label';
 import { ItemSelector } from './ItemSelector';
 import { AllergenSelector } from './AllergenSelector';
 import { SeasonSelector } from './SeasonSelector';
-import { COMMON_ALLERGENS } from '../constants/allergens';
-import { MONTHS } from '../constants/seasons';
+import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
+import { MONTHS, getMonthLabel } from '../constants/seasons';
 import { AlertTriangle, Calendar } from 'lucide-react';
 
 export interface RecipeFiltersState {
@@ -313,7 +313,7 @@ export function RecipeFilters({
                 }}
               >
                 <AlertTriangle className="h-3 w-3" />
-                Senza {allergen.label}
+                Senza {getAllergenLabel(allergen.key)}
                 <X className="h-3 w-3" />
               </Badge>
             ) : null;
@@ -338,7 +338,7 @@ export function RecipeFilters({
                 }}
               >
                 <Calendar className="h-3 w-3" />
-                {month.label}
+                {getMonthLabel(month.key)}
                 <X className="h-3 w-3" />
               </Badge>
             ) : null;

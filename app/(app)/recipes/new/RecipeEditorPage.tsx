@@ -9,6 +9,7 @@ import { RecipeBreadcrumb } from '../components/RecipeBreadcrumb';
 import { RecipeProgressStepper } from '../components/RecipeProgressStepper';
 import { RecipeSummaryCard } from '../components/RecipeSummaryCard';
 import { useState } from 'react';
+import { t } from '@/lib/i18n';
 
 export default function RecipeEditorPage() {
   const router = useRouter();
@@ -44,14 +45,14 @@ export default function RecipeEditorPage() {
           variant="ghost"
           size="icon"
           onClick={() => router.push('/recipes')}
-          aria-label="Torna alle ricette"
+          aria-label={t('recipe.backToRecipes')}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Nuova Ricetta</h1>
+          <h1 className="text-3xl font-bold">{t('recipe.newRecipe')}</h1>
           <p className="text-sm text-muted-foreground">
-            Compila tutti i campi per creare una nuova ricetta
+            {t('recipe.fillAllFields')}
           </p>
         </div>
       </div>

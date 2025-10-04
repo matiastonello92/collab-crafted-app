@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Check, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { MONTHS } from '../constants/seasons';
+import { MONTHS, getMonthLabel } from '../constants/seasons';
 
 interface SeasonSelectorProps {
   selectedMonths: string[];
@@ -74,7 +74,7 @@ export function SeasonSelector({
                       >
                         {isSelected && <Check className="h-3 w-3 text-white" />}
                       </div>
-                      <span>{month.label}</span>
+                      <span>{getMonthLabel(month.key)}</span>
                     </CommandItem>
                   );
                 })}
@@ -101,7 +101,7 @@ export function SeasonSelector({
                   borderColor: `hsl(${month.color} / 0.3)`
                 }}
               >
-                {month.label.slice(0, 3)}
+                {getMonthLabel(month.key).slice(0, 3)}
                 <X className="h-3 w-3" />
               </Badge>
             );
