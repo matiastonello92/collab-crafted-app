@@ -1,6 +1,16 @@
 export const en = {
   // Common
   common: {
+    viewAll: 'View all',
+    request: 'Request',
+    manage: 'Manage',
+    viewPlanner: 'View Planner',
+    planner: 'Planner',
+    users: 'Users',
+    inventory: 'Inventory',
+    timeclock: 'Timeclock',
+    leaveRequests: 'Leave Requests',
+    settings: 'Settings',
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete',

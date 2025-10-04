@@ -2891,6 +2891,36 @@ export type Database = {
           },
         ]
       }
+      user_dashboard_widgets: {
+        Row: {
+          config: Json | null
+          is_visible: boolean | null
+          position: number | null
+          size: string | null
+          updated_at: string | null
+          user_id: string
+          widget_id: string
+        }
+        Insert: {
+          config?: Json | null
+          is_visible?: boolean | null
+          position?: number | null
+          size?: string | null
+          updated_at?: string | null
+          user_id: string
+          widget_id: string
+        }
+        Update: {
+          config?: Json | null
+          is_visible?: boolean | null
+          position?: number | null
+          size?: string | null
+          updated_at?: string | null
+          user_id?: string
+          widget_id?: string
+        }
+        Relationships: []
+      }
       user_job_tags: {
         Row: {
           assigned_at: string

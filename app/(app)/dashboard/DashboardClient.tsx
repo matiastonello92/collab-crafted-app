@@ -1,202 +1,77 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Users, MapPin, Settings, UserPlus, Building2, Shield, Activity } from 'lucide-react'
-import Link from 'next/link'
-import { useTranslation } from '@/lib/i18n'
+import { Suspense } from 'react';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
+import { getUserLevel, getVisibleWidgets } from '@/lib/dashboard/widget-selector';
+import { WidgetSkeleton } from '@/components/dashboard/WidgetSkeleton';
+import { useTranslation } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardClient() {
-  const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-  const [permissions, setPermissions] = useState<string[]>([])
-  const [location_name, setLocationName] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { t } = useTranslation();
+  const { permissions, isAdmin, isLoading: permissionsLoading } = usePermissions();
+  const { preferences, isLoading: widgetsLoading } = useDashboardWidgets();
 
-  // Handle hydration and load permissions
-  useEffect(() => {
-    setMounted(true)
-    loadUserData()
-  }, [])
-
-  const loadUserData = async () => {
-    try {
-      // Load permissions
-      const permResponse = await fetch('/api/v1/me/permissions', {
-        credentials: 'include'
-      })
-      if (permResponse.ok) {
-        const permData = await permResponse.json()
-        setPermissions(permData.permissions || [])
-      }
-
-      // Load location context (if available)
-      try {
-        const contextResponse = await fetch('/api/v1/me/context', {
-          credentials: 'include'
-        })
-        if (contextResponse.ok) {
-          const contextData = await contextResponse.json()
-          setLocationName(contextData.location_name)
-        }
-      } catch (contextError) {
-        console.warn('Context not available:', contextError)
-      }
-
-    } catch (error) {
-      console.error('Failed to load user data:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Simple permission checker
-  const hasPermission = (permission: string): boolean => {
-    if (!permissions || permissions.length === 0) return false
-    if (permissions.includes('*')) return true // Admin wildcard
-    
-    // Direct match
-    if (permissions.includes(permission)) return true
-    
-    // Module wildcard (e.g., 'users:*' covers 'users:manage')
-    const [module] = permission.split(':')
-    if (module && permissions.includes(`${module}:*`)) return true
-    
-    return false
-  }
-
-  // Show loading state during hydration
-  if (!mounted || isLoading) {
+  if (permissionsLoading || widgetsLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="space-y-4">
-            <div className="h-40 bg-gray-200 rounded"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
-          </div>
+      <div className="container mx-auto p-6">
+        <div className="mb-8">
+          <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <WidgetSkeleton size="large" />
+          <WidgetSkeleton size="medium" />
+          <WidgetSkeleton size="small" />
         </div>
       </div>
-    )
+    );
   }
 
-  const canManageUsers = hasPermission('users:manage')
-  const canManageLocations = hasPermission('locations:manage')
-  const canViewAdmin = hasPermission('admin:access') || hasPermission('*')
+  const userLevel = getUserLevel(isAdmin, permissions);
+  const visibleWidgets = getVisibleWidgets(userLevel, permissions, preferences);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('dashboard.welcome')}
-            {location_name && <span> • {location_name}</span>}
-          </p>
+          <h1 className="text-3xl font-bold">{t('dashboard.welcome')}</h1>
+          <p className="text-muted-foreground mt-1">{t('dashboard.overview')}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-green-500" />
-          <Badge variant="secondary">{t('dashboard.systemOperational')}</Badge>
-        </div>
+        <Link href="/settings/dashboard">
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            {t('dashboard.customize')}
+          </Button>
+        </Link>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            {t('dashboard.quickActions')}
-          </CardTitle>
-          <CardDescription>
-            {t('dashboard.quickActionsDesc')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {canManageUsers && (
-              <Link href="/admin/users/invite">
-                <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                  <UserPlus className="w-6 h-6" />
-                  <span>{t('dashboard.inviteUser')}</span>
-                </Button>
-              </Link>
-            )}
-            
-            {canManageLocations && (
-              <Link href="/admin/locations">
-                <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                  <Building2 className="w-6 h-6" />
-                  <span>{t('dashboard.manageLocations')}</span>
-                </Button>
-              </Link>
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {visibleWidgets.map((widget) => {
+          const WidgetComponent = widget.component;
+          const size = widget.preference?.size || widget.defaultSize;
+          const config = widget.preference?.config || {};
 
-            {canViewAdmin && (
-              <Link href="/admin">
-                <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                  <Shield className="w-6 h-6" />
-                  <span>{t('dashboard.adminPanel')}</span>
-                </Button>
-              </Link>
-            )}
+          return (
+            <Suspense key={widget.id} fallback={<WidgetSkeleton size={size} />}>
+              <WidgetComponent size={size} config={config} />
+            </Suspense>
+          );
+        })}
+      </div>
 
-            <Link href="/me">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <Users className="w-6 h-6" />
-                <span>{t('dashboard.myProfile')}</span>
-              </Button>
-            </Link>
-
-            <Link href="/locations/manage">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <MapPin className="w-6 h-6" />
-                <span>{t('dashboard.myLocations')}</span>
-              </Button>
-            </Link>
-
-            <Link href="/settings">
-              <Button variant="outline" className="w-full h-20 flex flex-col gap-2">
-                <Settings className="w-6 h-6" />
-                <span>{t('dashboard.settings')}</span>
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Simple Status Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('dashboard.systemStatus')}</CardTitle>
-          <CardDescription>
-            {t('dashboard.systemStatusDesc')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm font-medium">{t('dashboard.systemOperationalStatus')}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Debug Info (development only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle className="text-sm">{t('dashboard.debugInfo')}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs">
-            <div>{t('dashboard.permissions')}: {permissions.length > 0 ? permissions.join(', ') : 'None'}</div>
-            <div>{t('dashboard.location')}: {location_name || 'Not set'}</div>
-            <div>{t('dashboard.canManageUsers')}: {canManageUsers ? 'Yes' : 'No'}</div>
-            <div>{t('dashboard.canViewAdmin')}: {canViewAdmin ? 'Yes' : 'No'}</div>
-          </CardContent>
-        </Card>
+      {visibleWidgets.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">{t('dashboard.noWidgets')}</p>
+          <Link href="/settings/dashboard">
+            <Button className="mt-4">
+              {t('dashboard.addWidgets')}
+            </Button>
+          </Link>
+        </div>
       )}
     </div>
-  )
+  );
 }
