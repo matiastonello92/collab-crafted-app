@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useTranslation } from '@/lib/i18n'
 
 const NONE_VALUE = '__none__'
 
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }: Props) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -76,17 +78,17 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   
   const validateForm = () => {
     if (!startDate) {
-      toast.error('Data obbligatoria')
+      toast.error(t('planner.validation.dateRequired'))
       return false
     }
     if (!startTime || !endTime) {
-      toast.error('Orari di inizio e fine obbligatori')
+      toast.error(t('planner.validation.timesRequired'))
       return false
     }
     const start = new Date(`${startDate}T${startTime}:00`)
     const end = new Date(`${startDate}T${endTime}:00`)
     if (end <= start) {
-      toast.error('L\'orario di fine deve essere successivo all\'inizio')
+      toast.error(t('planner.validation.endAfterStart'))
       return false
     }
     return true
@@ -124,7 +126,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
         if (!createResponse.ok) {
           const error = await createResponse.json()
           console.error('❌ [ShiftCreate] Error response:', error)
-          toast.error(error.message || error.error || 'Errore durante la creazione')
+          toast.error(error.message || error.error || t('planner.toast.errorSaving'))
           return
         }
         
@@ -138,7 +140,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
           })
         }
         
-        toast.success('Turno creato con successo')
+        toast.success(t('planner.toast.shiftCreated'))
       } else {
         const response = await fetch(`/api/v1/shifts/${shift.id}`, {
           method: 'PUT',
@@ -154,7 +156,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
         
         if (!response.ok) {
           const error = await response.json()
-          toast.error(error.message || 'Errore durante il salvataggio')
+          toast.error(error.message || t('planner.toast.errorSaving'))
           return
         }
         
@@ -170,18 +172,18 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
           })
           
           if (!assignResponse.ok) {
-            toast.error('Errore durante l\'assegnazione utente')
+            toast.error(t('planner.toast.errorAssigningUser'))
           }
         }
         
-        toast.success('Turno aggiornato con successo')
+        toast.success(t('planner.toast.shiftUpdated'))
       }
       
       onSave()
       onClose()
     } catch (error) {
       console.error('Error saving shift:', error)
-      toast.error('Errore durante il salvataggio')
+      toast.error(t('planner.toast.errorSaving'))
     } finally {
       setLoading(false)
     }
@@ -198,17 +200,17 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       
       if (!response.ok) {
         const error = await response.json()
-        toast.error(error.message || 'Errore durante l\'eliminazione')
+        toast.error(error.message || t('planner.toast.errorDeleting'))
         return
       }
       
-      toast.success('Turno eliminato con successo')
+      toast.success(t('planner.toast.shiftDeleted'))
       onSave()
       onClose()
       setShowDeleteDialog(false)
     } catch (error) {
       console.error('Error deleting shift:', error)
-      toast.error('Errore durante l\'eliminazione')
+      toast.error(t('planner.toast.errorDeleting'))
     } finally {
       setDeleting(false)
     }
@@ -225,7 +227,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>
-              {isNew ? 'Nuovo Turno o Assenza' : 'Modifica Turno'}
+              {isNew ? t('planner.edit.newShiftOrAbsence') : t('planner.edit.editShift')}
             </DialogTitle>
           </DialogHeader>
           
@@ -234,11 +236,11 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="shift">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Nuovo Turno
+                  {t('planner.edit.newShift')}
                 </TabsTrigger>
                 <TabsTrigger value="absence">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Nuova Assenza
+                  {t('planner.edit.newAbsence')}
                 </TabsTrigger>
               </TabsList>
               
@@ -246,7 +248,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Date & Time */}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="font-medium text-foreground">Data</Label>
+                <Label className="font-medium text-foreground">{t('planner.edit.date')}</Label>
                 <Input
                   className="bg-background"
                   type="date" 
@@ -257,7 +259,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium text-foreground">Inizio</Label>
+                <Label className="font-medium text-foreground">{t('planner.edit.startTime')}</Label>
                 <Input
                   className="bg-background"
                   required
@@ -269,7 +271,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium text-foreground">Fine</Label>
+                <Label className="font-medium text-foreground">{t('planner.edit.endTime')}</Label>
                 <Input
                   className="bg-background"
                   required
@@ -284,7 +286,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             {/* Break & Job Tag */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="font-medium text-foreground">Pausa (minuti)</Label>
+                <Label className="font-medium text-foreground">{t('planner.edit.breakMinutes')}</Label>
                 <Input
                   className="bg-background"
                   type="number" 
@@ -296,13 +298,13 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
               </div>
               
               <div className="space-y-2">
-                <Label className="font-medium text-foreground">Ruolo</Label>
+                <Label className="font-medium text-foreground">{t('planner.edit.role')}</Label>
                 <Select value={jobTagId} onValueChange={setJobTagId} disabled={isLocked}>
                   <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Seleziona ruolo" />
+                    <SelectValue placeholder={t('planner.common.selectRole')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={NONE_VALUE}>Nessun ruolo</SelectItem>
+                    <SelectItem value={NONE_VALUE}>{t('planner.common.noRole')}</SelectItem>
                     {jobTags.map(tag => (
                       <SelectItem key={tag.id} value={tag.id}>
                         {tag.label_it}
@@ -315,13 +317,13 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* User Assignment */}
             <div className="space-y-2">
-              <Label className="font-medium text-foreground">Assegna Utente</Label>
+              <Label className="font-medium text-foreground">{t('planner.edit.assignUser')}</Label>
               <Select value={assignedUserId} onValueChange={setAssignedUserId} disabled={isLocked}>
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Seleziona utente" />
+                  <SelectValue placeholder={t('planner.common.selectUser')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NONE_VALUE}>Nessun utente</SelectItem>
+                  <SelectItem value={NONE_VALUE}>{t('planner.common.noUser')}</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex items-center gap-2">
@@ -341,12 +343,12 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             
             {/* Notes */}
             <div className="space-y-2">
-              <Label className="font-medium text-foreground">Note</Label>
+              <Label className="font-medium text-foreground">{t('planner.edit.notes')}</Label>
               <Textarea
                 className="bg-background"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Aggiungi note..."
+                placeholder={t('planner.edit.addNotes')}
                 rows={3}
                 disabled={isLocked}
               />
@@ -360,7 +362,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 disabled={isLocked || deleting}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Elimina
+                {t('common.delete')}
               </Button>
               
               <div className="flex gap-2">
@@ -371,15 +373,15 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   className="gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Assegnazione AI
+                  {t('planner.edit.aiAssign')}
                 </Button>
                 <Button variant="outline" onClick={onClose} disabled={loading}>
                   <X className="h-4 w-4 mr-2" />
-                  Annulla
+                  {t('common.cancel')}
                 </Button>
                 <Button onClick={handleSave} disabled={loading || isLocked}>
                   <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Salvataggio...' : 'Salva'}
+                  {loading ? t('common.saving') : t('common.save')}
                 </Button>
               </div>
             </DialogFooter>
@@ -405,7 +407,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 {/* Date & Time */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-medium text-foreground">Data</Label>
+                    <Label className="font-medium text-foreground">{t('planner.edit.date')}</Label>
                     <Input
                       className="bg-background"
                       type="date" 
@@ -416,7 +418,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="font-medium text-foreground">Inizio</Label>
+                    <Label className="font-medium text-foreground">{t('planner.edit.startTime')}</Label>
                     <Input
                       className="bg-background"
                       required
@@ -428,7 +430,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="font-medium text-foreground">Fine</Label>
+                    <Label className="font-medium text-foreground">{t('planner.edit.endTime')}</Label>
                     <Input
                       className="bg-background"
                       required
@@ -443,7 +445,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 {/* Break & Job Tag */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="font-medium text-foreground">Pausa (minuti)</Label>
+                    <Label className="font-medium text-foreground">{t('planner.edit.breakMinutes')}</Label>
                     <Input
                       className="bg-background"
                       type="number" 
@@ -455,13 +457,13 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="font-medium text-foreground">Ruolo</Label>
+                    <Label className="font-medium text-foreground">{t('planner.edit.role')}</Label>
                     <Select value={jobTagId} onValueChange={setJobTagId} disabled={isLocked}>
                       <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Seleziona ruolo" />
+                        <SelectValue placeholder={t('planner.common.selectRole')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={NONE_VALUE}>Nessun ruolo</SelectItem>
+                        <SelectItem value={NONE_VALUE}>{t('planner.common.noRole')}</SelectItem>
                         {jobTags.map(tag => (
                           <SelectItem key={tag.id} value={tag.id}>
                             {tag.label_it}
@@ -474,13 +476,13 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 
                 {/* User Assignment */}
                 <div className="space-y-2">
-                  <Label className="font-medium text-foreground">Assegna Utente</Label>
+                  <Label className="font-medium text-foreground">{t('planner.edit.assignUser')}</Label>
                   <Select value={assignedUserId} onValueChange={setAssignedUserId} disabled={isLocked}>
                     <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Seleziona utente" />
+                      <SelectValue placeholder={t('planner.common.selectUser')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={NONE_VALUE}>Nessun utente</SelectItem>
+                      <SelectItem value={NONE_VALUE}>{t('planner.common.noUser')}</SelectItem>
                       {users.map(user => (
                         <SelectItem key={user.id} value={user.id}>
                           <div className="flex items-center gap-2">
@@ -500,12 +502,12 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label className="font-medium text-foreground">Note</Label>
+                  <Label className="font-medium text-foreground">{t('planner.edit.notes')}</Label>
                   <Textarea
                     className="bg-background"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Aggiungi note..."
+                    placeholder={t('planner.edit.addNotes')}
                     rows={3}
                     disabled={isLocked}
                   />
@@ -520,7 +522,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                   disabled={isLocked || deleting}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Elimina
+                  {t('common.delete')}
                 </Button>
                 
                 <div className="flex gap-2">
@@ -531,15 +533,15 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                     className="gap-2"
                   >
                     <Sparkles className="h-4 w-4" />
-                    Assegnazione AI
+                    {t('planner.edit.aiAssign')}
                   </Button>
                   <Button variant="outline" onClick={onClose} disabled={loading}>
                     <X className="h-4 w-4 mr-2" />
-                    Annulla
+                    {t('common.cancel')}
                   </Button>
                   <Button onClick={handleSave} disabled={loading || isLocked}>
                     <Save className="h-4 w-4 mr-2" />
-                    {loading ? 'Salvataggio...' : 'Salva'}
+                    {loading ? t('common.saving') : t('common.save')}
                   </Button>
                 </div>
               </DialogFooter>
@@ -552,15 +554,15 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminare questo turno?</AlertDialogTitle>
+            <AlertDialogTitle>{t('planner.edit.delete')} - Conferma</AlertDialogTitle>
             <AlertDialogDescription>
               Questa azione non può essere annullata. Il turno verrà eliminato definitivamente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              {deleting ? 'Eliminazione...' : 'Elimina'}
+              {deleting ? t('common.deleting') : t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

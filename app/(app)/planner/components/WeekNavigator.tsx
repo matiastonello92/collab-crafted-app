@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, ChevronRight, Calendar, Send, Lock, Eye, EyeOff } from 'lucide-react'
 import { formatWeekLabel, getPreviousWeek, getNextWeek, getCurrentWeekStart } from '@/lib/shifts/week-utils'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   currentWeek: string // ISO date (lunedì)
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, onPublish, onLock, canPublish, canLock, showUsersWithoutShifts, onToggleUsersWithoutShifts }: Props) {
+  const { t } = useTranslation()
+  
   const goToPrevWeek = () => {
     onWeekChange(getPreviousWeek(currentWeek))
   }
@@ -47,13 +50,13 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
   const getStatusLabel = () => {
     switch (rotaStatus) {
       case 'draft':
-        return 'Bozza'
+        return t('planner.publish.draft') || 'Bozza'
       case 'published':
-        return 'Pubblicata'
+        return t('planner.publish.published') || 'Pubblicata'
       case 'locked':
-        return 'Bloccata'
+        return t('planner.publish.locked') || 'Bloccata'
       default:
-        return 'Nessuna Rota'
+        return t('planner.publish.noRota') || 'Nessuna Rota'
     }
   }
   
@@ -95,7 +98,7 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
           className="h-8"
         >
           <Calendar className="h-4 w-4 mr-2" />
-          Oggi
+          {t('common.today')}
         </Button>
       </div>
 
@@ -111,12 +114,12 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             {showUsersWithoutShifts ? (
               <>
                 <EyeOff className="h-4 w-4 mr-2" />
-                Nascondi utenti senza turni
+                {t('planner.dragDrop.hideUsersWithoutShifts') || 'Nascondi utenti senza turni'}
               </>
             ) : (
               <>
                 <Eye className="h-4 w-4 mr-2" />
-                Mostra tutti gli utenti
+                {t('planner.dragDrop.showAllUsers') || 'Mostra tutti gli utenti'}
               </>
             )}
           </Button>
@@ -130,7 +133,7 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             className="h-8"
           >
             <Send className="h-4 w-4 mr-2" />
-            Pubblica
+            {t('planner.common.publishRota')}
           </Button>
         )}
         
@@ -142,7 +145,7 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             className="h-8"
           >
             <Lock className="h-4 w-4 mr-2" />
-            Blocca
+            {t('planner.common.lockRota')}
           </Button>
         )}
       </div>

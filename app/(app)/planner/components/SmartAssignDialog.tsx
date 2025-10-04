@@ -8,6 +8,7 @@ import { Sparkles, User, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useSupabase } from '@/hooks/useSupabase'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslation } from '@/lib/i18n'
 
 interface SmartCandidate {
   user_id: string
@@ -32,6 +33,7 @@ interface SmartAssignDialogProps {
 }
 
 export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAssignDialogProps) {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const [candidates, setCandidates] = useState<SmartCandidate[]>([])
   const [loading, setLoading] = useState(false)
@@ -54,11 +56,11 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
         console.error('🤖 [SmartAssign] Full error:', JSON.stringify(error, null, 2))
         
         if (error.message?.includes('FunctionsHttpError') || error.message?.includes('not found')) {
-          toast.error('Funzione AI non disponibile. Verifica che sia deployata su Supabase.')
+          toast.error(t('planner.smartAssign.functionUnavailable'))
         } else if (error.message?.includes('LOVABLE_API_KEY') || error.message?.includes('API key')) {
-          toast.error('LOVABLE_API_KEY mancante. Configura in Supabase Edge Functions Secrets.')
+          toast.error(t('planner.smartAssign.apiKeyMissing'))
         } else {
-          toast.error(`Errore AI: ${error.message}`)
+          toast.error(`${t('planner.smartAssign.aiError')}: ${error.message}`)
         }
         throw error
       }
@@ -94,12 +96,12 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
 
       if (!res.ok) throw new Error('Failed to assign')
 
-      toast.success('Turno assegnato con successo')
+      toast.success(t('planner.smartAssign.assignSuccess'))
       onAssign()
       onClose()
     } catch (error) {
       console.error('Error assigning shift:', error)
-      toast.error('Errore nell\'assegnazione')
+      toast.error(t('planner.smartAssign.assignError'))
     } finally {
       setAssigning(null)
     }
@@ -129,18 +131,18 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Assegnazione Intelligente
+            {t('planner.smartAssign.title')}
           </DialogTitle>
         </DialogHeader>
 
         {!loading && candidates.length === 0 && (
           <div className="py-8 text-center">
             <p className="text-muted-foreground mb-4">
-              Usa l'AI per trovare il candidato migliore per questo turno
+              {t('planner.smartAssign.description')}
             </p>
             <Button onClick={loadCandidates} className="gap-2">
               <Sparkles className="h-4 w-4" />
-              Analizza Candidati
+              {t('planner.smartAssign.analyzeCandidates')}
             </Button>
           </div>
         )}

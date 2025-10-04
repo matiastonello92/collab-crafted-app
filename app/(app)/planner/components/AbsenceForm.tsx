@@ -17,6 +17,7 @@ import { useLeaveTypes, type LeaveType } from '@/app/(app)/my-shifts/hooks/useLe
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { UserProfile } from '@/types/shifts'
+import { useTranslation } from '@/lib/i18n'
 
 interface AbsenceFormProps {
   users: UserProfile[]
@@ -29,6 +30,7 @@ interface AbsenceFormProps {
 type TimeSlot = 'morning' | 'afternoon' | 'full_day'
 
 export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: AbsenceFormProps) {
+  const { t } = useTranslation()
   const { leaveTypes, loading: loadingTypes } = useLeaveTypes()
   const [leaveTypeId, setLeaveTypeId] = useState<string>('')
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
@@ -80,15 +82,15 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
   const handleSubmit = async () => {
     if (!leaveTypeId) {
-      toast.error('Seleziona un tipo di assenza')
+      toast.error(t('planner.validation.selectAbsenceType'))
       return
     }
     if (selectedUsers.size === 0) {
-      toast.error('Seleziona almeno un utente')
+      toast.error(t('planner.validation.selectUser'))
       return
     }
     if (new Date(startDate) > new Date(endDate)) {
-      toast.error('La data di fine deve essere successiva o uguale alla data di inizio')
+      toast.error(t('planner.validation.endDateAfterStart'))
       return
     }
 
@@ -119,17 +121,17 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       if (failed.length > 0) {
         const firstError = await failed[0].json()
         if (firstError.error === 'LEAVE_COLLISION') {
-          toast.error('Esiste già un\'assenza per uno o più utenti in questo periodo. Rimuovi quella esistente o scegli un altro giorno.')
+          toast.error(t('planner.toast.leaveCollision'))
         } else {
-          toast.error(`${failed.length} assenze non sono state create: ${firstError.message || firstError.error}`)
+          toast.error(`${failed.length} ${t('planner.toast.absencesFailed')}: ${firstError.message || firstError.error}`)
         }
       } else {
-        toast.success(`${userIds.length} assenza/e create con successo`)
+        toast.success(`${userIds.length} ${t('planner.toast.absencesCreated')}`)
         onSuccess()
       }
     } catch (error) {
       console.error('Error creating absences:', error)
-      toast.error('Errore durante la creazione delle assenze')
+      toast.error(t('planner.toast.errorCreatingAbsence'))
     } finally {
       setSubmitting(false)
     }

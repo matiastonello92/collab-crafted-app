@@ -12,9 +12,11 @@ import { LeaveCard } from './LeaveCard'
 import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, MouseSensor, TouchSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 // Delete Zone Component - Separate to ensure proper droppable registration
 function DeleteZone({ visible }: { visible: boolean }) {
+  const { t } = useTranslation()
   const { isOver, setNodeRef } = useDroppable({ 
     id: 'delete-zone',
     data: { action: 'delete' }
@@ -48,7 +50,7 @@ function DeleteZone({ visible }: { visible: boolean }) {
           color="white" 
         />
         <span className="text-white font-semibold text-sm tracking-wide">
-          {isOver ? 'Rilascia per eliminare' : 'Trascina qui per eliminare'}
+          {isOver ? t('planner.dragDrop.releaseToDelete') : t('planner.dragDrop.dragToDelete')}
         </span>
       </div>
     </div>
