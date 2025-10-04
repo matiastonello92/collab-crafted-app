@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
-import { t, getCurrentLocale } from '@/lib/i18n'
+import { t, type Locale } from '@/lib/i18n'
 
 interface Props {
   children: ReactNode
@@ -21,6 +21,7 @@ interface State {
   errorInfo: ErrorInfo | null
   errorId: string
   retryCount: number
+  locale: Locale
 }
 
 export class EnhancedErrorBoundary extends Component<Props, State> {
@@ -33,7 +34,8 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null,
       errorId: '',
-      retryCount: 0
+      retryCount: 0,
+      locale: 'it'
     }
   }
 
@@ -157,7 +159,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
   }
 
   private renderErrorUI() {
-    const { error, errorInfo, errorId, retryCount } = this.state
+    const { error, errorInfo, errorId, retryCount, locale } = this.state
     const { level = 'component' } = this.props
     const maxRetries = 3
 
@@ -171,6 +173,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
           onReload={this.handleReload}
           retryCount={retryCount}
           maxRetries={maxRetries}
+          locale={locale}
         />
       
       case 'section':
@@ -180,6 +183,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
           onRetry={this.handleRetry}
           retryCount={retryCount}
           maxRetries={maxRetries}
+          locale={locale}
         />
       
       default:
@@ -189,6 +193,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
           onRetry={this.handleRetry}
           retryCount={retryCount}
           maxRetries={maxRetries}
+          locale={locale}
         />
     }
   }
@@ -201,7 +206,8 @@ function PageLevelError({
   onRetry, 
   onReload, 
   retryCount, 
-  maxRetries 
+  maxRetries,
+  locale
 }: {
   error: Error | null
   errorId: string
@@ -209,8 +215,8 @@ function PageLevelError({
   onReload: () => void
   retryCount: number
   maxRetries: number
+  locale: Locale
 }) {
-  const locale = getCurrentLocale()
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -233,7 +239,7 @@ function PageLevelError({
             </div>
           </div>
           
-          <ErrorDetails error={error} />
+          <ErrorDetails error={error} locale={locale} />
           
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button 
@@ -263,15 +269,16 @@ function SectionLevelError({
   errorId, 
   onRetry, 
   retryCount, 
-  maxRetries 
+  maxRetries,
+  locale
 }: {
   error: Error | null
   errorId: string
   onRetry: () => void
   retryCount: number
   maxRetries: number
+  locale: Locale
 }) {
-  const locale = getCurrentLocale()
   
   return (
     <Card className="border-destructive/20 bg-destructive/5">
@@ -305,15 +312,16 @@ function ComponentLevelError({
   errorId, 
   onRetry, 
   retryCount, 
-  maxRetries 
+  maxRetries,
+  locale
 }: {
   error: Error | null
   errorId: string
   onRetry: () => void
   retryCount: number
   maxRetries: number
+  locale: Locale
 }) {
-  const locale = getCurrentLocale()
   
   return (
     <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
@@ -339,9 +347,8 @@ function ComponentLevelError({
 }
 
 // Error details component with collapsible stack trace
-function ErrorDetails({ error }: { error: Error | null }) {
+function ErrorDetails({ error, locale }: { error: Error | null; locale: Locale }) {
   const [showDetails, setShowDetails] = useState(false)
-  const locale = getCurrentLocale()
   
   if (!error) return null
 
