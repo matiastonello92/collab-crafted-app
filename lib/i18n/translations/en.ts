@@ -320,6 +320,7 @@ export const en = {
     
     // Common Admin Labels
     flagCodePlaceholder: 'e.g. advanced_feature',
+    nameNotAvailable: 'Name not available',
     edit: 'Edit',
     save: 'Save',
     saving: 'Saving...',
@@ -2332,6 +2333,12 @@ export const en = {
 
   // Invite Acceptance
   invite: {
+    pageTitle: 'System Invitation',
+    pageDescription: 'You have been invited to join the management system',
+    notFound: 'Invitation not found or invalid',
+    expired: 'This invitation has expired',
+    invalid: 'This invitation is no longer valid (it may have already been used or revoked)',
+    validationError: 'Error validating invitation',
     systemTitle: 'System Invitation',
     welcome: 'Welcome, {email}!',
     role: 'Role',
@@ -2353,9 +2360,6 @@ export const en = {
     useExistingAccount: 'Use your existing account to accept the invitation',
     inviteAccepted: 'Invitation Accepted!',
     completingProfile: 'Completing profile...',
-    notFound: 'Invitation not found or invalid',
-    expired: 'This invitation has expired',
-    invalid: 'This invitation is no longer valid (it may have already been used or revoked)',
     dataUnavailable: 'Invitation data unavailable',
     errorValidating: 'Error validating invitation',
     errorCreatingAccount: 'Error creating account (server)',
@@ -2389,6 +2393,18 @@ export const en = {
     success: 'Profile completed successfully!',
     error: 'Error updating profile: {error}',
     canCompleteLater: 'You can complete your profile later from settings',
+  },
+
+  // Timer
+  timer: {
+    title: 'Timer',
+    completed: 'Timer completed!',
+    totalMinutes: 'total',
+    minute: 'minute',
+    minutes: 'minutes',
+    pause: 'Pause',
+    start: 'Start',
+    reset: 'Reset',
   },
 
   // Kiosk

@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { XCircle } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
   params: { token: string }
@@ -12,6 +13,7 @@ interface Props {
 
 export default async function InviteTokenPage({ params }: Props) {
   const { token } = params
+  const t = await getTranslation();
 
   // SSR validation
   let isValidToken = true
@@ -24,22 +26,22 @@ export default async function InviteTokenPage({ params }: Props) {
 
     if (error || !validationData || validationData.length === 0) {
       isValidToken = false
-      errorMessage = 'Invito non trovato o non valido'
+      errorMessage = t('invite.notFound')
     } else {
       const inviteData = validationData[0]
       if (!inviteData.is_valid) {
         isValidToken = false
         if (new Date() > new Date(inviteData.expires_at)) {
-          errorMessage = 'Questo invito è scaduto'
+          errorMessage = t('invite.expired')
         } else {
-          errorMessage = 'Questo invito non è più valido (potrebbe essere già stato utilizzato o revocato)'
+          errorMessage = t('invite.invalid')
         }
       }
     }
   } catch (error) {
     console.error('SSR validation error:', error)
     isValidToken = false
-    errorMessage = 'Errore nella validazione dell\'invito'
+    errorMessage = t('invite.validationError')
   }
 
   return (
@@ -47,9 +49,9 @@ export default async function InviteTokenPage({ params }: Props) {
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Invito al Sistema</CardTitle>
+            <CardTitle className="text-2xl">{t('invite.pageTitle')}</CardTitle>
             <CardDescription>
-              Sei stato invitato a partecipare al sistema di gestione
+              {t('invite.pageDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>

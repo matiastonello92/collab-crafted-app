@@ -42,7 +42,7 @@ export default async function UserDetailPage({ params }: Props) {
 
   const getFullName = () => {
     const parts = [user.first_name, user.last_name].filter(Boolean)
-    return parts.length > 0 ? parts.join(' ') : 'Nome non disponibile'
+    return parts.length > 0 ? parts.join(' ') : t('admin.nameNotAvailable')
   }
 
   // Extract locations and top roles for overview

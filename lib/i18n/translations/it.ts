@@ -319,6 +319,7 @@ export const it = {
     
     // Common Admin Labels
     flagCodePlaceholder: 'es. advanced_feature',
+    nameNotAvailable: 'Nome non disponibile',
     edit: 'Modifica',
     save: 'Salva',
     saving: 'Salvataggio...',
@@ -2456,6 +2457,12 @@ export const it = {
 
   // Invite Acceptance
   invite: {
+    pageTitle: 'Invito al Sistema',
+    pageDescription: 'Sei stato invitato a partecipare al sistema di gestione',
+    notFound: 'Invito non trovato o non valido',
+    expired: 'Questo invito è scaduto',
+    invalid: 'Questo invito non è più valido (potrebbe essere già stato utilizzato o revocato)',
+    validationError: 'Errore nella validazione dell\'invito',
     systemTitle: 'Invito al Sistema',
     welcome: 'Benvenuto, {email}!',
     role: 'Ruolo',
@@ -2477,9 +2484,6 @@ export const it = {
     useExistingAccount: 'Usa il tuo account esistente per accettare l\'invito',
     inviteAccepted: 'Invito Accettato!',
     completingProfile: 'Completamento profilo in corso...',
-    notFound: 'Invito non trovato o non valido',
-    expired: 'Questo invito è scaduto',
-    invalid: 'Questo invito non è più valido (potrebbe essere già stato utilizzato o revocato)',
     dataUnavailable: 'Dati invito non disponibili',
     errorValidating: 'Errore nella validazione dell\'invito',
     errorCreatingAccount: 'Errore creazione account (server)',
@@ -2513,6 +2517,18 @@ export const it = {
     success: 'Profilo completato con successo!',
     error: 'Errore nell\'aggiornamento del profilo: {error}',
     canCompleteLater: 'Puoi completare il profilo più tardi dalle impostazioni',
+  },
+
+  // Timer
+  timer: {
+    title: 'Timer',
+    completed: 'Timer completato!',
+    totalMinutes: 'totali',
+    minute: 'minuto',
+    minutes: 'minuti',
+    pause: 'Pausa',
+    start: 'Avvia',
+    reset: 'Reset',
   },
 
   // Kiosk
