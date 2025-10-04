@@ -43,6 +43,7 @@ interface RecipeEditorFormProps {
     steps?: any[];
   };
   mode?: 'create' | 'edit';
+  initialTab?: 'info' | 'ingredients' | 'steps';
   onSuccess?: (recipeId: string) => void;
   onCancel?: () => void;
 }
@@ -51,6 +52,7 @@ export function RecipeEditorForm({
   recipeId,
   initialData,
   mode = 'create',
+  initialTab = 'info',
   onSuccess,
   onCancel
 }: RecipeEditorFormProps) {
@@ -72,7 +74,7 @@ export function RecipeEditorForm({
   const [locationId, setLocationId] = useState<string>('');
   const [orgId, setOrgId] = useState<string>('');
   const [isDirty, setIsDirty] = useState(false);
-  const [currentTab, setCurrentTab] = useState('info');
+  const [currentTab, setCurrentTab] = useState<string>(initialTab);
 
   useEffect(() => {
     loadUserContext();

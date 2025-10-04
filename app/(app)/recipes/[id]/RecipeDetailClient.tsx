@@ -85,6 +85,13 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       if (!response.ok) throw new Error('Failed to load recipe');
       
       const data = await response.json();
+      console.log('Recipe loaded:', {
+        status: data.recipe.status,
+        can_edit: data.recipe.can_edit,
+        can_publish: data.recipe.can_publish,
+        created_by: data.recipe.created_by,
+        currentUserId,
+      });
       setRecipe(data.recipe);
     } catch (error) {
       console.error('Error loading recipe:', error);
@@ -197,6 +204,16 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const canApprove = (isDraft || isSubmitted) && canManage && recipe.photo_url;
   const canUseCookMode = isPublished && recipe.recipe_steps?.length > 0;
   const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
+
+  console.log('Recipe permissions:', {
+    isDraft,
+    isOwner,
+    canEdit,
+    canManage,
+    canApprove,
+    currentUserId,
+    createdBy: recipe.created_by,
+  });
 
   return (
     <div className="container mx-auto p-6 max-w-5xl space-y-6">

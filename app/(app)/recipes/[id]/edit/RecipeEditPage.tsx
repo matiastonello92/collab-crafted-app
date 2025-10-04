@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { RecipeEditorForm } from '../../components/RecipeEditorForm';
+import { RecipeBreadcrumb } from '../../components/RecipeBreadcrumb';
+import { RecipeProgressStepper } from '../../components/RecipeProgressStepper';
+import { RecipeSummaryCard } from '../../components/RecipeSummaryCard';
 
 interface RecipeEditPageProps {
   recipeId: string;
@@ -15,11 +18,12 @@ interface RecipeEditPageProps {
 export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'info';
+  const initialTab = (searchParams.get('tab') as 'info' | 'ingredients' | 'steps') || 'info';
   
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [canEdit, setCanEdit] = useState(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'ingredients' | 'steps'>(initialTab);
 
   useEffect(() => {
     loadRecipe();
@@ -71,8 +75,18 @@ export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
     return null;
   }
 
+  const completionStatus = {
+    info: !!(recipe.title && recipe.category && recipe.servings > 0),
+    ingredients: (recipe.recipe_ingredients?.length || 0) > 0,
+    steps: (recipe.recipe_steps?.length || 0) > 0,
+  };
+
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+    <div className="container mx-auto p-6 max-w-7xl space-y-6">
+      {/* Breadcrumb */}
+      <RecipeBreadcrumb mode="edit" recipeTitle={recipe.title} />
+
+      {/* Header */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -88,31 +102,57 @@ export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
         </div>
       </div>
 
+      {/* Progress Stepper */}
       <Card>
         <CardContent className="pt-6">
-          <RecipeEditorForm
-            recipeId={recipeId}
-            mode="edit"
-            initialData={{
-              title: recipe.title,
-              description: recipe.description,
-              category: recipe.category,
-              servings: recipe.servings,
-              prep_time_minutes: recipe.prep_time_minutes,
-              cook_time_minutes: recipe.cook_time_minutes,
-              photo_url: recipe.photo_url,
-              allergens: recipe.allergens,
-              season: recipe.season,
-              ingredients: recipe.recipe_ingredients || [],
-              steps: recipe.recipe_steps || [],
-            }}
-            onSuccess={(id) => {
-              router.push(`/recipes/${id}`);
-            }}
-            onCancel={() => router.push(`/recipes/${recipeId}`)}
+          <RecipeProgressStepper
+            currentStep={activeTab}
+            completionStatus={completionStatus}
+            onStepClick={setActiveTab}
           />
         </CardContent>
       </Card>
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        {/* Main Form */}
+        <Card>
+          <CardContent className="pt-6">
+            <RecipeEditorForm
+              recipeId={recipeId}
+              mode="edit"
+              initialTab={activeTab}
+              initialData={{
+                title: recipe.title,
+                description: recipe.description,
+                category: recipe.category,
+                servings: recipe.servings,
+                prep_time_minutes: recipe.prep_time_minutes,
+                cook_time_minutes: recipe.cook_time_minutes,
+                photo_url: recipe.photo_url,
+                allergens: recipe.allergens,
+                season: recipe.season,
+                ingredients: recipe.recipe_ingredients || [],
+                steps: recipe.recipe_steps || [],
+              }}
+              onSuccess={(id) => {
+                router.push(`/recipes/${id}`);
+              }}
+              onCancel={() => router.push(`/recipes/${recipeId}`)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Sidebar Summary */}
+        <RecipeSummaryCard
+          title={recipe.title}
+          category={recipe.category}
+          servings={recipe.servings}
+          photoUrl={recipe.photo_url}
+          ingredientsCount={recipe.recipe_ingredients?.length || 0}
+          stepsCount={recipe.recipe_steps?.length || 0}
+        />
+      </div>
     </div>
   );
 }
