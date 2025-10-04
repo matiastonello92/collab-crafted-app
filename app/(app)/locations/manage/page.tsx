@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, Clock, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
+import { t } from '@/lib/i18n'
 
 export default async function LocationsManagePage() {
   const supabase = await createSupabaseServerClient()
@@ -38,10 +39,11 @@ export default async function LocationsManagePage() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="text-center py-12">
           <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Nessuna Location Assegnata</h2>
+          <h2 className="text-2xl font-semibold mb-2">{t('common.messages.noLocationAssigned')}</h2>
           <p className="text-muted-foreground">
-            Non sei stato assegnato a nessuna location come responsabile.
-            Contatta un amministratore per ricevere le autorizzazioni necessarie.
+            {t('common.messages.notAssignedDesc')}
+            {' '}
+            {t('common.messages.contactAdmin')}
           </p>
         </div>
       </div>

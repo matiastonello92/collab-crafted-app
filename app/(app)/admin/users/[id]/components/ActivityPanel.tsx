@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Activity, Clock, User, Shield } from 'lucide-react'
+import { t } from '@/lib/i18n'
 
 interface ActivityPanelProps {
   userId: string
@@ -83,7 +84,7 @@ export default function ActivityPanel({ userId }: ActivityPanelProps) {
         {mockActivityData.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="mx-auto h-8 w-8 mb-2" />
-            <p>Nessuna attività registrata</p>
+            <p>{t('common.messages.noActivity')}</p>
           </div>
         ) : (
           <div className="space-y-4">

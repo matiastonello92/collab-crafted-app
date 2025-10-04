@@ -118,7 +118,7 @@ export function LocationManagersTab({ locationId }: Props) {
               <Input
                 id="managerEmail"
                 type="email"
-                placeholder="manager@example.com"
+                placeholder={t('common.placeholders.email')}
                 value={newManagerEmail}
                 onChange={(e) => setNewManagerEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddManager()}

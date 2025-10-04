@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ChefHat, CheckCircle2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeSummaryCardProps {
   title: string;
@@ -23,6 +24,8 @@ export function RecipeSummaryCard({
   ingredientsCount,
   stepsCount,
 }: RecipeSummaryCardProps) {
+  const { t } = useTranslation();
+  
   const fields = [
     { label: 'Titolo', value: title, isComplete: !!title },
     { label: 'Categoria', value: category, isComplete: !!category },
@@ -54,7 +57,7 @@ export function RecipeSummaryCard({
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <ImageIcon className="w-12 h-12" />
-              <span className="text-sm">Nessuna foto</span>
+              <span className="text-sm">{t('common.messages.noPhoto')}</span>
             </div>
           )}
         </div>

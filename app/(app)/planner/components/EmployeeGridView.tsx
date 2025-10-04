@@ -458,16 +458,16 @@ export function EmployeeGridView({
                       }}
                       className="absolute bottom-2 left-1/2 -translate-x-1/2 
                                  w-9 h-9 flex items-center justify-center
-                                 opacity-0 group-hover:opacity-100 
-                                 transition-all duration-200
-                                 bg-primary text-primary-foreground 
-                                 hover:bg-primary/90 hover:scale-110
-                                 rounded-full shadow-lg z-10
-                                 border-2 border-background"
-                      title="Aggiungi turno o assenza"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
+                                  opacity-0 group-hover:opacity-100 
+                                  transition-all duration-200
+                                  bg-primary text-primary-foreground 
+                                  hover:bg-primary/90 hover:scale-110
+                                  rounded-full shadow-lg z-10
+                                  border-2 border-background"
+                       title={t('common.ariaLabels.addShiftOrAbsence')}
+                     >
+                       <Plus className="h-4 w-4" />
+                     </button>
                   </div>
                 </DroppableCell>
               )
@@ -547,16 +547,16 @@ export function EmployeeGridView({
                         }}
                         className="absolute bottom-2 left-1/2 -translate-x-1/2 
                                    w-9 h-9 flex items-center justify-center
-                                   opacity-0 group-hover:opacity-100 
-                                   transition-all duration-200
-                                   bg-primary text-primary-foreground 
-                                   hover:bg-primary/90 hover:scale-110
-                                   rounded-full shadow-lg z-10
-                                   border-2 border-background"
-                        title="Aggiungi turno o assenza"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
+                                    opacity-0 group-hover:opacity-100 
+                                    transition-all duration-200
+                                    bg-primary text-primary-foreground 
+                                    hover:bg-primary/90 hover:scale-110
+                                    rounded-full shadow-lg z-10
+                                    border-2 border-background"
+                         title={t('common.ariaLabels.addShiftOrAbsence')}
+                       >
+                         <Plus className="h-4 w-4" />
+                       </button>
                     </div>
                   </DroppableCell>
                 )

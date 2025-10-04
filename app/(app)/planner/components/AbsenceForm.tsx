@@ -204,10 +204,10 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
       {/* Leave Type */}
       <div className="space-y-2">
-        <Label className="font-medium text-foreground">Tipo di Assenza</Label>
+        <Label className="font-medium text-foreground">{t('planner.absence.absenceType')}</Label>
         <Select value={leaveTypeId} onValueChange={setLeaveTypeId} disabled={loadingTypes}>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="Seleziona tipo..." />
+            <SelectValue placeholder={t('planner.absence.selectType')} />
           </SelectTrigger>
           <SelectContent>
             {leaveTypes
@@ -230,7 +230,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       {/* Time Slot - Only for weekly rest */}
       {isWeeklyRest && (
         <div className="space-y-2">
-          <Label className="font-medium text-foreground">Periodo</Label>
+          <Label className="font-medium text-foreground">{t('planner.absence.period')}</Label>
           <div className="grid grid-cols-3 gap-2">
             <Button
               type="button"
@@ -238,7 +238,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
               onClick={() => setTimeSlot('morning')}
               className="w-full"
             >
-              Mattina
+              {t('planner.absence.morning')}
             </Button>
             <Button
               type="button"
@@ -246,7 +246,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
               onClick={() => setTimeSlot('afternoon')}
               className="w-full"
             >
-              Pomeriggio
+              {t('planner.absence.afternoon')}
             </Button>
             <Button
               type="button"
@@ -254,7 +254,7 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
               onClick={() => setTimeSlot('full_day')}
               className="w-full"
             >
-              Giornata
+              {t('planner.absence.fullDay')}
             </Button>
           </div>
         </div>
@@ -262,14 +262,14 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
       {isPaidLeave && (
         <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-          Il congedo retribuito è sempre per la giornata intera
+          {t('planner.absence.paidLeaveInfo')}
         </div>
       )}
 
       {/* User Selection */}
       <div className="space-y-2">
         <Label className="font-medium text-foreground">
-          Seleziona Utenti ({selectedUsers.size})
+          {t('planner.absence.selectUsers')} ({selectedUsers.size})
         </Label>
         <ScrollArea className="h-[200px] rounded-md border bg-background">
           <div className="p-4 space-y-2">
@@ -298,12 +298,12 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label className="font-medium text-foreground">Note</Label>
+        <Label className="font-medium text-foreground">{t('planner.edit.notes')}</Label>
         <Textarea
           className="bg-background"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Aggiungi note..."
+          placeholder={t('planner.edit.addNotes')}
           rows={3}
         />
       </div>
@@ -311,10 +311,10 @@ export function AbsenceForm({ users, date, locationId, onSuccess, onCancel }: Ab
       {/* Actions */}
       <div className="flex justify-end gap-2 pt-4">
         <Button variant="outline" onClick={onCancel} disabled={submitting}>
-          Annulla
+          {t('common.cancel')}
         </Button>
         <Button onClick={handleSubmit} disabled={submitting || !leaveTypeId || selectedUsers.size === 0}>
-          {submitting ? 'Creazione...' : 'Crea Assenza'}
+          {submitting ? t('planner.common.creating') : t('planner.absence.createAbsence')}
         </Button>
       </div>
     </div>

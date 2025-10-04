@@ -8,6 +8,7 @@ import { format, parseISO, differenceInHours } from 'date-fns'
 import { Clock, AlertTriangle, User, MoreHorizontal } from 'lucide-react'
 import type { ShiftWithAssignments } from '@/types/shifts'
 import type { ViolationWithUser } from '@/types/compliance'
+import { useTranslation } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ViolationBadge } from '@/components/compliance/ViolationBadge'
 
@@ -35,6 +36,8 @@ export const ShiftCard = memo(function ShiftCard({
   conflicts = [],
   showConflicts = false
 }: Props) {
+  const { t } = useTranslation()
+  
   // Fix 6: Defensive programming - return early if shift is invalid
   if (!shift || !shift.id) {
     console.error('Invalid shift:', shift)
@@ -219,7 +222,7 @@ export const ShiftCard = memo(function ShiftCard({
           e.stopPropagation()
           onClick?.(shift)
         }}
-        aria-label="Azioni turno"
+        aria-label={t('common.ariaLabels.shiftActions')}
       >
         <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
       </button>

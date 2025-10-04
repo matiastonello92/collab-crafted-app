@@ -147,7 +147,7 @@ export function InviteUserForm() {
           <Input
             id="email"
             type="email"
-            placeholder="utente@example.com"
+            placeholder={t('common.placeholders.email')}
             {...register('email')}
           />
           {errors.email && (
@@ -159,7 +159,7 @@ export function InviteUserForm() {
           <Label htmlFor="firstName">Nome *</Label>
           <Input
             id="firstName"
-            placeholder="Mario"
+            placeholder={t('common.placeholders.firstName')}
             {...register('firstName')}
           />
           {errors.firstName && (
@@ -171,7 +171,7 @@ export function InviteUserForm() {
           <Label htmlFor="lastName">Cognome *</Label>
           <Input
             id="lastName"
-            placeholder="Rossi"
+            placeholder={t('common.placeholders.lastName')}
             {...register('lastName')}
           />
           {errors.lastName && (
@@ -185,10 +185,10 @@ export function InviteUserForm() {
         <Label>Ruolo Globale (opzionale)</Label>
         <Select value={globalRoleId} onValueChange={setGlobalRoleId}>
           <SelectTrigger>
-            <SelectValue placeholder="Seleziona ruolo globale..." />
+            <SelectValue placeholder={t('common.placeholders.selectGlobalRole')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nessun ruolo globale</SelectItem>
+            <SelectItem value="">{t('common.placeholders.noGlobalRole')}</SelectItem>
             {roles.map(role => (
               <SelectItem key={role.id} value={role.id}>
                 {role.display_name}
@@ -205,7 +205,7 @@ export function InviteUserForm() {
         <div className="flex gap-2">
           <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleziona location..." />
+              <SelectValue placeholder={t('common.placeholders.selectLocation')} />
             </SelectTrigger>
             <SelectContent>
               {locations.map(location => (
@@ -218,7 +218,7 @@ export function InviteUserForm() {
 
           <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleziona ruolo..." />
+              <SelectValue placeholder={t('common.placeholders.selectRole')} />
             </SelectTrigger>
             <SelectContent>
               {roles.map(role => (
