@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Circle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface StepStatus {
   info: boolean;
@@ -26,6 +27,7 @@ export function RecipeProgressStepper({
   completionStatus,
   onStepClick,
 }: RecipeProgressStepperProps) {
+  const { t } = useTranslation();
   const completedCount = Object.values(completionStatus).filter(Boolean).length;
   const totalSteps = Object.keys(completionStatus).length;
   const progress = (completedCount / totalSteps) * 100;
@@ -35,9 +37,9 @@ export function RecipeProgressStepper({
       {/* Progress Bar */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">Progresso completamento</span>
+          <span className="font-medium">{t('recipe.progressCompletion')}</span>
           <span className="text-muted-foreground">
-            {completedCount}/{totalSteps} sezioni
+            {completedCount}/{totalSteps} {t('recipe.sections')}
           </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">

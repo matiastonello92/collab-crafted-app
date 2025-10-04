@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { ListChecks } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface ChecklistWidgetProps {
   items: string[];
@@ -13,6 +14,7 @@ interface ChecklistWidgetProps {
 }
 
 export function ChecklistWidget({ items, recipeId, stepNumber }: ChecklistWidgetProps) {
+  const { t } = useTranslation();
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
 
   const storageKey = `cook_mode_${recipeId}_step_${stepNumber}_checklist`;
@@ -87,7 +89,7 @@ export function ChecklistWidget({ items, recipeId, stepNumber }: ChecklistWidget
 
         {completedCount === items.length && items.length > 0 && (
           <div className="text-center text-green-600 font-medium pt-2">
-            ✓ Checklist completata!
+            {t('recipe.checklistCompleted')}
           </div>
         )}
       </CardContent>

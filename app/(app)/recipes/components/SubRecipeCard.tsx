@@ -7,6 +7,7 @@ import { ChefHat, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { calculateSubRecipeScale } from '@/lib/recipes/scaling';
+import { useTranslation } from '@/lib/i18n';
 
 interface SubRecipeCardProps {
   subRecipe: {
@@ -19,6 +20,7 @@ interface SubRecipeCardProps {
 }
 
 export function SubRecipeCard({ subRecipe, requestedServings }: SubRecipeCardProps) {
+  const { t } = useTranslation();
   const scaleFactor = calculateSubRecipeScale(requestedServings, subRecipe.servings);
 
   return (
@@ -56,7 +58,7 @@ export function SubRecipeCard({ subRecipe, requestedServings }: SubRecipeCardPro
                 className="mt-2 h-7 text-xs gap-1 px-2"
               >
                 <ExternalLink className="h-3 w-3" />
-                Vedi ricetta completa
+                {t('recipe.viewFullRecipe')}
               </Button>
             </Link>
           </div>

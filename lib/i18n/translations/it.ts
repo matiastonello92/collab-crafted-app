@@ -1451,6 +1451,13 @@ export const it = {
     unsavedChangesConfirm: 'Hai modifiche non salvate. Vuoi davvero uscire?',
     saveFirstToAddSteps: 'Salva prima la ricetta per aggiungere gli step di preparazione',
     unsavedChangesKeyboardHint: 'Modifiche non salvate • Usa Ctrl/Cmd+S per salvare velocemente',
+    checklistCompleted: '✓ Checklist completata!',
+    progressCompletion: 'Progresso completamento',
+    sections: 'sezioni',
+    completion: 'Completamento',
+    missingFields: 'Campi mancanti:',
+    completeAllFields: 'completa tutti i campi per inviare la ricetta',
+    viewFullRecipe: 'Vedi ricetta completa',
     
     // Success messages
     recipeCreated: 'Ricetta creata! Aggiungi ora gli step di preparazione',
@@ -2400,9 +2407,14 @@ export const it = {
       errorAssigning: 'Errore nell\'assegnazione',
       errorPublishing: 'Errore nella pubblicazione',
       errorLoading: 'Errore nel caricamento dei turni',
-    },
+  },
 
-    // Job Tags
+  // Permission Tags
+  permissionTags: {
+    selectUsersFirst: 'Seleziona prima gli utenti',
+  },
+
+  // Job Tags
     jobTag: {
       created: 'Tag creato',
       updated: 'Tag aggiornato',

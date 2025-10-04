@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
+import { useTranslation } from '@/lib/i18n'
+import {
   Table, 
   TableBody, 
   TableCell, 
@@ -68,6 +69,7 @@ export function UsersTable({
   pageSize, 
   totalPages 
 }: UsersTableProps) {
+  const { t } = useTranslation();
   const [users] = useState<User[]>(initialUsers)
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
@@ -136,7 +138,7 @@ export function UsersTable({
   // Handle bulk assign
   const handleBulkAssign = async (tag: PermissionTag, orgId: string, locationId?: string) => {
     if (selectedUsers.size === 0) {
-      toast.warning('Please select users first')
+      toast.warning(t('permissionTags.selectUsersFirst'))
       return
     }
 

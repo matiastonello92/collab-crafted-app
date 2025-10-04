@@ -77,7 +77,7 @@ export function RecipeSummaryCard({
         {/* Progress */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">Completamento</span>
+            <span className="font-medium">{t('recipe.completion')}</span>
             <span className="text-muted-foreground">
               {completedFields}/{totalFields}
             </span>
@@ -123,7 +123,7 @@ export function RecipeSummaryCard({
         {completedFields < totalFields && (
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              <strong>Campi mancanti:</strong> completa tutti i campi per inviare la ricetta
+              <strong>{t('recipe.missingFields')}</strong> {t('recipe.completeAllFields')}
             </p>
           </div>
         )}

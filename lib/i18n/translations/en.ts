@@ -1091,6 +1091,13 @@ export const en = {
     unsavedChangesConfirm: 'You have unsaved changes. Do you really want to exit?',
     saveFirstToAddSteps: 'Save the recipe first to add preparation steps',
     unsavedChangesKeyboardHint: 'Unsaved changes • Use Ctrl/Cmd+S to save quickly',
+    checklistCompleted: '✓ Checklist completed!',
+    progressCompletion: 'Completion progress',
+    sections: 'sections',
+    completion: 'Completion',
+    missingFields: 'Missing fields:',
+    completeAllFields: 'complete all fields to submit the recipe',
+    viewFullRecipe: 'View full recipe',
     
     // Success messages
     recipeCreated: 'Recipe created! Now add the preparation steps',
@@ -2276,9 +2283,14 @@ export const en = {
       errorAssigning: 'Error assigning',
       errorPublishing: 'Error publishing',
       errorLoading: 'Error loading shifts',
-    },
+  },
 
-    // Job Tags
+  // Permission Tags
+  permissionTags: {
+    selectUsersFirst: 'Please select users first',
+  },
+
+  // Job Tags
     jobTag: {
       created: 'Tag created',
       updated: 'Tag updated',
