@@ -95,7 +95,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
         setSelectedLocation(undefined)
         onUpdate?.()
       } else {
-        toast.error(result.error || 'Failed to assign role')
+        toast.error(result.error || t('toast.error'))
         // Revert optimistic update on error by triggering a re-render
         onUpdate?.()
       }
@@ -106,7 +106,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
     // Find the role ID from available roles
     const roleData = availableRoles.find(r => r.name === role.role_name)
     if (!roleData) {
-      toast.error('Role data not found')
+      toast.error(t('toast.roleNotFound'))
       return
     }
 
@@ -123,7 +123,7 @@ export default function RolesByLocationPanel({ roles, userId, onUpdate }: RolesB
         toast.success(result.message)
         onUpdate?.()
       } else {
-        toast.error(result.error || 'Failed to revoke role')
+        toast.error(result.error || t('toast.error'))
         // Revert optimistic update on error
         onUpdate?.()
       }

@@ -20,15 +20,14 @@ import { withRetry } from '@/lib/utils/retry'
 import { getEmailRedirectTo } from '@/lib/url'
 import { useTranslation } from '@/lib/i18n'
 
-const passwordSchema = z.object({
-  password: z.string().min(6, 'Password deve essere di almeno 6 caratteri'),
+// Schema will be created inside component to access t() function
+const createPasswordSchema = (t: (key: string) => string) => z.object({
+  password: z.string().min(6, t('validation.passwordMinLength')),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Le password non coincidono",
+  message: t('validation.passwordMismatch'),
   path: ["confirmPassword"],
 })
-
-type PasswordForm = z.infer<typeof passwordSchema>
 
 interface InvitationData {
   email: string
@@ -65,6 +64,9 @@ export function InviteAcceptance({ token }: Props) {
   const [emailMismatch, setEmailMismatch] = useState(false)
   const [uiState, setUiState] = useState<UiState>({ status: 'idle' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const passwordSchema = createPasswordSchema(t)
+  type PasswordForm = z.infer<typeof passwordSchema>
 
   const {
     register,

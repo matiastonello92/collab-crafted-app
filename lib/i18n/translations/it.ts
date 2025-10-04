@@ -1686,6 +1686,18 @@ export const it = {
       errorLoading: 'Errore nel caricamento delle richieste',
       errorProcessing: 'Errore nella decisione',
     },
+    
+    // General Toasts
+    permissionNotFound: 'Dati permesso non trovati',
+    roleNotFound: 'Dati ruolo non trovati',
+    timerComplete: 'Timer completato!',
+    loadError: 'Errore nel caricamento',
+    profileUpdateSuccess: 'Profilo completato con successo!',
+    profileUpdateError: 'Errore nell\'aggiornamento del profilo',
+    profileUpdateLater: 'Puoi completare il profilo più tardi dalle impostazioni',
+    inviteError: 'Errore nella creazione dell\'invito',
+    recipeSaveError: 'Errore nel salvataggio della ricetta',
+    tagSaveError: 'Errore nel salvataggio del tag',
   },
 
   // Invite Acceptance
@@ -1805,11 +1817,13 @@ export const it = {
   // Validation Messages
   validation: {
     passwordMinLength: 'La password deve contenere almeno {min} caratteri',
-    passwordsNotMatch: 'Le password non corrispondono',
+    passwordsNotMatch: 'Le password non coincidono',
     invalidEmail: 'Email non valida',
     emailRequired: 'Email obbligatoria',
     nameRequired: 'Nome obbligatorio',
+    surnameRequired: 'Cognome richiesto',
     fullNameRequired: 'Nome completo obbligatorio',
+    fullNameTooLong: 'Nome troppo lungo',
     phoneRequired: 'Telefono obbligatorio',
     phoneFormat: 'Formato telefono non valido',
     localeRequired: 'Lingua obbligatoria',
@@ -1817,6 +1831,17 @@ export const it = {
     fieldRequired: 'Campo obbligatorio',
     minLength: 'Minimo {min} caratteri',
     maxLength: 'Massimo {max} caratteri',
+    required: 'Questo campo è obbligatorio',
+    email: 'Inserisci un indirizzo email valido',
+    password: 'La password deve contenere almeno 8 caratteri',
+    passwordMatch: 'Le password non corrispondono',
+    phone: 'Inserisci un numero di telefono valido',
+    url: 'Inserisci un URL valido',
+    number: 'Inserisci un numero valido',
+    date: 'Inserisci una data valida',
+    time: 'Inserisci un orario valido',
+    passwordRequired: 'Password richiesta',
+    passwordMismatch: 'Le password non coincidono',
   },
 
   // Onboarding Shifts List

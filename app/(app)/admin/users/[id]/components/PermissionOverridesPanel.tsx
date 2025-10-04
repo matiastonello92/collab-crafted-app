@@ -116,7 +116,7 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
         setIsGranted(true)
         onUpdate?.()
       } else {
-        toast.error(result.error || 'Failed to set permission override')
+        toast.error(result.error || t('toast.error'))
         // Revert optimistic update on error
         onUpdate?.()
       }
@@ -127,7 +127,7 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
     // Find the permission ID from available permissions
     const permissionData = availablePermissions.find(p => p.name === override.permission_name)
     if (!permissionData) {
-      toast.error('Permission data not found')
+      toast.error(t('toast.permissionNotFound'))
       return
     }
 
@@ -145,7 +145,7 @@ export default function PermissionOverridesPanel({ overrides, userId, onUpdate }
         toast.success(result.message)
         onUpdate?.()
       } else {
-        toast.error(result.error || 'Failed to remove permission override')
+        toast.error(result.error || t('toast.error'))
         // Revert optimistic update on error
         onUpdate?.()
       }

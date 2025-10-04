@@ -16,14 +16,13 @@ import { User, Phone, Globe, ArrowRight, CheckCircle } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { useTranslation } from '@/lib/i18n'
 
-const profileSchema = z.object({
-  full_name: z.string().min(1, 'Nome completo è richiesto').max(100, 'Nome troppo lungo'),
+// Schema will be created inside component to access t() function
+const createProfileSchema = (t: (key: string) => string) => z.object({
+  full_name: z.string().min(1, t('validation.fullNameRequired')).max(100, t('validation.fullNameTooLong')),
   phone: z.string().optional().or(z.literal('')),
   locale: z.string().min(1),
   timezone: z.string().min(1),
 })
-
-type ProfileForm = z.infer<typeof profileSchema>
 
 interface Props {
   token: string
@@ -39,6 +38,9 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedLocale, setSelectedLocale] = useState(initialProfile?.locale || 'it')
   const [selectedTimezone, setSelectedTimezone] = useState(initialProfile?.timezone || 'Europe/Rome')
+
+  const profileSchema = createProfileSchema(t)
+  type ProfileForm = z.infer<typeof profileSchema>
 
   const {
     register,
@@ -82,7 +84,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
         }
 
         // Show success message
-        toast.success('Profilo completato con successo!')
+        toast.success(t('toast.profileUpdateSuccess'))
         
         // Redirect to dashboard after short delay
         setTimeout(() => {
@@ -91,7 +93,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
         
       } catch (error: any) {
         console.error('Error updating profile:', error)
-        toast.error(`Errore nell'aggiornamento del profilo: ${error.message}`)
+        toast.error(`${t('toast.profileUpdateError')}: ${error.message}`)
         setIsSubmitting(false)
       }
     })
@@ -99,7 +101,7 @@ export function CompleteProfileForm({ token, user, initialProfile, inviteData }:
 
   const handleSkip = () => {
     // Allow users to skip profile completion and go directly to dashboard
-    toast.info('Puoi completare il profilo più tardi dalle impostazioni')
+    toast.info(t('toast.profileUpdateLater'))
     router.push('/')
   }
 

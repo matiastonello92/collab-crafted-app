@@ -1650,6 +1650,18 @@ export const en = {
       errorLoading: 'Failed to load correction requests',
       errorProcessing: 'Failed to process decision',
     },
+    
+    // General Toasts
+    permissionNotFound: 'Permission data not found',
+    roleNotFound: 'Role data not found',
+    timerComplete: 'Timer complete!',
+    loadError: 'Loading error',
+    profileUpdateSuccess: 'Profile completed successfully!',
+    profileUpdateError: 'Error updating profile',
+    profileUpdateLater: 'You can complete your profile later in settings',
+    inviteError: 'Error creating invitation',
+    recipeSaveError: 'Error saving recipe',
+    tagSaveError: 'Error saving tag',
   },
 
   // Invite Acceptance
@@ -1773,7 +1785,9 @@ export const en = {
     invalidEmail: 'Invalid email',
     emailRequired: 'Email is required',
     nameRequired: 'Name is required',
+    surnameRequired: 'Surname is required',
     fullNameRequired: 'Full name is required',
+    fullNameTooLong: 'Name is too long',
     phoneRequired: 'Phone is required',
     phoneFormat: 'Invalid phone format',
     localeRequired: 'Language is required',
@@ -1781,6 +1795,17 @@ export const en = {
     fieldRequired: 'Field is required',
     minLength: 'Minimum {min} characters',
     maxLength: 'Maximum {max} characters',
+    required: 'This field is required',
+    email: 'Enter a valid email address',
+    password: 'Password must contain at least 8 characters',
+    passwordMatch: 'Passwords do not match',
+    phone: 'Enter a valid phone number',
+    url: 'Enter a valid URL',
+    number: 'Enter a valid number',
+    date: 'Enter a valid date',
+    time: 'Enter a valid time',
+    passwordRequired: 'Password required',
+    passwordMismatch: 'Passwords do not match',
   },
 
   // Onboarding Shifts List
