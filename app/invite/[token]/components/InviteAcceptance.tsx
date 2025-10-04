@@ -545,7 +545,7 @@ export function InviteAcceptance({ token }: Props) {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Minimo 6 caratteri"
+                    placeholder={t('validation.passwordPlaceholder')}
                     className="text-sm pr-10"
                     {...register('password')}
                   />
@@ -644,11 +644,12 @@ function LoginForm({
   onSubmit: (data: { email: string; password: string }) => void;
   isPending: boolean;
 }) {
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   
   const loginSchema = z.object({
     email: z.string().email(),
-    password: z.string().min(1, 'Password richiesta'),
+    password: z.string().min(1, t('validation.passwordRequired')),
   })
 
   const {
@@ -679,7 +680,7 @@ function LoginForm({
           <Input
             id="loginPassword"
             type={showPassword ? "text" : "password"}
-            placeholder="Inserisci password"
+            placeholder={t('validation.enterPassword')}
             className="text-sm pr-10"
             {...register('password')}
           />

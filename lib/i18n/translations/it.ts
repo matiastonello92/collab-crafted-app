@@ -136,6 +136,8 @@ export const it = {
 
   // Admin
   admin: {
+    pageTitle: 'Admin Dashboard',
+    pageDescription: 'Panoramica amministrazione sistema',
     users: {
       title: 'Gestione Utenti',
       subtitle: 'Visualizza e gestisci tutti gli utenti del sistema',
@@ -2659,6 +2661,8 @@ export const it = {
     time: 'Inserisci un orario valido',
     passwordRequired: 'Password richiesta',
     passwordMismatch: 'Le password non coincidono',
+    passwordPlaceholder: 'Minimo 6 caratteri',
+    enterPassword: 'Inserisci password',
   },
 
   // Onboarding Shifts List
