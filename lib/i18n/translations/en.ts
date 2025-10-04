@@ -2420,4 +2420,98 @@ export const en = {
       registeredUsers: 'Registered users'
     }
   },
+
+  // Days of week
+  days: {
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday'
+  },
+
+  // Schedule
+  schedule: {
+    openingHours: 'Opening Hours',
+    closed: 'Closed',
+    morning: 'Morning',
+    afternoon: 'Afternoon',
+    edit: 'Edit',
+    cancel: 'Cancel',
+    save: 'Save',
+    saving: 'Saving...'
+  },
+
+  // Feature Flags
+  featureFlags: {
+    filters: 'Filters',
+    allModules: 'All modules',
+    allScopes: 'All scopes',
+    onlyGlobal: 'Global only',
+    onlyLocation: 'Location only',
+    activeFlags: 'Active Feature Flags',
+    manageFeaturesDesc: 'Manage active features for your organization',
+    flag: 'Flag',
+    module: 'Module',
+    scope: 'Scope',
+    status: 'Status',
+    actions: 'Actions',
+    global: 'Global',
+    active: 'Active',
+    inactive: 'Inactive',
+    edit: 'Edit',
+    totalFlags: 'Total Flags',
+    activeCount: 'Active Flags',
+    globalFlags: 'Global Flags',
+    perLocation: 'Per Location'
+  },
+
+  // Metadata
+  metadata: {
+    complianceSettings: 'Manage compliance rules',
+    emailLogsDesc: 'View and filter system email logs',
+    timesheetDetail: 'View and approve timesheets',
+    myLocations: 'My Locations',
+    myLocationsDesc: 'Manage schedules for your responsible locations',
+    myProfile: 'My Profile',
+    myProfileDesc: 'View your personal information and assignments',
+    jobTagsManage: 'Manage staff roles and location assignments'
+  },
+
+  // Timesheet
+  timesheet: {
+    detail: 'Details',
+    totalBreaks: 'Total breaks',
+    plannedHours: 'Planned hours',
+    variance: 'Difference vs planned',
+    notes: 'Notes',
+    notesPlaceholder: 'Add timesheet notes...',
+    approving: 'Approving...',
+    approveAndLock: 'Approve and Lock',
+    approvedOn: 'Approved on',
+    notFound: 'Timesheet not found',
+    regularHours: 'Regular Hours',
+    overtime: 'Overtime',
+    daysWorked: 'Days Worked',
+    totalHours: 'Total Hours',
+    totalMinutes: 'total minutes',
+    totalMinutesOne: 'minute'
+  },
+
+  // Platform
+  platformStats: {
+    totalTenants: 'Total Tenants',
+    totalUsers: 'Total Users'
+  },
+
+  // General
+  general: {
+    manageSchedule: 'Manage Schedule',
+    manageRoles: 'Manage Roles',
+    manageSessions: 'Manage user active sessions',
+    viewPersonalInfo: 'View your personal information and assignments',
+    total: 'Total'
+  }
 } as const;

@@ -5,7 +5,7 @@ import { EmailLogsClient } from './EmailLogsClient';
 
 export const metadata: Metadata = {
   title: 'Log Email | Admin Settings',
-  description: 'Visualizza e filtra i log delle email inviate dal sistema'
+  description: 'metadata.emailLogsDesc'
 };
 
 export default async function EmailLogsPage() {

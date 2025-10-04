@@ -2487,4 +2487,98 @@ export const it = {
       registeredUsers: 'Utenti registrati'
     }
   },
+
+  // Days of week
+  days: {
+    monday: 'Lunedì',
+    tuesday: 'Martedì',
+    wednesday: 'Mercoledì',
+    thursday: 'Giovedì',
+    friday: 'Venerdì',
+    saturday: 'Sabato',
+    sunday: 'Domenica'
+  },
+
+  // Schedule
+  schedule: {
+    openingHours: 'Orari di Apertura',
+    closed: 'Chiuso',
+    morning: 'Mattino',
+    afternoon: 'Pomeriggio',
+    edit: 'Modifica',
+    cancel: 'Annulla',
+    save: 'Salva',
+    saving: 'Salvataggio...'
+  },
+
+  // Feature Flags
+  featureFlags: {
+    filters: 'Filtri',
+    allModules: 'Tutti i moduli',
+    allScopes: 'Tutti gli ambiti',
+    onlyGlobal: 'Solo globali',
+    onlyLocation: 'Solo per location',
+    activeFlags: 'Feature Flags Attivi',
+    manageFeaturesDesc: 'Gestisci le funzionalità attive per la tua organizzazione',
+    flag: 'Flag',
+    module: 'Modulo',
+    scope: 'Ambito',
+    status: 'Stato',
+    actions: 'Azioni',
+    global: 'Globale',
+    active: 'Attivo',
+    inactive: 'Inattivo',
+    edit: 'Modifica',
+    totalFlags: 'Flags Totali',
+    activeCount: 'Flags Attivi',
+    globalFlags: 'Flags Globali',
+    perLocation: 'Per Location'
+  },
+
+  // Metadata
+  metadata: {
+    complianceSettings: 'Gestisci regole di compliance',
+    emailLogsDesc: 'Visualizza e filtra i log delle email inviate dal sistema',
+    timesheetDetail: 'Visualizza e approva timesheet',
+    myLocations: 'Le Mie Locations',
+    myLocationsDesc: 'Gestisci gli orari delle location di cui sei responsabile',
+    myProfile: 'Il Mio Profilo',
+    myProfileDesc: 'Visualizza le tue informazioni personali e le tue assegnazioni',
+    jobTagsManage: 'Gestisci i ruoli del personale e le assegnazioni per location'
+  },
+
+  // Timesheet
+  timesheet: {
+    detail: 'Dettaglio',
+    totalBreaks: 'Pause totali',
+    plannedHours: 'Ore pianificate',
+    variance: 'Differenza vs pianificate',
+    notes: 'Note',
+    notesPlaceholder: 'Aggiungi note al timesheet...',
+    approving: 'Approvazione...',
+    approveAndLock: 'Approva e Blocca',
+    approvedOn: 'Approvato il',
+    notFound: 'Timesheet non trovato',
+    regularHours: 'Ore Ordinarie',
+    overtime: 'Straordinari',
+    daysWorked: 'Giorni Lavorati',
+    totalHours: 'Ore Totali',
+    totalMinutes: 'minuti totali',
+    totalMinutesOne: 'minuto'
+  },
+
+  // Platform
+  platformStats: {
+    totalTenants: 'Tenants Totali',
+    totalUsers: 'Utenti Totali'
+  },
+
+  // General
+  general: {
+    manageSchedule: 'Gestisci Orari',
+    manageRoles: 'Gestisci Ruoli',
+    manageSessions: 'Gestisci le sessioni attive dell\'utente',
+    viewPersonalInfo: 'Visualizza le tue informazioni personali e le tue assegnazioni',
+    total: 'Totali'
+  }
 } as const;

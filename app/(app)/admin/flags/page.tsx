@@ -202,17 +202,17 @@ export default function FeatureFlagsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Filtri
+            {t('featureFlags.filters')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Select value={selectedModule} onValueChange={setSelectedModule}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tutti i moduli" />
+                <SelectValue placeholder={t('featureFlags.allModules')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti i moduli</SelectItem>
+                <SelectItem value="all">{t('featureFlags.allModules')}</SelectItem>
                 {mockModules.map((module) => (
                   <SelectItem key={module} value={module}>
                     {module}
@@ -223,12 +223,12 @@ export default function FeatureFlagsPage() {
             
             <Select value={selectedScope} onValueChange={setSelectedScope}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tutti gli ambiti" />
+                <SelectValue placeholder={t('featureFlags.allScopes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti gli ambiti</SelectItem>
-                <SelectItem value="global">Solo globali</SelectItem>
-                <SelectItem value="location">Solo per location</SelectItem>
+                <SelectItem value="all">{t('featureFlags.allScopes')}</SelectItem>
+                <SelectItem value="global">{t('featureFlags.onlyGlobal')}</SelectItem>
+                <SelectItem value="location">{t('featureFlags.onlyLocation')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -240,21 +240,21 @@ export default function FeatureFlagsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Flag className="h-5 w-5" />
-            Feature Flags Attivi
+            {t('featureFlags.activeFlags')}
           </CardTitle>
           <CardDescription>
-            Gestisci le funzionalità attive per la tua organizzazione
+            {t('featureFlags.manageFeaturesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Flag</TableHead>
-                <TableHead>Modulo</TableHead>
-                <TableHead>Ambito</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>Azioni</TableHead>
+                <TableHead>{t('featureFlags.flag')}</TableHead>
+                <TableHead>{t('featureFlags.module')}</TableHead>
+                <TableHead>{t('featureFlags.scope')}</TableHead>
+                <TableHead>{t('featureFlags.status')}</TableHead>
+                <TableHead>{t('featureFlags.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -279,7 +279,7 @@ export default function FeatureFlagsPage() {
                       {flag.scope === 'global' ? (
                         <>
                           <Globe className="h-4 w-4" />
-                          <span>Globale</span>
+                          <span>{t('featureFlags.global')}</span>
                         </>
                       ) : (
                         <>
@@ -296,13 +296,13 @@ export default function FeatureFlagsPage() {
                         onCheckedChange={() => toggleFlag(flag.id)}
                       />
                       <Badge variant={flag.enabled ? 'default' : 'secondary'}>
-                        {flag.enabled ? 'Attivo' : 'Inattivo'}
+                        {flag.enabled ? t('featureFlags.active') : t('featureFlags.inactive')}
                       </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm">
-                      Modifica
+                      {t('featureFlags.edit')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -318,7 +318,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Totali</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('featureFlags.totalFlags')}</p>
                 <p className="text-2xl font-bold">{mockFlags.length}</p>
               </div>
               <Flag className="h-8 w-8 text-muted-foreground" />
@@ -330,7 +330,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Attivi</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('featureFlags.activeCount')}</p>
                 <p className="text-2xl font-bold text-green-600">
                   {mockFlags.filter(f => f.enabled).length}
                 </p>
@@ -346,7 +346,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Globali</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('featureFlags.globalFlags')}</p>
                 <p className="text-2xl font-bold">
                   {mockFlags.filter(f => f.scope === 'global').length}
                 </p>
@@ -360,7 +360,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Per Location</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('featureFlags.perLocation')}</p>
                 <p className="text-2xl font-bold">
                   {mockFlags.filter(f => f.scope === 'location').length}
                 </p>

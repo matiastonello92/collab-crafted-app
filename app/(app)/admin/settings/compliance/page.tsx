@@ -3,7 +3,7 @@ import { ComplianceSettingsClient } from './ComplianceSettingsClient'
 
 export const metadata: Metadata = {
   title: 'Compliance Settings',
-  description: 'Gestisci regole di compliance'
+  description: 'metadata.complianceSettings'
 }
 
 export default function ComplianceSettingsPage() {

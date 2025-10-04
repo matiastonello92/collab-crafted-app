@@ -97,7 +97,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <p className="text-center text-muted-foreground">Caricamento...</p>
+        <p className="text-center text-muted-foreground">{t('admin.loading')}</p>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
   if (!timesheet) {
     return (
       <div className="container mx-auto p-6">
-        <p className="text-center text-muted-foreground">Timesheet non trovato</p>
+        <p className="text-center text-muted-foreground">{t('timesheet.notFound')}</p>
       </div>
     )
   }
@@ -141,7 +141,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
         {!timesheet.approved_at && (
           <Button onClick={handleApprove} disabled={approving}>
             <CheckCircle className="w-4 h-4 mr-2" />
-            {approving ? 'Approvazione...' : 'Approva e Blocca'}
+            {approving ? t('timesheet.approving') : t('timesheet.approveAndLock')}
           </Button>
         )}
       </div>
@@ -149,39 +149,39 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">{t('admin.timesheets.totalHours')}</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('timesheet.totalHours')}</div>
           <div className="text-3xl font-bold">{formatMinutesToHours(totalHours)}h</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Ore Ordinarie</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('timesheet.regularHours')}</div>
           <div className="text-3xl font-bold">{formatMinutesToHours(totals.regular_minutes)}h</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Straordinari</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('timesheet.overtime')}</div>
           <div className="text-3xl font-bold text-orange-600">
             {formatMinutesToHours(totals.overtime_minutes)}h
           </div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Giorni Lavorati</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('timesheet.daysWorked')}</div>
           <div className="text-3xl font-bold">{totals.days_worked}</div>
         </Card>
       </div>
 
       {/* Breakdown */}
       <Card className="p-6 space-y-4">
-        <h2 className="text-xl font-bold">Dettaglio</h2>
+        <h2 className="text-xl font-bold">{t('timesheet.detail')}</h2>
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Pause totali</span>
+            <span className="text-muted-foreground">{t('timesheet.totalBreaks')}</span>
             <span className="font-semibold">{formatMinutesToHours(totals.break_minutes)}h</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Ore pianificate</span>
+            <span className="text-muted-foreground">{t('timesheet.plannedHours')}</span>
             <span className="font-semibold">{formatMinutesToHours(totals.planned_minutes)}h</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Differenza vs pianificate</span>
+            <span className="text-muted-foreground">{t('timesheet.variance')}</span>
             <span className={`font-semibold ${totals.variance_minutes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {totals.variance_minutes >= 0 ? '+' : ''}
               {formatMinutesToHours(totals.variance_minutes)}h
@@ -192,11 +192,11 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
 
       {/* Notes */}
       <Card className="p-6 space-y-4">
-        <h2 className="text-xl font-bold">Note</h2>
+        <h2 className="text-xl font-bold">{t('timesheet.notes')}</h2>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Aggiungi note al timesheet..."
+          placeholder={t('timesheet.notesPlaceholder')}
           rows={4}
           disabled={!!timesheet.approved_at}
         />
@@ -207,7 +207,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
           <div className="flex items-center gap-2 text-green-800">
             <CheckCircle className="w-5 h-5" />
             <span className="font-semibold">
-              Approvato il {new Date(timesheet.approved_at).toLocaleDateString('it-IT')}
+              {t('timesheet.approvedOn')} {new Date(timesheet.approved_at).toLocaleDateString('it-IT')}
             </span>
           </div>
         </Card>
