@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,7 @@ export default function LoginPage() {
     e.preventDefault();
     
     if (!email || !password) {
-      setError('Inserisci email e password');
+      setError(t('login.errorEmailPassword'));
       return;
     }
 
@@ -60,7 +62,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Errore durante il login');
+      setError(t('login.errorLogin'));
     } finally {
       setLoading(false);
     }
@@ -76,14 +78,14 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Klyra</h2>
-            <p className="text-gray-600">Accedi con il tuo account Supabase</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('login.title')}</h2>
+            <p className="text-gray-600">{t('login.subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t('login.email')}
               </label>
               <input
                 id="email"
@@ -92,14 +94,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="inserisci la tua email"
+                placeholder={t('login.emailPlaceholder')}
                 disabled={loading}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                {t('login.password')}
               </label>
               <input
                 id="password"
@@ -108,7 +110,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="inserisci la tua password"
+                placeholder={t('login.passwordPlaceholder')}
                 disabled={loading}
               />
             </div>
@@ -132,17 +134,17 @@ export default function LoginPage() {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Accesso in corso...
+                  {t('login.loggingIn')}
                 </div>
               ) : (
-                'Accedi'
+                t('login.loginButton')
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Staff Management System • Powered by Supabase
+              {t('login.poweredBy')}
             </p>
           </div>
         </div>

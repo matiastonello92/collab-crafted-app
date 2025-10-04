@@ -9,6 +9,7 @@ import { Pencil, Trash2, User } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface JobTag {
   id: string
@@ -51,6 +52,7 @@ export function ShiftsList({
   onDelete,
   onAssignmentChange,
 }: ShiftsListProps) {
+  const { t } = useTranslation()
   const [assigningShift, setAssigningShift] = useState<string | null>(null)
 
   const handleAssign = async (shiftId: string, userId: string) => {
@@ -66,22 +68,22 @@ export function ShiftsList({
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || 'Errore nell\'assegnazione')
+        throw new Error(error.error || t('onboardingShiftsList.assignError'))
       }
 
-      toast.success('Utente assegnato con successo')
+      toast.success(t('onboardingShiftsList.assignSuccess'))
       setAssigningShift(null)
       onAssignmentChange()
     } catch (error: any) {
       console.error('Error assigning shift:', error)
-      toast.error(error.message || 'Errore nell\'assegnazione')
+      toast.error(error.message || t('onboardingShiftsList.assignError'))
     }
   }
 
   const getJobTagLabel = (jobTagId?: string) => {
-    if (!jobTagId) return 'Nessun ruolo'
+    if (!jobTagId) return t('onboardingShiftsList.noRole')
     const tag = jobTags.find((t) => t.id === jobTagId)
-    return tag?.label_it || 'Sconosciuto'
+    return tag?.label_it || t('onboardingShiftsList.unknown')
   }
 
   const getJobTagColor = (jobTagId?: string) => {
@@ -91,16 +93,16 @@ export function ShiftsList({
   }
 
   const getUserName = (userId?: string) => {
-    if (!userId) return 'Non assegnato'
+    if (!userId) return t('onboardingShiftsList.unassigned')
     const user = users.find((u) => u.id === userId)
-    return user?.full_name || user?.email || 'Sconosciuto'
+    return user?.full_name || user?.email || t('onboardingShiftsList.unknown')
   }
 
   if (shifts.length === 0) {
     return (
       <Card className="p-8 text-center">
         <p className="text-muted-foreground">
-          Nessun turno creato. Usa il form sopra per aggiungere turni.
+          {t('onboardingShiftsList.noShifts')}
         </p>
       </Card>
     )
@@ -137,7 +139,7 @@ export function ShiftsList({
                   {format(parseISO(shift.end_at), 'HH:mm')}
                 </span>
                 {shift.break_minutes > 0 && (
-                  <span>Pausa: {shift.break_minutes} min</span>
+                  <span>{t('onboardingShiftsList.breakMinutes').replace('{minutes}', shift.break_minutes.toString())}</span>
                 )}
               </div>
 
@@ -153,7 +155,7 @@ export function ShiftsList({
                       users={users}
                       value={shift.assigned_user_id}
                       onValueChange={(userId) => handleAssign(shift.id, userId)}
-                      placeholder="Seleziona utente"
+                      placeholder={t('onboardingShiftsList.selectUser')}
                     />
                   </div>
                 ) : (

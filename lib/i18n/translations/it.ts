@@ -1801,4 +1801,48 @@ export const it = {
     newRecipe: 'Nuova Ricetta',
     editRecipe: 'Modifica Ricetta',
   },
+
+  // Validation Messages
+  validation: {
+    passwordMinLength: 'La password deve contenere almeno {min} caratteri',
+    passwordsNotMatch: 'Le password non corrispondono',
+    invalidEmail: 'Email non valida',
+    emailRequired: 'Email obbligatoria',
+    nameRequired: 'Nome obbligatorio',
+    fullNameRequired: 'Nome completo obbligatorio',
+    phoneRequired: 'Telefono obbligatorio',
+    phoneFormat: 'Formato telefono non valido',
+    localeRequired: 'Lingua obbligatoria',
+    timezoneRequired: 'Timezone obbligatorio',
+    fieldRequired: 'Campo obbligatorio',
+    minLength: 'Minimo {min} caratteri',
+    maxLength: 'Massimo {max} caratteri',
+  },
+
+  // Onboarding Shifts List
+  onboardingShiftsList: {
+    noRole: 'Nessun ruolo',
+    noShifts: 'Nessun turno creato. Usa il form sopra per aggiungere turni.',
+    breakMinutes: 'Pausa: {minutes} min',
+    unassigned: 'Non assegnato',
+    unknown: 'Sconosciuto',
+    selectUser: 'Seleziona utente',
+    assignSuccess: 'Utente assegnato con successo',
+    assignError: 'Errore nell\'assegnazione',
+  },
+
+  // Login Page
+  login: {
+    title: 'Klyra',
+    subtitle: 'Accedi con il tuo account Supabase',
+    email: 'Email',
+    password: 'Password',
+    emailPlaceholder: 'inserisci la tua email',
+    passwordPlaceholder: 'inserisci la tua password',
+    loginButton: 'Accedi',
+    loggingIn: 'Accesso in corso...',
+    errorEmailPassword: 'Inserisci email e password',
+    errorLogin: 'Errore durante il login',
+    poweredBy: 'Staff Management System • Powered by Supabase',
+  },
 } as const;

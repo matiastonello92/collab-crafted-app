@@ -1765,4 +1765,48 @@ export const en = {
     newRecipe: 'New Recipe',
     editRecipe: 'Edit Recipe',
   },
+
+  // Validation Messages
+  validation: {
+    passwordMinLength: 'Password must be at least {min} characters',
+    passwordsNotMatch: 'Passwords do not match',
+    invalidEmail: 'Invalid email',
+    emailRequired: 'Email is required',
+    nameRequired: 'Name is required',
+    fullNameRequired: 'Full name is required',
+    phoneRequired: 'Phone is required',
+    phoneFormat: 'Invalid phone format',
+    localeRequired: 'Language is required',
+    timezoneRequired: 'Timezone is required',
+    fieldRequired: 'Field is required',
+    minLength: 'Minimum {min} characters',
+    maxLength: 'Maximum {max} characters',
+  },
+
+  // Onboarding Shifts List
+  onboardingShiftsList: {
+    noRole: 'No role',
+    noShifts: 'No shifts created. Use the form above to add shifts.',
+    breakMinutes: 'Break: {minutes} min',
+    unassigned: 'Unassigned',
+    unknown: 'Unknown',
+    selectUser: 'Select user',
+    assignSuccess: 'User assigned successfully',
+    assignError: 'Assignment error',
+  },
+
+  // Login Page
+  login: {
+    title: 'Klyra',
+    subtitle: 'Sign in with your Supabase account',
+    email: 'Email',
+    password: 'Password',
+    emailPlaceholder: 'enter your email',
+    passwordPlaceholder: 'enter your password',
+    loginButton: 'Sign In',
+    loggingIn: 'Signing in...',
+    errorEmailPassword: 'Please enter email and password',
+    errorLogin: 'Login error',
+    poweredBy: 'Staff Management System • Powered by Supabase',
+  },
 } as const;
