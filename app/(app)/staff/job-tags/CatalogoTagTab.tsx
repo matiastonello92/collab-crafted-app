@@ -100,7 +100,7 @@ export function CatalogoTagTab() {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Errore di salvataggio')
+        throw new Error(err.error || t('staff.jobTags.catalog.errorSaving'))
       }
 
       toast.success(editingTag ? t('staff.jobTags.catalog.toast.updated') : t('staff.jobTags.catalog.toast.created'))
@@ -147,7 +147,7 @@ export function CatalogoTagTab() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Caricamento...</div>
+    return <div className="text-center py-8">{t('staff.jobTags.catalog.loading')}</div>
   }
 
   return (
@@ -173,11 +173,11 @@ export function CatalogoTagTab() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Label</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Colore</TableHead>
-              <TableHead>Stato</TableHead>
-              <TableHead className="text-right">Azioni</TableHead>
+              <TableHead>{t('staff.jobTags.catalog.tableLabel')}</TableHead>
+              <TableHead>{t('staff.jobTags.catalog.tableCategory')}</TableHead>
+              <TableHead>{t('staff.jobTags.catalog.tableColor')}</TableHead>
+              <TableHead>{t('staff.jobTags.catalog.tableStatus')}</TableHead>
+              <TableHead className="text-right">{t('staff.jobTags.catalog.tableActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -205,9 +205,9 @@ export function CatalogoTagTab() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={tag.is_active ? 'default' : 'secondary'}>
-                    {tag.is_active ? 'Attivo' : 'Disattivo'}
-                  </Badge>
+                <Badge variant={tag.is_active ? 'default' : 'secondary'}>
+                  {tag.is_active ? t('staff.jobTags.catalog.statusActive') : t('staff.jobTags.catalog.statusInactive')}
+                </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
@@ -244,23 +244,23 @@ export function CatalogoTagTab() {
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="label">Nome *</Label>
+              <Label htmlFor="label">{t('staff.jobTags.catalog.nameLabel')} *</Label>
               <Input
                 id="label"
                 value={formData.label_it}
                 onChange={(e) => setFormData({ ...formData, label_it: e.target.value })}
-                placeholder="Es. Cameriere"
+                placeholder={t('staff.jobTags.catalog.namePlaceholder')}
               />
             </div>
 
             <div>
-              <Label htmlFor="categoria">Categoria</Label>
+              <Label htmlFor="categoria">{t('staff.jobTags.catalog.categoryLabel')}</Label>
               <Select
                 value={formData.categoria}
                 onValueChange={(val) => setFormData({ ...formData, categoria: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona categoria" />
+                  <SelectValue placeholder={t('staff.jobTags.catalog.categoryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIE.map((cat) => (
@@ -273,7 +273,7 @@ export function CatalogoTagTab() {
             </div>
 
             <div>
-              <Label htmlFor="color">Colore</Label>
+              <Label htmlFor="color">{t('staff.jobTags.catalog.colorLabel')}</Label>
               
               {/* Color picker nativo + Input HEX + Preview */}
               <div className="flex gap-2 items-center">
@@ -337,10 +337,10 @@ export function CatalogoTagTab() {
 
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)}>
-              Annulla
+              {t('staff.jobTags.catalog.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={!formData.label_it}>
-              {editingTag ? 'Salva' : 'Crea'}
+              {editingTag ? t('staff.jobTags.catalog.save') : t('staff.jobTags.catalog.create')}
             </Button>
           </DialogFooter>
         </DialogContent>

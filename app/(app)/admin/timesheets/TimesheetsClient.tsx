@@ -147,7 +147,7 @@ export default function TimesheetsClient() {
         })
       })
 
-      if (!res.ok) throw new Error('Export fallito')
+      if (!res.ok) throw new Error(t('admin.timesheets.exportFailed'))
 
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
@@ -176,31 +176,31 @@ export default function TimesheetsClient() {
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Download className="w-4 h-4 mr-2" />
-                Export CSV
+                {t('admin.timesheets.exportCSV')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Export Timesheets CSV</DialogTitle>
+                <DialogTitle>{t('admin.timesheets.exportTitle')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Seleziona i campi da includere nel CSV
+                  {t('admin.timesheets.exportDescription')}
                 </p>
                 {[
-                  { id: 'user_email', label: 'Email Utente' },
-                  { id: 'user_name', label: 'Nome Utente' },
-                  { id: 'period', label: 'Periodo' },
-                  { id: 'regular_hours', label: 'Ore Ordinarie' },
-                  { id: 'overtime_hours', label: 'Straordinari' },
-                  { id: 'break_hours', label: 'Pause' },
-                  { id: 'total_hours', label: 'Ore Totali' },
-                  { id: 'planned_hours', label: 'Ore Pianificate' },
-                  { id: 'variance_hours', label: 'Differenza' },
-                  { id: 'days_worked', label: 'Giorni Lavorati' },
-                  { id: 'status', label: 'Stato' },
-                  { id: 'approved_at', label: 'Approvato Il' },
-                  { id: 'notes', label: 'Note' }
+                  { id: 'user_email', label: t('admin.timesheets.fields.userEmail') },
+                  { id: 'user_name', label: t('admin.timesheets.fields.userName') },
+                  { id: 'period', label: t('admin.timesheets.fields.period') },
+                  { id: 'regular_hours', label: t('admin.timesheets.fields.regularHours') },
+                  { id: 'overtime_hours', label: t('admin.timesheets.fields.overtimeHours') },
+                  { id: 'break_hours', label: t('admin.timesheets.fields.breakHours') },
+                  { id: 'total_hours', label: t('admin.timesheets.fields.totalHours') },
+                  { id: 'planned_hours', label: t('admin.timesheets.fields.plannedHours') },
+                  { id: 'variance_hours', label: t('admin.timesheets.fields.varianceHours') },
+                  { id: 'days_worked', label: t('admin.timesheets.fields.daysWorked') },
+                  { id: 'status', label: t('admin.timesheets.fields.status') },
+                  { id: 'approved_at', label: t('admin.timesheets.fields.approvedAt') },
+                  { id: 'notes', label: t('admin.timesheets.fields.notes') }
                 ].map(field => (
                   <div key={field.id} className="flex items-center gap-2">
                     <Checkbox
@@ -219,7 +219,7 @@ export default function TimesheetsClient() {
                 ))}
                 <Button onClick={handleExport} className="w-full">
                   <Download className="w-4 h-4 mr-2" />
-                  Scarica CSV
+                  {t('admin.timesheets.downloadCSV')}
                 </Button>
               </div>
             </DialogContent>
@@ -227,7 +227,7 @@ export default function TimesheetsClient() {
           
           <Button onClick={handleGenerateForCurrentMonth}>
             <Plus className="w-4 h-4 mr-2" />
-            Genera Mese Corrente
+            {t('admin.timesheets.generateCurrentMonth')}
           </Button>
         </div>
       </div>
@@ -236,21 +236,21 @@ export default function TimesheetsClient() {
       <Card className="p-4">
         <div className="flex gap-4 items-end">
           <div className="flex-1">
-            <Label>Stato</Label>
+            <Label>{t('admin.timesheets.statusLabel')}</Label>
             <Select value={filter.status} onValueChange={(v) => setFilter({ ...filter, status: v })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti</SelectItem>
-                <SelectItem value="draft">Bozza</SelectItem>
-                <SelectItem value="approved">Approvati</SelectItem>
-                <SelectItem value="locked">Bloccati</SelectItem>
+                <SelectItem value="all">{t('admin.timesheets.statusAll')}</SelectItem>
+                <SelectItem value="draft">{t('admin.timesheets.statusDraft')}</SelectItem>
+                <SelectItem value="approved">{t('admin.timesheets.statusApproved')}</SelectItem>
+                <SelectItem value="locked">{t('admin.timesheets.statusLocked')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex-1">
-            <Label>Da</Label>
+            <Label>{t('admin.timesheets.from')}</Label>
             <Input
               type="date"
               value={filter.period_start}
@@ -258,7 +258,7 @@ export default function TimesheetsClient() {
             />
           </div>
           <div className="flex-1">
-            <Label>A</Label>
+            <Label>{t('admin.timesheets.to')}</Label>
             <Input
               type="date"
               value={filter.period_end}
@@ -267,18 +267,18 @@ export default function TimesheetsClient() {
           </div>
           <Button variant="outline" onClick={fetchTimesheets}>
             <Filter className="w-4 h-4 mr-2" />
-            Filtra
+            {t('admin.timesheets.filter')}
           </Button>
         </div>
       </Card>
 
       {/* Timesheets List */}
       {loading ? (
-        <p className="text-center text-muted-foreground">Caricamento...</p>
+        <p className="text-center text-muted-foreground">{t('admin.loading')}</p>
       ) : timesheets.length === 0 ? (
         <Card className="p-12 text-center">
           <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Nessun timesheet trovato</p>
+          <p className="text-muted-foreground">{t('admin.timesheets.noTimesheets')}</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -303,7 +303,7 @@ export default function TimesheetsClient() {
                         <Calendar className="w-4 h-4" />
                         {ts.period_start} - {ts.period_end}
                       </span>
-                      <span>Giorni: {ts.totals.days_worked}</span>
+                      <span>{t('admin.timesheets.days')}: {ts.totals.days_worked}</span>
                     </div>
                   </div>
                   <div className="text-right space-y-1">
@@ -312,7 +312,7 @@ export default function TimesheetsClient() {
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {ts.totals.variance_minutes >= 0 ? '+' : ''}
-                      {formatMinutesToHours(ts.totals.variance_minutes)}h vs pianificate
+                      {formatMinutesToHours(ts.totals.variance_minutes)}h {t('admin.timesheets.vsPlanned')}
                     </div>
                   </div>
                 </div>

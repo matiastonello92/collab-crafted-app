@@ -138,7 +138,7 @@ export function AssegnazioniTab() {
       }
       setUserAssignments(grouped)
     } catch (error) {
-      toast.error('Errore caricamento dati')
+      toast.error(t('staff.jobTags.assignments.errorLoadingData'))
     } finally {
       setLoading(false)
     }
@@ -237,10 +237,10 @@ export function AssegnazioniTab() {
   if (!selectedLocation) {
     return (
       <div className="space-y-4">
-        <Label>Seleziona Location</Label>
+        <Label>{t('staff.jobTags.assignments.selectLocation')}</Label>
         <Select value={selectedLocation} onValueChange={setSelectedLocation}>
           <SelectTrigger>
-            <SelectValue placeholder="Scegli una location" />
+            <SelectValue placeholder={t('staff.jobTags.assignments.chooseLocation')} />
           </SelectTrigger>
           <SelectContent>
             {locations.map((loc) => (
@@ -269,7 +269,7 @@ export function AssegnazioniTab() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="flex-1">
-          <Label>Location</Label>
+          <Label>{t('staff.jobTags.assignments.location')}</Label>
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
             <SelectTrigger>
               <SelectValue />
@@ -285,9 +285,9 @@ export function AssegnazioniTab() {
         </div>
 
         <div className="flex-1">
-          <Label>Cerca Utente</Label>
+          <Label>{t('staff.jobTags.assignments.searchUser')}</Label>
           <Input
-            placeholder="Nome o email"
+            placeholder={t('staff.jobTags.assignments.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -295,7 +295,7 @@ export function AssegnazioniTab() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Caricamento...</div>
+        <div className="text-center py-8">{t('staff.jobTags.assignments.loading')}</div>
       ) : (
         <div className="space-y-4">
           {filteredUsers.map((user) => {
@@ -310,21 +310,21 @@ export function AssegnazioniTab() {
                   <CardTitle className="text-base flex items-center justify-between">
                     <span>{user.full_name || user.email}</span>
                     {!hasPrimary && (
-                      <Badge variant="destructive">Manca primario</Badge>
+                      <Badge variant="destructive">{t('staff.jobTags.assignments.missingPrimary')}</Badge>
                     )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">
-                      Primario (obbligatorio)
+                      {t('staff.jobTags.assignments.primaryRequired')}
                     </Label>
                     <Select
                       value={primaryAssignment?.job_tag_id || ''}
                       onValueChange={(val) => handleSetPrimary(user.id, val)}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Seleziona tag primario" />
+                        <SelectValue placeholder={t('staff.jobTags.assignments.selectPrimaryPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {jobTags.map((tag) => (
@@ -351,7 +351,7 @@ export function AssegnazioniTab() {
 
                   <div>
                     <Label className="text-sm font-medium">
-                      Secondari (opzionali)
+                      {t('staff.jobTags.assignments.secondaryOptional')}
                     </Label>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {jobTags
