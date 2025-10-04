@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Clock, Users, ChefHat, Archive, Send, Trash2, Plus, ExternalLink } from 'lucide-react';
+import { Clock, Users, ChefHat, Archive, Send, Trash2, Plus, ExternalLink, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { RecipeEditorDialog } from './components/RecipeEditorDialog';
 import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
@@ -13,6 +13,7 @@ import { RecipeFilters, RecipeFiltersState } from './components/RecipeFilters';
 import { FavoriteButton } from './components/FavoriteButton';
 import { Badge } from '@/components/ui/badge';
 import { getAllergenColor, getAllergenLabel } from './constants/allergens';
+import { formatSeasonRange, getSeasonColor } from './constants/seasons';
 import { AlertTriangle } from 'lucide-react';
 
 interface Recipe {
@@ -28,6 +29,7 @@ interface Recipe {
   created_by: string;
   created_at: string;
   allergens?: string[];
+  season?: string[];
   created_by_profile: {
     full_name: string;
   };
@@ -47,6 +49,8 @@ export function RecipesClient() {
     includeItems: [],
     excludeItems: [],
     allergens: [],
+    seasonMonths: [],
+    inSeasonNow: false,
     favorites: false,
     sortBy: 'recent',
   });
@@ -90,6 +94,8 @@ export function RecipesClient() {
       if (filters.includeItems.length > 0) params.set('includeItems', filters.includeItems.join(','));
       if (filters.excludeItems.length > 0) params.set('excludeItems', filters.excludeItems.join(','));
       if (filters.allergens && filters.allergens.length > 0) params.set('allergens', filters.allergens.join(','));
+      if (filters.seasonMonths && filters.seasonMonths.length > 0) params.set('seasonMonths', filters.seasonMonths.join(','));
+      if (filters.inSeasonNow) params.set('inSeasonNow', 'true');
       if (filters.favorites) params.set('favorites', 'true');
       if (filters.sortBy && filters.sortBy !== 'recent') params.set('sortBy', filters.sortBy);
       if (defaultLocationId) params.set('locationId', defaultLocationId);
@@ -326,6 +332,18 @@ export function RecipesClient() {
                           </Badge>
                         )}
                       </>
+                     )}
+
+                    {/* Season Badge */}
+                    {recipe.season && recipe.season.length > 0 && (
+                      <Badge variant="secondary" className="text-xs gap-1" style={{
+                        backgroundColor: `hsl(${getSeasonColor(recipe.season)} / 0.15)`,
+                        color: `hsl(${getSeasonColor(recipe.season)})`,
+                        borderColor: `hsl(${getSeasonColor(recipe.season)} / 0.3)`
+                      }}>
+                        <Calendar className="w-3 h-3" />
+                        {formatSeasonRange(recipe.season)}
+                      </Badge>
                     )}
                   </div>
 

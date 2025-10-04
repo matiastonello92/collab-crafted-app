@@ -21,20 +21,22 @@ import {
   AlertCircle,
   Loader2,
   AlertTriangle as AlertTriangleIcon,
-  Copy
+  Copy,
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
 import { RecipeWorkflowBadge } from '../components/RecipeWorkflowBadge';
 import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
 import { StepsEditor } from '../components/StepsEditor';
+import { getAllergenLabel, getAllergenColor } from '../constants/allergens';
+import { formatSeasonRange, getSeasonColor } from '../constants/seasons';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CloneRecipeButton } from '../components/CloneRecipeButton';
 import { ServiceNotesSection } from '../components/ServiceNotesSection';
 import { PrintRecipeButton } from '../components/PrintRecipeButton';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getAllergenColor, getAllergenLabel } from '../constants/allergens';
 import { AlertTriangle } from 'lucide-react';
 
 interface Recipe {
@@ -50,6 +52,7 @@ interface Recipe {
   created_by: string;
   created_at: string;
   allergens?: string[];
+  season?: string[];
   recipe_ingredients: any[];
   recipe_steps: any[];
   recipe_service_notes?: any[];
@@ -355,7 +358,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{recipe.category}</Badge>
                 
-                {/* Allergen Badges */}
+                 {/* Allergen Badges */}
                 {recipe.allergens && recipe.allergens.length > 0 && (
                   <>
                     {recipe.allergens.map((allergenKey) => {
@@ -378,6 +381,22 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
                       );
                     })}
                   </>
+                )}
+
+                {/* Season Badge */}
+                {recipe.season && recipe.season.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1"
+                    style={{
+                      backgroundColor: `hsl(${getSeasonColor(recipe.season)} / 0.15)`,
+                      color: `hsl(${getSeasonColor(recipe.season)})`,
+                      borderColor: `hsl(${getSeasonColor(recipe.season)} / 0.3)`
+                    }}
+                  >
+                    <Calendar className="h-3 w-3" />
+                    {formatSeasonRange(recipe.season)}
+                  </Badge>
                 )}
               </div>
 

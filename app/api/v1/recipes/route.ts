@@ -81,6 +81,25 @@ export async function GET(request: Request) {
       query = query.contains('season', [params.season]);
     }
 
+    // Additional season filters (from RecipeFilters)
+    const seasonMonths = searchParams.get('seasonMonths')?.split(',').filter(Boolean);
+    const inSeasonNow = searchParams.get('inSeasonNow') === 'true';
+    
+    if (seasonMonths && seasonMonths.length > 0) {
+      query = query.overlaps('season', seasonMonths);
+    }
+    
+    if (inSeasonNow) {
+      const currentMonth = new Date().toLocaleString('it-IT', { month: 'short' }).toLowerCase();
+      const monthMap: Record<string, string> = {
+        'gen': 'gen', 'feb': 'feb', 'mar': 'mar', 'apr': 'apr',
+        'mag': 'mag', 'giu': 'giu', 'lug': 'lug', 'ago': 'ago',
+        'set': 'set', 'ott': 'ott', 'nov': 'nov', 'dic': 'dic'
+      };
+      const month = monthMap[currentMonth] || 'gen';
+      query = query.contains('season', [month]);
+    }
+
     if (params.minServings) {
       query = query.gte('servings', params.minServings);
     }

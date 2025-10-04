@@ -15,8 +15,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ItemSelector } from './ItemSelector';
 import { AllergenSelector } from './AllergenSelector';
+import { SeasonSelector } from './SeasonSelector';
 import { COMMON_ALLERGENS } from '../constants/allergens';
-import { AlertTriangle } from 'lucide-react';
+import { MONTHS } from '../constants/seasons';
+import { AlertTriangle, Calendar } from 'lucide-react';
 
 export interface RecipeFiltersState {
   q: string;
@@ -25,6 +27,8 @@ export interface RecipeFiltersState {
   includeItems: string[];
   excludeItems: string[];
   allergens?: string[];
+  seasonMonths?: string[];
+  inSeasonNow?: boolean;
   favorites: boolean;
   sortBy: string;
 }
@@ -81,6 +85,8 @@ export function RecipeFilters({
       includeItems: [],
       excludeItems: [],
       allergens: [],
+      seasonMonths: [],
+      inSeasonNow: false,
       favorites: false,
       sortBy: 'recent',
     });
@@ -93,6 +99,8 @@ export function RecipeFilters({
     filters.includeItems.length > 0 ||
     filters.excludeItems.length > 0 ||
     (filters.allergens && filters.allergens.length > 0) ||
+    (filters.seasonMonths && filters.seasonMonths.length > 0) ||
+    filters.inSeasonNow ||
     filters.favorites;
 
   return (
@@ -209,6 +217,30 @@ export function RecipeFilters({
         </p>
       </div>
 
+      {/* Stagionalità */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <SeasonSelector
+            selectedMonths={filters.seasonMonths || []}
+            onMonthsChange={(months) => updateFilter('seasonMonths', months.length > 0 ? months : undefined)}
+            label="Mesi di stagione"
+            placeholder="Filtra per mese..."
+          />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Switch
+            id="in-season-now"
+            checked={filters.inSeasonNow || false}
+            onCheckedChange={(checked) => updateFilter('inSeasonNow', checked)}
+          />
+          <Label htmlFor="in-season-now" className="flex items-center gap-1 cursor-pointer">
+            <Calendar className="w-4 h-4" />
+            In stagione ora
+          </Label>
+        </div>
+      </div>
+
       {/* Active Filter Badges */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 pt-2 border-t">
@@ -285,6 +317,43 @@ export function RecipeFilters({
               </Badge>
             ) : null;
           })}
+
+          {/* Season badges */}
+          {filters.seasonMonths && filters.seasonMonths.length > 0 && filters.seasonMonths.map((monthKey) => {
+            const month = MONTHS.find(m => m.key === monthKey);
+            return month ? (
+              <Badge
+                key={monthKey}
+                variant="secondary"
+                className="gap-1 cursor-pointer hover:bg-secondary/80"
+                onClick={() => {
+                  const newMonths = filters.seasonMonths?.filter(k => k !== monthKey);
+                  updateFilter('seasonMonths', newMonths && newMonths.length > 0 ? newMonths : undefined);
+                }}
+                style={{
+                  backgroundColor: `hsl(${month.color} / 0.15)`,
+                  color: `hsl(${month.color})`,
+                  borderColor: `hsl(${month.color} / 0.3)`
+                }}
+              >
+                <Calendar className="h-3 w-3" />
+                {month.label}
+                <X className="h-3 w-3" />
+              </Badge>
+            ) : null;
+          })}
+
+          {filters.inSeasonNow && (
+            <Badge
+              variant="secondary"
+              className="gap-1 cursor-pointer hover:bg-secondary/80"
+              onClick={() => updateFilter('inSeasonNow', false)}
+            >
+              <Calendar className="w-3 h-3" />
+              In stagione ora
+              <X className="w-3 w-3" />
+            </Badge>
+          )}
 
           {filters.favorites && (
             <Badge variant="secondary" className="gap-1">

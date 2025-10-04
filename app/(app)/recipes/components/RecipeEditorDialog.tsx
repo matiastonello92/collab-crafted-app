@@ -13,6 +13,7 @@ import { Save, X } from 'lucide-react';
 import { IngredientsForm } from './IngredientsForm';
 import { RecipePhotoUploader } from './RecipePhotoUploader';
 import { AllergenSelector } from './AllergenSelector';
+import { SeasonSelector } from './SeasonSelector';
 import { ScalableIngredient } from '@/lib/recipes/scaling';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 
@@ -53,6 +54,7 @@ export function RecipeEditorDialog({
   const [photoUrl, setPhotoUrl] = useState('');
   const [ingredients, setIngredients] = useState<ScalableIngredient[]>([]);
   const [allergens, setAllergens] = useState<string[]>([]);
+  const [season, setSeason] = useState<string[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -95,6 +97,7 @@ export function RecipeEditorDialog({
     setPhotoUrl('');
     setIngredients([]);
     setAllergens([]);
+    setSeason([]);
   };
 
   const handleClose = () => {
@@ -143,6 +146,7 @@ export function RecipeEditorDialog({
         cook_time_minutes: cookTime,
         photo_url: photoUrl,
         allergens: allergens.length > 0 ? allergens : undefined,
+        season: season.length > 0 ? season : undefined,
         ingredients: ingredients.length > 0 ? ingredients : undefined
       };
 
@@ -243,6 +247,19 @@ export function RecipeEditorDialog({
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Indica gli allergeni principali presenti nella ricetta
+              </p>
+            </div>
+
+            {/* Stagionalità */}
+            <div>
+              <SeasonSelector
+                selectedMonths={season}
+                onMonthsChange={setSeason}
+                label="Stagionalità"
+                placeholder="Seleziona mesi..."
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Indica i mesi in cui questa ricetta è più appropriata
               </p>
             </div>
 
