@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { GripVertical, Trash2, Edit } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -33,13 +34,8 @@ export function TemplateItemsManager({
   items,
   onItemsChange
 }: TemplateItemsManagerProps) {
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const sectionLabels = {
-    pantry: 'Dispensa',
-    fridge: 'Frigo',
-    freezer: 'Freezer'
-  };
 
   const sectionColors = {
     pantry: 'bg-orange-100 text-orange-800',
@@ -90,9 +86,9 @@ export function TemplateItemsManager({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Organizza Prodotti</h3>
+        <h3 className="text-lg font-medium">{t('inventory.labels.products')}</h3>
         <div className="text-sm text-muted-foreground">
-          {items.length} prodotti
+          {items.length} {t('inventory.labels.products')}
         </div>
       </div>
 
@@ -125,12 +121,12 @@ export function TemplateItemsManager({
                     onValueChange={(value) => handleSectionChange(item.catalog_item_id, value)}
                   >
                     <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Sezione" />
+                      <SelectValue placeholder={t('inventory.labels.section')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pantry">Dispensa</SelectItem>
-                      <SelectItem value="fridge">Frigo</SelectItem>
-                      <SelectItem value="freezer">Freezer</SelectItem>
+                      <SelectItem value="pantry">{t('inventory.sections.pantry')}</SelectItem>
+                      <SelectItem value="fridge">{t('inventory.sections.fridge')}</SelectItem>
+                      <SelectItem value="freezer">{t('inventory.sections.freezer')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -154,7 +150,7 @@ export function TemplateItemsManager({
 
               {item.section && (
                 <Badge className={sectionColors[item.section]}>
-                  {sectionLabels[item.section]}
+                  {t(`inventory.sections.${item.section}`)}
                 </Badge>
               )}
             </div>
@@ -164,7 +160,7 @@ export function TemplateItemsManager({
 
       {items.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          Nessun prodotto selezionato. Torna al passo precedente per aggiungerne.
+          {t('inventory.empty.noItems')}
         </div>
       )}
     </div>

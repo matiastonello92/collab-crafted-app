@@ -1654,6 +1654,227 @@ export const it = {
       noEvents: 'Non ci sono eventi time clock nel mese corrente',
     },
 
+    // Inventory
+    inventory: {
+      // Page titles
+      title: 'Inventario',
+      catalog: 'Catalogo Prodotti',
+      history: 'Storico Inventari',
+      templates: 'Template',
+      
+      // Categories
+      categories: {
+        kitchen: 'Cucina',
+        bar: 'Bar',
+        cleaning: 'Pulizie',
+      },
+      
+      // Product Categories (sottocategorie)
+      productCategories: {
+        kitchen: {
+          fresh: 'Freschi',
+          frozen: 'Surgelati',
+          dry: 'Secchi',
+          spices: 'Spezie',
+          oils: 'Oli',
+          other: 'Altro',
+        },
+        bar: {
+          spirits: 'Spirits',
+          wines: 'Vini',
+          beers: 'Birre',
+          softDrinks: 'Bibite',
+          mixers: 'Mixer',
+          garnishes: 'Guarnizioni',
+          other: 'Altro',
+        },
+        cleaning: {
+          detergents: 'Detergenti',
+          sanitizers: 'Sanitizzanti',
+          tools: 'Strumenti',
+          disposables: 'Monouso',
+          other: 'Altro',
+        },
+      },
+      
+      // Status labels
+      status: {
+        inProgress: 'In Corso',
+        completed: 'Completato',
+        approved: 'Approvato',
+        active: 'Attivo',
+        inactive: 'Inattivo',
+      },
+      
+      // Common labels
+      labels: {
+        product: 'Prodotto',
+        quantity: 'Quantità',
+        unitPrice: 'Prezzo Unitario',
+        totalValue: 'Valore Totale',
+        category: 'Categoria',
+        uom: 'Unità di Misura',
+        notes: 'Note',
+        createdBy: 'Creato da',
+        createdAt: 'Creato il',
+        date: 'Data',
+        creator: 'Creatore',
+        section: 'Sezione',
+        price: 'Prezzo',
+        name: 'Nome',
+        selected: 'selezionati',
+        products: 'prodotti',
+        items: 'articoli',
+        none: 'Nessuno',
+      },
+      
+      // Sections
+      sections: {
+        pantry: 'Dispensa',
+        fridge: 'Frigo',
+        freezer: 'Freezer',
+      },
+      
+      // Toast messages
+      toast: {
+        inventoryCreated: 'Inventario creato con successo',
+        inventoryDeleted: 'Inventario eliminato',
+        productAdded: 'Prodotto aggiunto',
+        productCreated: 'Prodotto creato con successo',
+        productUpdated: 'Prodotto aggiornato',
+        productDeleted: 'Prodotto eliminato',
+        quantityUpdated: 'Quantità aggiornata',
+        templateCreated: 'Template creato con successo',
+        templateUpdated: 'Template aggiornato con successo',
+        errorCreatingInventory: 'Errore durante la creazione dell\'inventario',
+        errorLoadingInventories: 'Errore nel caricamento degli inventari',
+        errorLoadingProducts: 'Errore nel caricamento dei prodotti',
+        errorLoadingCatalog: 'Errore durante il caricamento del catalogo',
+        errorAddingProduct: 'Errore durante l\'aggiunta del prodotto',
+        errorCreatingProduct: 'Errore durante la creazione del prodotto',
+        errorUpdatingProduct: 'Errore durante l\'aggiornamento del prodotto',
+        errorDeletingProduct: 'Errore durante l\'eliminazione del prodotto',
+        errorUpdatingQuantity: 'Errore durante l\'aggiornamento della quantità',
+        errorLoadingTemplate: 'Errore durante il caricamento del template',
+        errorSavingTemplate: 'Errore durante il salvataggio del template',
+        allFieldsRequired: 'Tutti i campi sono obbligatori',
+        selectProduct: 'Seleziona un prodotto',
+        enterQuantity: 'Inserisci una quantità valida',
+        selectCategory: 'Seleziona una categoria',
+        templateNameRequired: 'Il nome del template è obbligatorio',
+        selectAtLeastOneProduct: 'Seleziona almeno un prodotto',
+      },
+      
+      // Placeholders
+      placeholders: {
+        search: 'Cerca prodotti...',
+        searchInventories: 'Cerca inventari...',
+        selectProduct: 'Seleziona prodotto...',
+        selectCategory: 'Seleziona categoria...',
+        enterQuantity: 'Inserisci quantità',
+        enterPrice: 'Inserisci prezzo',
+        enterName: 'Inserisci nome prodotto',
+        enterNotes: 'Aggiungi note...',
+        selectUom: 'Seleziona unità...',
+        customUnit: 'Unità personalizzata',
+        enterCustomUnit: 'Inserisci unità',
+        templateName: 'Nome del template',
+      },
+      
+      // Buttons
+      buttons: {
+        createInventory: 'Crea Inventario',
+        createTemplate: 'Crea Template',
+        addProduct: 'Aggiungi Prodotto',
+        newProduct: 'Nuovo Prodotto',
+        save: 'Salva',
+        cancel: 'Annulla',
+        delete: 'Elimina',
+        edit: 'Modifica',
+        view: 'Visualizza',
+        confirm: 'Conferma',
+        back: 'Indietro',
+        next: 'Avanti',
+        finish: 'Completa',
+        createAndAdd: 'Crea e Aggiungi',
+        add: 'Aggiungi',
+        remove: 'Rimuovi',
+        bulkDelete: 'Elimina Selezionati',
+        saveChanges: 'Salva Modifiche',
+        complete: 'Completa',
+        approve: 'Approva',
+      },
+      
+      // Dialogs
+      dialogs: {
+        createInventoryTitle: 'Crea Nuovo Inventario',
+        addItemTitle: 'Aggiungi Prodotto',
+        editProductTitle: 'Modifica Prodotto',
+        deleteConfirmTitle: 'Conferma Eliminazione',
+        createTemplateTitle: 'Crea Template',
+        editTemplateTitle: 'Modifica Template',
+      },
+      
+      // Confirmations
+      confirmations: {
+        deleteInventory: 'Sei sicuro di voler eliminare questo inventario?',
+        deleteProduct: 'Sei sicuro di voler eliminare questo prodotto?',
+        bulkDeleteProducts: 'Sei sicuro di voler eliminare {count} prodotti?',
+        deleteItem: 'Vuoi rimuovere questo articolo dall\'inventario?',
+      },
+      
+      // Empty states
+      empty: {
+        noInventories: 'Nessun inventario trovato',
+        noProducts: 'Nessun prodotto disponibile',
+        noProductsFound: 'Nessun prodotto trovato',
+        noItems: 'Nessun articolo nell\'inventario',
+        noTemplates: 'Nessun template disponibile',
+        startInventory: 'Inizia creando il tuo primo inventario',
+        addProducts: 'Aggiungi prodotti per iniziare',
+      },
+      
+      // Loading states
+      loading: {
+        inventories: 'Caricamento inventari...',
+        products: 'Caricamento prodotti...',
+        catalog: 'Caricamento catalogo...',
+        saving: 'Salvataggio...',
+        creating: 'Creazione...',
+        deleting: 'Eliminazione...',
+      },
+      
+      // Tabs
+      tabs: {
+        fromCatalog: 'Da Catalogo',
+        newProduct: 'Nuovo Prodotto',
+        fromTemplate: 'Da Template',
+        fromLast: 'Dall\'Ultimo',
+        empty: 'Vuoto',
+        existing: 'Esistente',
+      },
+      
+      // Create modes
+      createModes: {
+        template: 'Usa un template per popolare l\'inventario',
+        last: 'Copia dall\'ultimo inventario approvato',
+        empty: 'Inizia con un inventario vuoto',
+      },
+      
+      // Info messages
+      info: {
+        selectedCount: '{count} {label} selezionati',
+        noTemplatesAvailable: 'Nessun template attivo disponibile per questa categoria',
+      },
+      
+      // Filter labels
+      filters: {
+        all: 'Tutti',
+        activeOnly: 'Solo Attivi',
+        showInactive: 'Mostra anche inattivi',
+      },
+    },
+
     // Compliance
     compliance: {
       ruleUpdated: 'Regola aggiornata',

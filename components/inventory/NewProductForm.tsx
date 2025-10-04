@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -21,17 +22,12 @@ interface NewProductFormProps {
   onProductCreated: (product: CatalogItem) => void;
 }
 
-const categoryOptions = {
-  kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
-  bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
-  cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
-};
-
 export function NewProductForm({
   locationId,
   category,
   onProductCreated
 }: NewProductFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     uom: '',
@@ -41,11 +37,39 @@ export function NewProductForm({
   });
   const [loading, setLoading] = useState(false);
 
+  // Category options per department
+  const getCategoryOptions = (cat: string) => {
+    if (cat === 'kitchen') return [
+      t('inventory.productCategories.kitchen.fresh'),
+      t('inventory.productCategories.kitchen.frozen'),
+      t('inventory.productCategories.kitchen.dry'),
+      t('inventory.productCategories.kitchen.spices'),
+      t('inventory.productCategories.kitchen.oils'),
+      t('inventory.productCategories.kitchen.other')
+    ];
+    if (cat === 'bar') return [
+      t('inventory.productCategories.bar.spirits'),
+      t('inventory.productCategories.bar.wines'),
+      t('inventory.productCategories.bar.beers'),
+      t('inventory.productCategories.bar.softDrinks'),
+      t('inventory.productCategories.bar.mixers'),
+      t('inventory.productCategories.bar.garnishes'),
+      t('inventory.productCategories.bar.other')
+    ];
+    return [
+      t('inventory.productCategories.cleaning.detergents'),
+      t('inventory.productCategories.cleaning.sanitizers'),
+      t('inventory.productCategories.cleaning.tools'),
+      t('inventory.productCategories.cleaning.disposables'),
+      t('inventory.productCategories.cleaning.other')
+    ];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.uom.trim() || !formData.default_unit_price || !formData.product_category) {
-      toast.error('Compila tutti i campi obbligatori (inclusa categoria)');
+      toast.error(t('inventory.toast.allFieldsRequired'));
       return;
     }
 
@@ -68,16 +92,16 @@ export function NewProductForm({
 
       if (response.ok) {
         const newProduct = await response.json();
-        toast.success('Prodotto creato con successo');
+        toast.success(t('inventory.toast.productCreated'));
         onProductCreated(newProduct);
         setFormData({ name: '', uom: '', default_unit_price: '', product_category: '', showCustomUom: false });
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Errore durante la creazione del prodotto');
+        toast.error(error.error || t('inventory.toast.errorCreatingProduct'));
       }
     } catch (error) {
-      console.error('Error creating product:', error);
-      toast.error('Errore durante la creazione del prodotto');
+      console.error(t('inventory.toast.errorCreatingProduct'), error);
+      toast.error(t('inventory.toast.errorCreatingProduct'));
     } finally {
       setLoading(false);
     }
@@ -86,26 +110,26 @@ export function NewProductForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Nome Prodotto *</Label>
+        <Label htmlFor="name">{t('inventory.labels.name')} *</Label>
         <Input
           id="name"
-          placeholder="Es. Olio Extra Vergine"
+          placeholder={t('inventory.placeholders.enterName')}
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Categoria Prodotto *</Label>
+        <Label htmlFor="category">{t('inventory.labels.category')} *</Label>
         <Select
           value={formData.product_category}
           onValueChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleziona categoria" />
+            <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
           </SelectTrigger>
           <SelectContent>
-            {categoryOptions[category].map((cat) => (
+            {getCategoryOptions(category).map((cat) => (
               <SelectItem key={cat} value={cat}>
                 {cat}
               </SelectItem>
@@ -115,7 +139,7 @@ export function NewProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="uom">Unità di Misura *</Label>
+        <Label htmlFor="uom">{t('inventory.labels.uom')} *</Label>
         <Select
           value={formData.uom}
           onValueChange={(value) => {
@@ -127,7 +151,7 @@ export function NewProductForm({
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleziona unità di misura" />
+            <SelectValue placeholder={t('inventory.placeholders.selectUom')} />
           </SelectTrigger>
           <SelectContent className="bg-white dark:bg-slate-900 z-50">
             <SelectItem value="Kg">Kg</SelectItem>
@@ -136,12 +160,12 @@ export function NewProductForm({
             <SelectItem value="ml">ml</SelectItem>
             <SelectItem value="cl">cl</SelectItem>
             <SelectItem value="Pce">Pce</SelectItem>
-            <SelectItem value="custom">Altro...</SelectItem>
+            <SelectItem value="custom">{t('inventory.placeholders.customUnit')}</SelectItem>
           </SelectContent>
         </Select>
         {(formData as any).showCustomUom && (
           <Input
-            placeholder="Inserisci unità personalizzata"
+            placeholder={t('inventory.placeholders.enterCustomUnit')}
             value={formData.uom}
             onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
           />
@@ -149,19 +173,19 @@ export function NewProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="price">Prezzo Unitario (€) *</Label>
+        <Label htmlFor="price">{t('inventory.labels.unitPrice')} (€) *</Label>
         <Input
           id="price"
           type="number"
           step="0.01"
-          placeholder="0.00"
+          placeholder={t('inventory.placeholders.enterPrice')}
           value={formData.default_unit_price}
           onChange={(e) => setFormData(prev => ({ ...prev, default_unit_price: e.target.value }))}
         />
       </div>
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading ? 'Creazione...' : 'Crea Prodotto'}
+        {loading ? t('inventory.loading.creating') : t('inventory.buttons.newProduct')}
       </Button>
     </form>
   );

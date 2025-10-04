@@ -1618,6 +1618,227 @@ export const en = {
       noEvents: 'No time clock events in current month',
     },
 
+    // Inventory
+    inventory: {
+      // Page titles
+      title: 'Inventory',
+      catalog: 'Product Catalog',
+      history: 'Inventory History',
+      templates: 'Templates',
+      
+      // Categories
+      categories: {
+        kitchen: 'Kitchen',
+        bar: 'Bar',
+        cleaning: 'Cleaning',
+      },
+      
+      // Product Categories (subcategories)
+      productCategories: {
+        kitchen: {
+          fresh: 'Fresh',
+          frozen: 'Frozen',
+          dry: 'Dry',
+          spices: 'Spices',
+          oils: 'Oils',
+          other: 'Other',
+        },
+        bar: {
+          spirits: 'Spirits',
+          wines: 'Wines',
+          beers: 'Beers',
+          softDrinks: 'Soft Drinks',
+          mixers: 'Mixers',
+          garnishes: 'Garnishes',
+          other: 'Other',
+        },
+        cleaning: {
+          detergents: 'Detergents',
+          sanitizers: 'Sanitizers',
+          tools: 'Tools',
+          disposables: 'Disposables',
+          other: 'Other',
+        },
+      },
+      
+      // Status labels
+      status: {
+        inProgress: 'In Progress',
+        completed: 'Completed',
+        approved: 'Approved',
+        active: 'Active',
+        inactive: 'Inactive',
+      },
+      
+      // Common labels
+      labels: {
+        product: 'Product',
+        quantity: 'Quantity',
+        unitPrice: 'Unit Price',
+        totalValue: 'Total Value',
+        category: 'Category',
+        uom: 'Unit of Measure',
+        notes: 'Notes',
+        createdBy: 'Created by',
+        createdAt: 'Created at',
+        date: 'Date',
+        creator: 'Creator',
+        section: 'Section',
+        price: 'Price',
+        name: 'Name',
+        selected: 'selected',
+        products: 'products',
+        items: 'items',
+        none: 'None',
+      },
+      
+      // Sections
+      sections: {
+        pantry: 'Pantry',
+        fridge: 'Fridge',
+        freezer: 'Freezer',
+      },
+      
+      // Toast messages
+      toast: {
+        inventoryCreated: 'Inventory created successfully',
+        inventoryDeleted: 'Inventory deleted',
+        productAdded: 'Product added',
+        productCreated: 'Product created successfully',
+        productUpdated: 'Product updated',
+        productDeleted: 'Product deleted',
+        quantityUpdated: 'Quantity updated',
+        templateCreated: 'Template created successfully',
+        templateUpdated: 'Template updated successfully',
+        errorCreatingInventory: 'Error creating inventory',
+        errorLoadingInventories: 'Error loading inventories',
+        errorLoadingProducts: 'Error loading products',
+        errorLoadingCatalog: 'Error loading catalog',
+        errorAddingProduct: 'Error adding product',
+        errorCreatingProduct: 'Error creating product',
+        errorUpdatingProduct: 'Error updating product',
+        errorDeletingProduct: 'Error deleting product',
+        errorUpdatingQuantity: 'Error updating quantity',
+        errorLoadingTemplate: 'Error loading template',
+        errorSavingTemplate: 'Error saving template',
+        allFieldsRequired: 'All fields are required',
+        selectProduct: 'Select a product',
+        enterQuantity: 'Enter a valid quantity',
+        selectCategory: 'Select a category',
+        templateNameRequired: 'Template name is required',
+        selectAtLeastOneProduct: 'Select at least one product',
+      },
+      
+      // Placeholders
+      placeholders: {
+        search: 'Search products...',
+        searchInventories: 'Search inventories...',
+        selectProduct: 'Select product...',
+        selectCategory: 'Select category...',
+        enterQuantity: 'Enter quantity',
+        enterPrice: 'Enter price',
+        enterName: 'Enter product name',
+        enterNotes: 'Add notes...',
+        selectUom: 'Select unit...',
+        customUnit: 'Custom unit',
+        enterCustomUnit: 'Enter unit',
+        templateName: 'Template name',
+      },
+      
+      // Buttons
+      buttons: {
+        createInventory: 'Create Inventory',
+        createTemplate: 'Create Template',
+        addProduct: 'Add Product',
+        newProduct: 'New Product',
+        save: 'Save',
+        cancel: 'Cancel',
+        delete: 'Delete',
+        edit: 'Edit',
+        view: 'View',
+        confirm: 'Confirm',
+        back: 'Back',
+        next: 'Next',
+        finish: 'Finish',
+        createAndAdd: 'Create and Add',
+        add: 'Add',
+        remove: 'Remove',
+        bulkDelete: 'Delete Selected',
+        saveChanges: 'Save Changes',
+        complete: 'Complete',
+        approve: 'Approve',
+      },
+      
+      // Dialogs
+      dialogs: {
+        createInventoryTitle: 'Create New Inventory',
+        addItemTitle: 'Add Product',
+        editProductTitle: 'Edit Product',
+        deleteConfirmTitle: 'Confirm Deletion',
+        createTemplateTitle: 'Create Template',
+        editTemplateTitle: 'Edit Template',
+      },
+      
+      // Confirmations
+      confirmations: {
+        deleteInventory: 'Are you sure you want to delete this inventory?',
+        deleteProduct: 'Are you sure you want to delete this product?',
+        bulkDeleteProducts: 'Are you sure you want to delete {count} products?',
+        deleteItem: 'Do you want to remove this item from the inventory?',
+      },
+      
+      // Empty states
+      empty: {
+        noInventories: 'No inventories found',
+        noProducts: 'No products available',
+        noProductsFound: 'No products found',
+        noItems: 'No items in inventory',
+        noTemplates: 'No templates available',
+        startInventory: 'Start by creating your first inventory',
+        addProducts: 'Add products to get started',
+      },
+      
+      // Loading states
+      loading: {
+        inventories: 'Loading inventories...',
+        products: 'Loading products...',
+        catalog: 'Loading catalog...',
+        saving: 'Saving...',
+        creating: 'Creating...',
+        deleting: 'Deleting...',
+      },
+      
+      // Tabs
+      tabs: {
+        fromCatalog: 'From Catalog',
+        newProduct: 'New Product',
+        fromTemplate: 'From Template',
+        fromLast: 'From Last',
+        empty: 'Empty',
+        existing: 'Existing',
+      },
+      
+      // Create modes
+      createModes: {
+        template: 'Use a template to populate the inventory',
+        last: 'Copy from the last approved inventory',
+        empty: 'Start with an empty inventory',
+      },
+      
+      // Info messages
+      info: {
+        selectedCount: '{count} {label} selected',
+        noTemplatesAvailable: 'No active templates available for this category',
+      },
+      
+      // Filter labels
+      filters: {
+        all: 'All',
+        activeOnly: 'Active Only',
+        showInactive: 'Show inactive also',
+      },
+    },
+
     // Compliance
     compliance: {
       ruleUpdated: 'Rule updated',

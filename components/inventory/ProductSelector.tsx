@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NewProductForm } from './NewProductForm';
 import { Search } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -37,6 +38,7 @@ export function ProductSelector({
   selectedItems,
   onItemsChange
 }: ProductSelectorProps) {
+  const { t } = useTranslation();
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,7 +61,7 @@ export function ProductSelector({
         setCatalogItems(items);
       }
     } catch (error) {
-      console.error('Error loading catalog items:', error);
+      console.error(t('inventory.toast.errorLoadingCatalog'), error);
     } finally {
       setLoading(false);
     }
@@ -101,15 +103,15 @@ export function ProductSelector({
     <div className="space-y-4">
       <Tabs defaultValue="catalog" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="catalog">Da Catalogo</TabsTrigger>
-          <TabsTrigger value="new">Nuovo Prodotto</TabsTrigger>
+          <TabsTrigger value="catalog">{t('inventory.tabs.fromCatalog')}</TabsTrigger>
+          <TabsTrigger value="new">{t('inventory.tabs.newProduct')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="catalog" className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Cerca prodotti..."
+              placeholder={t('inventory.placeholders.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -118,13 +120,13 @@ export function ProductSelector({
 
           {loading ? (
             <div className="text-center py-4 text-muted-foreground">
-              Caricamento prodotti...
+              {t('inventory.loading.products')}
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredItems.length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground">
-                  {searchTerm ? 'Nessun prodotto trovato' : 'Nessun prodotto disponibile'}
+                  {searchTerm ? t('inventory.empty.noProductsFound') : t('inventory.empty.noProducts')}
                 </div>
               ) : (
                 filteredItems.map((item) => (
@@ -150,7 +152,7 @@ export function ProductSelector({
 
           {selectedItems.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              {selectedItems.length} prodotti selezionati
+              {selectedItems.length} {t('inventory.labels.products')} {t('inventory.labels.selected')}
             </div>
           )}
         </TabsContent>
