@@ -16,6 +16,7 @@ import { AllergenSelector } from './AllergenSelector';
 import { SeasonSelector } from './SeasonSelector';
 import { ScalableIngredient } from '@/lib/recipes/scaling';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeEditorDialogProps {
   open: boolean;
@@ -23,23 +24,24 @@ interface RecipeEditorDialogProps {
   onSuccess: () => void;
 }
 
-const CATEGORIES = [
-  { value: 'main_course', label: 'Primo/Secondo' },
-  { value: 'appetizer', label: 'Antipasto' },
-  { value: 'dessert', label: 'Dolce' },
-  { value: 'beverage', label: 'Bevanda' },
-  { value: 'side_dish', label: 'Contorno' },
-  { value: 'soup', label: 'Zuppa' },
-  { value: 'salad', label: 'Insalata' },
-  { value: 'breakfast', label: 'Colazione' },
-  { value: 'other', label: 'Altro' }
-];
+const CATEGORY_VALUES = [
+  'main_course',
+  'appetizer',
+  'dessert',
+  'beverage',
+  'side_dish',
+  'soup',
+  'salad',
+  'breakfast',
+  'other'
+] as const;
 
 export function RecipeEditorDialog({
   open,
   onOpenChange,
   onSuccess
 }: RecipeEditorDialogProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [orgId, setOrgId] = useState<string>('');
   const [locationId, setLocationId] = useState<string>('');
@@ -68,7 +70,7 @@ export function RecipeEditorDialog({
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast.error('Utente non autenticato');
+        toast.error(t('recipes.editor.toast.authError'));
         return;
       }
 
@@ -108,34 +110,34 @@ export function RecipeEditorDialog({
   const handleSave = async () => {
     // P1: Enhanced validation
     if (!title.trim()) {
-      toast.error('Il titolo è obbligatorio');
+      toast.error(t('recipes.editor.validation.titleRequired'));
       return;
     }
     if (!category) {
-      toast.error('La categoria è obbligatoria');
+      toast.error(t('recipes.editor.validation.categoryRequired'));
       return;
     }
     if (!servings || servings < 1) {
-      toast.error('Le porzioni devono essere almeno 1');
+      toast.error(t('recipes.editor.validation.servingsMin'));
       return;
     }
     if (ingredients.length === 0) {
-      toast.error('Aggiungi almeno un ingrediente');
+      toast.error(t('recipes.editor.validation.ingredientsRequired'));
       return;
     }
     const hasValidIngredient = ingredients.some(ing => 
       ing.quantity && parseFloat(ing.quantity.toString()) > 0
     );
     if (!hasValidIngredient) {
-      toast.error('Almeno un ingrediente deve avere quantità > 0');
+      toast.error(t('recipes.editor.validation.ingredientQuantityRequired'));
       return;
     }
     if (!photoUrl) {
-      toast.error('Carica una foto per la ricetta');
+      toast.error(t('recipes.editor.validation.photoRequired'));
       return;
     }
     if (!orgId || !locationId) {
-      toast.error('Contesto organizzazione mancante');
+      toast.error(t('recipes.editor.validation.contextMissing'));
       return;
     }
 
@@ -145,7 +147,7 @@ export function RecipeEditorDialog({
     );
 
     if (incompleteIngredients.length > 0) {
-      toast.error('Completa tutti gli ingredienti o rimuovili');
+      toast.error(t('recipes.editor.validation.incompleteIngredients'));
       return;
     }
 
@@ -178,12 +180,12 @@ export function RecipeEditorDialog({
         throw new Error(data.error || 'Failed to create recipe');
       }
 
-      toast.success('Ricetta creata con successo');
+      toast.success(t('recipes.editor.toast.success'));
       handleClose();
       onSuccess();
     } catch (error: any) {
       console.error('Failed to save recipe:', error);
-      toast.error('Errore salvataggio ricetta', {
+      toast.error(t('recipes.editor.toast.error'), {
         description: error.message
       });
     } finally {
@@ -195,51 +197,51 @@ export function RecipeEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nuova Ricetta</DialogTitle>
+          <DialogTitle>{t('recipes.editor.title')}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="info">Informazioni Base</TabsTrigger>
-            <TabsTrigger value="ingredients">Ingredienti</TabsTrigger>
+            <TabsTrigger value="info">{t('recipes.editor.tabs.info')}</TabsTrigger>
+            <TabsTrigger value="ingredients">{t('recipes.editor.tabs.ingredients')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-4 mt-4">
             {/* Titolo */}
             <div>
-              <Label htmlFor="title">Titolo *</Label>
+              <Label htmlFor="title">{t('recipes.editor.form.titleLabel')} *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="es. Risotto ai Funghi"
+                placeholder={t('recipes.editor.form.titlePlaceholder')}
                 maxLength={200}
               />
             </div>
 
             {/* Descrizione */}
             <div>
-              <Label htmlFor="description">Descrizione</Label>
+              <Label htmlFor="description">{t('recipes.editor.form.descriptionLabel')}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Breve descrizione della ricetta..."
+                placeholder={t('recipes.editor.form.descriptionPlaceholder')}
                 rows={3}
               />
             </div>
 
             {/* Categoria */}
             <div>
-              <Label htmlFor="category">Categoria *</Label>
+              <Label htmlFor="category">{t('recipes.editor.form.categoryLabel')} *</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger id="category">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                  {CATEGORY_VALUES.map(cat => (
+                    <SelectItem key={cat} value={cat}>
+                      {t(`recipes.categories.${cat}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -259,11 +261,11 @@ export function RecipeEditorDialog({
               <AllergenSelector
                 selectedAllergens={allergens}
                 onAllergensChange={setAllergens}
-                label="Allergeni"
-                placeholder="Seleziona allergeni presenti..."
+                label={t('recipes.editor.form.allergensLabel')}
+                placeholder={t('recipes.editor.form.allergensPlaceholder')}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Indica gli allergeni principali presenti nella ricetta
+                {t('recipes.editor.form.allergensHelp')}
               </p>
             </div>
 
@@ -272,17 +274,17 @@ export function RecipeEditorDialog({
               <SeasonSelector
                 selectedMonths={season}
                 onMonthsChange={setSeason}
-                label="Stagionalità"
-                placeholder="Seleziona mesi..."
+                label={t('recipes.editor.form.seasonLabel')}
+                placeholder={t('recipes.editor.form.seasonPlaceholder')}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Indica i mesi in cui questa ricetta è più appropriata
+                {t('recipes.editor.form.seasonHelp')}
               </p>
             </div>
 
             {/* Porzioni */}
             <div>
-              <Label htmlFor="servings">Porzioni Standard *</Label>
+              <Label htmlFor="servings">{t('recipes.editor.form.servingsLabel')} *</Label>
               <Input
                 id="servings"
                 type="number"
@@ -295,14 +297,14 @@ export function RecipeEditorDialog({
                 }}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Numero di porzioni per cui è calcolata la ricetta
+                {t('recipes.editor.form.servingsHelp')}
               </p>
             </div>
 
             {/* Tempi */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="prepTime">Tempo Preparazione (min)</Label>
+                <Label htmlFor="prepTime">{t('recipes.editor.form.prepTimeLabel')}</Label>
                 <Input
                   id="prepTime"
                   type="number"
@@ -312,7 +314,7 @@ export function RecipeEditorDialog({
                 />
               </div>
               <div>
-                <Label htmlFor="cookTime">Tempo Cottura (min)</Label>
+                <Label htmlFor="cookTime">{t('recipes.editor.form.cookTimeLabel')}</Label>
                 <Input
                   id="cookTime"
                   type="number"
@@ -336,11 +338,11 @@ export function RecipeEditorDialog({
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={handleClose} disabled={loading}>
             <X className="w-4 h-4 mr-1" />
-            Annulla
+            {t('recipes.editor.buttons.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             <Save className="w-4 h-4 mr-1" />
-            {loading ? 'Salvataggio...' : 'Salva Bozza'}
+            {loading ? t('recipes.editor.buttons.saving') : t('recipes.editor.buttons.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

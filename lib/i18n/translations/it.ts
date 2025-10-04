@@ -685,6 +685,65 @@ export const it = {
       selectedCount: '{count} selezionati',
     },
     
+    // Categories
+    categories: {
+      main_course: 'Primo/Secondo',
+      appetizer: 'Antipasto',
+      dessert: 'Dolce',
+      beverage: 'Bevanda',
+      side_dish: 'Contorno',
+      soup: 'Zuppa',
+      salad: 'Insalata',
+      breakfast: 'Colazione',
+      other: 'Altro',
+    },
+    
+    // Recipe Editor
+    editor: {
+      title: 'Nuova Ricetta',
+      tabs: {
+        info: 'Informazioni Base',
+        ingredients: 'Ingredienti',
+      },
+      form: {
+        titleLabel: 'Titolo',
+        titlePlaceholder: 'es. Risotto ai Funghi',
+        descriptionLabel: 'Descrizione',
+        descriptionPlaceholder: 'Breve descrizione della ricetta...',
+        categoryLabel: 'Categoria',
+        allergensLabel: 'Allergeni',
+        allergensPlaceholder: 'Seleziona allergeni presenti...',
+        allergensHelp: 'Indica gli allergeni principali presenti nella ricetta',
+        seasonLabel: 'Stagionalità',
+        seasonPlaceholder: 'Seleziona mesi...',
+        seasonHelp: 'Indica i mesi in cui questa ricetta è più appropriata',
+        servingsLabel: 'Porzioni Standard',
+        servingsHelp: 'Numero di porzioni per cui è calcolata la ricetta',
+        prepTimeLabel: 'Tempo Preparazione (min)',
+        cookTimeLabel: 'Tempo Cottura (min)',
+      },
+      validation: {
+        titleRequired: 'Il titolo è obbligatorio',
+        categoryRequired: 'La categoria è obbligatoria',
+        servingsMin: 'Le porzioni devono essere almeno 1',
+        ingredientsRequired: 'Aggiungi almeno un ingrediente',
+        ingredientQuantityRequired: 'Almeno un ingrediente deve avere quantità > 0',
+        photoRequired: 'Carica una foto per la ricetta',
+        contextMissing: 'Contesto organizzazione mancante',
+        incompleteIngredients: 'Completa tutti gli ingredienti o rimuovili',
+      },
+      toast: {
+        success: 'Ricetta creata con successo',
+        error: 'Errore salvataggio ricetta',
+        authError: 'Utente non autenticato',
+      },
+      buttons: {
+        cancel: 'Annulla',
+        save: 'Salva Bozza',
+        saving: 'Salvataggio...',
+      },
+    },
+    
     // Item Selector
     itemSelector: {
       searchPlaceholder: 'Cerca ingrediente...',

@@ -689,6 +689,65 @@ export const en = {
       selectedCount: '{count} selected',
     },
     
+    // Categories
+    categories: {
+      main_course: 'Main Course',
+      appetizer: 'Appetizer',
+      dessert: 'Dessert',
+      beverage: 'Beverage',
+      side_dish: 'Side Dish',
+      soup: 'Soup',
+      salad: 'Salad',
+      breakfast: 'Breakfast',
+      other: 'Other',
+    },
+    
+    // Recipe Editor
+    editor: {
+      title: 'New Recipe',
+      tabs: {
+        info: 'Basic Information',
+        ingredients: 'Ingredients',
+      },
+      form: {
+        titleLabel: 'Title',
+        titlePlaceholder: 'e.g. Mushroom Risotto',
+        descriptionLabel: 'Description',
+        descriptionPlaceholder: 'Brief recipe description...',
+        categoryLabel: 'Category',
+        allergensLabel: 'Allergens',
+        allergensPlaceholder: 'Select allergens present...',
+        allergensHelp: 'Indicate the main allergens present in the recipe',
+        seasonLabel: 'Seasonality',
+        seasonPlaceholder: 'Select months...',
+        seasonHelp: 'Indicate the months when this recipe is most appropriate',
+        servingsLabel: 'Standard Servings',
+        servingsHelp: 'Number of servings this recipe yields',
+        prepTimeLabel: 'Prep Time (min)',
+        cookTimeLabel: 'Cook Time (min)',
+      },
+      validation: {
+        titleRequired: 'Title is required',
+        categoryRequired: 'Category is required',
+        servingsMin: 'Servings must be at least 1',
+        ingredientsRequired: 'Add at least one ingredient',
+        ingredientQuantityRequired: 'At least one ingredient must have quantity > 0',
+        photoRequired: 'Upload a photo for the recipe',
+        contextMissing: 'Organization context missing',
+        incompleteIngredients: 'Complete all ingredients or remove them',
+      },
+      toast: {
+        success: 'Recipe created successfully',
+        error: 'Error saving recipe',
+        authError: 'User not authenticated',
+      },
+      buttons: {
+        cancel: 'Cancel',
+        save: 'Save Draft',
+        saving: 'Saving...',
+      },
+    },
+    
     // Item Selector
     itemSelector: {
       searchPlaceholder: 'Search ingredient...',
