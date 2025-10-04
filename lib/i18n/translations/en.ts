@@ -75,6 +75,8 @@ export const en = {
       errorLoadingUsers: 'Error loading users',
       errorLoadingShifts: 'Error loading shifts',
       errorSaving: 'Save error',
+      notAuthenticated: 'Not authenticated',
+      approvalFailed: 'Approval failed',
     },
     ariaLabels: {
       shiftActions: 'Shift actions',
@@ -1823,6 +1825,8 @@ export const en = {
       approved: 'Approved',
       active: 'Active',
       inactive: 'Inactive',
+      in_progress: 'In Progress',
+      draft: 'Draft',
     },
     
     // Common labels
@@ -1959,9 +1963,32 @@ export const en = {
       inventories: 'Loading inventories...',
       products: 'Loading products...',
       catalog: 'Loading catalog...',
+      history: 'Loading inventory history...',
       saving: 'Saving...',
       creating: 'Creating...',
       deleting: 'Deleting...',
+    },
+    
+    // History page
+    historyPage: {
+      title: 'Inventory History',
+      searchPlaceholder: 'Search by location, user...',
+      filterStatus: 'Status',
+      filterCategory: 'Category',
+      allStatuses: 'All statuses',
+      allCategories: 'All categories',
+      errorLoading: 'Error loading history',
+      tableHeaders: {
+        startDate: 'Start Date',
+        category: 'Category',
+        location: 'Location',
+        status: 'Status',
+        totalValue: 'Total Value',
+        startedBy: 'Started By',
+        approvedBy: 'Approved By',
+        approvalDate: 'Approval Date',
+        actions: 'Actions',
+      },
     },
     
     // Tabs

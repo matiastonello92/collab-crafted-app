@@ -75,6 +75,8 @@ export const it = {
       errorLoadingUsers: 'Errore nel caricamento degli utenti',
       errorLoadingShifts: 'Errore nel caricamento dei turni',
       errorSaving: 'Errore salvataggio',
+      notAuthenticated: 'Non autenticato',
+      approvalFailed: 'Approvazione fallita',
     },
     ariaLabels: {
       shiftActions: 'Azioni turno',
@@ -1888,6 +1890,8 @@ export const it = {
       approved: 'Approvato',
       active: 'Attivo',
       inactive: 'Inattivo',
+      in_progress: 'In Corso',
+      draft: 'Bozza',
     },
     
     // Common labels
@@ -2024,9 +2028,32 @@ export const it = {
       inventories: 'Caricamento inventari...',
       products: 'Caricamento prodotti...',
       catalog: 'Caricamento catalogo...',
+      history: 'Caricamento storico inventari...',
       saving: 'Salvataggio...',
       creating: 'Creazione...',
       deleting: 'Eliminazione...',
+    },
+    
+    // History page
+    historyPage: {
+      title: 'Storico Inventari',
+      searchPlaceholder: 'Cerca per location, utente...',
+      filterStatus: 'Stato',
+      filterCategory: 'Categoria',
+      allStatuses: 'Tutti gli stati',
+      allCategories: 'Tutte le categorie',
+      errorLoading: 'Errore nel caricamento dello storico',
+      tableHeaders: {
+        startDate: 'Data Inizio',
+        category: 'Categoria',
+        location: 'Location',
+        status: 'Stato',
+        totalValue: 'Valore Totale',
+        startedBy: 'Iniziato da',
+        approvedBy: 'Approvato da',
+        approvalDate: 'Data Approvazione',
+        actions: 'Azioni',
+      },
     },
     
     // Tabs

@@ -15,6 +15,7 @@ import { useSupabase } from '@/hooks/useSupabase';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface InventoryHistoryItem {
   id: string;
@@ -28,25 +29,8 @@ interface InventoryHistoryItem {
   location_name?: string;
 }
 
-const statusLabels = {
-  'in_progress': 'In Corso',
-  'completed': 'Completato', 
-  'approved': 'Approvato'
-};
-
-const statusColors = {
-  'in_progress': 'bg-yellow-100 text-yellow-800',
-  'completed': 'bg-blue-100 text-blue-800',
-  'approved': 'bg-green-100 text-green-800'
-};
-
-const categoryLabels = {
-  'kitchen': 'Cucina',
-  'bar': 'Bar',
-  'cleaning': 'Pulizie'
-};
-
 export function InventoryHistoryPage() {
+  const { t } = useTranslation()
   const [inventories, setInventories] = useState<InventoryHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,11 +77,11 @@ export function InventoryHistoryPage() {
       setInventories(formattedData);
     } catch (error) {
       console.error('❌ [HISTORY] Error loading inventories:', error);
-      toast.error('Errore nel caricamento dello storico');
+      toast.error(t('inventory.historyPage.errorLoading'));
     } finally {
       setLoading(false);
     }
-  }, [locationId, supabase]);
+  }, [locationId, supabase, t]);
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -147,6 +131,15 @@ export function InventoryHistoryPage() {
     toast.info('Modifica inventario - Coming soon');
   };
 
+  const getStatusColor = (status: string) => {
+    const colors = {
+      'in_progress': 'bg-yellow-100 text-yellow-800',
+      'completed': 'bg-blue-100 text-blue-800',
+      'approved': 'bg-green-100 text-green-800'
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
   const canEdit = (status: string) => {
     if (isAdmin) return true;
     if (status === 'in_progress' || status === 'completed') return true;
@@ -159,7 +152,7 @@ export function InventoryHistoryPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="h-5 w-5" />
-            Storico Inventari
+            {t('inventory.historyPage.title')}
           </CardTitle>
           
           {/* Filters */}
@@ -167,7 +160,7 @@ export function InventoryHistoryPage() {
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4" />
               <Input
-                placeholder="Cerca per location, utente..."
+                placeholder={t('inventory.historyPage.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-64"
@@ -176,25 +169,25 @@ export function InventoryHistoryPage() {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Stato" />
+                <SelectValue placeholder={t('inventory.historyPage.filterStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti gli stati</SelectItem>
-                <SelectItem value="in_progress">In Corso</SelectItem>
-                <SelectItem value="completed">Completato</SelectItem>
-                <SelectItem value="approved">Approvato</SelectItem>
+                <SelectItem value="all">{t('inventory.historyPage.allStatuses')}</SelectItem>
+                <SelectItem value="in_progress">{t('inventory.status.in_progress')}</SelectItem>
+                <SelectItem value="completed">{t('inventory.status.completed')}</SelectItem>
+                <SelectItem value="approved">{t('inventory.status.approved')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Categoria" />
+                <SelectValue placeholder={t('inventory.historyPage.filterCategory')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutte le categorie</SelectItem>
-                <SelectItem value="kitchen">Cucina</SelectItem>
-                <SelectItem value="bar">Bar</SelectItem>
-                <SelectItem value="cleaning">Pulizie</SelectItem>
+                <SelectItem value="all">{t('inventory.historyPage.allCategories')}</SelectItem>
+                <SelectItem value="kitchen">{t('inventory.categories.kitchen')}</SelectItem>
+                <SelectItem value="bar">{t('inventory.categories.bar')}</SelectItem>
+                <SelectItem value="cleaning">{t('inventory.categories.cleaning')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -202,20 +195,20 @@ export function InventoryHistoryPage() {
         
         <CardContent>
           {loading || permissionsLoading ? (
-            <div className="text-center py-8">Caricamento storico inventari...</div>
+            <div className="text-center py-8">{t('inventory.loading.history')}</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data Inizio</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Valore Totale</TableHead>
-                  <TableHead>Iniziato da</TableHead>
-                  <TableHead>Approvato da</TableHead>
-                  <TableHead>Data Approvazione</TableHead>
-                  <TableHead>Azioni</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.startDate')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.category')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.location')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.status')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.totalValue')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.startedBy')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.approvedBy')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.approvalDate')}</TableHead>
+                  <TableHead>{t('inventory.historyPage.tableHeaders.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -224,11 +217,11 @@ export function InventoryHistoryPage() {
                     <TableCell>
                       {format(new Date(item.started_at), 'dd/MM/yyyy HH:mm', { locale: it })}
                     </TableCell>
-                    <TableCell>{categoryLabels[item.category as keyof typeof categoryLabels]}</TableCell>
+                    <TableCell>{t(`inventory.categories.${item.category}`)}</TableCell>
                     <TableCell>{item.location_name}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[item.status as keyof typeof statusColors]}>
-                        {statusLabels[item.status as keyof typeof statusLabels]}
+                      <Badge className={getStatusColor(item.status)}>
+                        {t(`inventory.status.${item.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>€{item.total_value.toFixed(2)}</TableCell>

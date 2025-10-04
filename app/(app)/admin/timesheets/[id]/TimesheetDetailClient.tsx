@@ -67,7 +67,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
       
       const session = await supabase.auth.getSession()
       if (!session.data.session) {
-        throw new Error('Non autenticato')
+        throw new Error(t('common.messages.notAuthenticated'))
       }
 
       const res = await fetch(`/api/v1/timesheets/${timesheetId}/approve`, {
@@ -81,7 +81,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Approvazione fallita')
+        throw new Error(err.error || t('common.messages.approvalFailed'))
       }
 
       toast.success(t('toast.timesheet.approved'))
