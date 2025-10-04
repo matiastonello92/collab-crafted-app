@@ -153,35 +153,35 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
           <div className="text-3xl font-bold">{formatMinutesToHours(totalHours)}h</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Ore Ordinarie</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('admin.timesheetDetailRegularHours')}</div>
           <div className="text-3xl font-bold">{formatMinutesToHours(totals.regular_minutes)}h</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Straordinari</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('admin.timesheetDetailOvertime')}</div>
           <div className="text-3xl font-bold text-orange-600">
             {formatMinutesToHours(totals.overtime_minutes)}h
           </div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground mb-1">Giorni Lavorati</div>
+          <div className="text-sm text-muted-foreground mb-1">{t('admin.timesheetDetailDaysWorked')}</div>
           <div className="text-3xl font-bold">{totals.days_worked}</div>
         </Card>
       </div>
 
       {/* Breakdown */}
       <Card className="p-6 space-y-4">
-        <h2 className="text-xl font-bold">Dettaglio</h2>
+        <h2 className="text-xl font-bold">{t('admin.timesheetDetailBreakdown')}</h2>
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Pause totali</span>
+            <span className="text-muted-foreground">{t('admin.timesheetDetailBreakTotal')}</span>
             <span className="font-semibold">{formatMinutesToHours(totals.break_minutes)}h</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Ore pianificate</span>
+            <span className="text-muted-foreground">{t('admin.timesheetDetailPlannedHours')}</span>
             <span className="font-semibold">{formatMinutesToHours(totals.planned_minutes)}h</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Differenza vs pianificate</span>
+            <span className="text-muted-foreground">{t('admin.timesheetDetailVariance')}</span>
             <span className={`font-semibold ${totals.variance_minutes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {totals.variance_minutes >= 0 ? '+' : ''}
               {formatMinutesToHours(totals.variance_minutes)}h
@@ -192,11 +192,11 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
 
       {/* Notes */}
       <Card className="p-6 space-y-4">
-        <h2 className="text-xl font-bold">Note</h2>
+        <h2 className="text-xl font-bold">{t('admin.timesheetDetailNotes')}</h2>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Aggiungi note al timesheet..."
+          placeholder={t('admin.timesheetDetailNotesPlaceholder')}
           rows={4}
           disabled={!!timesheet.approved_at}
         />

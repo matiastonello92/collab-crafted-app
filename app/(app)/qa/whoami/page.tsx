@@ -5,6 +5,7 @@ import { User, Shield, MapPin, Key, Clock } from 'lucide-react'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
+import { t } from '@/lib/i18n'
 
 export default async function QAWhoAmIPage() {
   // Guard: require admin permissions
@@ -65,35 +66,35 @@ export default async function QAWhoAmIPage() {
               <p className="text-sm font-mono break-all">{user.id}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Email</label>
-              <p className="text-sm">{user.email || 'N/D'}</p>
+              <label className="text-sm font-medium text-muted-foreground">{t('qa.whoami.email')}</label>
+              <p className="text-sm">{user.email || t('qa.whoami.notAvailable')}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Email Verificata</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('qa.whoami.emailVerified')}</label>
               <Badge variant={user.email_confirmed_at ? 'default' : 'secondary'}>
-                {user.email_confirmed_at ? 'Sì' : 'No'}
+                {user.email_confirmed_at ? t('common.yes') : t('common.no')}
               </Badge>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Ultimo Login</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('qa.whoami.lastLogin')}</label>
               <p className="text-sm">
                 {user.last_sign_in_at 
                   ? new Date(user.last_sign_in_at).toLocaleString('it-IT')
-                  : 'N/D'
+                  : t('qa.whoami.notAvailable')
                 }
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Creato il</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('qa.whoami.createdOn')}</label>
               <p className="text-sm">
                 {user.created_at 
                   ? new Date(user.created_at).toLocaleString('it-IT')
-                  : 'N/D'
+                  : t('qa.whoami.notAvailable')
                 }
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Provider</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('qa.whoami.provider')}</label>
               <p className="text-sm">{user.app_metadata?.provider || 'email'}</p>
             </div>
           </div>

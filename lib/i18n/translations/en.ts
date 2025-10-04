@@ -42,6 +42,32 @@ export const en = {
       changePhoto: 'Change photo',
       formatInfo: 'Formats: JPG, PNG, GIF. Max 5MB.',
     },
+    placeholders: {
+      email: 'user@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      selectRole: 'Select role...',
+      selectGlobalRole: 'Select global role...',
+      selectLocation: 'Select location...',
+      searchUsers: 'Search users by email or name...',
+      addNotes: 'Add notes...',
+      selectType: 'Select type...',
+      selectColor: 'Select color',
+      noGlobalRole: 'No global role',
+    },
+    messages: {
+      noActivity: 'No activity recorded',
+      noRoles: 'No roles assigned',
+      noOverrides: 'No specific overrides',
+      noPhoto: 'No photo',
+      noLocationAssigned: 'No Location Assigned',
+      notAssignedDesc: 'You have not been assigned to any location as a manager.',
+      contactAdmin: 'Contact an administrator to receive the necessary permissions.',
+    },
+    ariaLabels: {
+      shiftActions: 'Shift actions',
+      addShiftOrAbsence: 'Add shift or absence',
+    },
   },
 
   // Navigation
@@ -584,6 +610,29 @@ export const en = {
     dayFriday: 'Friday',
     daySaturday: 'Saturday',
     daySunday: 'Sunday',
+    
+    // User Detail Tabs
+    tabOverview: 'Overview',
+    tabRolesLocation: 'Roles & Location',
+    tabJobTags: 'Job Tags',
+    tabPermissions: 'Effective Permissions',
+    tabCompliance: 'Compliance',
+    tabActivity: 'Activity',
+    tabSecurity: 'Security',
+  },
+  
+  // QA & Debug
+  qa: {
+    whoami: {
+      title: 'User Information',
+      userId: 'User ID',
+      email: 'Email',
+      emailVerified: 'Email Verified',
+      lastLogin: 'Last Login',
+      createdOn: 'Created on',
+      provider: 'Provider',
+      notAvailable: 'N/A',
+    },
   },
 
   // Planner & Shifts

@@ -17,6 +17,7 @@ import { DeleteUserDialog } from './components/DeleteUserDialog'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
+import { t } from '@/lib/i18n'
 
 interface Props {
   params: {
@@ -107,13 +108,13 @@ export default async function UserDetailPage({ params }: Props) {
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="roles">Ruoli & Location</TabsTrigger>
-          <TabsTrigger value="job-tags">Job Tags</TabsTrigger>
-          <TabsTrigger value="permissions">Permessi Effettivi</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
-          <TabsTrigger value="activity">Attività</TabsTrigger>
-          <TabsTrigger value="security">Sicurezza</TabsTrigger>
+          <TabsTrigger value="overview">{t('admin.tabOverview')}</TabsTrigger>
+          <TabsTrigger value="roles">{t('admin.tabRolesLocation')}</TabsTrigger>
+          <TabsTrigger value="job-tags">{t('admin.tabJobTags')}</TabsTrigger>
+          <TabsTrigger value="permissions">{t('admin.tabPermissions')}</TabsTrigger>
+          <TabsTrigger value="compliance">{t('admin.tabCompliance')}</TabsTrigger>
+          <TabsTrigger value="activity">{t('admin.tabActivity')}</TabsTrigger>
+          <TabsTrigger value="security">{t('admin.tabSecurity')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -125,7 +126,7 @@ export default async function UserDetailPage({ params }: Props) {
         </TabsContent>
 
         <TabsContent value="roles" className="mt-6">
-          <Suspense fallback={<div>Caricamento ruoli...</div>}>
+          <Suspense fallback={<div>{t('admin.loadingRoles')}</div>}>
             <RolesByLocationPanel 
               roles={rolesByLocation} 
               userId={params.id}
@@ -147,7 +148,7 @@ export default async function UserDetailPage({ params }: Props) {
             {userLocations.length === 0 && (
               <Card>
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  L'utente non è assegnato a nessuna location
+                  {t('admin.userNotAssignedToLocation')}
                 </CardContent>
               </Card>
             )}
@@ -163,7 +164,7 @@ export default async function UserDetailPage({ params }: Props) {
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
-          <Suspense fallback={<div>Caricamento attività...</div>}>
+          <Suspense fallback={<div>{t('admin.loadingActivity')}</div>}>
             <ActivityPanel userId={params.id} />
           </Suspense>
         </TabsContent>
@@ -171,31 +172,31 @@ export default async function UserDetailPage({ params }: Props) {
         <TabsContent value="security" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Sicurezza Account</CardTitle>
+              <CardTitle>{t('admin.accountSecurity')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h4 className="font-medium">Sessioni Attive</h4>
+                    <h4 className="font-medium">{t('admin.activeSessions')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Gestisci le sessioni attive dell'utente
+                      {t('admin.manageActiveSessionsDesc')}
                     </p>
                   </div>
                   <Button variant="outline" disabled>
-                    Revoca Tutte
+                    {t('admin.revokeAll')}
                   </Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h4 className="font-medium">Reset Password</h4>
+                    <h4 className="font-medium">{t('admin.resetPassword')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Invia email per reset password
+                      {t('admin.sendResetEmail')}
                     </p>
                   </div>
                   <Button variant="outline" disabled>
-                    Invia Reset
+                    {t('admin.sendReset')}
                   </Button>
                 </div>
               </div>
