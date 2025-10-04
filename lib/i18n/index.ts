@@ -1,5 +1,6 @@
 import { it } from './translations/it';
 import { en } from './translations/en';
+import { useLocale as useLocaleContext } from './LocaleProvider';
 
 export type Locale = 'it' | 'en' | 'fr' | 'es';
 export type TranslationKey = string;
@@ -50,9 +51,7 @@ export function t(key: string, locale?: Locale): string {
  * React hook for translations - use this in components for reactive locale changes
  */
 export function useTranslation() {
-  // Import dynamically to avoid circular dependency
-  const { useLocale } = require('./LocaleProvider');
-  const { locale } = useLocale();
+  const { locale } = useLocaleContext();
   
   return {
     t: (key: string) => t(key, locale),

@@ -17,6 +17,87 @@ export const it = {
     no: 'No',
   },
 
+  // Navigation
+  nav: {
+    dashboard: 'Dashboard',
+    inventory: 'Inventari',
+    kitchen: 'Cucina',
+    bar: 'Bar',
+    cleaning: 'Pulizie',
+    history: 'Storico',
+    templates: 'Gestione Template',
+    productsSeparator: 'Prodotti',
+    catalog: 'Catalogo Prodotti',
+    shifts: 'Klyra Shifts',
+    onboarding: 'Onboarding Rota',
+    planner: 'Planner Turni',
+    myShifts: 'I miei Turni',
+    jobTags: 'Job Tags',
+    compliance: 'Compliance',
+    recipes: 'Klyra Recipes',
+    recipesList: 'Lista Ricette',
+    admin: 'Amministrazione',
+    invitations: 'Inviti',
+    locations: 'Locations',
+    permissionTags: 'Permission Tags',
+    emailLogs: 'Email Logs',
+    qa: 'QA & Debug',
+    settings: 'Impostazioni',
+    locked: 'Bloccato',
+    platform: 'Platform',
+    systemActive: 'Sistema Attivo',
+    home: 'Home',
+    other: 'Altro',
+  },
+
+  // Header
+  header: {
+    noLocation: 'Nessuna sede',
+    selectLocation: 'Seleziona sede attiva',
+    errorMemberships: 'Impossibile leggere le assegnazioni.',
+    errorLocations: 'Impossibile leggere le sedi.',
+    errorFatal: 'Errore inatteso.',
+  },
+
+  // User dropdown
+  user: {
+    login: 'Accedi',
+    myProfile: 'Il Mio Profilo',
+    settings: 'Impostazioni',
+    logout: 'Logout',
+  },
+
+  // Admin
+  admin: {
+    userManagement: 'Gestione Utenti',
+    userManagementDesc: 'Invita e gestisci gli utenti della tua organizzazione',
+    inviteUser: 'Invita Utente',
+    backToList: 'Torna alla lista',
+    inviteUserTitle: 'Invita Utente',
+    inviteUserDesc: 'Invia un invito per aggiungere un nuovo utente al sistema',
+    inviteDetails: 'Dettagli Invito',
+    inviteDetailsDesc: 'Compila i campi per inviare l\'invito via email',
+    accessDenied: 'Accesso Negato',
+    accessDeniedDesc: 'Non hai i permessi necessari per accedere a questa sezione amministrativa.',
+    adminRequired: 'È richiesto il ruolo di amministratore per visualizzare questa pagina.',
+  },
+
+  // Metadata (page titles/descriptions)
+  metadata: {
+    plannerTitle: 'Planner Turni',
+    plannerDesc: 'Pianifica e gestisci i turni del tuo team',
+    myShiftsTitle: 'I Miei Turni',
+    myShiftsDesc: 'Visualizza i tuoi turni assegnati',
+  },
+
+  // Aria labels
+  aria: {
+    mainNav: 'Navigazione principale',
+    expandNav: 'Espandi menu di navigazione',
+    collapseNav: 'Comprimi menu di navigazione',
+    openMenu: 'Apri menu',
+  },
+
   // Recipe Categories
   categories: {
     appetizer: 'Antipasto',

@@ -33,53 +33,10 @@ import { can } from '@/lib/permissions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
-
-const navigation: any[] = [
-  { name: 'Dashboard', href: '/', icon: Home, permission: null },
-  { 
-    name: 'Inventari', 
-    icon: Package, 
-    permission: null,
-    children: [
-      { name: 'Cucina', href: '/inventory/kitchen', icon: ChefHat },
-      { name: 'Bar', href: '/inventory/bar', icon: Wine },
-      { name: 'Pulizie', href: '/inventory/cleaning', icon: Sparkles },
-      { name: 'Storico', href: '/inventory/history', icon: History },
-      { name: 'Gestione Template', href: '/admin/templates', icon: Package },
-      { name: '--- Prodotti ---', disabled: true },
-      { name: 'Catalogo Prodotti', href: '/inventory/catalog', icon: Package },
-    ]
-  },
-  {
-    name: 'Klyra Shifts',
-    icon: CalendarClock,
-    permission: null,
-    children: [
-      { name: 'Onboarding Rota', href: '/onboarding/rota', icon: CalendarClock, permission: 'shifts:manage', badge: 'NEW' },
-      { name: 'Planner Turni', href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
-      { name: 'I miei Turni', href: '/my-shifts', icon: CalendarDays, permission: null },
-      { name: 'Job Tags', href: '/staff/job-tags', icon: Tag, permission: 'manage_users', adminOnly: true },
-      { name: 'Compliance', href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
-    ]
-  },
-  {
-    name: 'Klyra Recipes',
-    icon: ChefHat,
-    permission: null,
-    children: [
-      { name: 'Lista Ricette', href: '/recipes', icon: ChefHat, permission: null },
-    ]
-  },
-  { name: 'Amministrazione', href: '/admin/users', icon: Users, permission: 'manage_users' },
-  { name: 'Inviti', href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
-  { name: 'Locations', href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
-  { name: 'Permission Tags', href: '/permission-tags', icon: Shield, permission: null, platformAdminOnly: true },
-  { name: 'Email Logs', href: '/admin/settings/email-logs', icon: Mail, permission: 'view_settings' },
-  { name: 'QA & Debug', href: '/qa', icon: Bug, permission: '*' },
-  { name: 'Impostazioni', href: '/settings', icon: Settings, permission: 'view_settings' },
-]
+import { useTranslation } from '@/lib/i18n'
 
 export default function SidebarClient({ onNavigate }: { onNavigate?: () => void } = {}) {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
   const [isAdminClaims, setIsAdminClaims] = useState(false)
@@ -87,6 +44,51 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
   const pathname = usePathname()
   const supabase = useSupabase()
   const { permissions, context, permissionsLoading } = useHydratedStore()
+  
+  const navigation: any[] = [
+    { name: t('nav.dashboard'), href: '/', icon: Home, permission: null },
+    { 
+      name: t('nav.inventory'), 
+      icon: Package, 
+      permission: null,
+      children: [
+        { name: t('nav.kitchen'), href: '/inventory/kitchen', icon: ChefHat },
+        { name: t('nav.bar'), href: '/inventory/bar', icon: Wine },
+        { name: t('nav.cleaning'), href: '/inventory/cleaning', icon: Sparkles },
+        { name: t('nav.history'), href: '/inventory/history', icon: History },
+        { name: t('nav.templates'), href: '/admin/templates', icon: Package },
+        { name: `--- ${t('nav.productsSeparator')} ---`, disabled: true },
+        { name: t('nav.catalog'), href: '/inventory/catalog', icon: Package },
+      ]
+    },
+    {
+      name: t('nav.shifts'),
+      icon: CalendarClock,
+      permission: null,
+      children: [
+        { name: t('nav.onboarding'), href: '/onboarding/rota', icon: CalendarClock, permission: 'shifts:manage', badge: 'NEW' },
+        { name: t('nav.planner'), href: '/planner', icon: CalendarClock, permission: 'shifts:manage' },
+        { name: t('nav.myShifts'), href: '/my-shifts', icon: CalendarDays, permission: null },
+        { name: t('nav.jobTags'), href: '/staff/job-tags', icon: Tag, permission: 'manage_users', adminOnly: true },
+        { name: t('nav.compliance'), href: '/admin/settings/compliance', icon: Shield, permission: 'shifts:manage' },
+      ]
+    },
+    {
+      name: t('nav.recipes'),
+      icon: ChefHat,
+      permission: null,
+      children: [
+        { name: t('nav.recipesList'), href: '/recipes', icon: ChefHat, permission: null },
+      ]
+    },
+    { name: t('nav.admin'), href: '/admin/users', icon: Users, permission: 'manage_users' },
+    { name: t('nav.invitations'), href: '/admin/invitations', icon: Users, permission: '*', adminOnly: true },
+    { name: t('nav.locations'), href: '/admin/locations', icon: MapPin, permission: 'locations:view', adminOnly: true },
+    { name: t('nav.permissionTags'), href: '/permission-tags', icon: Shield, permission: null, platformAdminOnly: true },
+    { name: t('nav.emailLogs'), href: '/admin/settings/email-logs', icon: Mail, permission: 'view_settings' },
+    { name: t('nav.qa'), href: '/qa', icon: Bug, permission: '*' },
+    { name: t('nav.settings'), href: '/settings', icon: Settings, permission: 'view_settings' },
+  ]
 
   const handleLinkClick = () => {
     onNavigate?.()
@@ -143,7 +145,7 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
 
   return (
     <aside
-      aria-label="Navigazione principale"
+      aria-label={t('aria.mainNav')}
       className={cn(
         'relative flex h-dvh flex-col border-r border-border/60 bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
         collapsed ? 'w-20' : 'w-64'
@@ -159,7 +161,7 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
         <Button
           variant="ghost"
           size="icon"
-          aria-label={collapsed ? 'Espandi menu di navigazione' : 'Comprimi menu di navigazione'}
+          aria-label={collapsed ? t('aria.expandNav') : t('aria.collapseNav')}
           onClick={() => setCollapsed(!collapsed)}
           className="size-8 rounded-full text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground"
         >
@@ -328,12 +330,12 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
                     )}
                     {!collapsed && item.platformAdminOnly && canAccess && (
                       <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700 border-orange-200">
-                        Platform
+                        {t('nav.platform')}
                       </Badge>
                     )}
                     {!collapsed && !canAccess && (
                       <span className="rounded-full border border-border/60 bg-muted/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Bloccato
+                        {t('nav.locked')}
                       </span>
                     )}
                   </Link>
@@ -347,7 +349,7 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
       <div className="border-t border-border/60 px-4 py-4">
         <div className={cn('flex items-center gap-2 text-xs text-muted-foreground', collapsed ? 'justify-center' : 'justify-start')}>
           <span className="size-2 rounded-full bg-klyra-success" aria-hidden="true" />
-          {!collapsed && <span className="font-medium">Sistema Attivo</span>}
+          {!collapsed && <span className="font-medium">{t('nav.systemActive')}</span>}
         </div>
       </div>
     </aside>

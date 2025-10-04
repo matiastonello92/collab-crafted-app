@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { t } from '@/lib/i18n'
 
 export default async function InviteUserPage() {
   await requireOrgAdmin()
@@ -16,13 +17,13 @@ export default async function InviteUserPage() {
         <Button asChild variant="ghost" size="sm">
           <Link href="/admin/users">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Torna alla lista
+            {t('admin.backToList')}
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Invita Utente</h1>
+          <h1 className="text-3xl font-bold">{t('admin.inviteUserTitle')}</h1>
           <p className="text-muted-foreground">
-            Invia un invito per aggiungere un nuovo utente al sistema
+            {t('admin.inviteUserDesc')}
           </p>
         </div>
       </div>
@@ -30,9 +31,9 @@ export default async function InviteUserPage() {
       <div className="max-w-2xl">
         <Card>
           <CardHeader>
-            <CardTitle>Dettagli Invito</CardTitle>
+            <CardTitle>{t('admin.inviteDetails')}</CardTitle>
             <CardDescription>
-              Compila i campi per inviare l'invito via email
+              {t('admin.inviteDetailsDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>

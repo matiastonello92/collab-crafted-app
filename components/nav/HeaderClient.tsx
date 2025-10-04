@@ -7,6 +7,7 @@ import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useTranslation } from '@/lib/i18n';
 
 export default function HeaderClient({
   locations,
@@ -21,6 +22,7 @@ export default function HeaderClient({
   errorMessage?: string;
   setActiveLocation: (id?: string | null) => Promise<void>;
 }) {
+  const { t } = useTranslation()
   const router = useRouter();
   const [, startTransition] = useTransition();
   const didPersistRef = useRef(false);
@@ -95,7 +97,7 @@ export default function HeaderClient({
           </span>
         ) : !locations?.length ? (
           <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-2 py-1 text-xs font-medium text-muted-foreground sm:px-3">
-            Nessuna sede
+            {t('header.noLocation')}
           </span>
         ) : null}
       </div>
@@ -108,7 +110,7 @@ export default function HeaderClient({
               className="focus-enhanced h-11 w-full min-w-[160px] rounded-xl border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition sm:h-10 sm:min-w-[180px] sm:px-4"
               value={activeLocationId ?? ''}
               onChange={event => onSelect(event.target.value)}
-              aria-label="Seleziona sede attiva"
+              aria-label={t('header.selectLocation')}
             >
               {locations.map(location => (
                 <option key={location.id} value={location.id} className="bg-background text-foreground">

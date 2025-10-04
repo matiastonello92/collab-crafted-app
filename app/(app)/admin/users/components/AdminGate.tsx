@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { checkIsAdmin } from '@/lib/data/admin'
+import { t } from '@/lib/i18n'
 
 interface AdminGateProps {
   children: React.ReactNode
@@ -22,12 +23,12 @@ export default async function AdminGate({ children, fallback }: AdminGateProps) 
           <CardContent className="pt-6">
             <div className="text-center">
               <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Accesso Negato</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('admin.accessDenied')}</h3>
               <p className="text-muted-foreground">
-                Non hai i permessi necessari per accedere a questa sezione amministrativa.
+                {t('admin.accessDeniedDesc')}
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                È richiesto il ruolo di amministratore per visualizzare questa pagina.
+                {t('admin.adminRequired')}
               </p>
             </div>
           </CardContent>

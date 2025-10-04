@@ -17,6 +17,87 @@ export const en = {
     no: 'No',
   },
 
+  // Navigation
+  nav: {
+    dashboard: 'Dashboard',
+    inventory: 'Inventory',
+    kitchen: 'Kitchen',
+    bar: 'Bar',
+    cleaning: 'Cleaning',
+    history: 'History',
+    templates: 'Template Management',
+    productsSeparator: 'Products',
+    catalog: 'Product Catalog',
+    shifts: 'Klyra Shifts',
+    onboarding: 'Rota Onboarding',
+    planner: 'Shift Planner',
+    myShifts: 'My Shifts',
+    jobTags: 'Job Tags',
+    compliance: 'Compliance',
+    recipes: 'Klyra Recipes',
+    recipesList: 'Recipe List',
+    admin: 'Administration',
+    invitations: 'Invitations',
+    locations: 'Locations',
+    permissionTags: 'Permission Tags',
+    emailLogs: 'Email Logs',
+    qa: 'QA & Debug',
+    settings: 'Settings',
+    locked: 'Locked',
+    platform: 'Platform',
+    systemActive: 'System Active',
+    home: 'Home',
+    other: 'Other',
+  },
+
+  // Header
+  header: {
+    noLocation: 'No location',
+    selectLocation: 'Select active location',
+    errorMemberships: 'Unable to load assignments.',
+    errorLocations: 'Unable to load locations.',
+    errorFatal: 'Unexpected error.',
+  },
+
+  // User dropdown
+  user: {
+    login: 'Login',
+    myProfile: 'My Profile',
+    settings: 'Settings',
+    logout: 'Logout',
+  },
+
+  // Admin
+  admin: {
+    userManagement: 'User Management',
+    userManagementDesc: 'Invite and manage users in your organization',
+    inviteUser: 'Invite User',
+    backToList: 'Back to list',
+    inviteUserTitle: 'Invite User',
+    inviteUserDesc: 'Send an invitation to add a new user to the system',
+    inviteDetails: 'Invitation Details',
+    inviteDetailsDesc: 'Fill in the fields to send the invitation via email',
+    accessDenied: 'Access Denied',
+    accessDeniedDesc: 'You do not have the necessary permissions to access this admin section.',
+    adminRequired: 'Administrator role is required to view this page.',
+  },
+
+  // Metadata (page titles/descriptions)
+  metadata: {
+    plannerTitle: 'Shift Planner',
+    plannerDesc: 'Plan and manage your team\'s shifts',
+    myShiftsTitle: 'My Shifts',
+    myShiftsDesc: 'View your assigned shifts',
+  },
+
+  // Aria labels
+  aria: {
+    mainNav: 'Main navigation',
+    expandNav: 'Expand navigation menu',
+    collapseNav: 'Collapse navigation menu',
+    openMenu: 'Open menu',
+  },
+
   // Recipe Categories
   categories: {
     appetizer: 'Appetizer',

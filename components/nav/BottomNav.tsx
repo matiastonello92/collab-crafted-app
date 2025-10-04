@@ -4,16 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Calendar, Users, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-const navItems = [
-  { href: '/dashboard', icon: Home, label: 'Home' },
-  { href: '/planner', icon: Calendar, label: 'Planner' },
-  { href: '/my-shifts', icon: Calendar, label: 'Turni' },
-  { href: '/settings', icon: Settings, label: 'Altro' },
-]
+import { useTranslation } from '@/lib/i18n'
 
 export function BottomNav() {
+  const { t } = useTranslation()
   const pathname = usePathname()
+  
+  const navItems = [
+    { href: '/dashboard', icon: Home, label: t('nav.home') },
+    { href: '/planner', icon: Calendar, label: t('nav.planner') },
+    { href: '/my-shifts', icon: Calendar, label: t('nav.myShifts') },
+    { href: '/settings', icon: Settings, label: t('nav.other') },
+  ]
   
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 safe-area-inset-bottom">

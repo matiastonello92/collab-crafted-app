@@ -8,6 +8,7 @@ import UserTable from './components/UserTable'
 import { getUsersWithDetails } from '@/lib/data/admin'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { TableSkeleton } from '@/components/ui/loading-skeleton'
+import { t } from '@/lib/i18n'
 
 interface SearchParams {
   page?: string
@@ -31,15 +32,15 @@ export default async function AdminUsersPage({
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Gestione Utenti</h1>
+          <h1 className="text-3xl font-bold">{t('admin.userManagement')}</h1>
           <p className="text-muted-foreground">
-            Amministrazione utenti del sistema
+            {t('admin.userManagementDesc')}
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/users/invite">
             <Plus className="mr-2 h-4 w-4" />
-            Invita Utente
+            {t('admin.inviteUser')}
           </Link>
         </Button>
       </div>

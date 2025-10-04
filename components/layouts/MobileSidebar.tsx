@@ -5,8 +5,10 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import SidebarClient from '@/components/nav/SidebarClient';
+import { useTranslation } from '@/lib/i18n';
 
 export function MobileSidebar() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false);
 
   return (
@@ -16,7 +18,7 @@ export function MobileSidebar() {
           variant="ghost"
           size="icon"
           className="-ml-2 lg:hidden"
-          aria-label="Apri menu"
+          aria-label={t('aria.openMenu')}
         >
           <Menu className="h-5 w-5" />
         </Button>

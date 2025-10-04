@@ -15,8 +15,10 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslation } from '@/lib/i18n'
 
 export function UserDropdown() {
+  const { t } = useTranslation()
   const [user, setUser] = useState<{ email: string; name?: string } | null>(null)
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export function UserDropdown() {
   if (!user) {
     return (
       <Button asChild variant="ghost" size="sm">
-        <Link href="/login">Accedi</Link>
+        <Link href="/login">{t('user.login')}</Link>
       </Button>
     )
   }
@@ -88,14 +90,14 @@ export function UserDropdown() {
         <DropdownMenuItem asChild>
           <Link href="/me" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            Il Mio Profilo
+            {t('user.myProfile')}
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
           <Link href="/settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            Impostazioni
+            {t('user.settings')}
           </Link>
         </DropdownMenuItem>
         
@@ -106,7 +108,7 @@ export function UserDropdown() {
           className="flex items-center gap-2 text-red-600 focus:text-red-600"
         >
           <LogOut className="h-4 w-4" />
-          Logout
+          {t('user.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
