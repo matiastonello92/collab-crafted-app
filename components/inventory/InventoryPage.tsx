@@ -15,6 +15,7 @@ import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useTranslation } from '@/lib/i18n';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -37,18 +38,6 @@ interface InventoryHeader {
   creation_mode?: 'template' | 'last' | 'empty';
 }
 
-const categoryLabels = {
-  kitchen: 'Cucina',
-  bar: 'Bar',
-  cleaning: 'Pulizie'
-};
-
-const statusLabels = {
-  in_progress: 'In corso',
-  completed: 'Completato',
-  approved: 'Approvato'
-};
-
 const statusColors = {
   in_progress: 'bg-yellow-500',
   completed: 'bg-blue-500',
@@ -56,6 +45,7 @@ const statusColors = {
 };
 
 export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
+  const { t } = useTranslation();
   const [header, setHeader] = useState<InventoryHeader | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,12 +91,12 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         setHeader(data[0]);
       } else {
         setHeader(null);
-        toast.error('Inventario non trovato');
+        toast.error(t('inventory.empty.noInventories'));
       }
     } catch (error) {
       console.error('Error loading inventory:', error);
       setHeader(null);
-      toast.error('Errore nel caricamento dell\'inventario');
+      toast.error(t('inventory.toast.errorLoadingInventories'));
     } finally {
       setLoading(false);
     }
@@ -206,11 +196,11 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       if (response.ok) {
         const data = await response.json();
         setHeader(data);
-        toast.success(`Inventario ${statusLabels[newStatus].toLowerCase()}`);
+        toast.success(`${t('inventory.title')} ${t(`inventory.status.${newStatus === 'in_progress' ? 'inProgress' : newStatus}`).toLowerCase()}`);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      toast.error("Errore durante l'aggiornamento");
+      toast.error(t('inventory.toast.errorUpdatingProduct'));
     } finally {
       setSaving(false);
     }
@@ -236,15 +226,14 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         {!hasTemplates && canCreateInventory && (
           <Card className="border-orange-200 bg-orange-50">
             <CardHeader>
-              <CardTitle className="text-orange-800">Nessun template disponibile</CardTitle>
+              <CardTitle className="text-orange-800">{t('admin.templates.noTemplates')}</CardTitle>
               <CardDescription className="text-orange-700">
-                Prima di creare il tuo primo inventario, ti consigliamo di creare un template
-                per velocizzare le operazioni future.
+                {t('admin.templates.noTemplatesDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button onClick={() => setShowTemplateWizard(true)} variant="outline">
-                Crea Template {categoryLabels[category]}
+                {t('admin.templates.firstTemplate')} {t(`inventory.categories.${category}`)}
               </Button>
             </CardContent>
           </Card>
@@ -252,19 +241,19 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         
         <Card>
           <CardHeader>
-            <CardTitle>Inventario {categoryLabels[category]}</CardTitle>
+            <CardTitle>{t('inventory.title')} {t(`inventory.categories.${category}`)}</CardTitle>
             <CardDescription>
-              Nessun inventario in corso per questa categoria
+              {t('inventory.empty.noInventories')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {canCreateInventory ? (
               <Button onClick={() => setShowCreateModal(true)}>
-                Crea Inventario {categoryLabels[category]}
+                {t('inventory.buttons.createInventory')} {t(`inventory.categories.${category}`)}
               </Button>
             ) : (
               <div className="text-muted-foreground">
-                Non hai i permessi per creare un inventario
+                {t('admin.accessDeniedDesc')}
               </div>
             )}
           </CardContent>
@@ -301,20 +290,19 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                Inventario {categoryLabels[category]}
+                {t('inventory.title')} {t(`inventory.categories.${category}`)}
                 <Badge className={`${statusColors[header.status]} text-white`}>
-                  {statusLabels[header.status]}
+                  {t(`inventory.status.${header.status === 'in_progress' ? 'inProgress' : header.status}`)}
                 </Badge>
                 {header.creation_mode && (
                   <Badge variant="outline">
-                    {header.creation_mode === 'template' ? 'Da Template' : 
-                     header.creation_mode === 'last' ? 'Da Ultimo' : 'Vuoto'}
+                    {t(`inventory.createModes.${header.creation_mode === 'template' ? 'template' : header.creation_mode === 'last' ? 'last' : 'empty'}`).split(' ')[0]}
                   </Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                Iniziato il {new Date(header.started_at).toLocaleDateString('it-IT')}
-                {header.approved_at && ` • Approvato il ${new Date(header.approved_at).toLocaleDateString('it-IT')}`}
+                {t('inventory.labels.createdAt')} {new Date(header.started_at).toLocaleDateString('it-IT')}
+                {header.approved_at && ` • ${t('inventory.status.approved')} ${new Date(header.approved_at).toLocaleDateString('it-IT')}`}
               </CardDescription>
             </div>
             
@@ -329,7 +317,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
                 €{Number(header.total_value).toFixed(2)}
               </div>
               <div className="text-sm text-muted-foreground">
-                Valore totale
+                {t('inventory.labels.totalValue')}
               </div>
             </div>
             
@@ -345,7 +333,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
                   ) : (
                     <CheckCircle className="mr-2 h-4 w-4" />
                   )}
-                  Segna Completato
+                  {t('inventory.buttons.complete')}
                 </Button>
               )}
               
@@ -359,7 +347,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
                   ) : (
                     <AlertCircle className="mr-2 h-4 w-4" />
                   )}
-                  Approva
+                  {t('inventory.buttons.approve')}
                 </Button>
               )}
             </div>

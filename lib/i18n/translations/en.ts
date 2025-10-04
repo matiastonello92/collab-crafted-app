@@ -197,6 +197,44 @@ export const en = {
     activeFlagsTitle: 'Active Feature Flags',
     manageFeaturesDesc: 'Manage active features for your organization',
     
+    // Templates Management
+    templates: {
+      title: 'Inventory Template Management',
+      description: 'Create and manage inventory templates',
+      newTemplate: 'New Template',
+      firstTemplate: 'Create First Template',
+      noTemplates: 'No templates available',
+      noTemplatesDescription: 'Create your first template to speed up inventory creation',
+      version: 'Version',
+      products: 'products',
+      others: 'other products',
+      loading: 'Loading templates...',
+      deleteConfirm: 'Are you sure you want to delete this template?',
+      category: {
+        kitchen: 'Kitchen',
+        bar: 'Bar',
+        cleaning: 'Cleaning',
+      },
+      status: {
+        active: 'Active',
+        inactive: 'Inactive',
+      },
+      actions: {
+        edit: 'Edit',
+        activate: 'Activate',
+        deactivate: 'Deactivate',
+        delete: 'Delete',
+      },
+      toast: {
+        activated: 'Template activated',
+        deactivated: 'Template deactivated',
+        deleted: 'Template deleted',
+        errorLoading: 'Error loading template',
+        errorUpdating: 'Error updating',
+        errorDeleting: 'Error deleting',
+      },
+    },
+    
     // User Detail Page
     resendInvite: 'Resend Invite',
     manageRoles: 'Manage Roles',

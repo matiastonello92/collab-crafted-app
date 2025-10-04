@@ -15,6 +15,7 @@ import { NewProductForm } from './NewProductForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions, hasPermission } from '@/hooks/usePermissions';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -31,19 +32,8 @@ interface CatalogItem {
   created_at: string;
 }
 
-const categoryLabels = {
-  kitchen: 'Cucina',
-  bar: 'Bar',
-  cleaning: 'Pulizie'
-};
-
-const categoryOptions = {
-  kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
-  bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
-  cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
-};
-
 export function CatalogPage({ category }: CatalogPageProps) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,11 +64,11 @@ export function CatalogPage({ category }: CatalogPageProps) {
           a.name.localeCompare(b.name)
         ));
       } else {
-        toast.error('Errore nel caricamento del catalogo');
+        toast.error(t('inventory.toast.errorLoadingCatalog'));
       }
     } catch (error) {
       console.error('Error loading catalog:', error);
-      toast.error('Errore nel caricamento del catalogo');
+      toast.error(t('inventory.toast.errorLoadingCatalog'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +80,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
   }, [hasHydrated, loadCatalog]);
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo prodotto?')) {
+    if (!confirm(t('inventory.confirmations.deleteProduct'))) {
       return;
     }
 
@@ -103,23 +93,23 @@ export function CatalogPage({ category }: CatalogPageProps) {
       });
 
       if (response.ok) {
-        toast.success('Prodotto eliminato');
+        toast.success(t('inventory.toast.productDeleted'));
       } else {
         // Rollback in caso di errore
         loadCatalog();
         const error = await response.json();
-        toast.error(error.error || 'Errore durante l\'eliminazione');
+        toast.error(error.error || t('inventory.toast.errorDeletingProduct'));
       }
     } catch (error) {
       console.error('Error deleting product:', error);
       // Rollback in caso di errore
       loadCatalog();
-      toast.error('Errore durante l\'eliminazione');
+      toast.error(t('inventory.toast.errorDeletingProduct'));
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Eliminare ${selectedIds.size} prodotti selezionati?`)) return;
+    if (!confirm(t('inventory.confirmations.bulkDeleteProducts').replace('{count}', selectedIds.size.toString()))) return;
 
     const idsToDelete = Array.from(selectedIds);
     
@@ -137,13 +127,13 @@ export function CatalogPage({ category }: CatalogPageProps) {
 
       const failed = results.filter(r => r.status === 'rejected').length;
       if (failed > 0) {
-        toast.error(`${failed} prodotti non eliminati. Ricarico...`);
+        toast.error(`${failed} ${t('inventory.labels.products')} ${t('inventory.toast.errorDeletingProduct')}`);
         loadCatalog(); // Rollback
       } else {
-        toast.success(`${idsToDelete.length} prodotti eliminati`);
+        toast.success(`${idsToDelete.length} ${t('inventory.toast.productDeleted')}`);
       }
     } catch (error) {
-      toast.error('Errore durante l\'eliminazione multipla');
+      toast.error(t('inventory.toast.errorDeletingProduct'));
       loadCatalog(); // Rollback
     } finally {
       setIsDeleting(false);
@@ -167,9 +157,9 @@ export function CatalogPage({ category }: CatalogPageProps) {
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Catalogo Prodotti - {categoryLabels[category]}</h1>
+          <h1 className="text-3xl font-bold">{t('inventory.catalog')} - {t(`inventory.categories.${category}`)}</h1>
           <p className="text-muted-foreground mt-1">
-            Gestisci tutti i prodotti del reparto {categoryLabels[category].toLowerCase()}
+            {t('admin.templates.description')}
           </p>
         </div>
         {canManage && (
@@ -181,12 +171,12 @@ export function CatalogPage({ category }: CatalogPageProps) {
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Elimina {selectedIds.size} prodotti
+                {t('inventory.buttons.bulkDelete')} ({selectedIds.size})
               </Button>
             )}
             <Button onClick={() => setShowNewProductDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Nuovo Prodotto
+              {t('inventory.buttons.newProduct')}
             </Button>
           </div>
         )}
@@ -194,14 +184,14 @@ export function CatalogPage({ category }: CatalogPageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filtri</CardTitle>
+          <CardTitle>{t('planner.common.filters')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2 flex-1 min-w-[250px]">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca per nome prodotto..."
+                placeholder={t('inventory.placeholders.search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -209,15 +199,23 @@ export function CatalogPage({ category }: CatalogPageProps) {
             
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Categoria" />
+                <SelectValue placeholder={t('inventory.labels.category')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutte le categorie</SelectItem>
-                {categoryOptions[category].map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">{t('inventory.filters.all')}</SelectItem>
+                <SelectItem value="Carne">Carne</SelectItem>
+                <SelectItem value="Pesce">Pesce</SelectItem>
+                <SelectItem value="Vegetali">Vegetali</SelectItem>
+                <SelectItem value="Latticini">Latticini</SelectItem>
+                <SelectItem value="Conserve">Conserve</SelectItem>
+                <SelectItem value="Surgelati">Surgelati</SelectItem>
+                <SelectItem value="Vini">Vini</SelectItem>
+                <SelectItem value="Birre">Birre</SelectItem>
+                <SelectItem value="Soft Drink">Soft Drink</SelectItem>
+                <SelectItem value="Consumabili">Consumabili</SelectItem>
+                <SelectItem value="Altro">Altro</SelectItem>
+                <SelectItem value="Pulizia">Pulizia</SelectItem>
+                <SelectItem value="Manutenzione">Manutenzione</SelectItem>
               </SelectContent>
             </Select>
 
@@ -225,7 +223,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
               variant={showActiveOnly ? 'default' : 'outline'}
               onClick={() => setShowActiveOnly(!showActiveOnly)}
             >
-              {showActiveOnly ? 'Solo Attivi' : 'Tutti'}
+              {showActiveOnly ? t('inventory.filters.activeOnly') : t('inventory.filters.all')}
             </Button>
           </div>
         </CardContent>
@@ -234,10 +232,10 @@ export function CatalogPage({ category }: CatalogPageProps) {
       <Card>
         <CardContent className="pt-6">
           {loading ? (
-            <div className="text-center py-8">Caricamento catalogo...</div>
+            <div className="text-center py-8">{t('inventory.loading.catalog')}</div>
           ) : filteredItems.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Nessun prodotto trovato
+              {t('inventory.empty.noProductsFound')}
             </div>
           ) : (
             <Table>
@@ -257,12 +255,12 @@ export function CatalogPage({ category }: CatalogPageProps) {
                       />
                     </TableHead>
                   )}
-                  <TableHead>Nome Prodotto</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>U.M.</TableHead>
-                  <TableHead>Prezzo Unitario</TableHead>
-                  <TableHead>Stato</TableHead>
-                  {canManage && <TableHead>Azioni</TableHead>}
+                  <TableHead>{t('inventory.labels.name')}</TableHead>
+                  <TableHead>{t('inventory.labels.category')}</TableHead>
+                  <TableHead>{t('inventory.labels.uom')}</TableHead>
+                  <TableHead>{t('inventory.labels.unitPrice')}</TableHead>
+                  <TableHead>{t('admin.status')}</TableHead>
+                  {canManage && <TableHead>{t('common.actions')}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -294,7 +292,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
                     <TableCell>€{Number(item.default_unit_price).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={item.is_active ? 'default' : 'secondary'}>
-                        {item.is_active ? 'Attivo' : 'Disattivato'}
+                        {item.is_active ? t('inventory.status.active') : t('inventory.status.inactive')}
                       </Badge>
                     </TableCell>
                     {canManage && (
@@ -342,7 +340,7 @@ export function CatalogPage({ category }: CatalogPageProps) {
       <Dialog open={showNewProductDialog} onOpenChange={setShowNewProductDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nuovo Prodotto - {categoryLabels[category]}</DialogTitle>
+            <DialogTitle>{t('inventory.buttons.newProduct')} - {t(`inventory.categories.${category}`)}</DialogTitle>
           </DialogHeader>
           <NewProductForm
             locationId={locationId || ''}

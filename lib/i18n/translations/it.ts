@@ -196,6 +196,44 @@ export const it = {
     activeFlagsTitle: 'Feature Flags Attivi',
     manageFeaturesDesc: 'Gestisci le funzionalità attive per la tua organizzazione',
     
+    // Templates Management
+    templates: {
+      title: 'Gestione Template Inventario',
+      description: 'Crea e gestisci i template per gli inventari',
+      newTemplate: 'Nuovo Template',
+      firstTemplate: 'Crea Primo Template',
+      noTemplates: 'Nessun template disponibile',
+      noTemplatesDescription: 'Crea il tuo primo template per velocizzare la creazione degli inventari',
+      version: 'Versione',
+      products: 'prodotti',
+      others: 'altri prodotti',
+      loading: 'Caricamento template...',
+      deleteConfirm: 'Sei sicuro di voler eliminare questo template?',
+      category: {
+        kitchen: 'Cucina',
+        bar: 'Bar',
+        cleaning: 'Pulizie',
+      },
+      status: {
+        active: 'Attivo',
+        inactive: 'Inattivo',
+      },
+      actions: {
+        edit: 'Modifica',
+        activate: 'Attiva',
+        deactivate: 'Disattiva',
+        delete: 'Elimina',
+      },
+      toast: {
+        activated: 'Template attivato',
+        deactivated: 'Template disattivato',
+        deleted: 'Template eliminato',
+        errorLoading: 'Errore nel caricamento del template',
+        errorUpdating: 'Errore nell\'aggiornamento',
+        errorDeleting: 'Errore nell\'eliminazione',
+      },
+    },
+    
     // User Detail Page
     resendInvite: 'Resend Invito',
     manageRoles: 'Gestisci Ruoli',
