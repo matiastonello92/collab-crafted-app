@@ -2786,4 +2786,14 @@ export const it = {
     componentError: 'Errore Componente',
     errorDetails: 'Dettagli Errore',
   },
+
+  // Shift Card
+  shiftCard: {
+    ariaLabel: 'Turno dalle {start} alle {end}',
+    ariaLabelAssigned: 'Turno dalle {start} alle {end} assegnato a {name}',
+    ariaLabelUnassigned: 'Turno dalle {start} alle {end} non assegnato',
+    breakAriaLabel: 'Pausa {minutes} minuti',
+    conflictError: 'Errore conflitto',
+    conflictWarning: 'Avviso conflitto',
+  },
 } as const;

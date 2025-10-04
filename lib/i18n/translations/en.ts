@@ -2662,4 +2662,14 @@ export const en = {
     componentError: 'Component Error',
     errorDetails: 'Error Details',
   },
+
+  // Shift Card
+  shiftCard: {
+    ariaLabel: 'Shift from {start} to {end}',
+    ariaLabelAssigned: 'Shift from {start} to {end} assigned to {name}',
+    ariaLabelUnassigned: 'Shift from {start} to {end} unassigned',
+    breakAriaLabel: 'Break {minutes} minutes',
+    conflictError: 'Conflict error',
+    conflictWarning: 'Conflict warning',
+  },
 } as const;
