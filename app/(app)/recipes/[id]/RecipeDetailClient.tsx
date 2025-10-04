@@ -20,13 +20,17 @@ import {
   Play,
   AlertCircle,
   Loader2,
-  AlertTriangle as AlertTriangleIcon
+  AlertTriangle as AlertTriangleIcon,
+  Copy
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
 import { RecipeWorkflowBadge } from '../components/RecipeWorkflowBadge';
 import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
 import { StepsEditor } from '../components/StepsEditor';
+import { FavoriteButton } from '../components/FavoriteButton';
+import { CloneRecipeButton } from '../components/CloneRecipeButton';
+import { ServiceNotesSection } from '../components/ServiceNotesSection';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getAllergenColor, getAllergenLabel } from '../constants/allergens';
@@ -47,7 +51,10 @@ interface Recipe {
   allergens?: string[];
   recipe_ingredients: any[];
   recipe_steps: any[];
+  recipe_service_notes?: any[];
   profiles?: { full_name: string };
+  is_favorite?: boolean;
+  clone_count?: number;
 }
 
 interface RecipeDetailClientProps {
@@ -221,8 +228,21 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
           Indietro
         </Button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <RecipeWorkflowBadge status={recipe.status as any} />
+          
+          <FavoriteButton 
+            recipeId={recipeId} 
+            initialIsFavorite={recipe.is_favorite}
+            variant="icon"
+          />
+
+          {recipe.clone_count && recipe.clone_count > 0 && (
+            <Badge variant="secondary" className="gap-1">
+              <Copy className="w-3 h-3" />
+              Clonata {recipe.clone_count}x
+            </Badge>
+          )}
           
           {canUseCookMode && (
             <Button
@@ -233,6 +253,13 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               <Play className="h-4 w-4" />
               Modalità Cucina
             </Button>
+          )}
+
+          {isPublished && (
+            <CloneRecipeButton 
+              recipeId={recipeId}
+              recipeTitle={recipe.title}
+            />
           )}
           
           {canEdit && (
@@ -384,10 +411,18 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="ingredients" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="ingredients" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="ingredients">Ingredienti</TabsTrigger>
           <TabsTrigger value="steps">Procedimento</TabsTrigger>
+          <TabsTrigger value="notes" className="gap-1">
+            Note di Servizio
+            {recipe.recipe_service_notes && recipe.recipe_service_notes.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {recipe.recipe_service_notes.length}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="ingredients" className="space-y-4">
@@ -405,6 +440,19 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             steps={recipe.recipe_steps || []}
             readOnly={!canEdit}
             onStepsChange={loadRecipe}
+          />
+        </TabsContent>
+
+        <TabsContent value="notes" className="mt-6">
+          <ServiceNotesSection
+            recipeId={recipeId}
+            notes={recipe.recipe_service_notes || []}
+            onNoteAdded={(note) => {
+              setRecipe({
+                ...recipe,
+                recipe_service_notes: [note, ...(recipe.recipe_service_notes || [])]
+              });
+            }}
           />
         </TabsContent>
       </Tabs>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Search, CheckCircle2, XCircle, X, Star, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { ItemSelector } from './ItemSelector';
 import { AllergenSelector } from './AllergenSelector';
 import { COMMON_ALLERGENS } from '../constants/allergens';
@@ -23,6 +25,8 @@ export interface RecipeFiltersState {
   includeItems: string[];
   excludeItems: string[];
   allergens?: string[];
+  favorites: boolean;
+  sortBy: string;
 }
 
 interface RecipeFiltersProps {
@@ -77,6 +81,8 @@ export function RecipeFilters({
       includeItems: [],
       excludeItems: [],
       allergens: [],
+      favorites: false,
+      sortBy: 'recent',
     });
   };
 
@@ -86,12 +92,13 @@ export function RecipeFilters({
     (filters.category && filters.category !== 'all') ||
     filters.includeItems.length > 0 ||
     filters.excludeItems.length > 0 ||
-    (filters.allergens && filters.allergens.length > 0);
+    (filters.allergens && filters.allergens.length > 0) ||
+    filters.favorites;
 
   return (
     <div className="space-y-4">
       {/* Filter Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -137,16 +144,36 @@ export function RecipeFilters({
           </SelectContent>
         </Select>
 
-        {/* Clear All */}
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            onClick={clearAllFilters}
-            className="w-full"
-          >
-            Reset Filtri
-          </Button>
-        )}
+        {/* Sort By */}
+        <Select
+          value={filters.sortBy || 'recent'}
+          onValueChange={(value) => updateFilter('sortBy', value)}
+        >
+          <SelectTrigger className="gap-2">
+            <ArrowUpDown className="w-4 h-4" />
+            <SelectValue placeholder="Più recenti" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Più recenti</SelectItem>
+            <SelectItem value="favorites">Preferiti</SelectItem>
+            <SelectItem value="name_asc">Nome A-Z</SelectItem>
+            <SelectItem value="name_desc">Nome Z-A</SelectItem>
+            <SelectItem value="most_cloned">Più clonate</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Favorites Toggle */}
+        <div className="flex items-center gap-2">
+          <Switch
+            id="favorites"
+            checked={filters.favorites || false}
+            onCheckedChange={(checked) => updateFilter('favorites', checked)}
+          />
+          <Label htmlFor="favorites" className="flex items-center gap-1 cursor-pointer">
+            <Star className={filters.favorites ? 'w-4 h-4 fill-yellow-400 text-yellow-400' : 'w-4 h-4'} />
+            Solo preferiti
+          </Label>
+        </div>
       </div>
 
       {/* Item Filters */}
@@ -258,6 +285,17 @@ export function RecipeFilters({
               </Badge>
             ) : null;
           })}
+
+          {filters.favorites && (
+            <Badge variant="secondary" className="gap-1">
+              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              Solo preferiti
+              <X
+                className="w-3 w-3 ml-1 cursor-pointer hover:text-destructive"
+                onClick={() => updateFilter('favorites', false)}
+              />
+            </Badge>
+          )}
         </div>
       )}
     </div>

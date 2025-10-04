@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { RecipeEditorDialog } from './components/RecipeEditorDialog';
 import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
 import { RecipeFilters, RecipeFiltersState } from './components/RecipeFilters';
+import { FavoriteButton } from './components/FavoriteButton';
 import { Badge } from '@/components/ui/badge';
 import { getAllergenColor, getAllergenLabel } from './constants/allergens';
 import { AlertTriangle } from 'lucide-react';
@@ -46,6 +47,8 @@ export function RecipesClient() {
     includeItems: [],
     excludeItems: [],
     allergens: [],
+    favorites: false,
+    sortBy: 'recent',
   });
 
   useEffect(() => {
@@ -87,6 +90,8 @@ export function RecipesClient() {
       if (filters.includeItems.length > 0) params.set('includeItems', filters.includeItems.join(','));
       if (filters.excludeItems.length > 0) params.set('excludeItems', filters.excludeItems.join(','));
       if (filters.allergens && filters.allergens.length > 0) params.set('allergens', filters.allergens.join(','));
+      if (filters.favorites) params.set('favorites', 'true');
+      if (filters.sortBy && filters.sortBy !== 'recent') params.set('sortBy', filters.sortBy);
       if (defaultLocationId) params.set('locationId', defaultLocationId);
 
       const response = await fetch(`/api/v1/recipes?${params.toString()}`);
@@ -253,11 +258,19 @@ export function RecipesClient() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <RecipeWorkflowBadge status={recipe.status} />
-                      <Link href={`/recipes/${recipe.id}`} passHref>
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                      <div className="flex items-center gap-1">
+                        <FavoriteButton 
+                          recipeId={recipe.id}
+                          initialIsFavorite={(recipe as any).is_favorite}
+                          variant="icon"
+                          size="sm"
+                        />
+                        <Link href={`/recipes/${recipe.id}`} passHref>
+                          <Button variant="ghost" size="sm" className="gap-2">
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                     
                     <h3 className="font-semibold text-lg mb-1">{recipe.title}</h3>

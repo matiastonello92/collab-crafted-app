@@ -18,6 +18,8 @@ import {
 import { toast } from 'sonner';
 import { TimerWidget } from './components/TimerWidget';
 import { ChecklistWidget } from './components/ChecklistWidget';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertCircle, StickyNote } from 'lucide-react';
 
 interface RecipeStep {
   id: string;
@@ -33,6 +35,12 @@ interface Recipe {
   id: string;
   title: string;
   recipe_steps: RecipeStep[];
+  recipe_service_notes?: Array<{
+    id: string;
+    note_text: string;
+    created_at: string;
+    created_by_profile?: { full_name: string };
+  }>;
 }
 
 interface CookModeClientProps {
@@ -44,6 +52,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     loadRecipe();
@@ -60,7 +69,8 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
         title: data.recipe.title,
         recipe_steps: data.recipe.recipe_steps?.sort((a: RecipeStep, b: RecipeStep) => 
           a.step_number - b.step_number
-        ) || []
+        ) || [],
+        recipe_service_notes: data.recipe.recipe_service_notes || []
       });
     } catch (error) {
       console.error('Error loading recipe:', error);
@@ -134,10 +144,40 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
             </p>
           </div>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          {currentStep.step_number}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {recipe.recipe_service_notes && recipe.recipe_service_notes.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => setShowNotes(true)} className="gap-2">
+              <AlertCircle className="h-4 w-4 text-warning" />
+              Note ({recipe.recipe_service_notes.length})
+            </Button>
+          )}
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            {currentStep.step_number}
+          </Badge>
+        </div>
       </div>
+
+      {/* Service Notes Dialog */}
+      <Dialog open={showNotes} onOpenChange={setShowNotes}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <StickyNote className="h-5 w-5" />
+              Note di Servizio
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {recipe.recipe_service_notes?.map((note) => (
+              <div key={note.id} className="p-3 bg-warning/10 border border-warning/30 rounded-lg">
+                <p className="text-sm whitespace-pre-wrap">{note.note_text}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {note.created_by_profile?.full_name || 'Utente'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Progress Bar */}
       <Progress value={progress} className="mb-6 h-2" />
