@@ -78,9 +78,6 @@ export default function FeatureFlagsPage() {
     }
   ]
 
-  // Check if user can manage feature flags
-  const canManageFlags = hasPermission('locations.manage_flags')
-
   if (!canManageFlags) {
     return (
       <div className="container mx-auto py-8">

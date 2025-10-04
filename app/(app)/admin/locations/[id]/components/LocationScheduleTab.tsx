@@ -107,7 +107,7 @@ export function LocationScheduleTab({ location }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Orari di Apertura
+            {t('admin.locationScheduleTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -126,7 +126,7 @@ export function LocationScheduleTab({ location }: Props) {
                       </span>
                     </div>
                   ) : (
-                    'Chiuso'
+                    t('admin.locationScheduleClosed')
                   )}
                 </div>
               </div>
@@ -142,22 +142,22 @@ export function LocationScheduleTab({ location }: Props) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Orari di Apertura
+          {t('admin.locationScheduleTitle')}
         </CardTitle>
         {!isEditing ? (
           <Button variant="outline" onClick={() => setIsEditing(true)}>
             <Edit2 className="mr-2 h-4 w-4" />
-            Modifica
+            {t('admin.locationScheduleEdit')}
           </Button>
         ) : (
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleCancel}>
               <X className="mr-2 h-4 w-4" />
-              Annulla
+              {t('admin.locationScheduleCancel')}
             </Button>
             <Button onClick={handleSave} disabled={loading}>
               <Save className="mr-2 h-4 w-4" />
-              {loading ? 'Salvataggio...' : 'Salva'}
+              {loading ? t('admin.locationScheduleSaving') : t('admin.locationScheduleSave')}
             </Button>
           </div>
         )}
@@ -174,14 +174,14 @@ export function LocationScheduleTab({ location }: Props) {
                   disabled={!isEditing}
                 />
                 <Label htmlFor={day.key} className="font-medium">
-                  {day.label}
+                  {t(`admin.day${day.key.charAt(0).toUpperCase() + day.key.slice(1)}`)}
                 </Label>
               </div>
               
               {openDays.includes(day.key) && (
                 <div className="grid grid-cols-2 gap-4 ml-6">
                   <div>
-                    <Label className="text-sm">Mattino</Label>
+                    <Label className="text-sm">{t('admin.locationScheduleMorning')}</Label>
                     <div className="flex gap-2">
                       <Input
                         type="time"
@@ -199,7 +199,7 @@ export function LocationScheduleTab({ location }: Props) {
                   </div>
                   
                   <div>
-                    <Label className="text-sm">Pomeriggio</Label>
+                    <Label className="text-sm">{t('admin.locationScheduleAfternoon')}</Label>
                     <div className="flex gap-2">
                       <Input
                         type="time"
