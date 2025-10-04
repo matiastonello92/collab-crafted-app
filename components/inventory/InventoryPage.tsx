@@ -48,7 +48,7 @@ const statusColors = {
 export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const { t } = useTranslation();
   const [header, setHeader] = useState<InventoryHeader | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
@@ -168,7 +168,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   useEffect(() => {
     if (!selectedLocation) {
       console.log('⏳ [INVENTORY] Waiting for location context...');
-      setLoading(false);
       return;
     }
 

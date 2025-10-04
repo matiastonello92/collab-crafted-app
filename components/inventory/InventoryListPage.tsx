@@ -54,7 +54,7 @@ interface InventoryHeader {
 export function InventoryListPage({ category }: InventoryListPageProps) {
   const { t } = useTranslation();
   const [inventories, setInventories] = useState<InventoryHeader[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -109,7 +109,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   useEffect(() => {
     if (!selectedLocation) {
       console.log('⏳ [LIST] Waiting for location context...');
-      setLoading(false);
       return;
     }
 
