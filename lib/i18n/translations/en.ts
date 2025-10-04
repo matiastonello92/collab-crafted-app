@@ -2079,6 +2079,26 @@ export const en = {
       errorUpdating: 'Error updating tag',
       errorDeleting: 'Error deleting tag',
       errorAssigning: 'Error assigning',
+      errorLoading: 'Error loading',
+    },
+
+    // Inventory
+    inventory: {
+      created: 'Inventory created successfully',
+      saved: 'Inventory saved',
+      deleted: 'Inventory deleted',
+      completed: 'Inventory completed',
+      approved: 'Inventory approved',
+      productAdded: 'Product added',
+      productUpdated: 'Product updated',
+      productDeleted: 'Product deleted',
+      errorCreating: 'Error creating inventory',
+      errorSaving: 'Error saving',
+      errorDeleting: 'Error deleting',
+      errorLoading: 'Error loading',
+      errorLoadingHistory: 'Error loading history',
+      errorLoadingInventories: 'Error loading inventories',
+      editComingSoon: 'Edit inventory - Coming soon',
     },
 
     // Email logs

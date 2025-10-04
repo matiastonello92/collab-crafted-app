@@ -147,7 +147,7 @@ export function CatalogoTagTab() {
   }
 
   if (loading) {
-    return <div className="text-center py-8">Caricamento...</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   return (

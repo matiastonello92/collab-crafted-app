@@ -295,7 +295,7 @@ export function AssegnazioniTab() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Caricamento...</div>
+        <div className="text-center py-8">{t('common.loading')}</div>
       ) : (
         <div className="space-y-4">
           {filteredUsers.map((user) => {

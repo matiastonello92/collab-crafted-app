@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { User, MapPin, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n';
 
 interface UserOverviewProps {
   user: {
@@ -30,6 +31,7 @@ interface UserOverviewProps {
 }
 
 export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
+  const { t } = useTranslation();
   const initials = user.name
     .split(' ')
     .map(n => n.charAt(0))
@@ -93,7 +95,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nessuna location assegnata
+                {t('admin.noLocationAssigned')}
               </p>
             )}
           </CardContent>
@@ -118,7 +120,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nessun ruolo assegnato
+                {t('admin.noRoleAssigned')}
               </p>
             )}
           </CardContent>

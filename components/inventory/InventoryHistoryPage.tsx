@@ -15,6 +15,7 @@ import { useSupabase } from '@/hooks/useSupabase';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface InventoryHistoryItem {
   id: string;
@@ -47,6 +48,7 @@ const categoryLabels = {
 };
 
 export function InventoryHistoryPage() {
+  const { t } = useTranslation();
   const [inventories, setInventories] = useState<InventoryHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,7 +95,7 @@ export function InventoryHistoryPage() {
       setInventories(formattedData);
     } catch (error) {
       console.error('❌ [HISTORY] Error loading inventories:', error);
-      toast.error('Errore nel caricamento dello storico');
+      toast.error(t('toast.inventory.errorLoadingHistory'));
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,7 @@ export function InventoryHistoryPage() {
 
   const editInventory = (inventoryId: string) => {
     // TODO: Navigate to edit view (only for managers/admins on approved inventories)
-    toast.info('Modifica inventario - Coming soon');
+    toast.info(t('toast.inventory.editComingSoon'));
   };
 
   const canEdit = (status: string) => {
@@ -270,27 +272,27 @@ export function InventoryHistoryPage() {
                         </Button>
                         
                         {canEdit(item.status) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => editInventory(item.id)}
-                            title="Modifica"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => editInventory(item.id)}
+                          title={t('common.edit')}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         )}
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 
-                {filteredInventories.length === 0 && !loading && (
-                  <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      Nessun inventario trovato
-                    </TableCell>
-                  </TableRow>
-                )}
+              {filteredInventories.length === 0 && !loading && (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    {t('inventory.empty.noInventoriesFound')}
+                  </TableCell>
+                </TableRow>
+              )}
               </TableBody>
             </Table>
           )}
