@@ -13,6 +13,7 @@ import { useSupabase } from '@/hooks/useSupabase'
 import type { Location, ShiftWithAssignments } from '@/types/shifts'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export function PlannerClient() {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const { location_id: selectedLocation } = useHydratedLocationContext()
   const orgId = useHydratedOrgId()
@@ -79,7 +81,7 @@ export function PlannerClient() {
         if (!response.ok) {
           const errorText = await response.text()
           console.error('🔍 [Planner] API Error:', { status: response.status, error: errorText })
-          toast.error('Errore nel caricamento utenti')
+          toast.error(t('planner.toast.userLoadError'))
           return
         }
         
@@ -112,7 +114,7 @@ export function PlannerClient() {
         }
       } catch (err) {
         console.error('Error loading users and tags:', err)
-        toast.error('Errore nel caricamento dati')
+        toast.error(t('planner.toast.dataLoadError'))
       }
     }
 
@@ -122,7 +124,7 @@ export function PlannerClient() {
   // Handle cell click to create new shift
   const handleCellClick = (userId: string, date: string) => {
     if (!selectedLocation) {
-      toast.error('Nessuna location attiva')
+      toast.error(t('planner.toast.noActiveLocation'))
       return
     }
 
@@ -175,15 +177,15 @@ export function PlannerClient() {
       
       if (!response.ok) {
         const error = await response.json()
-        toast.error(error.message || 'Errore durante la pubblicazione')
+        toast.error(error.message || t('planner.toast.errorPublishing'))
         return
       }
       
-      toast.success('Rota pubblicata con successo')
+      toast.success(t('planner.toast.rotaPublished'))
       mutate()
     } catch (error) {
       console.error('Error publishing rota:', error)
-      toast.error('Errore durante la pubblicazione')
+      toast.error(t('planner.toast.errorPublishing'))
     } finally {
       setPublishing(false)
       setShowPublishDialog(false)
@@ -204,16 +206,16 @@ export function PlannerClient() {
       
       if (!response.ok) {
         const error = await response.json()
-        toast.error(error.message || 'Errore durante il blocco')
+        toast.error(error.message || t('planner.toast.errorLocking'))
         return
       }
       
-      toast.success('Rota bloccata con successo')
+      toast.success(t('planner.toast.rotaLocked'))
       mutate()
     } catch (error) {
       console.error('Error locking rota:', error)
-      toast.error('Errore durante il blocco')
-    } finally {
+      toast.error(t('planner.toast.errorLocking'))
+    } finally{
       setLocking(false)
       setShowLockDialog(false)
     }
@@ -234,9 +236,9 @@ export function PlannerClient() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Accesso Negato</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('planner.permissions.accessDenied')}</h2>
           <p className="text-muted-foreground">
-            Non hai i permessi necessari per accedere al planner turni.
+            {t('planner.permissions.noPermission')}
           </p>
         </div>
       </div>
@@ -275,7 +277,7 @@ export function PlannerClient() {
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground">Seleziona una location dalla top bar</p>
+            <p className="text-muted-foreground">{t('planner.placeholders.selectLocation')}</p>
           </div>
         )}
       </div>
@@ -293,16 +295,15 @@ export function PlannerClient() {
       <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Pubblicare la rota?</AlertDialogTitle>
+            <AlertDialogTitle>{t('planner.publish.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Una volta pubblicata, la rota sarà visibile a tutti i dipendenti.
-              I manager potranno ancora modificare i turni.
+              {t('planner.publish.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handlePublish}>
-              Pubblica
+              {t('planner.common.publishRota')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -312,16 +313,15 @@ export function PlannerClient() {
       <AlertDialog open={showLockDialog} onOpenChange={setShowLockDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Bloccare la rota?</AlertDialogTitle>
+            <AlertDialogTitle>{t('planner.publish.titleLock')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Una volta bloccata, la rota non potrà più essere modificata da nessuno.
-              Questa azione è irreversibile.
+              {t('planner.publish.descriptionLock')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleLock} className="bg-destructive text-destructive-foreground">
-              Blocca Definitivamente
+              {t('planner.publish.lockPermanently')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
