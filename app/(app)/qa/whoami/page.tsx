@@ -144,7 +144,7 @@ export default async function QAWhoAmIPage() {
         </CardHeader>
         <CardContent>
           {rolesByLocation.length === 0 ? (
-            <p className="text-muted-foreground">Nessun ruolo assegnato</p>
+            <p className="text-muted-foreground">{t('common.noRolesAssigned')}</p>
           ) : (
             <div className="space-y-3">
               {rolesByLocation.map((role, index) => (
@@ -155,16 +155,16 @@ export default async function QAWhoAmIPage() {
                         {role.role_display_name}
                       </Badge>
                       <Badge variant="outline">
-                        Livello {role.role_level}
+                        {t('common.level')} {role.role_level}
                       </Badge>
                     </div>
                     <Badge variant={role.is_active ? 'default' : 'secondary'}>
-                      {role.is_active ? 'Attivo' : 'Inattivo'}
+                      {role.is_active ? t('common.active') : t('common.inactive')}
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p><strong>Location:</strong> {role.location_name}</p>
-                    <p><strong>Assegnato il:</strong> {
+                    <p><strong>{t('common.location')}:</strong> {role.location_name}</p>
+                    <p><strong>{t('common.assignedOn')}:</strong> {
                       role.assigned_at 
                         ? new Date(role.assigned_at).toLocaleString('it-IT')
                         : 'N/D'
@@ -190,7 +190,7 @@ export default async function QAWhoAmIPage() {
         </CardHeader>
         <CardContent>
           {permissionOverrides.length === 0 ? (
-            <p className="text-muted-foreground">Nessun override specifico</p>
+            <p className="text-muted-foreground">{t('common.noOverridesSpecific')}</p>
           ) : (
             <div className="space-y-3">
               {permissionOverrides.map((override, index) => (

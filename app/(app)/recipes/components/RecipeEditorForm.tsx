@@ -120,7 +120,7 @@ export function RecipeEditorForm({
         handleSave();
       }
       if (e.key === 'Escape' && onCancel) {
-        if (!isDirty || confirm('Hai modifiche non salvate. Vuoi davvero uscire?')) {
+        if (!isDirty || confirm(t('recipe.unsavedChangesConfirm'))) {
           onCancel();
         }
       }
@@ -519,7 +519,7 @@ export function RecipeEditorForm({
             />
           ) : (
             <Card className="p-6 text-center text-muted-foreground">
-              Salva prima la ricetta per aggiungere gli step di preparazione
+              {t('recipe.saveFirstToAddSteps')}
             </Card>
           )}
         </TabsContent>
@@ -559,7 +559,7 @@ export function RecipeEditorForm({
 
       {isDirty && (
         <p className="text-xs text-muted-foreground text-center">
-          Modifiche non salvate • Usa Ctrl/Cmd+S per salvare velocemente
+          {t('recipe.unsavedChangesKeyboardHint')}
         </p>
       )}
     </div>
