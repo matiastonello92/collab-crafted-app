@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { useTranslation } from '@/lib/i18n'
 
 interface RecipePhotoUploaderProps {
   currentUrl?: string
@@ -14,6 +15,7 @@ interface RecipePhotoUploaderProps {
 }
 
 export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: RecipePhotoUploaderProps) {
+  const { t } = useTranslation()
   const [photoUrl, setPhotoUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -24,12 +26,12 @@ export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: Rec
 
     // Validate file type and size
     if (!file.type.startsWith('image/')) {
-      toast.error('Seleziona un file immagine valido')
+      toast.error(t('recipes.photoUploader.toast.invalidFile'))
       return
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast.error('Il file è troppo grande. Max 5MB.')
+      toast.error(t('recipes.photoUploader.toast.fileTooLarge'))
       return
     }
 
@@ -52,11 +54,11 @@ export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: Rec
       const { url } = await response.json()
       setPhotoUrl(url)
       onPhotoUpdate(url)
-      toast.success('Foto caricata con successo!')
+      toast.success(t('recipes.photoUploader.toast.success'))
 
     } catch (error: any) {
       console.error('Photo upload error:', error)
-      toast.error(`Errore caricamento: ${error.message}`)
+      toast.error(t('recipes.photoUploader.toast.error').replace('{message}', error.message))
     } finally {
       setIsUploading(false)
       // Clear file input
@@ -69,7 +71,7 @@ export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: Rec
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Foto ricetta</p>
+        <p className="text-sm font-medium">{t('recipes.photoUploader.title')}</p>
       </div>
 
       {/* Photo preview */}
@@ -85,7 +87,7 @@ export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: Rec
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <ImageIcon className="w-12 h-12" />
-            <p className="text-sm">Nessuna foto</p>
+            <p className="text-sm">{t('recipes.photoUploader.noPhoto')}</p>
           </div>
         )}
       </div>
@@ -113,10 +115,10 @@ export function RecipePhotoUploader({ currentUrl, onPhotoUpdate, disabled }: Rec
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          {isUploading ? 'Caricamento...' : photoUrl ? 'Cambia foto' : 'Carica foto'}
+          {isUploading ? t('recipes.photoUploader.uploading') : photoUrl ? t('recipes.photoUploader.change') : t('recipes.photoUploader.upload')}
         </Button>
         <p className="text-xs text-muted-foreground text-center">
-          Formati: JPG, PNG, WEBP. Max 5MB.
+          {t('recipes.photoUploader.formats')}
         </p>
       </div>
     </div>

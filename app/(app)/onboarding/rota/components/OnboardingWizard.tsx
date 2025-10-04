@@ -10,6 +10,7 @@ import { Step4Review } from './Step4Review'
 import { useWizardData } from '../hooks/useWizardData'
 import { useRotaCheck } from '../hooks/useRotaCheck'
 import { useAppStore } from '@/lib/store/unified'
+import { useTranslation } from '@/lib/i18n'
 
 const STEPS = [
   { id: 1, title: 'Location', description: 'Seleziona location' },
@@ -19,7 +20,15 @@ const STEPS = [
 ]
 
 export function OnboardingWizard() {
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
+  
+  const STEPS = [
+    { id: 1, title: t('onboarding.wizard.steps.location.title'), description: t('onboarding.wizard.steps.location.description') },
+    { id: 2, title: t('onboarding.wizard.steps.week.title'), description: t('onboarding.wizard.steps.week.description') },
+    { id: 3, title: t('onboarding.wizard.steps.shifts.title'), description: t('onboarding.wizard.steps.shifts.description') },
+    { id: 4, title: t('onboarding.wizard.steps.publish.title'), description: t('onboarding.wizard.steps.publish.description') }
+  ]
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
   const [rotaId, setRotaId] = useState<string | null>(null)

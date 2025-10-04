@@ -107,7 +107,7 @@ export default function TemplatesPage() {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo template? Questa azione eliminerà anche tutti gli elementi associati.')) return;
+    if (!confirm(t('admin.templates.deleteConfirm'))) return;
 
     try {
       const response = await fetch(`/api/v1/inventory/templates/${templateId}`, {
@@ -133,9 +133,9 @@ export default function TemplatesPage() {
   };
 
   const categoryLabels = {
-    kitchen: 'Cucina',
-    bar: 'Bar',
-    cleaning: 'Pulizie'
+    kitchen: t('admin.templates.category.kitchen'),
+    bar: t('admin.templates.category.bar'),
+    cleaning: t('admin.templates.category.cleaning')
   };
 
   const categoryColors = {
@@ -147,7 +147,7 @@ export default function TemplatesPage() {
   if (!hasHydrated || loading) {
     return (
       <div className="container mx-auto py-6">
-        <div className="text-center">Caricamento template...</div>
+        <div className="text-center">{t('admin.templates.loading')}</div>
       </div>
     );
   }
@@ -156,27 +156,27 @@ export default function TemplatesPage() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Gestione Template Inventario</h1>
+          <h1 className="text-2xl font-bold">{t('admin.templates.title')}</h1>
           <p className="text-muted-foreground">
-            Crea e gestisci i template per gli inventari delle diverse categorie
+            {t('admin.templates.description')}
           </p>
         </div>
         <Button onClick={() => setShowWizard(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Nuovo Template
+          {t('admin.templates.newTemplate')}
         </Button>
       </div>
 
       {templates.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">Nessun template disponibile</h3>
+            <h3 className="text-lg font-medium mb-2">{t('admin.templates.noTemplates')}</h3>
             <p className="text-muted-foreground mb-6">
-              Crea il tuo primo template per velocizzare la creazione degli inventari
+              {t('admin.templates.noTemplatesDescription')}
             </p>
             <Button onClick={() => setShowWizard(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Crea Primo Template
+              {t('admin.templates.firstTemplate')}
             </Button>
           </CardContent>
         </Card>
@@ -192,11 +192,11 @@ export default function TemplatesPage() {
                     </Badge>
                     <CardTitle className="text-lg">{template.name}</CardTitle>
                     <CardDescription>
-                      Versione {template.version} • {template.inventory_template_items?.length || 0} prodotti
+                      {t('admin.templates.version')} {template.version} • {template.inventory_template_items?.length || 0} {t('admin.templates.products')}
                     </CardDescription>
                   </div>
                   <Badge variant={template.is_active ? 'default' : 'secondary'}>
-                    {template.is_active ? 'Attivo' : 'Inattivo'}
+                    {template.is_active ? t('admin.templates.status.active') : t('admin.templates.status.inactive')}
                   </Badge>
                 </div>
               </CardHeader>
@@ -214,7 +214,7 @@ export default function TemplatesPage() {
                   ))}
                   {(template.inventory_template_items?.length || 0) > 3 && (
                     <div className="text-xs text-muted-foreground">
-                      +{(template.inventory_template_items?.length || 0) - 3} altri prodotti
+                      +{(template.inventory_template_items?.length || 0) - 3} {t('admin.templates.others')}
                     </div>
                   )}
                 </div>
@@ -226,14 +226,14 @@ export default function TemplatesPage() {
                     onClick={() => handleEditTemplate(template)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Modifica
+                    {t('admin.templates.actions.edit')}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleToggleActive(template.id, template.is_active)}
                   >
-                    {template.is_active ? 'Disattiva' : 'Attiva'}
+                    {template.is_active ? t('admin.templates.actions.deactivate') : t('admin.templates.actions.activate')}
                   </Button>
                   <Button
                     variant="outline"

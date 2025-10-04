@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Save, X, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useTranslation } from '@/lib/i18n'
 
 type Location = {
   id: string
@@ -46,6 +47,7 @@ type UserAssignments = {
 }
 
 export function AssegnazioniTab() {
+  const { t } = useTranslation()
   // Global context (like inventory modules)
   const rawLocationId = useAppStore(state => state.context.location_id)
   const defaultLocationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId
@@ -86,7 +88,7 @@ export function AssegnazioniTab() {
       const data = await res.json()
       setLocations(data.locations || [])
     } catch (error) {
-      toast.error('Errore caricamento locations')
+      toast.error(t('staff.jobTags.assignments.errorLoadingLocations'))
     }
   }
 
@@ -97,7 +99,7 @@ export function AssegnazioniTab() {
       const data = await res.json()
       setJobTags(data.jobTags || [])
     } catch (error) {
-      toast.error('Errore caricamento tag')
+      toast.error(t('staff.jobTags.assignments.errorLoadingTags'))
     }
   }
 
@@ -110,9 +112,9 @@ export function AssegnazioniTab() {
       console.log('🔍 [AssegnazioniTab] Users response:', { status: usersRes.status, ok: usersRes.ok })
       
       if (!usersRes.ok) {
-        const errorData = await usersRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
+        const errorData = await usersRes.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
         console.error('❌ [AssegnazioniTab] Failed to fetch users:', { status: usersRes.status, error: errorData })
-        throw new Error(errorData.error || 'Errore caricamento utenti')
+        throw new Error(errorData.error || t('staff.jobTags.assignments.errorLoadingUsers'))
       }
       const usersData = await usersRes.json()
       console.log('✅ [AssegnazioniTab] Users fetched:', usersData.users?.length || 0)
@@ -121,8 +123,8 @@ export function AssegnazioniTab() {
       // Fetch assignments for location
       const assignRes = await fetch(`/api/v1/admin/user-job-tags?location_id=${selectedLocation}`, { credentials: 'include' })
       if (!assignRes.ok) {
-        const errorData = await assignRes.json().catch(() => ({ error: 'Errore sconosciuto' }))
-        throw new Error(errorData.error || 'Errore caricamento assegnazioni')
+        const errorData = await assignRes.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
+        throw new Error(errorData.error || t('staff.jobTags.assignments.errorLoadingAssignments'))
       }
       const assignData = await assignRes.json()
 
@@ -156,8 +158,8 @@ export function AssegnazioniTab() {
           credentials: 'include',
         })
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
-          throw new Error(errorData.error || 'Errore aggiornamento tag')
+          const errorData = await res.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
+          throw new Error(errorData.error || t('staff.jobTags.assignments.errorUpdating'))
         }
       } else {
         // Create new primary
@@ -173,15 +175,15 @@ export function AssegnazioniTab() {
           credentials: 'include',
         })
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
-          throw new Error(errorData.error || 'Errore assegnazione tag')
+          const errorData = await res.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
+          throw new Error(errorData.error || t('staff.jobTags.assignments.errorAssigning'))
         }
       }
 
-      toast.success('Tag primario impostato')
+      toast.success(t('staff.jobTags.tagPrimarySet'))
       fetchUsersAndAssignments()
     } catch (error: any) {
-      toast.error(error.message || 'Errore di salvataggio')
+      toast.error(error.message || t('staff.jobTags.assignments.errorSaving'))
     }
   }
 
@@ -197,10 +199,10 @@ export function AssegnazioniTab() {
           credentials: 'include',
         })
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
-          throw new Error(errorData.error || 'Errore rimozione tag')
+          const errorData = await res.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
+          throw new Error(errorData.error || t('staff.jobTags.assignments.errorRemoving'))
         }
-        toast.success('Tag rimosso')
+        toast.success(t('staff.jobTags.tagRemoved'))
       } else {
         // Add
         const res = await fetch('/api/v1/admin/user-job-tags', {
@@ -215,15 +217,15 @@ export function AssegnazioniTab() {
           credentials: 'include',
         })
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Errore sconosciuto' }))
-          throw new Error(errorData.error || 'Errore assegnazione tag')
+          const errorData = await res.json().catch(() => ({ error: t('staff.jobTags.assignments.errorUnknown') }))
+          throw new Error(errorData.error || t('staff.jobTags.assignments.errorAssigning'))
         }
-        toast.success('Tag assegnato')
+        toast.success(t('staff.jobTags.tagAssigned'))
       }
 
       fetchUsersAndAssignments()
     } catch (error: any) {
-      toast.error(error.message || 'Errore di salvataggio')
+      toast.error(error.message || t('staff.jobTags.assignments.errorSaving'))
     }
   }
 
@@ -257,7 +259,7 @@ export function AssegnazioniTab() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Nessun tag disponibile. Crea un Job Tag dal tab <strong>Catalogo Tag</strong>.
+          {t('staff.jobTags.assignments.noTags')}
         </AlertDescription>
       </Alert>
     )
@@ -384,7 +386,7 @@ export function AssegnazioniTab() {
 
           {filteredUsers.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              Nessun utente trovato per questa location
+              {t('staff.jobTags.assignments.noUsers')}
             </div>
           )}
         </div>

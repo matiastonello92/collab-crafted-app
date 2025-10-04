@@ -25,6 +25,7 @@ interface Props {
 }
 
 export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [confirmEmail, setConfirmEmail] = useState('')

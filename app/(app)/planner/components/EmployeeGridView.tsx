@@ -15,9 +15,9 @@ import { toast } from 'sonner'
 import { useTranslation } from '@/lib/i18n'
 
 // Delete Zone Component - Separate to ensure proper droppable registration
-function DeleteZone({ visible }: { visible: boolean }) {
-  const { t } = useTranslation()
-  const { isOver, setNodeRef } = useDroppable({ 
+function DeleteZone({ visible, t }: { visible: boolean; t: any }) {
+
+  const { isOver, setNodeRef } = useDroppable({
     id: 'delete-zone',
     data: { action: 'delete' }
   })
@@ -25,9 +25,9 @@ function DeleteZone({ visible }: { visible: boolean }) {
   if (!visible) return null
   
   return (
-    <div
+      <div
       ref={setNodeRef}
-      title="Trascina qui uno shift per eliminarlo"
+      title={t('planner.grid.dropZone')}
       style={{
         position: 'fixed',
         bottom: 80,
@@ -98,6 +98,7 @@ export function EmployeeGridView({
   showUsersWithoutShifts = true,
   onSave
 }: Props) {
+  const { t } = useTranslation()
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
   // ✅ Local state for optimistic updates
   const [localShifts, setLocalShifts] = useState<ShiftWithAssignments[]>(shifts)
@@ -180,7 +181,7 @@ export function EmployeeGridView({
         
         if (!response.ok) throw new Error('Failed to delete shift')
         
-        toast.success('Turno eliminato')
+        toast.success(t('planner.grid.toast.shiftDeleted'))
         
         // Refetch per sincronizzare con server
         if (onSave) {
@@ -188,7 +189,7 @@ export function EmployeeGridView({
         }
       } catch (error) {
         console.error('Error deleting shift:', error)
-        toast.error('Errore nell\'eliminazione del turno')
+        toast.error(t('planner.grid.toast.errorDeleting'))
         
         // Revert: ripristina shifts originali su errore
         setLocalShifts(shifts)
@@ -301,7 +302,7 @@ export function EmployeeGridView({
           })
         }
         
-        toast.success('Turno duplicato con successo')
+        toast.success(t('planner.grid.toast.shiftDuplicated'))
       } else {
         const newStartAt = new Date(`${dateStr}T${format(new Date(shift.start_at), 'HH:mm')}:00`).toISOString()
         const newEndAt = new Date(`${dateStr}T${format(new Date(shift.end_at), 'HH:mm')}:00`).toISOString()
@@ -325,7 +326,7 @@ export function EmployeeGridView({
           })
         }
         
-        toast.success('Turno spostato con successo')
+        toast.success(t('planner.grid.toast.shiftMoved'))
       }
       
       // ✅ 3️⃣ Refetch per sincronizzare con server (in background)
@@ -334,7 +335,7 @@ export function EmployeeGridView({
       }
     } catch (error) {
       console.error('Error handling drag:', error)
-      toast.error('Errore nello spostamento del turno')
+      toast.error(t('planner.grid.toast.errorMoving'))
       
       // ✅ 4️⃣ REVERT: Ripristina shifts originali su errore
       setLocalShifts(shifts)
@@ -384,7 +385,7 @@ export function EmployeeGridView({
       onDragEnd={handleDragEnd} 
       collisionDetection={collisionDetection}
     >
-      <DeleteZone visible={activeShift !== null} />
+      <DeleteZone visible={activeShift !== null} t={t} />
       
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">

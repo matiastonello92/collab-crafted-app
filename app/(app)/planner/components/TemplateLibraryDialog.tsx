@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Loader2, Trash2, Play } from 'lucide-react'
 import { format } from 'date-fns'
+import { useTranslation } from '@/lib/i18n'
 
 interface Template {
   id: string
@@ -37,6 +38,7 @@ export function TemplateLibraryDialog({
   currentWeekStart,
   onApplied 
 }: Props) {
+  const { t } = useTranslation()
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(false)
   const [applying, setApplying] = useState<string | null>(null)
@@ -56,11 +58,11 @@ export function TemplateLibraryDialog({
         const data = await response.json()
         setTemplates(data.templates || [])
       } else {
-        toast.error('Errore caricamento template')
+        toast.error(t('planner.templateLibrary.toast.errorLoading'))
       }
     } catch (error) {
       console.error('Error loading templates:', error)
-      toast.error('Errore caricamento template')
+      toast.error(t('planner.templateLibrary.toast.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -80,23 +82,23 @@ export function TemplateLibraryDialog({
 
       if (response.ok) {
         const data = await response.json()
-        toast.success(`Template applicato: ${data.shifts.length} turni creati`)
+        toast.success(t('planner.templateLibrary.toast.applied').replace('{count}', data.shifts.length))
         onApplied()
         onClose()
       } else {
         const error = await response.json()
-        toast.error(error.message || 'Errore durante applicazione template')
+        toast.error(error.message || t('planner.templateLibrary.toast.errorApplying'))
       }
     } catch (error) {
       console.error('Error applying template:', error)
-      toast.error('Errore durante applicazione template')
+      toast.error(t('planner.templateLibrary.toast.errorApplying'))
     } finally {
       setApplying(null)
     }
   }
 
   const handleDelete = async (templateId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo template?')) return
+    if (!confirm(t('planner.templateLibrary.deleteConfirm'))) return
 
     setDeleting(templateId)
     try {
@@ -105,14 +107,14 @@ export function TemplateLibraryDialog({
       })
 
       if (response.ok) {
-        toast.success('Template eliminato')
+        toast.success(t('planner.templateLibrary.toast.deleted'))
         loadTemplates()
       } else {
-        toast.error('Errore durante eliminazione')
+        toast.error(t('planner.templateLibrary.toast.errorDeleting'))
       }
     } catch (error) {
       console.error('Error deleting template:', error)
-      toast.error('Errore durante eliminazione')
+      toast.error(t('planner.templateLibrary.toast.errorDeleting'))
     } finally {
       setDeleting(null)
     }
@@ -128,9 +130,9 @@ export function TemplateLibraryDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Libreria Template</DialogTitle>
+          <DialogTitle>{t('planner.templateLibrary.title')}</DialogTitle>
           <DialogDescription>
-            Applica un template predefinito alla settimana del {format(new Date(currentWeekStart), 'dd/MM/yyyy')}
+            {t('planner.templateLibrary.description')} {format(new Date(currentWeekStart), 'dd/MM/yyyy')}
           </DialogDescription>
         </DialogHeader>
 
@@ -140,8 +142,8 @@ export function TemplateLibraryDialog({
           </div>
         ) : templates.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Nessun template disponibile</p>
-            <p className="text-sm mt-2">Crea il tuo primo template da una settimana esistente</p>
+            <p>{t('planner.templateLibrary.noTemplates')}</p>
+            <p className="text-sm mt-2">{t('planner.templateLibrary.noTemplatesDescription')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -173,7 +175,7 @@ export function TemplateLibraryDialog({
                         ) : (
                           <>
                             <Play className="h-4 w-4 mr-1" />
-                            Applica
+                            {t('planner.templateLibrary.apply')}
                           </>
                         )}
                       </Button>
@@ -194,10 +196,10 @@ export function TemplateLibraryDialog({
 
                   <div className="flex gap-2 flex-wrap">
                     <Badge variant="secondary">
-                      {stats.shiftsCount} turni
+                      {stats.shiftsCount} {t('planner.templateLibrary.shifts')}
                     </Badge>
                     <Badge variant="secondary">
-                      {stats.days} giorni
+                      {stats.days} {t('planner.templateLibrary.days')}
                     </Badge>
                   </div>
                 </div>

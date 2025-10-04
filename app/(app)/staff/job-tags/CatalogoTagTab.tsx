@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 type JobTag = {
   id: string
@@ -30,6 +31,7 @@ const DEFAULT_COLORS: Record<string, string> = {
 }
 
 export function CatalogoTagTab() {
+  const { t } = useTranslation()
   const hasHydrated = useAppStore(state => state.hasHydrated)
   const [tags, setTags] = useState<JobTag[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +55,7 @@ export function CatalogoTagTab() {
       const data = await res.json()
       setTags(data.jobTags || [])
     } catch (error) {
-      toast.error('Errore nel caricamento dei tag')
+      toast.error(t('staff.jobTags.catalog.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -101,7 +103,7 @@ export function CatalogoTagTab() {
         throw new Error(err.error || 'Errore di salvataggio')
       }
 
-      toast.success(editingTag ? 'Tag aggiornato' : 'Tag creato')
+      toast.success(editingTag ? t('staff.jobTags.catalog.toast.updated') : t('staff.jobTags.catalog.toast.created'))
       setDialogOpen(false)
       fetchTags()
     } catch (error: any) {
@@ -120,15 +122,15 @@ export function CatalogoTagTab() {
 
       if (!res.ok) throw new Error('Failed to update')
 
-      toast.success(tag.is_active ? 'Tag disattivato' : 'Tag attivato')
+      toast.success(tag.is_active ? t('staff.jobTags.catalog.toast.deactivated') : t('staff.jobTags.catalog.toast.activated'))
       fetchTags()
     } catch (error) {
-      toast.error('Errore di aggiornamento')
+      toast.error(t('staff.jobTags.catalog.toast.errorUpdate'))
     }
   }
 
   const handleInsertPreset = async () => {
-    if (!confirm('Vuoi inserire il set consigliato di ruoli per ristorazione? I ruoli già esistenti non verranno duplicati.')) {
+    if (!confirm(t('staff.jobTags.catalog.recommendedSetConfirm'))) {
       return
     }
 
@@ -137,10 +139,10 @@ export function CatalogoTagTab() {
       if (!res.ok) throw new Error('Failed to insert preset')
 
       const data = await res.json()
-      toast.success(data.message || 'Set consigliato inserito')
+      toast.success(data.message || t('staff.jobTags.catalog.toast.presetInserted'))
       fetchTags()
     } catch (error) {
-      toast.error('Errore inserimento preset')
+      toast.error(t('staff.jobTags.catalog.toast.errorPreset'))
     }
   }
 
@@ -154,18 +156,18 @@ export function CatalogoTagTab() {
         <div className="flex gap-2">
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 mr-2" />
-            Nuovo Tag
+            {t('staff.jobTags.catalog.newTag')}
           </Button>
           <Button variant="outline" onClick={handleInsertPreset}>
             <Sparkles className="h-4 w-4 mr-2" />
-            Set Consigliato Ristorazione
+            {t('staff.jobTags.catalog.recommendedSet')}
           </Button>
         </div>
       </div>
 
       {tags.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          Nessun tag disponibile. Crea un Job Tag per iniziare.
+          {t('staff.jobTags.catalog.noTags')}
         </div>
       ) : (
         <Table>
@@ -234,9 +236,9 @@ export function CatalogoTagTab() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTag ? 'Modifica Tag' : 'Nuovo Tag'}</DialogTitle>
+            <DialogTitle>{editingTag ? t('staff.jobTags.catalog.dialogTitleEdit') : t('staff.jobTags.catalog.dialogTitleNew')}</DialogTitle>
             <DialogDescription>
-              Inserisci i dettagli del ruolo
+              {t('staff.jobTags.catalog.dialogDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -296,7 +298,7 @@ export function CatalogoTagTab() {
               
               {/* Palette colori predefiniti */}
               <div className="mt-3">
-                <p className="text-sm text-muted-foreground mb-2">Colori rapidi:</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('staff.jobTags.catalog.quickColors')}</p>
                 <div className="flex gap-2 flex-wrap">
                   {[
                     { name: 'Viola', hex: '#8B5CF6' },
@@ -327,7 +329,7 @@ export function CatalogoTagTab() {
               
               {formData.categoria && !formData.color && (
                 <p className="text-xs text-muted-foreground mt-2">
-                  Verrà utilizzato il colore predefinito per {formData.categoria}
+                  {t('staff.jobTags.catalog.defaultColorNote').replace('{category}', formData.categoria)}
                 </p>
               )}
             </div>

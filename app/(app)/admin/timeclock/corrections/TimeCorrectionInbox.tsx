@@ -92,10 +92,10 @@ export function TimeCorrectionInbox() {
   }
 
   const eventKindLabels = {
-    clock_in: 'Ingresso',
-    clock_out: 'Uscita',
-    break_start: 'Inizio Pausa',
-    break_end: 'Fine Pausa'
+    clock_in: t('admin.timeclock.corrections.eventKind.clock_in'),
+    clock_out: t('admin.timeclock.corrections.eventKind.clock_out'),
+    break_start: t('admin.timeclock.corrections.eventKind.break_start'),
+    break_end: t('admin.timeclock.corrections.eventKind.break_end')
   }
 
   if (isLoading) {
@@ -103,7 +103,7 @@ export function TimeCorrectionInbox() {
       <div className="container mx-auto p-6">
         <div className="text-center py-12">
           <Clock className="w-12 h-12 animate-spin mx-auto text-muted-foreground" />
-          <p className="mt-4 text-muted-foreground">Caricamento richieste...</p>
+          <p className="mt-4 text-muted-foreground">{t('admin.timeclock.corrections.loading')}</p>
         </div>
       </div>
     )
@@ -113,11 +113,11 @@ export function TimeCorrectionInbox() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Correzioni Timbrature</h1>
-          <p className="text-muted-foreground">Richieste di correzione in attesa</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('admin.timeclock.corrections.title')}</h1>
+          <p className="text-muted-foreground">{t('admin.timeclock.corrections.description')}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
-          {corrections.length} {corrections.length === 1 ? 'richiesta' : 'richieste'}
+          {corrections.length} {corrections.length === 1 ? t('admin.timeclock.corrections.count.single') : t('admin.timeclock.corrections.count.plural')}
         </Badge>
       </div>
 
@@ -125,10 +125,10 @@ export function TimeCorrectionInbox() {
         <Card className="p-12 text-center">
           <CheckCircle2 className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-foreground mb-2">
-            Nessuna richiesta in sospeso
+            {t('admin.timeclock.corrections.noRequests')}
           </h3>
           <p className="text-muted-foreground">
-            Tutte le richieste di correzione sono state processate
+            {t('admin.timeclock.corrections.noRequestsDescription')}
           </p>
         </Card>
       ) : (
@@ -161,7 +161,7 @@ export function TimeCorrectionInbox() {
                 <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                   {correction.event && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Tipo timbratura:</span>
+                      <span className="text-muted-foreground">{t('admin.timeclock.corrections.labels.eventType')}:</span>
                       <Badge variant="secondary">
                         {eventKindLabels[correction.event.kind as keyof typeof eventKindLabels]}
                       </Badge>
@@ -169,7 +169,7 @@ export function TimeCorrectionInbox() {
                   )}
 
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Orario originale:</span>
+                    <span className="text-muted-foreground">{t('admin.timeclock.corrections.labels.originalTime')}:</span>
                     <span className="font-mono text-foreground">
                       {correction.original_time
                         ? formatDateTime(correction.original_time)
@@ -178,14 +178,14 @@ export function TimeCorrectionInbox() {
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Orario richiesto:</span>
+                    <span className="text-muted-foreground">{t('admin.timeclock.corrections.labels.requestedTime')}:</span>
                     <span className="font-mono font-semibold text-primary">
                       {formatDateTime(correction.requested_time)}
                     </span>
                   </div>
 
                   <div className="pt-2 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-1">Motivazione:</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t('admin.timeclock.corrections.labels.reason')}:</p>
                     <p className="text-foreground">{correction.reason}</p>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export function TimeCorrectionInbox() {
                 {/* Review Notes */}
                 <div>
                   <label className="text-sm text-muted-foreground mb-2 block">
-                    Note revisione (opzionale)
+                    {t('admin.timeclock.corrections.labels.reviewNotes')}
                   </label>
                   <Textarea
                     value={reviewNotes[correction.id] || ''}
@@ -203,7 +203,7 @@ export function TimeCorrectionInbox() {
                         [correction.id]: e.target.value
                       }))
                     }
-                    placeholder="Aggiungi note per il dipendente..."
+                    placeholder={t('admin.timeclock.corrections.labels.reviewNotesPlaceholder')}
                     className="resize-none"
                     rows={2}
                     disabled={processingId === correction.id}
@@ -219,7 +219,7 @@ export function TimeCorrectionInbox() {
                     size="lg"
                   >
                     <CheckCircle2 className="w-5 h-5 mr-2" />
-                    Approva
+                    {t('admin.timeclock.corrections.actions.approve')}
                   </Button>
                   <Button
                     onClick={() => handleDecision(correction.id, 'reject')}
@@ -229,7 +229,7 @@ export function TimeCorrectionInbox() {
                     size="lg"
                   >
                     <XCircle className="w-5 h-5 mr-2" />
-                    Rifiuta
+                    {t('admin.timeclock.corrections.actions.reject')}
                   </Button>
                 </div>
               </div>
