@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Save, X } from 'lucide-react';
 import { IngredientsForm } from './IngredientsForm';
 import { RecipePhotoUploader } from './RecipePhotoUploader';
+import { AllergenSelector } from './AllergenSelector';
 import { ScalableIngredient } from '@/lib/recipes/scaling';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 
@@ -51,6 +52,7 @@ export function RecipeEditorDialog({
   const [cookTime, setCookTime] = useState(0);
   const [photoUrl, setPhotoUrl] = useState('');
   const [ingredients, setIngredients] = useState<ScalableIngredient[]>([]);
+  const [allergens, setAllergens] = useState<string[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -92,6 +94,7 @@ export function RecipeEditorDialog({
     setCookTime(0);
     setPhotoUrl('');
     setIngredients([]);
+    setAllergens([]);
   };
 
   const handleClose = () => {
@@ -139,6 +142,7 @@ export function RecipeEditorDialog({
         prep_time_minutes: prepTime,
         cook_time_minutes: cookTime,
         photo_url: photoUrl,
+        allergens: allergens.length > 0 ? allergens : undefined,
         ingredients: ingredients.length > 0 ? ingredients : undefined
       };
 
@@ -227,6 +231,19 @@ export function RecipeEditorDialog({
                 currentUrl={photoUrl}
                 onPhotoUpdate={setPhotoUrl}
               />
+            </div>
+
+            {/* Allergens */}
+            <div>
+              <AllergenSelector
+                selectedAllergens={allergens}
+                onAllergensChange={setAllergens}
+                label="Allergeni"
+                placeholder="Seleziona allergeni presenti..."
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Indica gli allergeni principali presenti nella ricetta
+              </p>
             </div>
 
             {/* Porzioni */}

@@ -12,6 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ItemSelector } from './ItemSelector';
+import { AllergenSelector } from './AllergenSelector';
+import { COMMON_ALLERGENS } from '../constants/allergens';
+import { AlertTriangle } from 'lucide-react';
 
 export interface RecipeFiltersState {
   q: string;
@@ -19,6 +22,7 @@ export interface RecipeFiltersState {
   category: string;
   includeItems: string[];
   excludeItems: string[];
+  allergens?: string[];
 }
 
 interface RecipeFiltersProps {
@@ -72,6 +76,7 @@ export function RecipeFilters({
       category: 'all',
       includeItems: [],
       excludeItems: [],
+      allergens: [],
     });
   };
 
@@ -80,7 +85,8 @@ export function RecipeFilters({
     (filters.status && filters.status !== 'all') ||
     (filters.category && filters.category !== 'all') ||
     filters.includeItems.length > 0 ||
-    filters.excludeItems.length > 0;
+    filters.excludeItems.length > 0 ||
+    (filters.allergens && filters.allergens.length > 0);
 
   return (
     <div className="space-y-4">
@@ -161,6 +167,21 @@ export function RecipeFilters({
         />
       </div>
 
+      {/* Allergens Filter */}
+      <div className="space-y-2">
+        <AllergenSelector
+          selectedAllergens={filters.allergens || []}
+          onAllergensChange={(allergens) =>
+            updateFilter('allergens', allergens.length > 0 ? allergens : undefined)
+          }
+          label="Senza Allergeni"
+          placeholder="Escludi allergeni..."
+        />
+        <p className="text-xs text-muted-foreground">
+          Mostra solo ricette senza questi allergeni
+        </p>
+      </div>
+
       {/* Active Filter Badges */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 pt-2 border-t">
@@ -212,6 +233,31 @@ export function RecipeFilters({
               />
             </Badge>
           )}
+
+          {/* Allergen badges */}
+          {filters.allergens && filters.allergens.length > 0 && filters.allergens.map((allergenKey) => {
+            const allergen = COMMON_ALLERGENS.find(a => a.key === allergenKey);
+            return allergen ? (
+              <Badge
+                key={allergenKey}
+                variant="secondary"
+                className="gap-1 cursor-pointer hover:bg-secondary/80"
+                onClick={() => {
+                  const newAllergens = filters.allergens?.filter(k => k !== allergenKey);
+                  updateFilter('allergens', newAllergens && newAllergens.length > 0 ? newAllergens : undefined);
+                }}
+                style={{
+                  backgroundColor: `hsl(${allergen.color} / 0.15)`,
+                  color: `hsl(${allergen.color})`,
+                  borderColor: `hsl(${allergen.color} / 0.3)`
+                }}
+              >
+                <AlertTriangle className="h-3 w-3" />
+                Senza {allergen.label}
+                <X className="h-3 w-3" />
+              </Badge>
+            ) : null;
+          })}
         </div>
       )}
     </div>

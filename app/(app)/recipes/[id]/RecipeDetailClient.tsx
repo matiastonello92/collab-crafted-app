@@ -19,7 +19,8 @@ import {
   Send,
   Play,
   AlertCircle,
-  Loader2
+  Loader2,
+  AlertTriangle as AlertTriangleIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
@@ -28,6 +29,8 @@ import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
 import { StepsEditor } from '../components/StepsEditor';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getAllergenColor, getAllergenLabel } from '../constants/allergens';
+import { AlertTriangle } from 'lucide-react';
 
 interface Recipe {
   id: string;
@@ -41,6 +44,7 @@ interface Recipe {
   status: string;
   created_by: string;
   created_at: string;
+  allergens?: string[];
   recipe_ingredients: any[];
   recipe_steps: any[];
   profiles?: { full_name: string };
@@ -315,6 +319,31 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{recipe.category}</Badge>
+                
+                {/* Allergen Badges */}
+                {recipe.allergens && recipe.allergens.length > 0 && (
+                  <>
+                    {recipe.allergens.map((allergenKey) => {
+                      const color = getAllergenColor(allergenKey);
+                      const label = getAllergenLabel(allergenKey);
+                      return (
+                        <Badge
+                          key={allergenKey}
+                          variant="secondary"
+                          className="gap-1"
+                          style={{
+                            backgroundColor: `hsl(${color} / 0.15)`,
+                            color: `hsl(${color})`,
+                            borderColor: `hsl(${color} / 0.3)`
+                          }}
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                          {label}
+                        </Badge>
+                      );
+                    })}
+                  </>
+                )}
               </div>
 
               <Separator />

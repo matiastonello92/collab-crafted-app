@@ -108,9 +108,9 @@ export async function GET(request: Request) {
       query = query.overlaps('tags', params.tags);
     }
 
-    // Allergens filter
+    // Allergens filter - "Senza questi allergeni" (NOT overlap)
     if (params.allergens && params.allergens.length > 0) {
-      query = query.overlaps('allergens', params.allergens);
+      query = query.not('allergens', 'ov', params.allergens);
     }
 
     // Pagination

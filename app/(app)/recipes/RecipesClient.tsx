@@ -10,6 +10,9 @@ import Link from 'next/link';
 import { RecipeEditorDialog } from './components/RecipeEditorDialog';
 import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
 import { RecipeFilters, RecipeFiltersState } from './components/RecipeFilters';
+import { Badge } from '@/components/ui/badge';
+import { getAllergenColor, getAllergenLabel } from './constants/allergens';
+import { AlertTriangle } from 'lucide-react';
 
 interface Recipe {
   id: string;
@@ -23,6 +26,7 @@ interface Recipe {
   cook_time_minutes: number;
   created_by: string;
   created_at: string;
+  allergens?: string[];
   created_by_profile: {
     full_name: string;
   };
@@ -41,6 +45,7 @@ export function RecipesClient() {
     category: 'all',
     includeItems: [],
     excludeItems: [],
+    allergens: [],
   });
 
   useEffect(() => {
@@ -81,6 +86,7 @@ export function RecipesClient() {
       if (filters.category && filters.category !== 'all') params.set('category', filters.category);
       if (filters.includeItems.length > 0) params.set('includeItems', filters.includeItems.join(','));
       if (filters.excludeItems.length > 0) params.set('excludeItems', filters.excludeItems.join(','));
+      if (filters.allergens && filters.allergens.length > 0) params.set('allergens', filters.allergens.join(','));
       if (defaultLocationId) params.set('locationId', defaultLocationId);
 
       const response = await fetch(`/api/v1/recipes?${params.toString()}`);
@@ -272,6 +278,42 @@ export function RecipesClient() {
                       <Clock className="w-4 h-4" />
                       <span>{recipe.prep_time_minutes + recipe.cook_time_minutes}min</span>
                     </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {recipe.category}
+                    </Badge>
+                    
+                    {/* Allergen badges (max 3 + count) */}
+                    {recipe.allergens && recipe.allergens.length > 0 && (
+                      <>
+                        {recipe.allergens.slice(0, 3).map((allergenKey: string) => {
+                          const color = getAllergenColor(allergenKey);
+                          const label = getAllergenLabel(allergenKey);
+                          return (
+                            <Badge
+                              key={allergenKey}
+                              variant="secondary"
+                              className="text-xs gap-1"
+                              style={{
+                                backgroundColor: `hsl(${color} / 0.15)`,
+                                color: `hsl(${color})`,
+                                borderColor: `hsl(${color} / 0.3)`
+                              }}
+                            >
+                              <AlertTriangle className="h-3 w-3" />
+                              {label}
+                            </Badge>
+                          );
+                        })}
+                        {recipe.allergens.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{recipe.allergens.length - 3}
+                          </Badge>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="text-xs text-muted-foreground">
