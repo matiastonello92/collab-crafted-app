@@ -17,6 +17,7 @@ import { useHydratedLocationContext } from '@/lib/store/useHydratedStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useTranslation } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useInventoryData } from '@/app/(app)/inventory/hooks/useInventoryData';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -47,17 +48,21 @@ const statusColors = {
 
 export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const { t } = useTranslation();
-  const [header, setHeader] = useState<InventoryHeader | null>(null);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
-  const [hasTemplates, setHasTemplates] = useState(false);
 
   const supabase = useSupabase();
   
   const { location_id: selectedLocation } = useHydratedLocationContext();
   const { isAdmin, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
+  
+  // Use SWR hook for data fetching
+  const { header, hasTemplates, isLoading, mutate } = useInventoryData(
+    selectedLocation,
+    category,
+    inventoryId
+  );
   
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
@@ -67,120 +72,14 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     }
   }, [header?.id, updatePresence]);
 
-  const loadSpecificInventory = useCallback(async (id: string) => {
-    if (!selectedLocation) {
-      console.log('Invalid location ID, skipping specific inventory load');
-      return;
-    }
-
-    console.log('Loading specific inventory:', id);
-    setLoading(true);
-    try {
-      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&id=${id}`;
-      console.log('Fetching:', url);
-      const response = await fetch(url, { credentials: 'include' });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data && Array.isArray(data) && data.length > 0) {
-        setHeader(data[0]);
-      } else {
-        setHeader(null);
-        toast.error(t('inventory.empty.noInventories'));
-      }
-    } catch (error) {
-      console.error('Error loading inventory:', error);
-      setHeader(null);
-      toast.error(t('inventory.toast.errorLoadingInventories'));
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedLocation, category, t]);
-
-  const loadCurrentInventory = useCallback(async () => {
-    if (!selectedLocation) {
-      console.log('Invalid location ID, skipping current inventory load');
-      return;
-    }
-
-    console.log('Loading current inventory for location:', selectedLocation);
-    setLoading(true);
-    try {
-      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&status=in_progress`;
-      console.log('Fetching:', url);
-      const response = await fetch(url, { credentials: 'include' });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data && Array.isArray(data) && data.length > 0) {
-        setHeader(data[0]);
-      } else {
-        setHeader(null);
-      }
-    } catch (error) {
-      console.error('Error loading inventory:', error);
-      setHeader(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedLocation, category]);
-
   const updateHeaderTotal = useCallback(async () => {
-    if (!header?.id || !selectedLocation) return;
-    
-    try {
-      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&id=${header.id}`;
-      const response = await fetch(url, { credentials: 'include' });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data && Array.isArray(data) && data.length > 0) {
-          setHeader(prev => prev ? { ...prev, total_value: data[0].total_value } : null);
-        }
-      }
-    } catch (error) {
-      console.error('Error updating header total:', error);
-    }
-  }, [header?.id, selectedLocation, category]);
-
-  const checkForTemplates = useCallback(async () => {
-    if (!selectedLocation) return;
-
-    try {
-      const response = await fetch(
-        `/api/v1/inventory/templates?location_id=${selectedLocation}&category=${category}&is_active=true`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setHasTemplates(data && data.length > 0);
-      }
-    } catch (error) {
-      console.error('Error checking templates:', error);
-    }
-  }, [selectedLocation, category]);
-
-  useEffect(() => {
-    if (!selectedLocation) {
-      console.log('⏳ [INVENTORY] Waiting for location context...');
-      return;
-    }
-
-    if (inventoryId) {
-      loadSpecificInventory(inventoryId);
-    } else {
-      loadCurrentInventory();
-      checkForTemplates();
-    }
-  }, [selectedLocation, category, inventoryId, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
+    // Trigger revalidation via SWR
+    await mutate();
+  }, [mutate]);
 
   const handleInventoryCreated = async (headerId: string) => {
-    await loadCurrentInventory();
+    // Trigger revalidation via SWR
+    await mutate();
   };
 
   const updateInventoryStatus = async (newStatus: InventoryStatus) => {
@@ -195,8 +94,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setHeader(data);
+        await mutate(); // Revalidate via SWR
         toast.success(`${t('inventory.title')} ${t(`inventory.status.${newStatus === 'in_progress' ? 'inProgress' : newStatus}`).toLowerCase()}`);
       }
     } catch (error) {
@@ -211,7 +109,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const canApprove = isAdmin;
   const canComplete = true;
 
-  if (!selectedLocation || permissionsLoading) {
+  if (!selectedLocation || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-8 space-y-6">
         <Card>
@@ -230,14 +128,6 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -294,8 +184,8 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         <TemplateWizard
           isOpen={showTemplateWizard}
           onClose={() => setShowTemplateWizard(false)}
-          onSuccess={() => {
-            checkForTemplates();
+          onSuccess={async () => {
+            await mutate(); // Revalidate to get updated templates
             setShowTemplateWizard(false);
           }}
           locationId={selectedLocation || ''}

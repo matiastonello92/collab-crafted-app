@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSupabase } from '@/hooks/useSupabase';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useTranslation } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useInventoryList } from '@/app/(app)/inventory/hooks/useInventoryList';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -53,68 +53,26 @@ interface InventoryHeader {
 
 export function InventoryListPage({ category }: InventoryListPageProps) {
   const { t } = useTranslation();
-  const [inventories, setInventories] = useState<InventoryHeader[]>([]);
-  const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [inventoryToDelete, setInventoryToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const supabase = useSupabase();
   const router = useRouter();
   
   const { location_id: selectedLocation } = useHydratedLocationContext();
   const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
   
+  // Use SWR hook for data fetching
+  const { inventories, isLoading, mutate } = useInventoryList(selectedLocation, category);
+  
   const canDelete = isAdmin || permissions.includes('*');
-
-  const loadInventories = useCallback(async () => {
-    if (!selectedLocation) {
-      console.log('⚠️ [LIST] Invalid location, skipping load');
-      return;
-    }
-
-    console.log('📥 [LIST] Loading inventories for location:', selectedLocation, 'category:', category);
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('inventory_headers')
-        .select('*')
-        .eq('location_id', selectedLocation)
-        .eq('category', category)
-        .order('started_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ [LIST] Error loading inventories:', error);
-        toast.error(t('inventory.toast.errorLoadingInventories'));
-        return;
-      }
-
-      console.log('✅ [LIST] Loaded inventories:', data?.length || 0);
-      setInventories(data || []);
-    } catch (error) {
-      console.error('❌ [LIST] Error in loadInventories:', error);
-      toast.error(t('inventory.toast.errorLoadingInventories'));
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedLocation, category, supabase, t]);
 
   const filteredInventories = useMemo(() => {
     if (statusFilter === 'all') return inventories;
     return inventories.filter(inv => inv.status === statusFilter);
   }, [inventories, statusFilter]);
-
-  useEffect(() => {
-    if (!selectedLocation) {
-      console.log('⏳ [LIST] Waiting for location context...');
-      return;
-    }
-
-    console.log('✅ [LIST] Loading data for location:', selectedLocation);
-    loadInventories();
-  }, [selectedLocation, loadInventories]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);
@@ -125,12 +83,12 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     router.push(`/inventory/${category}/${inventoryId}`);
   };
 
-  const handleDeleteClick = useCallback((inventoryId: string) => {
+  const handleDeleteClick = (inventoryId: string) => {
     setInventoryToDelete(inventoryId);
     setDeleteDialogOpen(true);
-  }, []);
+  };
 
-  const handleConfirmDelete = useCallback(async () => {
+  const handleConfirmDelete = async () => {
     if (!inventoryToDelete) return;
     
     setDeleting(true);
@@ -145,7 +103,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       }
 
       toast.success(t('inventory.toast.inventoryDeleted'));
-      await loadInventories();
+      await mutate(); // Revalidate via SWR
     } catch (error) {
       console.error('Error deleting inventory:', error);
       toast.error(t('inventory.toast.errorDeletingProduct'));
@@ -154,7 +112,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       setDeleteDialogOpen(false);
       setInventoryToDelete(null);
     }
-  }, [inventoryToDelete, loadInventories, t]);
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -167,7 +125,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
-  if (!selectedLocation || permissionsLoading) {
+  if (!selectedLocation || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">
@@ -190,14 +148,6 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -233,11 +183,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : filteredInventories.length === 0 ? (
+          {filteredInventories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{t('inventory.empty.noInventories')}</p>
