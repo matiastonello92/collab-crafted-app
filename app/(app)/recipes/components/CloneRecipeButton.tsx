@@ -51,7 +51,7 @@ export function CloneRecipeButton({ recipeId, recipeTitle, disabled }: CloneReci
       className="gap-2"
     >
       <Copy className="w-4 h-4" />
-      {loading ? 'Clonazione...' : 'Clona Ricetta'}
+      {loading ? t('recipes.clone.cloning') : t('recipes.clone.cloneRecipe')}
     </Button>
   );
 }

@@ -12,13 +12,6 @@ import { useRotaCheck } from '../hooks/useRotaCheck'
 import { useAppStore } from '@/lib/store/unified'
 import { useTranslation } from '@/lib/i18n'
 
-const STEPS = [
-  { id: 1, title: 'Location', description: 'Seleziona location' },
-  { id: 2, title: 'Settimana', description: 'Scegli settimana' },
-  { id: 3, title: 'Turni', description: 'Aggiungi turni' },
-  { id: 4, title: 'Pubblica', description: 'Riepilogo e invio' },
-]
-
 export function OnboardingWizard() {
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
@@ -89,9 +82,9 @@ export function OnboardingWizard() {
   return (
     <div className="container max-w-4xl mx-auto py-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Onboarding Rota</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('onboarding.wizard.title')}</h1>
         <p className="text-muted-foreground">
-          Crea la tua prima rota settimanale e assegna i turni agli utenti.
+          {t('onboarding.wizard.description')}
         </p>
       </div>
 

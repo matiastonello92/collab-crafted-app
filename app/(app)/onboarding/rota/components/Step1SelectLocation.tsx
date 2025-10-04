@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MapPin, AlertCircle } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface Location {
   id: string
@@ -31,10 +32,12 @@ export function Step1SelectLocation({
   onNext,
   loading,
 }: Step1Props) {
+  const { t } = useTranslation()
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Caricamento location...</p>
+        <p className="text-muted-foreground">{t('onboarding.step1.loading')}</p>
       </div>
     )
   }
@@ -44,8 +47,7 @@ export function Step1SelectLocation({
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Non hai accesso a nessuna location. Contatta l'amministratore per ottenere i
-          permessi necessari.
+          {t('onboarding.step1.noAccess')}
         </AlertDescription>
       </Alert>
     )
@@ -54,18 +56,18 @@ export function Step1SelectLocation({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Seleziona Location</h2>
+        <h2 className="text-2xl font-semibold mb-2">{t('onboarding.step1.title')}</h2>
         <p className="text-muted-foreground">
-          Scegli la location per cui vuoi creare la rota settimanale.
+          {t('onboarding.step1.description')}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Location</label>
+          <label className="text-sm font-medium">{t('onboarding.step1.locationLabel')}</label>
           <Select value={selectedLocation || ''} onValueChange={onLocationChange}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleziona una location" />
+              <SelectValue placeholder={t('onboarding.step1.locationPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               {locations.map((location) => (
@@ -83,7 +85,7 @@ export function Step1SelectLocation({
 
       <div className="flex justify-end">
         <Button onClick={onNext} disabled={!selectedLocation}>
-          Avanti
+          {t('onboarding.step1.nextButton')}
         </Button>
       </div>
     </div>

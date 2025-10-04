@@ -728,6 +728,33 @@ export const en = {
     wizard: {
       title: 'Rota Onboarding',
       description: 'Create your first weekly rota and assign shifts to users.',
+      steps: {
+        location: {
+          title: 'Location',
+          description: 'Select location',
+        },
+        week: {
+          title: 'Week',
+          description: 'Choose week',
+        },
+        shifts: {
+          title: 'Shifts',
+          description: 'Add shifts',
+        },
+        publish: {
+          title: 'Publish',
+          description: 'Review and send',
+        },
+      },
+    },
+    step1: {
+      loading: 'Loading locations...',
+      noAccess: 'You don\'t have access to any location. Contact your administrator to get the necessary permissions.',
+      title: 'Select Location',
+      description: 'Choose the location for which you want to create the weekly rota.',
+      locationLabel: 'Location',
+      locationPlaceholder: 'Select a location',
+      nextButton: 'Next',
     },
     shiftForm: {
       labels: {
@@ -923,6 +950,10 @@ export const en = {
 
   // Recipes Module
   recipes: {
+    clone: {
+      cloning: 'Cloning...',
+      cloneRecipe: 'Clone Recipe',
+    },
     // Filters
     filters: {
       searchPlaceholder: 'Search recipes...',

@@ -764,6 +764,33 @@ export const it = {
     wizard: {
       title: 'Onboarding Rota',
       description: 'Crea la tua prima rota settimanale e assegna i turni agli utenti.',
+      steps: {
+        location: {
+          title: 'Location',
+          description: 'Seleziona location',
+        },
+        week: {
+          title: 'Settimana',
+          description: 'Scegli settimana',
+        },
+        shifts: {
+          title: 'Turni',
+          description: 'Aggiungi turni',
+        },
+        publish: {
+          title: 'Pubblica',
+          description: 'Riepilogo e invio',
+        },
+      },
+    },
+    step1: {
+      loading: 'Caricamento location...',
+      noAccess: 'Non hai accesso a nessuna location. Contatta l\'amministratore per ottenere i permessi necessari.',
+      title: 'Seleziona Location',
+      description: 'Scegli la location per cui vuoi creare la rota settimanale.',
+      locationLabel: 'Location',
+      locationPlaceholder: 'Seleziona una location',
+      nextButton: 'Avanti',
     },
     shiftForm: {
       labels: {
@@ -857,6 +884,10 @@ export const it = {
 
   // Recipes Module
   recipes: {
+    clone: {
+      cloning: 'Clonazione...',
+      cloneRecipe: 'Clona Ricetta',
+    },
     // Filters
     filters: {
       searchPlaceholder: 'Cerca ricette...',
