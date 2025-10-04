@@ -57,8 +57,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const supabase = useSupabase();
   
   const { location_id: selectedLocation } = useHydratedLocationContext();
-  const locationId = selectedLocation || undefined;
-  const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId);
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
   
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
 
@@ -66,10 +65,10 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     if (header?.id) {
       updatePresence(header.id);
     }
-  }, [header?.id]);
+  }, [header?.id, updatePresence]);
 
   const loadSpecificInventory = useCallback(async (id: string) => {
-    if (!locationId) {
+    if (!selectedLocation) {
       console.log('Invalid location ID, skipping specific inventory load');
       return;
     }
@@ -77,7 +76,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     console.log('Loading specific inventory:', id);
     setLoading(true);
     try {
-      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&id=${id}`;
+      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&id=${id}`;
       console.log('Fetching:', url);
       const response = await fetch(url, { credentials: 'include' });
 
@@ -99,18 +98,18 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category]);
+  }, [selectedLocation, category, t]);
 
   const loadCurrentInventory = useCallback(async () => {
-    if (!locationId) {
+    if (!selectedLocation) {
       console.log('Invalid location ID, skipping current inventory load');
       return;
     }
 
-    console.log('Loading current inventory for location:', locationId);
+    console.log('Loading current inventory for location:', selectedLocation);
     setLoading(true);
     try {
-      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&status=in_progress`;
+      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&status=in_progress`;
       console.log('Fetching:', url);
       const response = await fetch(url, { credentials: 'include' });
 
@@ -130,13 +129,13 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category]);
+  }, [selectedLocation, category]);
 
   const updateHeaderTotal = useCallback(async () => {
-    if (!header?.id || !locationId) return;
+    if (!header?.id || !selectedLocation) return;
     
     try {
-      const url = `/api/v1/inventory/headers?location_id=${locationId}&category=${category}&id=${header.id}`;
+      const url = `/api/v1/inventory/headers?location_id=${selectedLocation}&category=${category}&id=${header.id}`;
       const response = await fetch(url, { credentials: 'include' });
       
       if (response.ok) {
@@ -148,14 +147,14 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } catch (error) {
       console.error('Error updating header total:', error);
     }
-  }, [header?.id, locationId, category]);
+  }, [header?.id, selectedLocation, category]);
 
   const checkForTemplates = useCallback(async () => {
-    if (!locationId) return;
+    if (!selectedLocation) return;
 
     try {
       const response = await fetch(
-        `/api/v1/inventory/templates?location_id=${locationId}&category=${category}&is_active=true`
+        `/api/v1/inventory/templates?location_id=${selectedLocation}&category=${category}&is_active=true`
       );
       if (response.ok) {
         const data = await response.json();
@@ -164,7 +163,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
     } catch (error) {
       console.error('Error checking templates:', error);
     }
-  }, [locationId, category]);
+  }, [selectedLocation, category]);
 
   useEffect(() => {
     if (!selectedLocation) {
@@ -289,7 +288,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSuccess={handleInventoryCreated}
-          locationId={locationId || ''}
+          locationId={selectedLocation || ''}
           category={category}
         />
 
@@ -300,7 +299,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
             checkForTemplates();
             setShowTemplateWizard(false);
           }}
-          locationId={locationId || ''}
+          locationId={selectedLocation || ''}
           preselectedCategory={category}
         />
       </div>
@@ -386,7 +385,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         headerId={header.id}
         canManage={header.status !== 'approved'}
         canEdit={header.status !== 'approved' || canApprove}
-        locationId={locationId || ''}
+        locationId={selectedLocation || ''}
         category={category}
         onHeaderUpdate={updateHeaderTotal}
       />

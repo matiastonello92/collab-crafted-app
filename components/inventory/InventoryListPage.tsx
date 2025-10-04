@@ -65,24 +65,23 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const router = useRouter();
   
   const { location_id: selectedLocation } = useHydratedLocationContext();
-  const locationId = selectedLocation || undefined;
-  const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(locationId);
+  const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
   
   const canDelete = isAdmin || permissions.includes('*');
 
   const loadInventories = useCallback(async () => {
-    if (!locationId) {
+    if (!selectedLocation) {
       console.log('⚠️ [LIST] Invalid location, skipping load');
       return;
     }
 
-    console.log('📥 [LIST] Loading inventories for location:', locationId, 'category:', category);
+    console.log('📥 [LIST] Loading inventories for location:', selectedLocation, 'category:', category);
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('inventory_headers')
         .select('*')
-        .eq('location_id', locationId)
+        .eq('location_id', selectedLocation)
         .eq('category', category)
         .order('started_at', { ascending: false });
 
@@ -100,7 +99,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, supabase, t]);
+  }, [selectedLocation, category, supabase, t]);
 
   const filteredInventories = useMemo(() => {
     if (statusFilter === 'all') return inventories;
@@ -317,7 +316,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           category={category}
-          locationId={locationId || ''}
+          locationId={selectedLocation || ''}
           onSuccess={handleInventoryCreated}
         />
       )}
