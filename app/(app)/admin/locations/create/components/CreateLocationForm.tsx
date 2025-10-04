@@ -95,28 +95,28 @@ export function CreateLocationForm() {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name">Nome Location *</Label>
+            <Label htmlFor="name">{t('admin.locations.name')} *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="es. Sede Milano Centro"
+              placeholder={t('admin.locations.namePlaceholder')}
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="city">Città</Label>
+            <Label htmlFor="city">{t('admin.locations.city')}</Label>
             <Input
               id="city"
               value={formData.city}
               onChange={(e) => setFormData({...formData, city: e.target.value})}
-              placeholder="es. Milano"
+              placeholder={t('admin.locations.cityPlaceholder')}
             />
           </div>
 
           <div>
-            <Label htmlFor="country">Paese</Label>
+            <Label htmlFor="country">{t('admin.locations.country')}</Label>
             <Select
               value={formData.country}
               onValueChange={(value) => setFormData({...formData, country: value})}
@@ -134,7 +134,7 @@ export function CreateLocationForm() {
           </div>
 
           <div>
-            <Label htmlFor="is_active">Status</Label>
+            <Label htmlFor="is_active">{t('admin.locations.status')}</Label>
             <Select
               value={formData.is_active ? "true" : "false"}
               onValueChange={(value) => setFormData({...formData, is_active: value === "true"})}
@@ -143,8 +143,8 @@ export function CreateLocationForm() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="true">Attivo</SelectItem>
-                <SelectItem value="false">Archiviato</SelectItem>
+                <SelectItem value="true">{t('admin.locations.active')}</SelectItem>
+                <SelectItem value="false">{t('admin.locations.archived')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -152,33 +152,33 @@ export function CreateLocationForm() {
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="phone">Telefono</Label>
+            <Label htmlFor="phone">{t('admin.locations.phone')}</Label>
             <Input
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              placeholder="+33 1 23 45 67 89"
+              placeholder={t('admin.locations.phonePlaceholder')}
             />
           </div>
 
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('admin.locations.email')}</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="location@company.com"
+              placeholder={t('admin.locations.emailPlaceholder')}
             />
           </div>
 
           <div>
-            <Label htmlFor="address">Indirizzo</Label>
+            <Label htmlFor="address">{t('admin.locations.address')}</Label>
             <Textarea
               id="address"
               value={formData.address}
               onChange={(e) => setFormData({...formData, address: e.target.value})}
-              placeholder="Indirizzo completo..."
+              placeholder={t('admin.locations.addressPlaceholder')}
               rows={3}
             />
           </div>
@@ -188,11 +188,11 @@ export function CreateLocationForm() {
       {/* Photo Upload */}
       <Card>
         <CardHeader>
-          <CardTitle>Foto Location</CardTitle>
+          <CardTitle>{t('admin.locations.photoTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Label htmlFor="photo">Carica una foto (opzionale)</Label>
+            <Label htmlFor="photo">{t('admin.locations.photoLabel')}</Label>
             <div className="flex items-center gap-4">
               <Input
                 id="photo"
@@ -207,7 +207,7 @@ export function CreateLocationForm() {
               <div className="mt-4">
                 <NextImage
                   src={formData.photo_url}
-                  alt="Anteprima foto location"
+                  alt={t('admin.locations.photoPreview')}
                   width={128}
                   height={128}
                   className="h-32 w-32 rounded-md object-cover"
@@ -225,16 +225,16 @@ export function CreateLocationForm() {
           variant="outline"
           onClick={() => router.back()}
         >
-          Annulla
+          {t('admin.locations.cancel')}
         </Button>
         <Button type="submit" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creazione...
+              {t('admin.locations.creating')}
             </>
           ) : (
-            'Crea Location'
+            t('admin.locations.create')
           )}
         </Button>
       </div>

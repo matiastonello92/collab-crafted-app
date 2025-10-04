@@ -254,10 +254,10 @@ export function InviteUserForm() {
       <div className="space-y-4">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-green-600 mb-2">
-            Invito Creato con Successo!
+            {t('admin.inviteUserForm.successTitle')}
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Copia e invia questo link all'utente invitato:
+            {t('admin.inviteUserForm.successMessage')}
           </p>
         </div>
         
@@ -280,7 +280,7 @@ export function InviteUserForm() {
           }}
           className="w-full"
         >
-          Crea Nuovo Invito
+          {t('admin.inviteUserForm.createNew')}
         </Button>
       </div>
     )
@@ -290,11 +290,11 @@ export function InviteUserForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="email">Email *</Label>
+        <Label htmlFor="email">{t('admin.inviteUserForm.email')} *</Label>
         <Input
           id="email"
           type="email"
-          placeholder="utente@example.com"
+          placeholder={t('admin.inviteUserForm.emailPlaceholder')}
           {...register('email')}
         />
         {errors.email && (
@@ -304,10 +304,10 @@ export function InviteUserForm() {
 
       {/* Role Selection */}
       <div className="space-y-2">
-        <Label>Ruolo *</Label>
+        <Label>{t('admin.inviteUserForm.role')} *</Label>
         <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
           <SelectTrigger>
-            <SelectValue placeholder="Seleziona ruolo..." />
+            <SelectValue placeholder={t('admin.inviteUserForm.roleRequired')} />
           </SelectTrigger>
           <SelectContent 
             className="bg-white dark:bg-gray-900 border shadow-md z-50" 
@@ -325,7 +325,7 @@ export function InviteUserForm() {
 
       {/* Location Selection */}
       <div className="space-y-3">
-        <Label>Locations * (almeno una)</Label>
+        <Label>{t('admin.inviteUserForm.locations')} * ({t('admin.inviteUserForm.locationsAtLeastOne')})</Label>
         <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
           {locations.map(location => (
             <div key={location.id} className="flex items-center space-x-2">
@@ -346,9 +346,9 @@ export function InviteUserForm() {
 
       {/* Job Tags Selection */}
       <div className="space-y-3">
-        <Label>Job Titles (opzionale)</Label>
+        <Label>{t('admin.inviteUserForm.jobTitles')} ({t('admin.inviteUserForm.jobTitlesOptional')})</Label>
         <p className="text-sm text-muted-foreground">
-          I job titles selezionati verranno applicati a tutte le locations selezionate
+          {t('admin.inviteUserForm.jobTitlesDescription')}
         </p>
         <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
           {jobTags.map(jobTag => (
@@ -387,13 +387,13 @@ export function InviteUserForm() {
       {/* Permission Overrides */}
       {selectedLocationIds.length > 0 && selectedRoleId && (
         <div className="space-y-3">
-          <Label>Override Permessi per Location</Label>
+          <Label>{t('admin.inviteUserForm.permissionOverrides')}</Label>
           <div className="border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-2 font-medium">Permesso</th>
+                    <th className="text-left p-2 font-medium">{t('admin.inviteUserForm.permission')}</th>
                     {selectedLocationIds.map(locationId => {
                       const location = locations.find(l => l.id === locationId)
                       return (
@@ -442,18 +442,18 @@ export function InviteUserForm() {
           {isLoadingPresets && (
             <div className="text-center py-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto"></div>
-              <p className="text-xs text-muted-foreground mt-1">Caricamento permessi...</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('admin.inviteUserForm.loadingPermissions')}</p>
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            I checkbox con bordo arancione indicano override rispetto ai permessi del ruolo
+            {t('admin.inviteUserForm.overrideIndicator')}
           </p>
         </div>
       )}
 
       {/* Expiry Days */}
       <div className="space-y-2">
-        <Label htmlFor="days">Scadenza (giorni)</Label>
+        <Label htmlFor="days">{t('admin.inviteUserForm.expiryDays')}</Label>
         <Input
           id="days"
           type="number"
@@ -465,7 +465,7 @@ export function InviteUserForm() {
           <p className="text-sm text-destructive">{errors.days.message}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          L'invito scadrà tra {selectedDays} giorni
+          {t('admin.inviteUserForm.expiryMessage').replace('{days}', selectedDays.toString())}
         </p>
       </div>
 
@@ -476,7 +476,7 @@ export function InviteUserForm() {
         className="w-full"
       >
         <Send className="h-4 w-4 mr-2" />
-        {isPending ? 'Creazione in corso...' : 'Crea Invito'}
+        {isPending ? t('admin.inviteUserForm.creating') : t('admin.inviteUserForm.createInvite')}
       </Button>
     </form>
   )

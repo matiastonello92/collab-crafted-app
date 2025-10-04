@@ -164,14 +164,14 @@ export function InvitationsList() {
   }
 
   const getStatusLabel = (status: string, expiresAt: string) => {
-    if (!currentTime) return 'In attesa'
+    if (!currentTime) return t('admin.invitationsList.statusPending')
     const expiryDate = new Date(expiresAt)
     
-    if (status === 'accepted') return 'Accettato'
-    if (status === 'revoked') return 'Revocato'
-    if (status === 'sent') return 'Email inviata'
-    if (currentTime > expiryDate) return 'Scaduto'
-    return 'In attesa'
+    if (status === 'accepted') return t('admin.invitationsList.statusAccepted')
+    if (status === 'revoked') return t('admin.invitationsList.statusRevoked')
+    if (status === 'sent') return t('admin.invitationsList.statusSent')
+    if (currentTime > expiryDate) return t('admin.invitationsList.statusExpired')
+    return t('admin.invitationsList.statusPending')
   }
 
   if (isLoading) {
@@ -190,7 +190,7 @@ export function InvitationsList() {
     <div className="space-y-4">
         <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          {invitations.length} inviti attivi trovati
+          {t('admin.invitationsList.activeInvites').replace('{count}', invitations.length.toString())}
         </p>
         <Button
           variant="outline"
@@ -199,14 +199,14 @@ export function InvitationsList() {
           disabled={isRefreshing}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Aggiorna
+          {t('admin.invitationsList.refresh')}
         </Button>
       </div>
 
       {invitations.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <p>Nessun invito attivo trovato</p>
-          <p className="text-xs mt-1">Gli inviti scaduti, revocati o già accettati non vengono mostrati</p>
+          <p>{t('admin.invitationsList.noInvites')}</p>
+          <p className="text-xs mt-1">{t('admin.invitationsList.noInvitesDescription')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -228,7 +228,7 @@ export function InvitationsList() {
                   
                   {invitation.role_name && (
                     <p className="text-sm text-muted-foreground">
-                      Ruolo: {invitation.role_name}
+                      {t('admin.invitationsList.role')}: {invitation.role_name}
                     </p>
                   )}
                   
@@ -245,16 +245,16 @@ export function InvitationsList() {
                   <p className="text-xs text-muted-foreground">
                     {isClient ? (
                       <>
-                        Creato {formatDistanceToNow(new Date(invitation.created_at), {
+                        {t('admin.invitationsList.createdAgo')} {formatDistanceToNow(new Date(invitation.created_at), {
                           addSuffix: true,
                           locale: it
-                        })} • Scade {formatDistanceToNow(new Date(invitation.expires_at), {
+                        })} • {t('admin.invitationsList.expiresIn')} {formatDistanceToNow(new Date(invitation.expires_at), {
                           addSuffix: true,
                           locale: it
                         })}
                       </>
                     ) : (
-                      <>Creato: {invitation.created_at} • Scade: {invitation.expires_at}</>
+                      <>{t('admin.invitationsList.createdAgo')}: {invitation.created_at} • {t('admin.invitationsList.expiresIn')}: {invitation.expires_at}</>
                     )}
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export function InvitationsList() {
                     onClick={() => copyInviteLink(invitation.token)}
                   >
                     <Copy className="h-3 w-3 mr-1" />
-                    Copia Link
+                    {t('admin.invitationsList.copyLink')}
                   </Button>
                   <Button
                     variant="outline"
@@ -276,7 +276,7 @@ export function InvitationsList() {
                     onClick={() => revokeInvitation(invitation.id)}
                   >
                     <Ban className="h-3 w-3 mr-1" />
-                    Revoca
+                    {t('admin.invitationsList.revoke')}
                   </Button>
                 </div>
               )}
