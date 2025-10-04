@@ -38,6 +38,7 @@ import { PrintRecipeButton } from '../components/PrintRecipeButton';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface Recipe {
   id: string;
@@ -66,6 +67,7 @@ interface RecipeDetailClientProps {
 }
 
 export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       setRecipe(data.recipe);
     } catch (error) {
       console.error('Error loading recipe:', error);
-      toast.error('Errore caricamento ricetta');
+      toast.error(t('recipes.detail.toast.loadError'));
     } finally {
       setLoading(false);
     }
@@ -125,7 +127,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
   async function handleSubmit() {
     if (!recipe?.photo_url) {
-      toast.error('Carica una foto prima di inviare');
+      toast.error(t('recipes.detail.toast.submitNoPhoto'));
       return;
     }
 
@@ -137,10 +139,10 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
       if (!response.ok) throw new Error('Failed to submit');
 
-      toast.success('Ricetta inviata per approvazione');
+      toast.success(t('recipes.detail.toast.submitSuccess'));
       loadRecipe();
     } catch (error) {
-      toast.error('Errore invio ricetta');
+      toast.error(t('recipes.detail.toast.submitError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -148,7 +150,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
 
   async function handleApprove() {
     if (!recipe?.photo_url) {
-      toast.error('Foto obbligatoria per pubblicare');
+      toast.error(t('recipes.detail.toast.approveNoPhoto'));
       return;
     }
 
@@ -163,10 +165,10 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
         throw new Error(data.error || 'Failed to approve');
       }
 
-      toast.success('Ricetta approvata e pubblicata');
+      toast.success(t('recipes.detail.toast.approveSuccess'));
       loadRecipe();
     } catch (error: any) {
-      toast.error(error.message || 'Errore approvazione ricetta');
+      toast.error(error.message || t('recipes.detail.toast.approveError'));
     } finally {
       setIsApproving(false);
     }
@@ -188,7 +190,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="p-6 text-center">
-            <p>Ricetta non trovata</p>
+            <p>{t('recipes.detail.notFound')}</p>
           </CardContent>
         </Card>
       </div>
@@ -222,7 +224,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
         <Alert variant="default" className="border-warning bg-warning/10">
           <AlertCircle className="h-4 w-4 text-warning" />
           <AlertDescription className="text-warning">
-            <strong>Foto obbligatoria:</strong> Carica una foto della ricetta prima di poter inviare per approvazione.
+            <strong>{t('recipes.detail.photoRequiredDraft')}</strong>
           </AlertDescription>
         </Alert>
       )}
@@ -232,7 +234,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
         <Alert variant="default" className="border-warning bg-warning/10">
           <AlertCircle className="h-4 w-4 text-warning" />
           <AlertDescription className="text-warning">
-            <strong>Foto mancante:</strong> Questa ricetta non può essere pubblicata senza una foto.
+            <strong>{t('recipes.detail.photoMissingSubmitted')}</strong>
           </AlertDescription>
         </Alert>
       )}
@@ -245,7 +247,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
           className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          Indietro
+          {t('recipes.detail.back')}
         </Button>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -260,7 +262,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
           {recipe.clone_count && recipe.clone_count > 0 && (
             <Badge variant="secondary" className="gap-1">
               <Copy className="w-3 h-3" />
-              Clonata {recipe.clone_count}x
+              {t('recipes.detail.cloned')} {recipe.clone_count}x
             </Badge>
           )}
           
@@ -271,7 +273,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               className="gap-2"
             >
               <Play className="h-4 w-4" />
-              Modalità Cucina
+              {t('recipes.detail.cookMode')}
             </Button>
           )}
 
@@ -296,7 +298,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               className="gap-2"
             >
               <Edit className="h-4 w-4" />
-              Modifica Bozza
+              {t('recipes.detail.editDraft')}
             </Button>
           )}
           
@@ -306,17 +308,17 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               onClick={handleSubmit}
               disabled={isSubmitting || !recipe.photo_url}
               className="gap-2"
-              title={!recipe.photo_url ? 'Carica una foto prima di inviare' : undefined}
+              title={!recipe.photo_url ? t('recipes.detail.uploadPhotoTooltip') : undefined}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Invio...
+                  {t('recipes.detail.submitting')}
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  Invia per Approvazione
+                  {t('recipes.detail.submitForApproval')}
                 </>
               )}
             </Button>
@@ -328,17 +330,17 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               onClick={handleApprove}
               disabled={isApproving || !recipe.photo_url}
               className="gap-2 bg-green-600 hover:bg-green-700"
-              title={!recipe.photo_url ? 'Foto obbligatoria per pubblicare' : undefined}
+              title={!recipe.photo_url ? t('recipes.detail.photoRequiredToPublish') : undefined}
             >
               {isApproving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Approvazione...
+                  {t('recipes.detail.approving')}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4" />
-                  Approva e Pubblica
+                  {t('recipes.detail.approveAndPublish')}
                 </>
               )}
             </Button>
@@ -422,21 +424,21 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Porzioni</p>
+                    <p className="text-muted-foreground">{t('recipes.detail.servings')}</p>
                     <p className="font-medium">{recipe.servings}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Preparazione</p>
+                    <p className="text-muted-foreground">{t('recipes.detail.preparation')}</p>
                     <p className="font-medium">{formatTime(recipe.prep_time_minutes)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-muted-foreground">Totale</p>
+                    <p className="text-muted-foreground">{t('recipes.detail.total')}</p>
                     <p className="font-medium">{formatTime(totalTime)}</p>
                   </div>
                 </div>
@@ -445,7 +447,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               <Separator />
 
               <div className="text-sm text-muted-foreground">
-                Creata da {recipe.profiles?.full_name || 'Utente'} il{' '}
+                {t('recipes.detail.createdBy')} {recipe.profiles?.full_name || 'Utente'} il{' '}
                 {new Date(recipe.created_at).toLocaleDateString('it-IT')}
               </div>
             </div>
@@ -456,10 +458,10 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       {/* Tabs */}
         <Tabs defaultValue="ingredients" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="ingredients">Ingredienti</TabsTrigger>
-          <TabsTrigger value="steps">Procedimento</TabsTrigger>
+          <TabsTrigger value="ingredients">{t('recipes.detail.ingredients')}</TabsTrigger>
+          <TabsTrigger value="steps">{t('recipes.detail.steps')}</TabsTrigger>
           <TabsTrigger value="notes" className="gap-1">
-            Note di Servizio
+            {t('recipes.detail.serviceNotes')}
             {recipe.recipe_service_notes && recipe.recipe_service_notes.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {recipe.recipe_service_notes.length}

@@ -21,6 +21,7 @@ import { ChecklistWidget } from './components/ChecklistWidget';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertCircle, StickyNote } from 'lucide-react';
 import { PrintRecipeButton } from '../../components/PrintRecipeButton';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeStep {
   id: string;
@@ -50,6 +51,7 @@ interface CookModeClientProps {
 }
 
 export default function CookModeClient({ recipeId }: CookModeClientProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
       });
     } catch (error) {
       console.error('Error loading recipe:', error);
-      toast.error('Errore caricamento ricetta');
+      toast.error(t('recipes.cook.loadError'));
     } finally {
       setLoading(false);
     }
@@ -129,7 +131,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-center space-y-4">
           <ChefHat className="h-16 w-16 mx-auto text-primary" />
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t('recipes.cook.loading')}</p>
         </div>
       </div>
     );
@@ -141,8 +143,8 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
         <Card className="max-w-md">
           <CardContent className="p-6 text-center space-y-4">
             <ChefHat className="h-12 w-12 mx-auto text-muted-foreground" />
-            <p className="text-muted-foreground">Nessun procedimento disponibile</p>
-            <Button onClick={handleExit}>Torna alla Ricetta</Button>
+            <p className="text-muted-foreground">{t('recipes.cook.noProcedure')}</p>
+            <Button onClick={handleExit}>{t('recipes.cook.backToRecipe')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -168,7 +170,9 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           <div>
             <h1 className="text-2xl font-bold">{recipe.title}</h1>
             <p className="text-sm text-muted-foreground">
-              Step {currentStepIndex + 1} di {recipe.recipe_steps.length}
+              {t('recipes.cook.stepOf')
+                .replace('{current}', String(currentStepIndex + 1))
+                .replace('{total}', String(recipe.recipe_steps.length))}
             </p>
           </div>
         </div>
@@ -176,7 +180,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           {recipe.recipe_service_notes && recipe.recipe_service_notes.length > 0 && (
             <Button variant="outline" size="sm" onClick={() => setShowNotes(true)} className="gap-2">
               <AlertCircle className="h-4 w-4 text-warning" />
-              Note ({recipe.recipe_service_notes.length})
+              {t('recipes.cook.notes')} ({recipe.recipe_service_notes.length})
             </Button>
           )}
           <PrintRecipeButton 
@@ -196,7 +200,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <StickyNote className="h-5 w-5" />
-              Note di Servizio
+              {t('recipes.cook.serviceNotes')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -286,18 +290,18 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
           onClick={handlePrevStep}
           disabled={currentStepIndex === 0}
           className="gap-2 min-w-[120px]"
-          aria-label="Passaggio precedente (freccia sinistra)"
+          aria-label={t('recipes.cook.previousAriaLabel')}
         >
           <ArrowLeft className="h-5 w-5" />
-          Precedente
+          {t('recipes.cook.previous')}
         </Button>
         <Button
           onClick={handleNextStep}
           disabled={currentStepIndex === recipe.recipe_steps.length - 1}
           className="gap-2 min-w-[120px]"
-          aria-label="Passaggio successivo (freccia destra)"
+          aria-label={t('recipes.cook.nextAriaLabel')}
         >
-          Successivo
+          {t('recipes.cook.next')}
           <ArrowRight className="h-5 w-5" />
         </Button>
       </div>

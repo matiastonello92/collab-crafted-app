@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { getAllergenColor, getAllergenLabel } from './constants/allergens';
 import { formatSeasonRange, getSeasonColor } from './constants/seasons';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface Recipe {
   id: string;
@@ -36,6 +37,7 @@ interface Recipe {
 }
 
 export function RecipesClient() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,7 @@ export function RecipesClient() {
       const data = await response.json();
       setRecipes(data.recipes || []);
     } catch (error: any) {
-      toast.error('Errore caricamento ricette', {
+      toast.error(t('recipes.client.toast.loadError'), {
         description: error.message
       });
     } finally {
@@ -141,10 +143,10 @@ export function RecipesClient() {
         throw new Error(data.error || 'Failed to submit');
       }
       
-      toast.success('Ricetta inviata per approvazione');
+      toast.success(t('recipes.client.toast.submitSuccess'));
       loadRecipes();
     } catch (error: any) {
-      toast.error('Errore invio ricetta', {
+      toast.error(t('recipes.client.toast.submitError'), {
         description: error.message
       });
     }
@@ -161,17 +163,17 @@ export function RecipesClient() {
         throw new Error(data.error || 'Failed to archive');
       }
       
-      toast.success('Ricetta archiviata');
+      toast.success(t('recipes.client.toast.archiveSuccess'));
       loadRecipes();
     } catch (error: any) {
-      toast.error('Errore archiviazione', {
+      toast.error(t('recipes.client.toast.archiveError'), {
         description: error.message
       });
     }
   }
 
   async function handleDelete(recipeId: string) {
-    if (!confirm('Eliminare questa bozza?')) return;
+    if (!confirm(t('recipes.client.deleteConfirm'))) return;
     
     try {
       const response = await fetch(`/api/v1/recipes/${recipeId}`, {
@@ -183,10 +185,10 @@ export function RecipesClient() {
         throw new Error(data.error || 'Failed to delete');
       }
       
-      toast.success('Ricetta eliminata');
+      toast.success(t('recipes.client.toast.deleteSuccess'));
       loadRecipes();
     } catch (error: any) {
-      toast.error('Errore eliminazione', {
+      toast.error(t('recipes.client.toast.deleteError'), {
         description: error.message
       });
     }
@@ -196,7 +198,7 @@ export function RecipesClient() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Caricamento...</div>
+          <div className="text-muted-foreground">{t('recipes.client.loading')}</div>
         </div>
       </div>
     );
@@ -206,14 +208,14 @@ export function RecipesClient() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Klyra Recipes</h1>
+          <h1 className="text-3xl font-bold">{t('recipes.client.title')}</h1>
           <p className="text-muted-foreground">
-            {recipes.length} {recipes.length === 1 ? 'ricetta trovata' : 'ricette trovate'}
+            {recipes.length} {recipes.length === 1 ? t('recipes.client.recipeFound') : t('recipes.client.recipesFound')}
           </p>
         </div>
         <Button onClick={() => router.push('/recipes/new')}>
           <Plus className="w-4 h-4 mr-2" />
-          Nuova Ricetta
+          {t('recipes.client.newRecipe')}
         </Button>
       </div>
 
@@ -230,9 +232,9 @@ export function RecipesClient() {
       {recipes.length === 0 ? (
         <Card className="p-12 text-center">
           <ChefHat className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">Nessuna ricetta</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('recipes.client.noRecipes')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Inizia creando la tua prima ricetta
+            {t('recipes.client.startCreating')}
           </p>
         </Card>
       ) : (
@@ -343,7 +345,7 @@ export function RecipesClient() {
                   </div>
 
                   <div className="text-xs text-muted-foreground">
-                    Creata da {recipe.created_by_profile?.full_name || 'N/A'}
+                    {t('recipes.client.createdBy')} {recipe.created_by_profile?.full_name || 'N/A'}
                   </div>
 
                   {/* Workflow Actions */}
@@ -356,7 +358,7 @@ export function RecipesClient() {
                         disabled={!recipe.photo_url}
                       >
                         <Send className="w-4 h-4 mr-1" />
-                        Invia
+                        {t('recipes.client.submit')}
                       </Button>
                     )}
 
@@ -367,7 +369,7 @@ export function RecipesClient() {
                         onClick={() => handleArchive(recipe.id)}
                       >
                         <Archive className="w-4 h-4 mr-1" />
-                        Archivia
+                        {t('recipes.client.archive')}
                       </Button>
                     )}
 
@@ -378,13 +380,13 @@ export function RecipesClient() {
                         onClick={() => handleDelete(recipe.id)}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Elimina
+                        {t('recipes.client.delete')}
                       </Button>
                     )}
 
                     {!recipe.photo_url && recipe.status === 'draft' && (
                       <div className="w-full text-xs text-amber-600 bg-amber-50 dark:bg-amber-950 px-2 py-1 rounded">
-                        ⚠️ Foto obbligatoria per inviare
+                        {t('recipes.client.photoRequired')}
                       </div>
                     )}
                   </div>

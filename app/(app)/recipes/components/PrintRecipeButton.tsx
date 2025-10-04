@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useTranslation } from '@/lib/i18n';
 
 interface PrintRecipeButtonProps {
   recipeId: string;
@@ -31,6 +32,7 @@ export function PrintRecipeButton({
   defaultServings = 4,
   defaultVariant = 'full'
 }: PrintRecipeButtonProps) {
+  const { t } = useTranslation();
   const [servings, setServings] = useState(defaultServings.toString());
   const [isOpen, setIsOpen] = useState(false);
 
@@ -39,7 +41,7 @@ export function PrintRecipeButton({
       const url = `/api/v1/recipes/${recipeId}/print?servings=${servings}&variant=${variant}`;
       window.open(url, '_blank');
       setIsOpen(false);
-      toast.success(variant === 'full' ? 'Scheda completa aperta' : 'Scheda stazione aperta');
+      toast.success(variant === 'full' ? t('recipes.print.fullSheetOpened') : t('recipes.print.stationSheetOpened'));
       
       // Log print usage
       fetch(`/api/v1/recipes/${recipeId}/log-usage`, {
@@ -52,25 +54,25 @@ export function PrintRecipeButton({
       }).catch(err => console.error('Failed to log usage:', err));
     } catch (error) {
       console.error('Print error:', error);
-      toast.error('Errore durante la stampa');
+      toast.error(t('recipes.print.printError'));
     }
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" aria-label="Stampa ricetta">
+        <Button variant="outline" size="sm" aria-label={t('recipes.print.print')}>
           <Printer className="h-4 w-4 mr-2" />
-          Stampa
+          {t('recipes.print.print')}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium mb-3">Stampa Ricetta</h4>
+            <h4 className="font-medium mb-3">{t('recipes.print.printRecipe')}</h4>
             
             <div className="space-y-2">
-              <Label htmlFor="servings-select">Porzioni</Label>
+              <Label htmlFor="servings-select">{t('recipes.print.servings')}</Label>
               <Select value={servings} onValueChange={setServings}>
                 <SelectTrigger id="servings-select">
                   <SelectValue />
@@ -78,7 +80,7 @@ export function PrintRecipeButton({
                 <SelectContent>
                   {SERVING_OPTIONS.map(num => (
                     <SelectItem key={num} value={num.toString()}>
-                      {num} porzioni
+                      {t('recipes.print.servingsCount').replace('{count}', String(num))}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -93,9 +95,9 @@ export function PrintRecipeButton({
               variant="default"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Scheda Completa
+              {t('recipes.print.fullSheet')}
               <span className="ml-auto text-xs opacity-70">
-                Con foto e note
+                {t('recipes.print.withPhotosAndNotes')}
               </span>
             </Button>
             
@@ -105,15 +107,15 @@ export function PrintRecipeButton({
               variant="outline"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Scheda Stazione
+              {t('recipes.print.stationSheet')}
               <span className="ml-auto text-xs opacity-70">
-                Solo essenziale
+                {t('recipes.print.essentialOnly')}
               </span>
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground">
-            La scheda si aprirà in una nuova finestra pronta per la stampa o salvataggio PDF.
+            {t('recipes.print.openInNewWindow')}
           </p>
         </div>
       </PopoverContent>

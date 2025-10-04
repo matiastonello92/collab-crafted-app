@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface FavoriteButtonProps {
   recipeId: string;
@@ -21,6 +22,7 @@ export function FavoriteButton({
   size = 'default',
   className 
 }: FavoriteButtonProps) {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [loading, setLoading] = useState(false);
 
@@ -39,15 +41,15 @@ export function FavoriteButton({
       setIsFavorite(data.is_favorite);
 
       toast.success(
-        data.is_favorite ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti',
+        data.is_favorite ? t('recipes.favorites.addedToFavorites') : t('recipes.favorites.removedFromFavorites'),
         { description: data.is_favorite 
-          ? 'La ricetta è stata salvata nei tuoi preferiti'
-          : 'La ricetta è stata rimossa dai preferiti'
+          ? t('recipes.favorites.addedDescription')
+          : t('recipes.favorites.removedDescription')
         }
       );
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      toast.error('Impossibile aggiornare i preferiti');
+      toast.error(t('recipes.favorites.errorUpdate'));
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ export function FavoriteButton({
           isFavorite ? 'fill-yellow-400 text-yellow-400' : ''
         )}
       />
-      {isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}
+      {isFavorite ? t('recipes.favorites.removeFromFavorites') : t('recipes.favorites.addToFavorites')}
     </Button>
   );
 }
