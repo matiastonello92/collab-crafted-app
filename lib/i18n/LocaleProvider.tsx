@@ -28,16 +28,12 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
       }
     }
     
-    // Synchronize global locale immediately before first render
-    setCurrentLocale(initialLoc);
-    
     return initialLoc;
   });
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    // Keep for subsequent locale changes
     setCurrentLocale(locale);
   }, [locale]);
 
