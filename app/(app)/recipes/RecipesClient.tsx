@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Clock, Users, ChefHat, Archive, Send, Trash2, Plus, ExternalLink, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { RecipeEditorDialog } from './components/RecipeEditorDialog';
+import { useRouter } from 'next/navigation';
 import { RecipeWorkflowBadge } from './components/RecipeWorkflowBadge';
 import { RecipeFilters, RecipeFiltersState } from './components/RecipeFilters';
 import { FavoriteButton } from './components/FavoriteButton';
@@ -36,10 +36,10 @@ interface Recipe {
 }
 
 export function RecipesClient() {
+  const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  const [editorOpen, setEditorOpen] = useState(false);
   const [defaultLocationId, setDefaultLocationId] = useState<string>('');
   const [itemNames, setItemNames] = useState<Map<string, string>>(new Map());
   const [filters, setFilters] = useState<RecipeFiltersState>({
@@ -211,7 +211,7 @@ export function RecipesClient() {
             {recipes.length} {recipes.length === 1 ? 'ricetta trovata' : 'ricette trovate'}
           </p>
         </div>
-        <Button onClick={() => setEditorOpen(true)}>
+        <Button onClick={() => router.push('/recipes/new')}>
           <Plus className="w-4 h-4 mr-2" />
           Nuova Ricetta
         </Button>
@@ -226,11 +226,6 @@ export function RecipesClient() {
         />
       )}
 
-      <RecipeEditorDialog
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        onSuccess={loadRecipes}
-      />
 
       {recipes.length === 0 ? (
         <Card className="p-12 text-center">

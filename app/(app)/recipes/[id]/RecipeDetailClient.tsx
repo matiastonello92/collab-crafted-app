@@ -27,7 +27,7 @@ import {
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
 import { RecipeWorkflowBadge } from '../components/RecipeWorkflowBadge';
-import { RecipeEditorDialog } from '../components/RecipeEditorDialog';
+
 import { StepsEditor } from '../components/StepsEditor';
 import { getAllergenLabel, getAllergenColor } from '../constants/allergens';
 import { formatSeasonRange, getSeasonColor } from '../constants/seasons';
@@ -71,7 +71,6 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [canManage, setCanManage] = useState(false);
-  const [editorOpen, setEditorOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
 
@@ -276,11 +275,11 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
           {canEdit && (
             <Button
               variant="outline"
-              onClick={() => setEditorOpen(true)}
+              onClick={() => router.push(`/recipes/${recipeId}/edit`)}
               className="gap-2"
             >
               <Edit className="h-4 w-4" />
-              Modifica
+              Modifica Bozza
             </Button>
           )}
           
@@ -484,15 +483,6 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
         </TabsContent>
       </Tabs>
 
-      {/* Editor Dialog */}
-      <RecipeEditorDialog
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        onSuccess={() => {
-          setEditorOpen(false);
-          loadRecipe();
-        }}
-      />
     </div>
   );
 }

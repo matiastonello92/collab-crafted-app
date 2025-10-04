@@ -91,15 +91,13 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const recipeId = params.id;
     
-    // Validate input
-    const validatedData = updateRecipeSchema.parse(body);
-
-    // Check recipe status
+    // Check recipe status and permissions first
     const { data: existingRecipe, error: checkError } = await supabase
       .from('recipes')
       .select('status, created_by, org_id, location_id')
-      .eq('id', params.id)
+      .eq('id', recipeId)
       .maybeSingle();
 
     if (checkError) throw checkError;
@@ -123,17 +121,63 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Update recipe
-    const { data: recipe, error } = await supabase
+    // Validate only base recipe fields
+    const validatedData = updateRecipeSchema.parse({
+      title: body.title,
+      description: body.description,
+      category: body.category,
+      servings: body.servings,
+      prep_time_minutes: body.prep_time_minutes,
+      cook_time_minutes: body.cook_time_minutes,
+      photo_url: body.photo_url,
+      allergens: body.allergens,
+      season: body.season,
+    });
+
+    // Update recipe base fields
+    const { error: updateError } = await supabase
       .from('recipes')
-      .update(validatedData)
-      .eq('id', params.id)
-      .select()
-      .single();
+      .update({
+        ...validatedData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', recipeId);
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
-    return NextResponse.json({ recipe });
+    // Update ingredients if provided
+    if (body.ingredients) {
+      // Delete existing ingredients
+      await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .eq('recipe_id', recipeId);
+
+      // Insert new ingredients
+      if (body.ingredients.length > 0) {
+        const ingredientsToInsert = body.ingredients.map((ing: any) => ({
+          recipe_id: recipeId,
+          sort_order: ing.sort_order || 0,
+          quantity: ing.quantity,
+          unit: ing.unit,
+          catalog_item_id: ing.catalog_item_id || null,
+          sub_recipe_id: ing.sub_recipe_id || null,
+          item_name_snapshot: ing.item_name_snapshot,
+          notes: ing.notes || null,
+          is_optional: ing.is_optional || false,
+          org_id: existingRecipe.org_id,
+          location_id: existingRecipe.location_id,
+        }));
+
+        const { error: ingredientsError } = await supabase
+          .from('recipe_ingredients')
+          .insert(ingredientsToInsert);
+
+        if (ingredientsError) throw ingredientsError;
+      }
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[recipes/:id/PATCH]', error);
     
