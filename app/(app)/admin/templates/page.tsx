@@ -9,6 +9,7 @@ import { TemplateWizard } from '@/components/inventory/TemplateWizard';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useTranslation } from '@/lib/i18n';
 
 interface Template {
   id: string;
@@ -29,6 +30,7 @@ interface Template {
 }
 
 export default function TemplatesPage() {
+  const { t } = useTranslation()
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
@@ -52,7 +54,7 @@ export default function TemplatesPage() {
       }
     } catch (error) {
       console.error('Error loading templates:', error);
-      toast.error('Errore nel caricamento dei template');
+      toast.error(t('toast.template.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -77,13 +79,13 @@ export default function TemplatesPage() {
       });
 
       if (response.ok) {
-        toast.success(`Template ${!currentActive ? 'attivato' : 'disattivato'}`);
+        toast.success(t(!currentActive ? 'toast.template.activated' : 'toast.template.deactivated'));
         loadTemplates();
       } else {
         throw new Error('Failed to toggle template');
       }
     } catch (error) {
-      toast.error('Errore nell\'aggiornamento del template');
+      toast.error(t('toast.template.errorUpdating'));
     }
   };
 
@@ -96,11 +98,11 @@ export default function TemplatesPage() {
         setEditingTemplate(fullTemplate);
         setShowWizard(true);
       } else {
-        toast.error('Errore nel caricamento del template');
+        toast.error(t('toast.template.errorLoading'));
       }
     } catch (error) {
       console.error('Error loading template:', error);
-      toast.error('Errore nel caricamento del template');
+      toast.error(t('toast.template.errorLoading'));
     }
   };
 
@@ -113,15 +115,15 @@ export default function TemplatesPage() {
       });
 
       if (response.ok) {
-        toast.success('Template eliminato');
+        toast.success(t('toast.template.deleted'));
         loadTemplates();
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Errore nell\'eliminazione del template');
+        toast.error(error.error || t('toast.template.errorDeleting'));
       }
     } catch (error) {
       console.error('Delete template error:', error);
-      toast.error('Errore nell\'eliminazione del template');
+      toast.error(t('toast.template.errorDeleting'));
     }
   };
 

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { CheckCircle2, XCircle, Clock, User, Calendar } from 'lucide-react'
 import type { TimeCorrectionRequest } from '@/types/timeclock'
+import { useTranslation } from '@/lib/i18n'
 
 interface CorrectionWithDetails extends TimeCorrectionRequest {
   requester?: { full_name: string; avatar_url?: string | null }
@@ -16,6 +17,7 @@ interface CorrectionWithDetails extends TimeCorrectionRequest {
 }
 
 export function TimeCorrectionInbox() {
+  const { t } = useTranslation()
   const [corrections, setCorrections] = useState<CorrectionWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
@@ -35,7 +37,7 @@ export function TimeCorrectionInbox() {
       setCorrections(data.corrections || [])
     } catch (error) {
       console.error('Error loading corrections:', error)
-      toast.error('Errore nel caricamento delle richieste')
+      toast.error(t('toast.correction.errorLoading'))
     } finally {
       setIsLoading(false)
     }
@@ -59,21 +61,21 @@ export function TimeCorrectionInbox() {
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error.error || 'Errore nella decisione')
+        toast.error(error.error || t('toast.correction.errorProcessing'))
         return
       }
 
       toast.success(
         decision === 'approve'
-          ? 'Correzione approvata'
-          : 'Correzione rifiutata'
+          ? t('toast.correction.approved')
+          : t('toast.correction.rejected')
       )
 
       // Reload corrections
       loadCorrections()
     } catch (error) {
       console.error('Decision error:', error)
-      toast.error('Errore durante la decisione')
+      toast.error(t('toast.correction.errorProcessing'))
     } finally {
       setProcessingId(null)
     }

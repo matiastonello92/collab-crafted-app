@@ -432,7 +432,8 @@ export const en = {
 
     // Timesheets
     timesheet: {
-      generated: 'Timesheets generated',
+      generated: 'timesheets generated',
+      approved: 'Timesheet approved and locked',
       exported: 'CSV file downloaded',
       correctionApproved: 'Correction approved',
       correctionRejected: 'Correction rejected',
@@ -440,6 +441,7 @@ export const en = {
       errorExporting: 'Error exporting',
       errorLoading: 'Error loading timesheets',
       errorProcessing: 'Error processing decision',
+      errorApproving: 'Failed to approve timesheet',
       noEvents: 'No time clock events in current month',
     },
 
@@ -498,6 +500,14 @@ export const en = {
       errorUpdating: 'Error updating product',
       errorDeleting: 'Error deleting product',
       errorLoading: 'Error loading products',
+    },
+
+    // Time Corrections
+    correction: {
+      approved: 'Correction approved',
+      rejected: 'Correction rejected',
+      errorLoading: 'Failed to load correction requests',
+      errorProcessing: 'Failed to process decision',
     },
   },
 } as const;

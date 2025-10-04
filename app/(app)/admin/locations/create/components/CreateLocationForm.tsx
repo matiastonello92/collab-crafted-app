@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Upload, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 export function CreateLocationForm() {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -48,9 +50,9 @@ export function CreateLocationForm() {
       const data = await response.json()
       setFormData(prev => ({ ...prev, photo_url: data.url }))
       
-      toast.success('La foto è stata caricata con successo.')
+      toast.success(t('toast.location.photoUploaded'))
     } catch (error) {
-      toast.error('Impossibile caricare la foto. Riprova.')
+      toast.error(t('toast.location.errorUploadingPhoto'))
     } finally {
       setUploading(false)
     }
@@ -60,7 +62,7 @@ export function CreateLocationForm() {
     e.preventDefault()
     
     if (!formData.name.trim()) {
-      toast.error('Il nome della location è obbligatorio.')
+      toast.error(t('toast.location.nameRequired'))
       return
     }
 
@@ -78,11 +80,11 @@ export function CreateLocationForm() {
 
       const data = await response.json()
       
-      toast.success('La nuova location è stata creata con successo.')
+      toast.success(t('toast.location.created'))
 
       router.push(`/admin/locations/${data.location.id}`)
     } catch (error) {
-      toast.error('Impossibile creare la location. Riprova.')
+      toast.error(t('toast.location.errorCreating'))
     } finally {
       setLoading(false)
     }

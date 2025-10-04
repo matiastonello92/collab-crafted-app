@@ -12,6 +12,7 @@ import { formatMinutesToHours } from '@/lib/shifts/timesheet-calculator'
 import type { Timesheet } from '@/types/shifts'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '@/lib/i18n'
 
 interface TimesheetWithUser extends Timesheet {
   user?: {
@@ -23,6 +24,7 @@ interface TimesheetWithUser extends Timesheet {
 }
 
 export default function TimesheetDetailClient({ timesheetId }: { timesheetId: string }) {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const router = useRouter()
   const [timesheet, setTimesheet] = useState<TimesheetWithUser | null>(null)
@@ -53,7 +55,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
       setTimesheet(data)
       setNotes(data.notes || '')
     } catch (err: any) {
-      toast.error(err.message || 'Errore nel caricamento del timesheet')
+      toast.error(err.message || t('toast.timesheet.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -82,11 +84,11 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
         throw new Error(err.error || 'Approvazione fallita')
       }
 
-      toast.success('Timesheet approvato e bloccato')
+      toast.success(t('toast.timesheet.approved'))
       
       fetchTimesheet()
     } catch (err: any) {
-      toast.error(err.message || 'Errore nell\'approvazione del timesheet')
+      toast.error(err.message || t('toast.timesheet.errorApproving'))
     } finally {
       setApproving(false)
     }

@@ -15,6 +15,7 @@ import { useSupabase } from '@/hooks/useSupabase'
 import { getCurrentMonthPeriod, formatMinutesToHours } from '@/lib/shifts/timesheet-calculator'
 import type { Timesheet } from '@/types/shifts'
 import Link from 'next/link'
+import { useTranslation } from '@/lib/i18n'
 
 interface TimesheetWithUser extends Timesheet {
   user?: {
@@ -26,6 +27,7 @@ interface TimesheetWithUser extends Timesheet {
 }
 
 export default function TimesheetsClient() {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const [timesheets, setTimesheets] = useState<TimesheetWithUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -80,7 +82,7 @@ export default function TimesheetsClient() {
       if (error) throw error
       setTimesheets(data || [])
     } catch (err: any) {
-      toast.error(err.message || 'Errore nel caricamento dei timesheets')
+      toast.error(err.message || t('toast.timesheet.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -98,7 +100,7 @@ export default function TimesheetsClient() {
         .lte('occurred_at', period.end)
 
       if (!events || events.length === 0) {
-        toast.error('Non ci sono eventi time clock nel mese corrente')
+        toast.error(t('toast.timesheet.noEvents'))
         return
       }
 
@@ -122,11 +124,11 @@ export default function TimesheetsClient() {
         })
       }
 
-      toast.success(`${uniqueCombos.length} timesheet generati`)
+      toast.success(`${uniqueCombos.length} ${t('toast.timesheet.generated')}`)
       
       fetchTimesheets()
     } catch (err: any) {
-      toast.error(err.message || 'Errore nella generazione dei timesheets')
+      toast.error(err.message || t('toast.timesheet.errorGenerating'))
     }
   }
 
@@ -154,11 +156,11 @@ export default function TimesheetsClient() {
       a.download = `timesheets_${new Date().toISOString().split('T')[0]}.csv`
       a.click()
 
-      toast.success('File CSV scaricato')
+      toast.success(t('toast.timesheet.exported'))
       
       setExportOpen(false)
     } catch (err: any) {
-      toast.error(err.message || 'Errore nell\'export')
+      toast.error(err.message || t('toast.timesheet.errorExporting'))
     }
   }
 

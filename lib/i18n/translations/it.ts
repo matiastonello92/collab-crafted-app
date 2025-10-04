@@ -432,7 +432,8 @@ export const it = {
 
     // Timesheets
     timesheet: {
-      generated: 'Timesheet generati',
+      generated: 'timesheet generati',
+      approved: 'Timesheet approvato e bloccato',
       exported: 'File CSV scaricato',
       correctionApproved: 'Correzione approvata',
       correctionRejected: 'Correzione rifiutata',
@@ -440,6 +441,7 @@ export const it = {
       errorExporting: 'Errore nell\'export',
       errorLoading: 'Errore nel caricamento dei timesheets',
       errorProcessing: 'Errore durante la decisione',
+      errorApproving: 'Errore nell\'approvazione del timesheet',
       noEvents: 'Non ci sono eventi time clock nel mese corrente',
     },
 
@@ -498,6 +500,14 @@ export const it = {
       errorUpdating: 'Errore nell\'aggiornamento del prodotto',
       errorDeleting: 'Errore nell\'eliminazione del prodotto',
       errorLoading: 'Errore nel caricamento dei prodotti',
+    },
+
+    // Time Corrections
+    correction: {
+      approved: 'Correzione approvata',
+      rejected: 'Correzione rifiutata',
+      errorLoading: 'Errore nel caricamento delle richieste',
+      errorProcessing: 'Errore nella decisione',
     },
   },
 } as const;

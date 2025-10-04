@@ -10,6 +10,7 @@ import { Edit2, Save, X, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
+import { useTranslation } from '@/lib/i18n'
 
 interface Location {
   id: string
@@ -32,6 +33,7 @@ const DAYS = [
 ]
 
 export function LocationScheduleTab({ location }: Props) {
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const [openingHours, setOpeningHours] = useState(location.opening_hours || {})
   const [openDays, setOpenDays] = useState<string[]>(location.open_days || [])
@@ -62,11 +64,11 @@ export function LocationScheduleTab({ location }: Props) {
         throw new Error('Failed to update schedule')
       }
 
-      toast.success('Gli orari di apertura sono stati salvati con successo.')
+      toast.success(t('toast.location.scheduleUpdated'))
       
       setIsEditing(false)
     } catch (error) {
-      toast.error('Impossibile salvare gli orari. Riprova.')
+      toast.error(t('toast.location.errorUpdatingSchedule'))
     } finally {
       setLoading(false)
     }
