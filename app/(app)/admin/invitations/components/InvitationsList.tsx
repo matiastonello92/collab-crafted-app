@@ -136,7 +136,7 @@ export function InvitationsList() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to revoke invitation')
+        throw new Error(t('errorMessages.failedToRevoke'))
       }
 
       toast.success(t('toast.invitation.revoked'))

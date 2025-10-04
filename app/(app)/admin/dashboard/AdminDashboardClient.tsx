@@ -41,14 +41,14 @@ export function AdminDashboardClient({ orgId }: Props) {
   const fetchData = async () => {
     try {
       const response = await fetch('/api/v1/admin/dashboard', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch dashboard data')
+      if (!response.ok) throw new Error(t('errorMessages.failedToFetch'))
       
       const newData = await response.json()
       setData(newData)
       setLastUpdate(new Date())
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : t('errorMessages.unknownError'))
     } finally {
       setLoading(false)
     }
@@ -258,8 +258,8 @@ export function AdminDashboardClient({ orgId }: Props) {
                     <div className="flex-1">
                       <span className="font-medium text-foreground">{event.event_key}</span>
                       {event.user_id && (
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          User: {event.user_id.slice(0, 8)}...
+                      <div className="mt-1 text-xs text-muted-foreground">
+                          {t('adminDashboard.user')}: {event.user_id.slice(0, 8)}...
                         </div>
                       )}
                     </div>

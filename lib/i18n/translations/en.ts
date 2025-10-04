@@ -1461,6 +1461,7 @@ export const en = {
     inviteUser: 'Invite User',
     addLocation: 'Add Location',
     manageUsers: 'Manage Users',
+    user: 'User',
   },
 
   // Settings
@@ -2582,5 +2583,7 @@ export const en = {
     uploadFailed: 'Upload failed',
     networkError: 'Network error',
     unknownError: 'Unknown error',
+    failedToFetch: 'Failed to fetch data',
+    failedToRevoke: 'Failed to revoke',
   },
 } as const;

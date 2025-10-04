@@ -1525,6 +1525,7 @@ export const it = {
     inviteUser: 'Invite User',
     addLocation: 'Add Location',
     manageUsers: 'Manage Users',
+    user: 'Utente',
   },
 
   // Settings
@@ -2705,5 +2706,7 @@ export const it = {
     uploadFailed: 'Caricamento file fallito',
     networkError: 'Errore di connessione',
     unknownError: 'Errore sconosciuto',
+    failedToFetch: 'Recupero dati fallito',
+    failedToRevoke: 'Revoca fallita',
   },
 } as const;
