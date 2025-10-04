@@ -207,7 +207,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
           <div className="flex items-center gap-2 text-green-800">
             <CheckCircle className="w-5 h-5" />
             <span className="font-semibold">
-              Approvato il {new Date(timesheet.approved_at).toLocaleDateString('it-IT')}
+              {t('admin.timesheetDetailApprovedOn')} {new Date(timesheet.approved_at).toLocaleDateString('it-IT')}
             </span>
           </div>
         </Card>
