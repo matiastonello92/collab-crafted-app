@@ -11,6 +11,7 @@ export const it = {
     search: 'Cerca',
     loading: 'Caricamento...',
     saving: 'Salvataggio...',
+    deleting: 'Eliminazione...',
     required: 'Obbligatorio',
     optional: 'Facoltativo',
     yes: 'Sì',
@@ -18,6 +19,22 @@ export const it = {
     step: 'Passo',
     of: 'di',
     actions: 'Azioni',
+    errorBoundary: {
+      title: 'Errore dell\'applicazione',
+      description: 'Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.',
+      technicalDetails: 'Dettagli tecnici',
+      reloadPage: 'Ricarica Pagina',
+    },
+    avatarUploader: {
+      invalidFile: 'Seleziona un file immagine valido',
+      fileTooLarge: 'Il file è troppo grande. Max 5MB.',
+      uploadSuccess: 'Avatar aggiornato con successo!',
+      uploadError: 'Errore caricamento: {error}',
+      profilePhoto: 'Foto profilo',
+      uploading: 'Caricamento...',
+      changePhoto: 'Cambia foto',
+      formatInfo: 'Formati: JPG, PNG, GIF. Max 5MB.',
+    },
   },
 
   // Navigation

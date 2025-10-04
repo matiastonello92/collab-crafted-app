@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface AvatarUploaderProps {
   orgId: string
@@ -15,6 +16,7 @@ interface AvatarUploaderProps {
 }
 
 export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: AvatarUploaderProps) {
+  const { t } = useTranslation()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -48,12 +50,12 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
 
     // Validate file type and size
     if (!file.type.startsWith('image/')) {
-      toast.error('Seleziona un file immagine valido')
+      toast.error(t('common.avatarUploader.invalidFile'))
       return
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast.error('Il file è troppo grande. Max 5MB.')
+      toast.error(t('common.avatarUploader.fileTooLarge'))
       return
     }
 
@@ -85,11 +87,11 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
       const { url } = await response.json()
       setAvatarUrl(url)
       onAvatarUpdate?.(url)
-      toast.success('Avatar aggiornato con successo!')
+      toast.success(t('common.avatarUploader.uploadSuccess'))
 
     } catch (error: any) {
       console.error('Avatar upload error:', error)
-      toast.error(`Errore caricamento: ${error.message}`)
+      toast.error(t('common.avatarUploader.uploadError').replace('{error}', error.message))
     } finally {
       setIsUploading(false)
       // Clear file input
@@ -115,7 +117,7 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
       </Avatar>
       
       <div className="space-y-2">
-        <p className="text-sm font-medium">Foto profilo</p>
+        <p className="text-sm font-medium">{t('common.avatarUploader.profilePhoto')}</p>
         <input
           ref={fileInputRef}
           type="file"
@@ -135,10 +137,10 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          {isUploading ? 'Caricamento...' : 'Cambia foto'}
+          {isUploading ? t('common.avatarUploader.uploading') : t('common.avatarUploader.changePhoto')}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Formati: JPG, PNG, GIF. Max 5MB.
+          {t('common.avatarUploader.formatInfo')}
         </p>
       </div>
     </div>

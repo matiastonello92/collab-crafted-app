@@ -11,6 +11,7 @@ export const en = {
     search: 'Search',
     loading: 'Loading...',
     saving: 'Saving...',
+    deleting: 'Deleting...',
     required: 'Required',
     optional: 'Optional',
     yes: 'Yes',
@@ -18,6 +19,22 @@ export const en = {
     step: 'Step',
     of: 'of',
     actions: 'Actions',
+    errorBoundary: {
+      title: 'Application Error',
+      description: 'An unexpected error has occurred. Reload the page to try again.',
+      technicalDetails: 'Technical details',
+      reloadPage: 'Reload Page',
+    },
+    avatarUploader: {
+      invalidFile: 'Please select a valid image file',
+      fileTooLarge: 'File is too large. Max 5MB.',
+      uploadSuccess: 'Avatar updated successfully!',
+      uploadError: 'Upload error: {error}',
+      profilePhoto: 'Profile photo',
+      uploading: 'Uploading...',
+      changePhoto: 'Change photo',
+      formatInfo: 'Formats: JPG, PNG, GIF. Max 5MB.',
+    },
   },
 
   // Navigation
