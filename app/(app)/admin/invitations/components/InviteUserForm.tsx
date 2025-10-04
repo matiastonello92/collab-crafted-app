@@ -20,7 +20,7 @@ import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { useTranslation } from '@/lib/i18n'
 
 const inviteSchema = z.object({
-  email: z.string().email('Email non valida'),
+  email: z.string().email(),
   days: z.number().min(1).max(30),
 })
 
