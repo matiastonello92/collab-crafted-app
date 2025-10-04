@@ -191,11 +191,11 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
                       className="gap-2"
                     >
                       {assigning === candidate.user_id ? (
-                        <>Assegnando...</>
+                        <>{t('planner.smartAssign.assigning')}</>
                       ) : (
                         <>
                           <CheckCircle2 className="h-4 w-4" />
-                          Assegna
+                          {t('planner.smartAssign.assign')}
                         </>
                       )}
                     </Button>
@@ -207,26 +207,26 @@ export function SmartAssignDialog({ open, onClose, shiftId, onAssign }: SmartAss
                     {candidate.details.has_required_tag ? (
                       <Badge variant="outline" className="gap-1">
                         <CheckCircle2 className="h-3 w-3 text-green-600" />
-                        Qualificato
+                        {t('planner.smartAssign.qualified')}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="gap-1">
                         <AlertCircle className="h-3 w-3 text-yellow-600" />
-                        Non qualificato
+                        {t('planner.smartAssign.notQualified')}
                       </Badge>
                     )}
 
                     {candidate.details.availability_preference !== 'unknown' && (
                       <Badge variant="outline" className="gap-1">
                         <Clock className="h-3 w-3" />
-                        {candidate.details.availability_preference === 'preferred' && '✓ Preferito'}
-                        {candidate.details.availability_preference === 'ok' && 'Disponibile'}
-                        {candidate.details.availability_preference === 'unavailable' && '✗ Non disponibile'}
+                        {candidate.details.availability_preference === 'preferred' && `✓ ${t('planner.smartAssign.preferred')}`}
+                        {candidate.details.availability_preference === 'ok' && t('planner.smartAssign.available')}
+                        {candidate.details.availability_preference === 'unavailable' && `✗ ${t('planner.smartAssign.unavailable')}`}
                       </Badge>
                     )}
 
                     <Badge variant="outline">
-                      {candidate.details.recent_hours}h ultimi 7gg
+                      {candidate.details.recent_hours}{t('planner.smartAssign.recentHours')}
                     </Badge>
                   </div>
                 </div>

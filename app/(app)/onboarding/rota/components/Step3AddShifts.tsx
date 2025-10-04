@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { ShiftForm } from './ShiftForm'
 import { ShiftsList } from './ShiftsList'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface JobTag {
   id: string
@@ -53,6 +54,7 @@ export function Step3AddShifts({
   onBack,
   onNext,
 }: Step3Props) {
+  const { t } = useTranslation()
   const [showForm, setShowForm] = useState(false)
   const [editingShift, setEditingShift] = useState<Shift | null>(null)
 
@@ -68,35 +70,35 @@ export function Step3AddShifts({
   }
 
   const handleDelete = async (shiftId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo turno?')) return
+    if (!confirm(t('onboarding.step3.deleteConfirm'))) return
 
     try {
       const res = await fetch(`/api/v1/shifts/${shiftId}`, {
         method: 'DELETE',
       })
 
-      if (!res.ok) throw new Error('Errore nell\'eliminazione del turno')
+      if (!res.ok) throw new Error(t('onboarding.step3.errorDeleting'))
 
-      toast.success('Turno eliminato')
+      toast.success(t('onboarding.step3.shiftDeleted'))
       onShiftsUpdate()
     } catch (error: any) {
       console.error('Error deleting shift:', error)
-      toast.error(error.message || 'Errore nell\'eliminazione del turno')
+      toast.error(error.message || t('onboarding.step3.errorDeleting'))
     }
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Aggiungi Turni</h2>
+        <h2 className="text-2xl font-semibold mb-2">{t('onboarding.step3.title')}</h2>
         <p className="text-muted-foreground">
-          Crea i turni della settimana e assegna gli utenti registrati.
+          {t('onboarding.step3.description')}
         </p>
       </div>
 
       <Card className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Turni della Settimana</h3>
+          <h3 className="text-lg font-medium">{t('onboarding.step3.weekShifts')}</h3>
           <Button
             onClick={() => {
               setEditingShift(null)
@@ -104,7 +106,7 @@ export function Step3AddShifts({
             }}
             variant={showForm ? 'outline' : 'default'}
           >
-            {showForm ? 'Chiudi Form' : 'Nuovo Turno'}
+            {showForm ? t('onboarding.step3.closeForm') : t('onboarding.step3.newShift')}
           </Button>
         </div>
 
@@ -135,10 +137,10 @@ export function Step3AddShifts({
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
-          Indietro
+          {t('onboarding.step3.buttons.back')}
         </Button>
         <Button onClick={onNext} disabled={shifts.length === 0}>
-          Avanti
+          {t('onboarding.step3.buttons.next')}
         </Button>
       </div>
     </div>

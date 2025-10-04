@@ -637,14 +637,14 @@ export const it = {
   // Feature Flags
   featureFlags: {
     title: 'Feature Flags',
-    description: 'Gestisci le funzionalità attive per location e moduli',
+    description: 'Gestisci le funzionalità attive della piattaforma e controlla l\'accesso alle feature per organizzazione.',
     stats: {
       total: 'Flag Totali',
       active: 'Attivi',
       inactive: 'Inattivi',
     },
     buttons: {
-      new: 'Nuovo Flag',
+      newFlag: 'Nuovo Flag',
       edit: 'Modifica',
       filters: 'Filtri',
     },
@@ -662,9 +662,85 @@ export const it = {
       active: 'Attivo',
       inactive: 'Inattivo',
       global: 'Globale',
+      perOrg: 'Per Org',
     },
     placeholder: {
-      notice: 'Questa è una versione dimostrativa. Le funzionalità di modifica e creazione flag saranno implementate nel prossimo step.',
+      notice: 'Placeholder UI: Questa è una versione demo del modulo Feature Flags. L\'implementazione completa richiederà integrazione backend.',
+    },
+  },
+
+  // Onboarding Rota Module
+  onboarding: {
+    wizard: {
+      title: 'Onboarding Rota',
+      description: 'Crea la tua prima rota settimanale e assegna i turni agli utenti.',
+    },
+    shiftForm: {
+      labels: {
+        day: 'Giorno',
+        role: 'Ruolo',
+        startTime: 'Orario Inizio',
+        endTime: 'Orario Fine',
+        breakMinutes: 'Pausa (minuti)',
+        quantity: 'Quantità',
+        assignTo: 'Assegna a (opzionale)',
+        notes: 'Note (opzionale)',
+      },
+      placeholders: {
+        selectRole: 'Seleziona ruolo',
+        noAssignment: 'Nessuna assegnazione',
+        additionalNotes: 'Note aggiuntive...',
+      },
+      buttons: {
+        cancel: 'Annulla',
+        creating: 'Creazione...',
+        createShift: 'Crea Turno',
+      },
+      validation: {
+        selectRole: 'Seleziona un ruolo',
+        endTimeAfterStart: 'L\'orario di fine deve essere successivo all\'orario di inizio',
+      },
+      toast: {
+        shiftCreated: 'Turno creato con successo',
+        errorCreating: 'Errore nella creazione del turno',
+      },
+    },
+    step3: {
+      title: 'Aggiungi Turni',
+      description: 'Crea i turni della settimana e assegna gli utenti registrati.',
+      weekShifts: 'Turni della Settimana',
+      closeForm: 'Chiudi Form',
+      newShift: 'Nuovo Turno',
+      deleteConfirm: 'Sei sicuro di voler eliminare questo turno?',
+      shiftDeleted: 'Turno eliminato',
+      errorDeleting: 'Errore nell\'eliminazione del turno',
+      buttons: {
+        back: 'Indietro',
+        next: 'Avanti',
+      },
+    },
+    step4: {
+      title: 'Riepilogo & Pubblicazione',
+      description: 'Controlla il riepilogo e pubblica la rota per inviare le email agli utenti.',
+      totalShifts: 'Turni Totali',
+      usersInvolved: 'Utenti Coinvolti',
+      assignedReady: 'turni assegnati e pronti per la pubblicazione.',
+      unassignedWarning: 'turni non ancora assegnati. Puoi comunque pubblicare e assegnare in seguito.',
+      whatHappens: 'Cosa succede dopo la pubblicazione?',
+      step1: 'La rota passa allo stato "pubblicata" e non sarà più modificabile',
+      step2: 'Ogni utente assegnato riceverà un\'email con i dettagli dei suoi turni',
+      step3: 'Gli utenti potranno visualizzare i loro turni nella sezione "I Miei Turni"',
+      step4: 'Potrai monitorare la rota dal Planner e dalla dashboard',
+      unassignedConfirm: 'Ci sono {count} turni non assegnati. Vuoi procedere comunque con la pubblicazione?',
+      buttons: {
+        back: 'Indietro',
+        publishing: 'Pubblicazione in corso...',
+        publish: 'Pubblica Rota',
+      },
+      toast: {
+        publishSuccess: 'Rota pubblicata con successo! Email inviate agli utenti assegnati.',
+        publishError: 'Errore nella pubblicazione',
+      },
     },
   },
 

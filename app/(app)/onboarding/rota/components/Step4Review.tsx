@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { AlertCircle, CheckCircle, Calendar, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '@/lib/i18n'
 
 interface Shift {
   id: string
@@ -22,6 +23,7 @@ interface Step4Props {
 }
 
 export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [publishing, setPublishing] = useState(false)
 
@@ -31,11 +33,8 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
 
   const handlePublish = async () => {
     if (unassignedShifts.length > 0) {
-      if (
-        !confirm(
-          `Ci sono ${unassignedShifts.length} turni non assegnati. Vuoi procedere comunque con la pubblicazione?`
-        )
-      ) {
+      const confirmMessage = t('onboarding.step4.unassignedConfirm').replace('{count}', unassignedShifts.length.toString())
+      if (!confirm(confirmMessage)) {
         return
       }
     }
@@ -50,10 +49,10 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || 'Errore nella pubblicazione')
+        throw new Error(error.error || t('onboarding.step4.toast.publishError'))
       }
 
-      toast.success('Rota pubblicata con successo! Email inviate agli utenti assegnati.')
+      toast.success(t('onboarding.step4.toast.publishSuccess'))
       
       // Redirect to planner
       setTimeout(() => {
@@ -61,7 +60,7 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
       }, 2000)
     } catch (error: any) {
       console.error('Error publishing rota:', error)
-      toast.error(error.message || 'Errore nella pubblicazione')
+      toast.error(error.message || t('onboarding.step4.toast.publishError'))
       setPublishing(false)
     }
   }
@@ -69,9 +68,9 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Riepilogo & Pubblicazione</h2>
+        <h2 className="text-2xl font-semibold mb-2">{t('onboarding.step4.title')}</h2>
         <p className="text-muted-foreground">
-          Controlla il riepilogo e pubblica la rota per inviare le email agli utenti.
+          {t('onboarding.step4.description')}
         </p>
       </div>
 
@@ -81,7 +80,7 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
             <Calendar className="h-8 w-8 text-primary" />
             <div>
               <p className="text-2xl font-bold">{shifts.length}</p>
-              <p className="text-sm text-muted-foreground">Turni Totali</p>
+              <p className="text-sm text-muted-foreground">{t('onboarding.step4.totalShifts')}</p>
             </div>
           </div>
         </Card>
@@ -91,7 +90,7 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
             <Users className="h-8 w-8 text-primary" />
             <div>
               <p className="text-2xl font-bold">{uniqueUsers}</p>
-              <p className="text-sm text-muted-foreground">Utenti Coinvolti</p>
+              <p className="text-sm text-muted-foreground">{t('onboarding.step4.usersInvolved')}</p>
             </div>
           </div>
         </Card>
@@ -101,7 +100,7 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
         <Alert>
           <CheckCircle className="h-4 w-4 text-success" />
           <AlertDescription>
-            {assignedShifts.length} turni assegnati e pronti per la pubblicazione.
+            {assignedShifts.length} {t('onboarding.step4.assignedReady')}
           </AlertDescription>
         </Alert>
       )}
@@ -110,48 +109,39 @@ export function Step4Review({ rotaId, shifts, onBack }: Step4Props) {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {unassignedShifts.length} turni non ancora assegnati. Puoi comunque
-            pubblicare e assegnare in seguito.
+            {unassignedShifts.length} {t('onboarding.step4.unassignedWarning')}
           </AlertDescription>
         </Alert>
       )}
 
       <Card className="p-4">
-        <h3 className="font-medium mb-3">Cosa succede dopo la pubblicazione?</h3>
+        <h3 className="font-medium mb-3">{t('onboarding.step4.whatHappens')}</h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">1</Badge>
-            <span>
-              La rota passa allo stato "pubblicata" e non sarà più modificabile
-            </span>
+            <span>{t('onboarding.step4.step1')}</span>
           </li>
           <li className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">2</Badge>
-            <span>
-              Ogni utente assegnato riceverà un'email con i dettagli dei suoi turni
-            </span>
+            <span>{t('onboarding.step4.step2')}</span>
           </li>
           <li className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">3</Badge>
-            <span>
-              Gli utenti potranno visualizzare i loro turni nella sezione "I Miei Turni"
-            </span>
+            <span>{t('onboarding.step4.step3')}</span>
           </li>
           <li className="flex items-start gap-2">
             <Badge variant="outline" className="mt-0.5">4</Badge>
-            <span>
-              Potrai monitorare la rota dal Planner e dalla dashboard
-            </span>
+            <span>{t('onboarding.step4.step4')}</span>
           </li>
         </ul>
       </Card>
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack} disabled={publishing}>
-          Indietro
+          {t('onboarding.step4.buttons.back')}
         </Button>
         <Button onClick={handlePublish} disabled={publishing || shifts.length === 0}>
-          {publishing ? 'Pubblicazione in corso...' : 'Pubblica Rota'}
+          {publishing ? t('onboarding.step4.buttons.publishing') : t('onboarding.step4.buttons.publish')}
         </Button>
       </div>
     </div>

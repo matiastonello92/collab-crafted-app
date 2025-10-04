@@ -7,9 +7,11 @@ import { requireOrgAdmin } from '@/lib/admin/guards'
 import { InviteUserForm } from './components/InviteUserForm'
 import { InvitationsList } from './components/InvitationsList'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getTranslation } from '@/lib/i18n/server'
 
 export default async function AdminInvitationsPage() {
   await requireOrgAdmin()
+  const t = await getTranslation()
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -17,13 +19,13 @@ export default async function AdminInvitationsPage() {
         <Button asChild variant="ghost" size="sm">
           <Link href="/admin/users">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Utenti
+            {t('admin.invitationsPage.usersLink')}
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">Gestione Inviti</h1>
+          <h1 className="text-3xl font-bold">{t('admin.invitationsPage.title')}</h1>
           <p className="text-muted-foreground">
-            Crea e gestisci inviti multi-location con permessi personalizzati
+            {t('admin.invitationsPage.description')}
           </p>
         </div>
       </div>
@@ -34,10 +36,10 @@ export default async function AdminInvitationsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Crea Nuovo Invito
+              {t('admin.invitationsPage.createTitle')}
             </CardTitle>
             <CardDescription>
-              Invita un utente con ruoli e permessi specifici per location
+              {t('admin.invitationsPage.createDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -50,9 +52,9 @@ export default async function AdminInvitationsPage() {
         {/* Invitations List */}
         <Card>
           <CardHeader>
-            <CardTitle>Inviti Attivi</CardTitle>
+            <CardTitle>{t('admin.invitationsPage.listTitle')}</CardTitle>
             <CardDescription>
-              Lista degli inviti inviati e loro stato
+              {t('admin.invitationsPage.listDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>

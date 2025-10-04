@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import type { LeaveType } from '@/types/shifts'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   leaveType?: LeaveType
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
+  const { t } = useTranslation()
   const [key, setKey] = useState(leaveType?.key || '')
   const [label, setLabel] = useState(leaveType?.label || '')
   const [color, setColor] = useState(leaveType?.color || '#6b7280')
@@ -48,11 +50,11 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
         throw new Error(error.error || 'Failed to save')
       }
 
-      toast.success(leaveType ? 'Tipologia aggiornata' : 'Tipologia creata con successo')
+      toast.success(leaveType ? t('admin.leaveTypeForm.toast.typeUpdated') : t('admin.leaveTypeForm.toast.typeCreated'))
       onSuccess()
     } catch (error: any) {
       console.error('Error saving leave type:', error)
-      toast.error(error.message || 'Errore durante il salvataggio')
+      toast.error(error.message || t('admin.leaveTypeForm.toast.errorSaving'))
     } finally {
       setSubmitting(false)
     }
@@ -61,35 +63,35 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="label">Label *</Label>
+        <Label htmlFor="label">{t('admin.leaveTypeForm.labels.label')} *</Label>
         <Input
           id="label"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          placeholder="es. Ferie"
+          placeholder={t('admin.leaveTypeForm.placeholders.labelExample')}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="key">Key *</Label>
+        <Label htmlFor="key">{t('admin.leaveTypeForm.labels.key')} *</Label>
         <Input
           id="key"
           value={key}
           onChange={(e) => setKey(e.target.value)}
-          placeholder="es. annual_leave"
+          placeholder={t('admin.leaveTypeForm.placeholders.keyExample')}
           required
           disabled={!!leaveType}
         />
         {leaveType && (
           <p className="text-xs text-muted-foreground">
-            La key non può essere modificata dopo la creazione
+            {t('admin.leaveTypeForm.descriptions.keyImmutable')}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="color">Color</Label>
+        <Label htmlFor="color">{t('admin.leaveTypeForm.labels.color')}</Label>
         <div className="flex gap-2">
           <Input
             id="color"
@@ -101,7 +103,7 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
           <Input
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            placeholder="#6b7280"
+            placeholder={t('admin.leaveTypeForm.placeholders.colorCode')}
             pattern="^#[0-9a-fA-F]{6}$"
           />
         </div>
@@ -109,9 +111,9 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
 
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
-          <Label htmlFor="requires_approval">Requires Approval</Label>
+          <Label htmlFor="requires_approval">{t('admin.leaveTypeForm.labels.requiresApproval')}</Label>
           <p className="text-xs text-muted-foreground">
-            Se attivo, le richieste devono essere approvate da un manager
+            {t('admin.leaveTypeForm.descriptions.requiresApprovalDescription')}
           </p>
         </div>
         <Switch
@@ -123,10 +125,10 @@ export function LeaveTypeForm({ leaveType, onSuccess, onCancel }: Props) {
 
       <div className="flex gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Annulla
+          {t('admin.leaveTypeForm.buttons.cancel')}
         </Button>
         <Button type="submit" disabled={submitting} className="flex-1">
-          {submitting ? 'Salvataggio...' : leaveType ? 'Aggiorna' : 'Crea'}
+          {submitting ? t('admin.leaveTypeForm.buttons.saving') : leaveType ? t('admin.leaveTypeForm.buttons.update') : t('admin.leaveTypeForm.buttons.create')}
         </Button>
       </div>
     </form>

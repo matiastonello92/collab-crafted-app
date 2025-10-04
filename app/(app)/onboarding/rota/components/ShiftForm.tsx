@@ -17,6 +17,7 @@ import { ShiftTimeField } from '@/components/onboarding/ShiftTimeField'
 import { toast } from 'sonner'
 import { format, addDays, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
+import { useTranslation } from '@/lib/i18n'
 
 interface JobTag {
   id: string
@@ -60,6 +61,7 @@ export function ShiftForm({
   onSuccess,
   onCancel,
 }: ShiftFormProps) {
+  const { t } = useTranslation()
   const [dayOfWeek, setDayOfWeek] = useState('0')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('17:00')
@@ -83,7 +85,7 @@ export function ShiftForm({
     e.preventDefault()
 
     if (!jobTagId) {
-      toast.error('Seleziona un ruolo')
+      toast.error(t('onboarding.shiftForm.validation.selectRole'))
       return
     }
 
@@ -94,7 +96,7 @@ export function ShiftForm({
     const endAt = `${selectedDay.date}T${endTime}:00+02:00`
 
     if (new Date(endAt) <= new Date(startAt)) {
-      toast.error('L\'orario di fine deve essere successivo all\'orario di inizio')
+      toast.error(t('onboarding.shiftForm.validation.endTimeAfterStart'))
       return
     }
 
@@ -120,7 +122,7 @@ export function ShiftForm({
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || 'Errore nella creazione del turno')
+        throw new Error(error.error || t('onboarding.shiftForm.toast.errorCreating'))
       }
 
       const data = await res.json()
@@ -138,11 +140,14 @@ export function ShiftForm({
         })
       }
 
-      toast.success(`Turno${parseInt(quantity) > 1 ? 'i' : ''} creato con successo`)
+      const successMessage = parseInt(quantity) > 1 
+        ? t('onboarding.shiftForm.toast.shiftCreated').replace('Turno', 'Turni')
+        : t('onboarding.shiftForm.toast.shiftCreated')
+      toast.success(successMessage)
       onSuccess()
     } catch (error: any) {
       console.error('Error creating shift:', error)
-      toast.error(error.message || 'Errore nella creazione del turno')
+      toast.error(error.message || t('onboarding.shiftForm.toast.errorCreating'))
     } finally {
       setSubmitting(false)
     }
@@ -152,7 +157,7 @@ export function ShiftForm({
     <form onSubmit={handleSubmit} className="space-y-4 border-t pt-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>Giorno</Label>
+          <Label>{t('onboarding.shiftForm.labels.day')}</Label>
           <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
             <SelectTrigger>
               <SelectValue />
@@ -168,10 +173,10 @@ export function ShiftForm({
         </div>
 
         <div className="space-y-2">
-          <Label>Ruolo</Label>
+          <Label>{t('onboarding.shiftForm.labels.role')}</Label>
           <Select value={jobTagId} onValueChange={setJobTagId}>
             <SelectTrigger>
-              <SelectValue placeholder="Seleziona ruolo" />
+              <SelectValue placeholder={t('onboarding.shiftForm.placeholders.selectRole')} />
             </SelectTrigger>
             <SelectContent>
               {jobTags.map((tag) => (
@@ -184,19 +189,19 @@ export function ShiftForm({
         </div>
 
         <ShiftTimeField
-          label="Orario Inizio"
+          label={t('onboarding.shiftForm.labels.startTime')}
           value={startTime}
           onChange={setStartTime}
         />
 
         <ShiftTimeField
-          label="Orario Fine"
+          label={t('onboarding.shiftForm.labels.endTime')}
           value={endTime}
           onChange={setEndTime}
         />
 
         <div className="space-y-2">
-          <Label>Pausa (minuti)</Label>
+          <Label>{t('onboarding.shiftForm.labels.breakMinutes')}</Label>
           <Input
             type="number"
             min="0"
@@ -206,7 +211,7 @@ export function ShiftForm({
         </div>
 
         <div className="space-y-2">
-          <Label>Quantità</Label>
+          <Label>{t('onboarding.shiftForm.labels.quantity')}</Label>
           <Input
             type="number"
             min="1"
@@ -218,30 +223,30 @@ export function ShiftForm({
       </div>
 
       <div className="space-y-2">
-        <Label>Assegna a (opzionale)</Label>
+        <Label>{t('onboarding.shiftForm.labels.assignTo')}</Label>
         <UserSelector
           users={users}
           value={assignedUserId}
           onValueChange={setAssignedUserId}
-          placeholder="Nessuna assegnazione"
+          placeholder={t('onboarding.shiftForm.placeholders.noAssignment')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Note (opzionale)</Label>
+        <Label>{t('onboarding.shiftForm.labels.notes')}</Label>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Note aggiuntive..."
+          placeholder={t('onboarding.shiftForm.placeholders.additionalNotes')}
         />
       </div>
 
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Annulla
+          {t('onboarding.shiftForm.buttons.cancel')}
         </Button>
         <Button type="submit" disabled={submitting}>
-          {submitting ? 'Creazione...' : 'Crea Turno'}
+          {submitting ? t('onboarding.shiftForm.buttons.creating') : t('onboarding.shiftForm.buttons.createShift')}
         </Button>
       </div>
     </form>
