@@ -298,4 +298,206 @@ export const en = {
     'America/Los_Angeles': 'America/Los Angeles',
     'Asia/Tokyo': 'Asia/Tokyo',
   },
+
+  // Toast Messages
+  toast: {
+    // Generic success
+    success: {
+      saved: 'Saved successfully',
+      created: 'Created successfully',
+      updated: 'Updated successfully',
+      deleted: 'Deleted successfully',
+      copied: 'Copied to clipboard',
+      uploaded: 'Uploaded successfully',
+      sent: 'Sent successfully',
+      activated: 'Activated',
+      deactivated: 'Deactivated',
+      approved: 'Approved',
+      rejected: 'Rejected',
+      cancelled: 'Cancelled',
+      revoked: 'Revoked',
+      generated: 'Generated successfully',
+      exported: 'Exported successfully',
+      imported: 'Imported successfully',
+    },
+
+    // Generic errors
+    error: {
+      generic: 'An error occurred',
+      loading: 'Error loading',
+      saving: 'Error saving',
+      creating: 'Error creating',
+      updating: 'Error updating',
+      deleting: 'Error deleting',
+      copying: 'Error copying',
+      uploading: 'Error uploading',
+      sending: 'Error sending',
+      processing: 'Error processing',
+      exporting: 'Error exporting',
+      importing: 'Error importing',
+      notFound: 'Resource not found',
+      unauthorized: 'Unauthorized',
+      forbidden: 'Access denied',
+      validation: 'Invalid data',
+      network: 'Connection error',
+      timeout: 'Request timeout',
+    },
+
+    // Invitations
+    invitation: {
+      created: 'Invitation created successfully',
+      revoked: 'Invitation revoked',
+      linkCopied: 'Link copied to clipboard',
+      errorCreating: 'Error creating invitation',
+      errorRevoking: 'Error revoking invitation',
+      errorCopying: 'Error copying link',
+      errorLoading: 'Error loading invitations',
+      selectRoleLocation: 'Select at least one role and location',
+    },
+
+    // Locations
+    location: {
+      created: 'Location created successfully',
+      updated: 'Location updated successfully',
+      deleted: 'Location deleted successfully',
+      photoUploaded: 'Photo uploaded successfully',
+      scheduleUpdated: 'Opening hours saved successfully',
+      managerAdded: 'Manager assigned successfully',
+      managerRemoved: 'Manager removed successfully',
+      errorCreating: 'Unable to create location',
+      errorUpdating: 'Unable to save changes',
+      errorDeleting: 'Unable to delete location',
+      errorUploadingPhoto: 'Unable to upload photo',
+      errorUpdatingSchedule: 'Unable to save schedule',
+      errorAddingManager: 'Unable to add manager',
+      errorRemovingManager: 'Unable to remove manager',
+      nameRequired: 'Location name is required',
+    },
+
+    // Users
+    user: {
+      created: 'User created successfully',
+      updated: 'User updated successfully',
+      deleted: 'User deleted successfully',
+      roleAssigned: 'Role assigned successfully',
+      roleRemoved: 'Role removed successfully',
+      permissionUpdated: 'Permission updated successfully',
+      errorCreating: 'Error creating user',
+      errorUpdating: 'Error updating user',
+      errorDeleting: 'Error deleting user',
+      errorLoadingDetails: 'Error loading details',
+    },
+
+    // Recipes
+    recipe: {
+      created: 'Recipe created successfully',
+      updated: 'Recipe updated successfully',
+      deleted: 'Recipe deleted successfully',
+      cloned: 'Recipe cloned',
+      published: 'Recipe published',
+      archived: 'Recipe archived',
+      errorCreating: 'Error creating recipe',
+      errorUpdating: 'Error updating recipe',
+      errorDeleting: 'Error deleting recipe',
+      errorCloning: 'Unable to clone recipe',
+      errorLoading: 'Error loading recipe',
+    },
+
+    // Templates
+    template: {
+      created: 'Template created successfully',
+      updated: 'Template updated successfully',
+      deleted: 'Template deleted',
+      activated: 'Template activated',
+      deactivated: 'Template deactivated',
+      errorCreating: 'Error creating template',
+      errorUpdating: 'Error updating template',
+      errorDeleting: 'Error deleting template',
+      errorLoading: 'Error loading templates',
+    },
+
+    // Leave requests
+    leave: {
+      created: 'Leave request created',
+      updated: 'Leave request updated',
+      cancelled: 'Leave request cancelled',
+      approved: 'Leave request approved',
+      rejected: 'Leave request rejected',
+      errorCreating: 'Error creating request',
+      errorUpdating: 'Error updating',
+      errorCancelling: 'Error cancelling',
+      errorProcessing: 'Error processing',
+      errorLoading: 'Error loading requests',
+    },
+
+    // Timesheets
+    timesheet: {
+      generated: 'Timesheets generated',
+      exported: 'CSV file downloaded',
+      correctionApproved: 'Correction approved',
+      correctionRejected: 'Correction rejected',
+      errorGenerating: 'Error generating timesheets',
+      errorExporting: 'Error exporting',
+      errorLoading: 'Error loading timesheets',
+      errorProcessing: 'Error processing decision',
+      noEvents: 'No time clock events in current month',
+    },
+
+    // Compliance
+    compliance: {
+      ruleUpdated: 'Rule updated',
+      violationSilenced: 'Violation silenced',
+      errorLoading: 'Error loading rules',
+      errorUpdating: 'Error updating',
+      errorSilencing: 'Error silencing',
+    },
+
+    // Shifts & Planner
+    shift: {
+      created: 'Shift created',
+      updated: 'Shift updated',
+      deleted: 'Shift deleted',
+      assigned: 'Shift assigned',
+      unassigned: 'Assignment removed',
+      published: 'Shifts published',
+      errorCreating: 'Error creating shift',
+      errorUpdating: 'Error updating shift',
+      errorDeleting: 'Error deleting shift',
+      errorAssigning: 'Error assigning',
+      errorPublishing: 'Error publishing',
+      errorLoading: 'Error loading shifts',
+    },
+
+    // Job Tags
+    jobTag: {
+      created: 'Tag created',
+      updated: 'Tag updated',
+      deleted: 'Tag deleted',
+      assigned: 'Tag assigned',
+      unassigned: 'Tag removed',
+      errorCreating: 'Error creating tag',
+      errorUpdating: 'Error updating tag',
+      errorDeleting: 'Error deleting tag',
+      errorAssigning: 'Error assigning',
+    },
+
+    // Email logs
+    email: {
+      sent: 'Email sent',
+      resent: 'Email resent',
+      errorSending: 'Error sending',
+      errorLoading: 'Error loading logs',
+    },
+
+    // Products
+    product: {
+      created: 'Product created',
+      updated: 'Product updated',
+      deleted: 'Product deleted',
+      errorCreating: 'Error creating product',
+      errorUpdating: 'Error updating product',
+      errorDeleting: 'Error deleting product',
+      errorLoading: 'Error loading products',
+    },
+  },
 } as const;

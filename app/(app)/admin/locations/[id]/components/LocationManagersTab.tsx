@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table'
 import { Plus, Trash2, Users, Mail } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface Manager {
   user_id: string
@@ -32,6 +33,7 @@ export function LocationManagersTab({ locationId }: Props) {
   const [newManagerEmail, setNewManagerEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
+  const { t } = useTranslation()
 
   const fetchManagers = async () => {
     setLoading(true)
@@ -68,12 +70,12 @@ export function LocationManagersTab({ locationId }: Props) {
         throw new Error(error.error || 'Failed to add manager')
       }
 
-      toast.success(`${newManagerEmail} è stato assegnato come responsabile.`)
+      toast.success(t('toast.location.managerAdded'))
 
       setNewManagerEmail('')
       fetchManagers()
     } catch (error: any) {
-      toast.error(error.message || 'Impossibile aggiungere il manager.')
+      toast.error(error.message || t('toast.location.errorAddingManager'))
     } finally {
       setAddLoading(false)
     }
@@ -91,11 +93,11 @@ export function LocationManagersTab({ locationId }: Props) {
         throw new Error('Failed to remove manager')
       }
 
-      toast.success(`${email} non è più responsabile di questa location.`)
+      toast.success(t('toast.location.managerRemoved'))
 
       fetchManagers()
     } catch (error) {
-      toast.error('Impossibile rimuovere il manager.')
+      toast.error(t('toast.location.errorRemovingManager'))
     }
   }
 

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Edit2, Save, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface Location {
   id: string
@@ -31,6 +32,7 @@ export function LocationInfoTab({ location }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState(location)
   const [loading, setLoading] = useState(false)
+  const { t } = useTranslation()
 
   const handleSave = async () => {
     setLoading(true)
@@ -45,14 +47,14 @@ export function LocationInfoTab({ location }: Props) {
         throw new Error('Failed to update location')
       }
 
-      toast.success('Le informazioni sono state salvate con successo.')
+      toast.success(t('toast.location.updated'))
       
       setIsEditing(false)
       // Refresh page to see changes
       window.location.reload()
     } catch (error) {
-      toast.error('Impossibile salvare le modifiche. Riprova.')
-    } finally {
+      toast.error(t('toast.location.errorUpdating'))
+    } finally{
       setLoading(false)
     }
   }

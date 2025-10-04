@@ -17,6 +17,7 @@ import { PERMISSIONS } from '@/lib/permissions/registry'
 import { normalizePermission } from '@/lib/permissions'
 import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import { useTranslation } from '@/lib/i18n'
 
 const inviteSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -53,6 +54,7 @@ export function InviteUserForm() {
   const [invitationLink, setInvitationLink] = useState<string>('')
   const [copied, setCopied] = useState(false)
   const [isLoadingPresets, setIsLoadingPresets] = useState(false)
+  const { t } = useTranslation()
 
   const allPermissions = Object.values(PERMISSIONS).flat()
 
@@ -118,7 +120,7 @@ export function InviteUserForm() {
         setOverrides(newOverrides)
       } catch (err) {
         console.error('loadRolePresets failed', err)
-        toast.error('Errore nel caricamento dei permessi del ruolo')
+        toast.error(t('toast.error.loading'))
         setRolePresets({})
       } finally {
         setIsLoadingPresets(false)
@@ -161,16 +163,16 @@ export function InviteUserForm() {
     try {
       await navigator.clipboard.writeText(invitationLink)
       setCopied(true)
-      toast.success('Link copiato negli appunti!')
+      toast.success(t('toast.invitation.linkCopied'))
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error('Errore nella copia del link')
+      toast.error(t('toast.invitation.errorCopying'))
     }
   }
 
   const onSubmit = async (data: InviteForm) => {
     if (!selectedRoleId || selectedLocationIds.length === 0) {
-      toast.error('Seleziona almeno un ruolo e una location')
+      toast.error(t('toast.invitation.selectRoleLocation'))
       return
     }
 
@@ -227,7 +229,7 @@ export function InviteUserForm() {
         const link = `${window.location.origin}/invite/${result.token}`
         setInvitationLink(link)
         
-        toast.success('Invito creato con successo!')
+        toast.success(t('toast.invitation.created'))
         
         // Dispatch event for list refresh
         window.dispatchEvent(new CustomEvent('invitation:created'))
@@ -242,7 +244,7 @@ export function InviteUserForm() {
         setIsLoadingPresets(false)
       } catch (error: any) {
         console.error('Error creating invitation:', error)
-        toast.error(error.message || 'Errore durante la creazione dell\'invito')
+        toast.error(error.message || t('toast.invitation.errorCreating'))
       }
     })
   }

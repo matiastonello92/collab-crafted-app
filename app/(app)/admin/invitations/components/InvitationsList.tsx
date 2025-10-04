@@ -9,6 +9,7 @@ import { Copy, Ban, RefreshCw } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
+import { useTranslation } from '@/lib/i18n'
 
 interface Invitation {
   id: string
@@ -27,6 +28,7 @@ export function InvitationsList() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const isClient = useIsClient()
+  const { t } = useTranslation()
 
   const loadInvitations = async () => {
     try {
@@ -80,7 +82,7 @@ export function InvitationsList() {
       setInvitations(processedInvitations)
     } catch (error) {
       console.error('Error loading invitations:', error)
-      toast.error('Errore nel caricamento degli inviti')
+      toast.error(t('toast.invitation.errorLoading'))
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)
@@ -106,9 +108,9 @@ export function InvitationsList() {
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         try {
           await navigator.clipboard.writeText(link)
-          toast.success('Link copiato negli appunti!')
+          toast.success(t('toast.invitation.linkCopied'))
         } catch (error) {
-          toast.error('Errore nella copia del link')
+          toast.error(t('toast.invitation.errorCopying'))
         }
       } else {
         // Fallback for older browsers
@@ -119,9 +121,9 @@ export function InvitationsList() {
           textArea.select()
           document.execCommand('copy')
           document.body.removeChild(textArea)
-          toast.success('Link copiato negli appunti!')
+          toast.success(t('toast.invitation.linkCopied'))
         } catch (error) {
-          toast.error('Impossibile copiare il link automaticamente')
+          toast.error(t('toast.invitation.errorCopying'))
         }
       }
     }
@@ -137,11 +139,11 @@ export function InvitationsList() {
         throw new Error('Failed to revoke invitation')
       }
 
-      toast.success('Invito revocato')
+      toast.success(t('toast.invitation.revoked'))
       loadInvitations() // Refresh list
     } catch (error) {
       console.error('Error revoking invitation:', error)
-      toast.error('Errore nella revoca dell\'invito')
+      toast.error(t('toast.invitation.errorRevoking'))
     }
   }
 

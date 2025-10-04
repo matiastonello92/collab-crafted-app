@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface CloneRecipeButtonProps {
   recipeId: string;
@@ -15,6 +16,7 @@ interface CloneRecipeButtonProps {
 export function CloneRecipeButton({ recipeId, recipeTitle, disabled }: CloneRecipeButtonProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleClone = async () => {
     setLoading(true);
@@ -27,15 +29,15 @@ export function CloneRecipeButton({ recipeId, recipeTitle, disabled }: CloneReci
 
       const data = await response.json();
 
-      toast.success('Ricetta clonata', {
-        description: `"${recipeTitle}" è stata clonata come bozza`
+      toast.success(t('toast.recipe.cloned'), {
+        description: `"${recipeTitle}" ${t('toast.recipe.cloned')}`
       });
 
       // Redirect to the new cloned recipe
       router.push(`/recipes/${data.recipe.id}`);
     } catch (error) {
       console.error('Error cloning recipe:', error);
-      toast.error('Impossibile clonare la ricetta');
+      toast.error(t('toast.recipe.errorCloning'));
     } finally {
       setLoading(false);
     }

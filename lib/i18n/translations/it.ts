@@ -298,4 +298,206 @@ export const it = {
     'America/Los_Angeles': 'America/Los Angeles',
     'Asia/Tokyo': 'Asia/Tokyo',
   },
+
+  // Toast Messages
+  toast: {
+    // Generic success
+    success: {
+      saved: 'Salvato con successo',
+      created: 'Creato con successo',
+      updated: 'Aggiornato con successo',
+      deleted: 'Eliminato con successo',
+      copied: 'Copiato negli appunti',
+      uploaded: 'Caricato con successo',
+      sent: 'Inviato con successo',
+      activated: 'Attivato',
+      deactivated: 'Disattivato',
+      approved: 'Approvato',
+      rejected: 'Rifiutato',
+      cancelled: 'Annullato',
+      revoked: 'Revocato',
+      generated: 'Generato con successo',
+      exported: 'Esportato con successo',
+      imported: 'Importato con successo',
+    },
+
+    // Generic errors
+    error: {
+      generic: 'Si è verificato un errore',
+      loading: 'Errore nel caricamento',
+      saving: 'Errore durante il salvataggio',
+      creating: 'Errore durante la creazione',
+      updating: 'Errore durante l\'aggiornamento',
+      deleting: 'Errore durante l\'eliminazione',
+      copying: 'Errore nella copia',
+      uploading: 'Errore durante il caricamento',
+      sending: 'Errore durante l\'invio',
+      processing: 'Errore durante l\'elaborazione',
+      exporting: 'Errore durante l\'esportazione',
+      importing: 'Errore durante l\'importazione',
+      notFound: 'Risorsa non trovata',
+      unauthorized: 'Non autorizzato',
+      forbidden: 'Accesso negato',
+      validation: 'Dati non validi',
+      network: 'Errore di connessione',
+      timeout: 'Timeout della richiesta',
+    },
+
+    // Invitations
+    invitation: {
+      created: 'Invito creato con successo',
+      revoked: 'Invito revocato',
+      linkCopied: 'Link copiato negli appunti',
+      errorCreating: 'Errore durante la creazione dell\'invito',
+      errorRevoking: 'Errore nella revoca dell\'invito',
+      errorCopying: 'Errore nella copia del link',
+      errorLoading: 'Errore nel caricamento degli inviti',
+      selectRoleLocation: 'Seleziona almeno un ruolo e una location',
+    },
+
+    // Locations
+    location: {
+      created: 'Location creata con successo',
+      updated: 'Location aggiornata con successo',
+      deleted: 'Location eliminata con successo',
+      photoUploaded: 'Foto caricata con successo',
+      scheduleUpdated: 'Orari di apertura salvati con successo',
+      managerAdded: 'Manager assegnato con successo',
+      managerRemoved: 'Manager rimosso con successo',
+      errorCreating: 'Impossibile creare la location',
+      errorUpdating: 'Impossibile salvare le modifiche',
+      errorDeleting: 'Impossibile eliminare la location',
+      errorUploadingPhoto: 'Impossibile caricare la foto',
+      errorUpdatingSchedule: 'Impossibile salvare gli orari',
+      errorAddingManager: 'Impossibile aggiungere il manager',
+      errorRemovingManager: 'Impossibile rimuovere il manager',
+      nameRequired: 'Il nome della location è obbligatorio',
+    },
+
+    // Users
+    user: {
+      created: 'Utente creato con successo',
+      updated: 'Utente aggiornato con successo',
+      deleted: 'Utente eliminato con successo',
+      roleAssigned: 'Ruolo assegnato con successo',
+      roleRemoved: 'Ruolo rimosso con successo',
+      permissionUpdated: 'Permesso aggiornato con successo',
+      errorCreating: 'Errore durante la creazione dell\'utente',
+      errorUpdating: 'Errore durante l\'aggiornamento dell\'utente',
+      errorDeleting: 'Errore durante l\'eliminazione dell\'utente',
+      errorLoadingDetails: 'Errore nel caricamento dei dettagli',
+    },
+
+    // Recipes
+    recipe: {
+      created: 'Ricetta creata con successo',
+      updated: 'Ricetta aggiornata con successo',
+      deleted: 'Ricetta eliminata con successo',
+      cloned: 'Ricetta clonata',
+      published: 'Ricetta pubblicata',
+      archived: 'Ricetta archiviata',
+      errorCreating: 'Errore durante la creazione della ricetta',
+      errorUpdating: 'Errore durante l\'aggiornamento della ricetta',
+      errorDeleting: 'Errore durante l\'eliminazione della ricetta',
+      errorCloning: 'Impossibile clonare la ricetta',
+      errorLoading: 'Errore nel caricamento della ricetta',
+    },
+
+    // Templates
+    template: {
+      created: 'Template creato con successo',
+      updated: 'Template aggiornato con successo',
+      deleted: 'Template eliminato',
+      activated: 'Template attivato',
+      deactivated: 'Template disattivato',
+      errorCreating: 'Errore durante la creazione del template',
+      errorUpdating: 'Errore nell\'aggiornamento del template',
+      errorDeleting: 'Errore nell\'eliminazione del template',
+      errorLoading: 'Errore nel caricamento dei template',
+    },
+
+    // Leave requests
+    leave: {
+      created: 'Richiesta ferie creata',
+      updated: 'Richiesta ferie aggiornata',
+      cancelled: 'Richiesta ferie annullata',
+      approved: 'Richiesta ferie approvata',
+      rejected: 'Richiesta ferie rifiutata',
+      errorCreating: 'Errore durante la creazione della richiesta',
+      errorUpdating: 'Errore durante l\'aggiornamento',
+      errorCancelling: 'Errore durante l\'annullamento',
+      errorProcessing: 'Errore durante l\'elaborazione',
+      errorLoading: 'Errore nel caricamento delle richieste',
+    },
+
+    // Timesheets
+    timesheet: {
+      generated: 'Timesheet generati',
+      exported: 'File CSV scaricato',
+      correctionApproved: 'Correzione approvata',
+      correctionRejected: 'Correzione rifiutata',
+      errorGenerating: 'Errore nella generazione dei timesheets',
+      errorExporting: 'Errore nell\'export',
+      errorLoading: 'Errore nel caricamento dei timesheets',
+      errorProcessing: 'Errore durante la decisione',
+      noEvents: 'Non ci sono eventi time clock nel mese corrente',
+    },
+
+    // Compliance
+    compliance: {
+      ruleUpdated: 'Regola aggiornata',
+      violationSilenced: 'Violazione silenziata',
+      errorLoading: 'Errore caricamento regole',
+      errorUpdating: 'Errore aggiornamento',
+      errorSilencing: 'Errore nel silenziamento',
+    },
+
+    // Shifts & Planner
+    shift: {
+      created: 'Turno creato',
+      updated: 'Turno aggiornato',
+      deleted: 'Turno eliminato',
+      assigned: 'Turno assegnato',
+      unassigned: 'Assegnazione rimossa',
+      published: 'Turni pubblicati',
+      errorCreating: 'Errore nella creazione del turno',
+      errorUpdating: 'Errore nell\'aggiornamento del turno',
+      errorDeleting: 'Errore nell\'eliminazione del turno',
+      errorAssigning: 'Errore nell\'assegnazione',
+      errorPublishing: 'Errore nella pubblicazione',
+      errorLoading: 'Errore nel caricamento dei turni',
+    },
+
+    // Job Tags
+    jobTag: {
+      created: 'Tag creato',
+      updated: 'Tag aggiornato',
+      deleted: 'Tag eliminato',
+      assigned: 'Tag assegnato',
+      unassigned: 'Tag rimosso',
+      errorCreating: 'Errore nella creazione del tag',
+      errorUpdating: 'Errore nell\'aggiornamento del tag',
+      errorDeleting: 'Errore nell\'eliminazione del tag',
+      errorAssigning: 'Errore nell\'assegnazione',
+    },
+
+    // Email logs
+    email: {
+      sent: 'Email inviata',
+      resent: 'Email reinviata',
+      errorSending: 'Errore nell\'invio',
+      errorLoading: 'Errore nel caricamento dei log',
+    },
+
+    // Products
+    product: {
+      created: 'Prodotto creato',
+      updated: 'Prodotto aggiornato',
+      deleted: 'Prodotto eliminato',
+      errorCreating: 'Errore nella creazione del prodotto',
+      errorUpdating: 'Errore nell\'aggiornamento del prodotto',
+      errorDeleting: 'Errore nell\'eliminazione del prodotto',
+      errorLoading: 'Errore nel caricamento dei prodotti',
+    },
+  },
 } as const;
