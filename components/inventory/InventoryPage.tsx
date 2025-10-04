@@ -13,7 +13,7 @@ import { AuthDebug } from '@/components/debug/AuthDebug';
 import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
-import { useHydratedLocationContext } from '@/lib/store/useHydratedStore';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useTranslation } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -51,15 +51,40 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const [saving, setSaving] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
+  
+  // Pattern di RecipesClient: load user e location dal profile
+  const [userId, setUserId] = useState<string | null>(null);
+  const [defaultLocationId, setDefaultLocationId] = useState<string>('');
 
   const supabase = useSupabase();
   
-  const { location_id: selectedLocation } = useHydratedLocationContext();
-  const { isAdmin, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
+  // Load user and location on mount
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('default_location_id')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.default_location_id) {
+          setDefaultLocationId(profile.default_location_id);
+        }
+      }
+    }
+    loadUser();
+  }, []);
   
-  // Use SWR hook for data fetching
+  const { isAdmin, isLoading: permissionsLoading } = usePermissions(defaultLocationId || undefined);
+  
+  // Use SWR hook for data fetching - aspetta che defaultLocationId sia disponibile
   const { header, hasTemplates, isLoading, mutate } = useInventoryData(
-    selectedLocation,
+    defaultLocationId || null,
     category,
     inventoryId
   );
@@ -109,7 +134,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const canApprove = isAdmin;
   const canComplete = true;
 
-  if (!selectedLocation || permissionsLoading || isLoading) {
+  if (!defaultLocationId || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-8 space-y-6">
         <Card>
@@ -177,7 +202,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSuccess={handleInventoryCreated}
-          locationId={selectedLocation || ''}
+          locationId={defaultLocationId || ''}
           category={category}
         />
 
@@ -188,7 +213,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
             await mutate(); // Revalidate to get updated templates
             setShowTemplateWizard(false);
           }}
-          locationId={selectedLocation || ''}
+          locationId={defaultLocationId || ''}
           preselectedCategory={category}
         />
       </div>
@@ -274,7 +299,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
         headerId={header.id}
         canManage={header.status !== 'approved'}
         canEdit={header.status !== 'approved' || canApprove}
-        locationId={selectedLocation || ''}
+        locationId={defaultLocationId || ''}
         category={category}
         onHeaderUpdate={updateHeaderTotal}
       />

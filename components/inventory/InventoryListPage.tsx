@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { CreateInventoryModal } from './CreateInventoryModal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { useHydratedLocationContext } from '@/lib/store/useHydratedStore';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { usePermissions } from '@/hooks/usePermissions';
 import {
   AlertDialog,
@@ -58,14 +58,39 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [inventoryToDelete, setInventoryToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  
+  // Pattern di RecipesClient: load user e location dal profile
+  const [userId, setUserId] = useState<string | null>(null);
+  const [defaultLocationId, setDefaultLocationId] = useState<string>('');
 
   const router = useRouter();
   
-  const { location_id: selectedLocation } = useHydratedLocationContext();
-  const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(selectedLocation || undefined);
+  // Load user and location on mount
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('default_location_id')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.default_location_id) {
+          setDefaultLocationId(profile.default_location_id);
+        }
+      }
+    }
+    loadUser();
+  }, []);
   
-  // Use SWR hook for data fetching
-  const { inventories, isLoading, mutate } = useInventoryList(selectedLocation, category);
+  const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(defaultLocationId || undefined);
+  
+  // Use SWR hook for data fetching - aspetta che defaultLocationId sia disponibile
+  const { inventories, isLoading, mutate } = useInventoryList(defaultLocationId || null, category);
   
   const canDelete = isAdmin || permissions.includes('*');
 
@@ -125,7 +150,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
-  if (!selectedLocation || permissionsLoading || isLoading) {
+  if (!defaultLocationId || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">
@@ -261,7 +286,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           category={category}
-          locationId={selectedLocation || ''}
+          locationId={defaultLocationId || ''}
           onSuccess={handleInventoryCreated}
         />
       )}
