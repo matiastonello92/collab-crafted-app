@@ -31,6 +31,7 @@ import { StepsEditor } from '../components/StepsEditor';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CloneRecipeButton } from '../components/CloneRecipeButton';
 import { ServiceNotesSection } from '../components/ServiceNotesSection';
+import { PrintRecipeButton } from '../components/PrintRecipeButton';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getAllergenColor, getAllergenLabel } from '../constants/allergens';
@@ -259,6 +260,13 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             <CloneRecipeButton 
               recipeId={recipeId}
               recipeTitle={recipe.title}
+            />
+          )}
+          
+          {(isPublished || isSubmitted) && (
+            <PrintRecipeButton 
+              recipeId={recipeId}
+              defaultServings={recipe.servings}
             />
           )}
           

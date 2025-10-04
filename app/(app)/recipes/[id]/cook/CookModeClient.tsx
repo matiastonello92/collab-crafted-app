@@ -20,6 +20,7 @@ import { TimerWidget } from './components/TimerWidget';
 import { ChecklistWidget } from './components/ChecklistWidget';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertCircle, StickyNote } from 'lucide-react';
+import { PrintRecipeButton } from '../../components/PrintRecipeButton';
 
 interface RecipeStep {
   id: string;
@@ -34,6 +35,7 @@ interface RecipeStep {
 interface Recipe {
   id: string;
   title: string;
+  servings: number;
   recipe_steps: RecipeStep[];
   recipe_service_notes?: Array<{
     id: string;
@@ -67,6 +69,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
       setRecipe({
         id: data.recipe.id,
         title: data.recipe.title,
+        servings: data.recipe.servings || 4,
         recipe_steps: data.recipe.recipe_steps?.sort((a: RecipeStep, b: RecipeStep) => 
           a.step_number - b.step_number
         ) || [],
@@ -151,6 +154,11 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
               Note ({recipe.recipe_service_notes.length})
             </Button>
           )}
+          <PrintRecipeButton 
+            recipeId={recipeId}
+            defaultServings={recipe.servings}
+            defaultVariant="station"
+          />
           <Badge variant="secondary" className="text-lg px-4 py-2">
             {currentStep.step_number}
           </Badge>

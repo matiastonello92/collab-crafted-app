@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from "react";
+import { Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+
+interface PrintRecipeButtonProps {
+  recipeId: string;
+  defaultServings?: number;
+  defaultVariant?: 'full' | 'station';
+}
+
+const SERVING_OPTIONS = [2, 4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
+
+export function PrintRecipeButton({ 
+  recipeId, 
+  defaultServings = 4,
+  defaultVariant = 'full'
+}: PrintRecipeButtonProps) {
+  const [servings, setServings] = useState(defaultServings.toString());
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handlePrint = (variant: 'full' | 'station') => {
+    try {
+      const url = `/api/v1/recipes/${recipeId}/print?servings=${servings}&variant=${variant}`;
+      window.open(url, '_blank');
+      setIsOpen(false);
+      toast.success(variant === 'full' ? 'Scheda completa aperta' : 'Scheda stazione aperta');
+    } catch (error) {
+      console.error('Print error:', error);
+      toast.error('Errore durante la stampa');
+    }
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Printer className="h-4 w-4 mr-2" />
+          Stampa
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80" align="end">
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium mb-3">Stampa Ricetta</h4>
+            
+            <div className="space-y-2">
+              <Label htmlFor="servings-select">Porzioni</Label>
+              <Select value={servings} onValueChange={setServings}>
+                <SelectTrigger id="servings-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SERVING_OPTIONS.map(num => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} porzioni
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => handlePrint('full')}
+              className="w-full justify-start"
+              variant="default"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Scheda Completa
+              <span className="ml-auto text-xs opacity-70">
+                Con foto e note
+              </span>
+            </Button>
+            
+            <Button
+              onClick={() => handlePrint('station')}
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Scheda Stazione
+              <span className="ml-auto text-xs opacity-70">
+                Solo essenziale
+              </span>
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            La scheda si aprirà in una nuova finestra pronta per la stampa o salvataggio PDF.
+          </p>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
