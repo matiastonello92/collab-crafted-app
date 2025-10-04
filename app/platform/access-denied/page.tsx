@@ -1,9 +1,12 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Shield, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { t } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 export default function PlatformAccessDenied() {
+  const { t } = useTranslation()
   return (
     <div className="container mx-auto py-8 max-w-md">
       <Card>

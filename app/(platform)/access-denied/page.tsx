@@ -1,10 +1,13 @@
+'use client'
+
 import { Shield, ArrowLeft, Home } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { t } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 export default function AccessDeniedPage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
       <div className="max-w-lg w-full mx-4">
