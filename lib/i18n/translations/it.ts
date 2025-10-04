@@ -15,6 +15,9 @@ export const it = {
     optional: 'Facoltativo',
     yes: 'Sì',
     no: 'No',
+    step: 'Passo',
+    of: 'di',
+    actions: 'Azioni',
   },
 
   // Navigation

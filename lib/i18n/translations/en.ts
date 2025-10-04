@@ -15,6 +15,9 @@ export const en = {
     optional: 'Optional',
     yes: 'Yes',
     no: 'No',
+    step: 'Step',
+    of: 'of',
+    actions: 'Actions',
   },
 
   // Navigation

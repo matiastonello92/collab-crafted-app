@@ -25,7 +25,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useTranslation } from '@/lib/i18n';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -50,8 +49,25 @@ interface InventoryHeader {
   };
 }
 
+const categoryLabels = {
+  kitchen: 'Cucina',
+  bar: 'Bar',
+  cleaning: 'Pulizie'
+};
+
+const statusLabels = {
+  in_progress: 'In corso',
+  completed: 'Completato',
+  approved: 'Approvato'
+};
+
+const statusVariants = {
+  in_progress: 'default',
+  completed: 'secondary',
+  approved: 'outline'
+} as const;
+
 export function InventoryListPage({ category }: InventoryListPageProps) {
-  const { t } = useTranslation();
   const [inventories, setInventories] = useState<InventoryHeader[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
@@ -63,11 +79,13 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const supabase = useSupabase();
   const router = useRouter();
   
+  // Use Zustand selectors for proper reactivity
   const rawLocationId = useAppStore(state => state.context.location_id);
   const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId;
   const hasHydrated = useAppStore(state => state.hasHydrated);
   const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(locationId);
   
+  // User can delete if they are admin OR have wildcard permission (org admin or manager)
   const canDelete = isAdmin || permissions.includes('*');
 
   const loadInventories = useCallback(async () => {
@@ -88,7 +106,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
 
       if (error) {
         console.error('❌ [LIST] Error loading inventories:', error);
-        toast.error(t('inventory.toast.errorLoadingInventories'));
+        toast.error('Errore nel caricamento degli inventari');
         return;
       }
 
@@ -96,12 +114,13 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       setInventories(data || []);
     } catch (error) {
       console.error('❌ [LIST] Error in loadInventories:', error);
-      toast.error(t('inventory.toast.errorLoadingInventories'));
+      toast.error('Errore nel caricamento degli inventari');
     } finally {
       setLoading(false);
     }
-  }, [locationId, category, supabase, t]);
+  }, [locationId, category, supabase]);
 
+  // Client-side filtering for better performance
   const filteredInventories = useMemo(() => {
     if (statusFilter === 'all') return inventories;
     return inventories.filter(inv => inv.status === statusFilter);
@@ -148,20 +167,20 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       });
 
       if (!response.ok) {
-        throw new Error(t('inventory.toast.errorDeletingProduct'));
+        throw new Error('Errore durante l\'eliminazione');
       }
 
-      toast.success(t('inventory.toast.inventoryDeleted'));
+      toast.success('Inventario eliminato con successo');
       await loadInventories();
     } catch (error) {
       console.error('Error deleting inventory:', error);
-      toast.error(t('inventory.toast.errorDeletingProduct'));
+      toast.error('Impossibile eliminare l\'inventario');
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
       setInventoryToDelete(null);
     }
-  }, [inventoryToDelete, loadInventories, t]);
+  }, [inventoryToDelete, loadInventories]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -186,12 +205,12 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">{t('inventory.title')} {t(`inventory.categories.${category}`)}</h1>
+          <h1 className="text-3xl font-bold">Inventario {categoryLabels[category]}</h1>
           <p className="text-muted-foreground">Gestisci gli inventari per questa categoria</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)} size="lg">
           <Plus className="mr-2 h-5 w-5" />
-          {t('inventory.buttons.createInventory')}
+          Inizia Nuovo Inventario
         </Button>
       </div>
 
@@ -199,15 +218,15 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>{t('inventory.history')}</CardTitle>
-              <CardDescription>Tutti gli inventari per {t(`inventory.categories.${category}`)}</CardDescription>
+              <CardTitle>Lista Inventari</CardTitle>
+              <CardDescription>Tutti gli inventari per {categoryLabels[category]}</CardDescription>
             </div>
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
               <TabsList>
-                <TabsTrigger value="all">{t('inventory.filters.all')}</TabsTrigger>
-                <TabsTrigger value="in_progress">{t('inventory.status.inProgress')}</TabsTrigger>
-                <TabsTrigger value="completed">{t('inventory.status.completed')}</TabsTrigger>
-                <TabsTrigger value="approved">{t('inventory.status.approved')}</TabsTrigger>
+                <TabsTrigger value="all">Tutti</TabsTrigger>
+                <TabsTrigger value="in_progress">In corso</TabsTrigger>
+                <TabsTrigger value="completed">Completati</TabsTrigger>
+                <TabsTrigger value="approved">Approvati</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -220,26 +239,26 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
           ) : filteredInventories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{t('inventory.empty.noInventories')}</p>
+              <p>Nessun inventario trovato</p>
               <Button 
                 variant="outline" 
                 className="mt-4"
                 onClick={() => setShowCreateModal(true)}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {t('inventory.buttons.createInventory')}
+                Crea il primo inventario
               </Button>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('inventory.labels.date')}</TableHead>
-                  <TableHead>{t('admin.status')}</TableHead>
-                  <TableHead>{t('inventory.labels.createdBy')}</TableHead>
-                  <TableHead className="text-right">{t('inventory.labels.totalValue')}</TableHead>
-                  <TableHead>{t('inventory.labels.notes')}</TableHead>
-                  <TableHead className="text-right">{t('common.actions')}</TableHead>
+                  <TableHead>Data Inizio</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead>Creato da</TableHead>
+                  <TableHead className="text-right">Valore Totale</TableHead>
+                  <TableHead>Note</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -247,8 +266,8 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                   <TableRow key={inventory.id}>
                     <TableCell>{formatDate(inventory.started_at)}</TableCell>
                     <TableCell>
-                      <Badge variant={inventory.status === 'approved' ? 'outline' : inventory.status === 'completed' ? 'secondary' : 'default'}>
-                        {t(`inventory.status.${inventory.status === 'in_progress' ? 'inProgress' : inventory.status}`)}
+                      <Badge variant={statusVariants[inventory.status]}>
+                        {statusLabels[inventory.status]}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -268,7 +287,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                           onClick={() => handleViewInventory(inventory.id)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          {t('inventory.buttons.view')}
+                          Visualizza
                         </Button>
                         {canDelete && (
                           <Button
@@ -277,7 +296,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
                             onClick={() => handleDeleteClick(inventory.id)}
                           >
                             <Trash className="h-4 w-4 mr-1" />
-                            {t('inventory.buttons.delete')}
+                            Elimina
                           </Button>
                         )}
                       </div>
@@ -303,13 +322,13 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('inventory.confirmations.deleteInventory')}</AlertDialogTitle>
+            <AlertDialogTitle>Elimina inventario</AlertDialogTitle>
             <AlertDialogDescription>
               Sei sicuro di voler eliminare questo inventario? Questa azione è irreversibile e verranno eliminati anche tutti i dati associati.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{t('inventory.buttons.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>Annulla</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={deleting}
@@ -318,10 +337,10 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
               {deleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('inventory.loading.deleting')}
+                  Eliminazione...
                 </>
               ) : (
-                t('inventory.buttons.delete')
+                'Elimina'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

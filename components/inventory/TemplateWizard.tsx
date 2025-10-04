@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ProductSelector } from './ProductSelector';
+import { useTranslation } from '@/lib/i18n';
 
 interface TemplateWizardProps {
   isOpen: boolean;
@@ -60,6 +61,7 @@ export function TemplateWizard({
   preselectedCategory,
   editingTemplate
 }: TemplateWizardProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -92,11 +94,11 @@ export function TemplateWizard({
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
-      toast.error('Inserisci un nome per il template');
+      toast.error(t('inventory.toast.templateNameRequired'));
       return;
     }
     if (items.length === 0) {
-      toast.error('Aggiungi almeno un prodotto al template');
+      toast.error(t('inventory.toast.selectAtLeastOneProduct'));
       return;
     }
 
@@ -129,17 +131,17 @@ export function TemplateWizard({
       });
 
       if (response.ok) {
-        toast.success(editingTemplate ? 'Template aggiornato con successo' : 'Template creato con successo');
+        toast.success(editingTemplate ? t('inventory.toast.templateUpdated') : t('inventory.toast.templateCreated'));
         onSuccess();
         onClose();
         resetWizard();
       } else {
         const error = await response.json();
-        toast.error(error.error || `Errore durante ${editingTemplate ? 'l\'aggiornamento' : 'la creazione'} del template`);
+        toast.error(error.error || t('inventory.toast.errorSavingTemplate'));
       }
     } catch (error) {
-      console.error('Error saving template:', error);
-      toast.error(`Errore durante ${editingTemplate ? 'l\'aggiornamento' : 'la creazione'} del template`);
+      console.error(t('inventory.toast.errorSavingTemplate'), error);
+      toast.error(t('inventory.toast.errorSavingTemplate'));
     } finally {
       setLoading(false);
     }
@@ -160,42 +162,36 @@ export function TemplateWizard({
     resetWizard();
   };
 
-  const categoryLabels = {
-    kitchen: 'Cucina',
-    bar: 'Bar',
-    cleaning: 'Pulizie'
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {editingTemplate ? 'Modifica Template' : `Crea Template - Passo ${step} di 2`}
+            {editingTemplate ? t('inventory.dialogs.editTemplateTitle') : `${t('inventory.dialogs.createTemplateTitle')} - ${t('common.step')} ${step} ${t('common.of')} 2`}
           </DialogTitle>
         </DialogHeader>
 
         {step === 1 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="category">{t('inventory.labels.category')}</Label>
               <Select value={category} onValueChange={(value: any) => setCategory(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="kitchen">Cucina</SelectItem>
-                  <SelectItem value="bar">Bar</SelectItem>
-                  <SelectItem value="cleaning">Pulizie</SelectItem>
+                  <SelectItem value="kitchen">{t('inventory.categories.kitchen')}</SelectItem>
+                  <SelectItem value="bar">{t('inventory.categories.bar')}</SelectItem>
+                  <SelectItem value="cleaning">{t('inventory.categories.cleaning')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Nome Template</Label>
+              <Label htmlFor="name">{t('inventory.labels.name')}</Label>
               <Input
                 id="name"
-                placeholder="Es. Template Standard Cucina"
+                placeholder={t('inventory.placeholders.templateName')}
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
               />
@@ -213,7 +209,7 @@ export function TemplateWizard({
             />
             {items.length > 0 && (
               <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium mb-2">Anteprima prodotti selezionati:</h4>
+                <h4 className="font-medium mb-2">{t('inventory.labels.products')}:</h4>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
                   {items.map((item) => (
                     <div key={item.catalog_item_id} className="text-sm flex justify-between">
@@ -229,14 +225,14 @@ export function TemplateWizard({
 
         <div className="flex justify-between pt-4">
           <Button variant="outline" onClick={step === 1 ? handleClose : handleBack}>
-            {step === 1 ? 'Annulla' : 'Indietro'}
+            {step === 1 ? t('inventory.buttons.cancel') : t('inventory.buttons.back')}
           </Button>
           
           {step === 1 ? (
-            <Button onClick={() => setStep(2)}>Avanti</Button>
+            <Button onClick={() => setStep(2)}>{t('inventory.buttons.next')}</Button>
           ) : (
             <Button onClick={handleSaveTemplate} disabled={loading}>
-              {loading ? 'Salvataggio...' : editingTemplate ? 'Aggiorna Template' : 'Salva Template'}
+              {loading ? t('inventory.loading.saving') : editingTemplate ? t('inventory.buttons.saveChanges') : t('inventory.buttons.save')}
             </Button>
           )}
         </div>
