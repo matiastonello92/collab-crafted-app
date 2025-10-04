@@ -13,7 +13,7 @@ import { CreateInventoryModal } from './CreateInventoryModal';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { useAppStore } from '@/lib/store/unified';
+import { useHydratedLocationContext } from '@/lib/store/useHydratedStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import {
   AlertDialog,
@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useTranslation } from '@/lib/i18n';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -63,9 +64,8 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   const supabase = useSupabase();
   const router = useRouter();
   
-  const rawLocationId = useAppStore(state => state.context.location_id);
-  const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId;
-  const hasHydrated = useAppStore(state => state.hasHydrated);
+  const { location_id: selectedLocation } = useHydratedLocationContext();
+  const locationId = selectedLocation || undefined;
   const { isAdmin, permissions, isLoading: permissionsLoading } = usePermissions(locationId);
   
   const canDelete = isAdmin || permissions.includes('*');
@@ -108,20 +108,15 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
   }, [inventories, statusFilter]);
 
   useEffect(() => {
-    if (!hasHydrated) {
-      console.log('⏳ [LIST] Waiting for store hydration...');
-      return;
-    }
-
-    if (!locationId) {
-      console.log('⚠️ [LIST] Missing location context');
+    if (!selectedLocation) {
+      console.log('⏳ [LIST] Waiting for location context...');
       setLoading(false);
       return;
     }
 
-    console.log('✅ [LIST] Loading data for location:', locationId);
+    console.log('✅ [LIST] Loading data for location:', selectedLocation);
     loadInventories();
-  }, [hasHydrated, locationId, loadInventories]);
+  }, [selectedLocation, loadInventories]);
 
   const handleViewInventory = (inventoryId: string) => {
     router.push(`/inventory/${category}/${inventoryId}`);
@@ -174,7 +169,34 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
-  if (loading || permissionsLoading) {
+  if (!selectedLocation || permissionsLoading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />

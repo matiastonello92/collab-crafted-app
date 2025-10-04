@@ -13,9 +13,10 @@ import { AuthDebug } from '@/components/debug/AuthDebug';
 import { InventoryPresence } from './InventoryPresence';
 import { useInventoryRealtime } from '@/hooks/useInventoryRealtime';
 import { toast } from 'sonner';
-import { useAppStore } from '@/lib/store/unified';
+import { useHydratedLocationContext } from '@/lib/store/useHydratedStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useTranslation } from '@/lib/i18n';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface InventoryPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -55,10 +56,8 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
 
   const supabase = useSupabase();
   
-  // Use Zustand selectors for proper reactivity
-  const rawLocationId = useAppStore(state => state.context.location_id);
-  const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId;
-  const hasHydrated = useAppStore(state => state.hasHydrated);
+  const { location_id: selectedLocation } = useHydratedLocationContext();
+  const locationId = selectedLocation || undefined;
   const { isAdmin, isLoading: permissionsLoading } = usePermissions(locationId);
   
   const { presenceUsers, updatePresence } = useInventoryRealtime(header?.id);
@@ -168,7 +167,11 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   }, [locationId, category]);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!selectedLocation) {
+      console.log('⏳ [INVENTORY] Waiting for location context...');
+      setLoading(false);
+      return;
+    }
 
     if (inventoryId) {
       loadSpecificInventory(inventoryId);
@@ -176,7 +179,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
       loadCurrentInventory();
       checkForTemplates();
     }
-  }, [hasHydrated, locationId, category, inventoryId, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
+  }, [selectedLocation, category, inventoryId, loadSpecificInventory, loadCurrentInventory, checkForTemplates]);
 
   const handleInventoryCreated = async (headerId: string) => {
     await loadCurrentInventory();
@@ -210,7 +213,30 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const canApprove = isAdmin;
   const canComplete = true;
 
-  if (loading || permissionsLoading) {
+  if (!selectedLocation || permissionsLoading) {
+    return (
+      <div className="container mx-auto py-8 space-y-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-24 w-full" />
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
