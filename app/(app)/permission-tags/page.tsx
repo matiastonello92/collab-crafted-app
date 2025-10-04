@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { UsersTable } from './_components/UsersTable'
 import { ModulesMatrix } from './_components/ModulesMatrix'
 import { getUsersWithTags, getModulePermissionsMatrix } from './actions'
+import { getTranslation } from '@/lib/i18n/server'
 
 // Loading components
 function UsersTableSkeleton() {
@@ -66,6 +67,7 @@ function ModulesMatrixSkeleton() {
 
 // Data fetching components
 async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchParams }) {
+  const t = await getTranslation()
   const result = await getUsersWithTags(searchParams)
   
   if (!result.success || !result.data) {
@@ -74,10 +76,10 @@ async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchPara
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" />
-            Error Loading Users
+            {t('permissionTags.errorLoadingUsers')}
           </CardTitle>
           <CardDescription>
-            {result.error || 'Unknown error occurred'}
+            {result.error || t('permissionTags.unknownError')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -98,6 +100,7 @@ async function UsersTableWrapper({ searchParams }: { searchParams: URLSearchPara
 }
 
 async function ModulesMatrixWrapper() {
+  const t = await getTranslation()
   const result = await getModulePermissionsMatrix()
   
   if (!result.success || !result.data) {
@@ -106,10 +109,10 @@ async function ModulesMatrixWrapper() {
         <CardHeader>
           <CardTitle className="text-destructive flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" />
-            Error Loading Permissions Matrix
+            {t('permissionTags.errorLoadingMatrix')}
           </CardTitle>
           <CardDescription>
-            {result.error || 'Unknown error occurred'}
+            {result.error || t('permissionTags.unknownError')}
           </CardDescription>
         </CardHeader>
       </Card>

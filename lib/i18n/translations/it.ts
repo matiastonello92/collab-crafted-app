@@ -2107,10 +2107,24 @@ export const it = {
   // Staff
   staff: {
     jobTags: {
-      title: 'Gestione Job Tags',
-      description: 'Gestisci i job tags e le assegnazioni per location',
-      tabCatalog: 'Catalogo Tag',
+      title: 'Job Tags - Gestione Ruoli',
+      description: 'Gestisci i ruoli dello staff e le assegnazioni per location',
+      pageTitle: 'Job Tags | Gestione Ruoli',
+      pageDescription: 'Gestisci i ruoli e le assegnazioni del personale per location',
+      tabCatalog: 'Catalogo',
       tabAssignments: 'Assegnazioni',
+      colors: {
+        purple: 'Viola',
+        red: 'Rosso',
+        green: 'Verde',
+        blue: 'Blu',
+        yellow: 'Giallo',
+        pink: 'Rosa',
+        teal: 'Teal',
+        orange: 'Arancione',
+        indigo: 'Indigo',
+        lime: 'Lime',
+      },
       catalogTitle: 'Catalogo Ruoli',
       catalogDescription: 'Crea e gestisci i ruoli disponibili per la tua organizzazione',
       assignmentsTitle: 'Assegnazioni per Location',
@@ -2411,7 +2425,28 @@ export const it = {
 
   // Permission Tags
   permissionTags: {
+    title: 'Gestione Tag Permessi',
+    description: 'Gestisci i tag e i permessi degli utenti',
+    tabs: {
+      users: 'Utenti',
+      modules: 'Moduli',
+    },
     selectUsersFirst: 'Seleziona prima gli utenti',
+    errorLoadingUsers: 'Errore durante il caricamento degli utenti',
+    errorLoadingMatrix: 'Errore durante il caricamento della matrice dei permessi',
+    unknownError: 'Errore sconosciuto',
+    filters: {
+      search: 'Cerca utenti per email o nome...',
+      filterOrg: 'Filtra per Organizzazione',
+      allOrgs: 'Tutte le Organizzazioni',
+    },
+    tableHeaders: {
+      user: 'Utente',
+      organizations: 'Organizzazioni',
+      currentTags: 'Tag Attuali',
+      created: 'Creato',
+      actions: 'Azioni',
+    },
   },
 
   // Job Tags

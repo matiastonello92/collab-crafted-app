@@ -228,7 +228,7 @@ export function UsersTable({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search users by email or name..."
+              placeholder={t('permissionTags.filters.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -237,10 +237,10 @@ export function UsersTable({
           
           <Select value={filterOrgId} onValueChange={setFilterOrgId}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by Organization" />
+              <SelectValue placeholder={t('permissionTags.filters.filterOrg')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Organizations</SelectItem>
+              <SelectItem value="">{t('permissionTags.filters.allOrgs')}</SelectItem>
               {organizations.map(org => (
                 <SelectItem key={org.id} value={org.id}>
                   <div className="flex items-center gap-2">
@@ -259,17 +259,17 @@ export function UsersTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
+                <TableHead>
                   <Checkbox
                     checked={selectedUsers.size === users.length && users.length > 0}
                     onCheckedChange={toggleAllSelection}
                   />
                 </TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Organizations</TableHead>
-                <TableHead>Current Tags</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-20">Actions</TableHead>
+                <TableHead>{t('permissionTags.tableHeaders.user')}</TableHead>
+                <TableHead>{t('permissionTags.tableHeaders.organizations')}</TableHead>
+                <TableHead>{t('permissionTags.tableHeaders.currentTags')}</TableHead>
+                <TableHead>{t('permissionTags.tableHeaders.created')}</TableHead>
+                <TableHead className="w-20">{t('permissionTags.tableHeaders.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

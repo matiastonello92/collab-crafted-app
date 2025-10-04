@@ -2042,10 +2042,24 @@ export const en = {
   // Staff
   staff: {
     jobTags: {
-      title: 'Job Tags Management',
-      description: 'Manage job tags and location assignments',
-      tabCatalog: 'Tag Catalog',
+      title: 'Job Tags - Role Management',
+      description: 'Manage staff roles and location assignments',
+      pageTitle: 'Job Tags | Role Management',
+      pageDescription: 'Manage staff roles and location assignments',
+      tabCatalog: 'Catalog',
       tabAssignments: 'Assignments',
+      colors: {
+        purple: 'Purple',
+        red: 'Red',
+        green: 'Green',
+        blue: 'Blue',
+        yellow: 'Yellow',
+        pink: 'Pink',
+        teal: 'Teal',
+        orange: 'Orange',
+        indigo: 'Indigo',
+        lime: 'Lime',
+      },
       catalogTitle: 'Roles Catalog',
       catalogDescription: 'Create and manage available roles for your organization',
       assignmentsTitle: 'Assignments by Location',
@@ -2287,7 +2301,28 @@ export const en = {
 
   // Permission Tags
   permissionTags: {
+    title: 'Permission Tags Management',
+    description: 'Manage user tags and permissions',
+    tabs: {
+      users: 'Users',
+      modules: 'Modules',
+    },
     selectUsersFirst: 'Please select users first',
+    errorLoadingUsers: 'Error loading users',
+    errorLoadingMatrix: 'Error Loading Permissions Matrix',
+    unknownError: 'Unknown error occurred',
+    filters: {
+      search: 'Search users by email or name...',
+      filterOrg: 'Filter by Organization',
+      allOrgs: 'All Organizations',
+    },
+    tableHeaders: {
+      user: 'User',
+      organizations: 'Organizations',
+      currentTags: 'Current Tags',
+      created: 'Created',
+      actions: 'Actions',
+    },
   },
 
   // Job Tags

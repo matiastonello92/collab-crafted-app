@@ -301,16 +301,16 @@ export function CatalogoTagTab() {
                 <p className="text-sm text-muted-foreground mb-2">{t('staff.jobTags.catalog.quickColors')}</p>
                 <div className="flex gap-2 flex-wrap">
                   {[
-                    { name: 'Viola', hex: '#8B5CF6' },
-                    { name: 'Rosso', hex: '#EF4444' },
-                    { name: 'Verde', hex: '#10B981' },
-                    { name: 'Blu', hex: '#3B82F6' },
-                    { name: 'Giallo', hex: '#F59E0B' },
-                    { name: 'Rosa', hex: '#EC4899' },
-                    { name: 'Teal', hex: '#14B8A6' },
-                    { name: 'Arancione', hex: '#F97316' },
-                    { name: 'Indigo', hex: '#6366F1' },
-                    { name: 'Lime', hex: '#84CC16' },
+                    { nameKey: 'purple', hex: '#8B5CF6' },
+                    { nameKey: 'red', hex: '#EF4444' },
+                    { nameKey: 'green', hex: '#10B981' },
+                    { nameKey: 'blue', hex: '#3B82F6' },
+                    { nameKey: 'yellow', hex: '#F59E0B' },
+                    { nameKey: 'pink', hex: '#EC4899' },
+                    { nameKey: 'teal', hex: '#14B8A6' },
+                    { nameKey: 'orange', hex: '#F97316' },
+                    { nameKey: 'indigo', hex: '#6366F1' },
+                    { nameKey: 'lime', hex: '#84CC16' },
                   ].map((c) => (
                     <button
                       key={c.hex}
@@ -321,7 +321,7 @@ export function CatalogoTagTab() {
                         backgroundColor: c.hex,
                         borderColor: formData.color === c.hex ? '#000' : 'transparent'
                       }}
-                      title={`${c.name} (${c.hex})`}
+                      title={`${t(`staff.jobTags.colors.${c.nameKey}`)} (${c.hex})`}
                     />
                   ))}
                 </div>
