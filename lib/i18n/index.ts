@@ -1,7 +1,7 @@
 import { it } from './translations/it';
 import { en } from './translations/en';
 
-export type Locale = 'it' | 'en';
+export type Locale = 'it' | 'en' | 'fr' | 'es';
 export type TranslationKey = string;
 
 type TranslationStructure = typeof it | typeof en;
@@ -9,6 +9,8 @@ type TranslationStructure = typeof it | typeof en;
 const translations: Record<Locale, TranslationStructure> = {
   it,
   en,
+  fr: en, // Fallback to English
+  es: en, // Fallback to English
 };
 
 let currentLocale: Locale = 'it';
@@ -42,6 +44,20 @@ export function t(key: string, locale?: Locale): string {
   }
 
   return typeof value === 'string' ? value : key;
+}
+
+/**
+ * React hook for translations - use this in components for reactive locale changes
+ */
+export function useTranslation() {
+  // Import dynamically to avoid circular dependency
+  const { useLocale } = require('./LocaleProvider');
+  const { locale } = useLocale();
+  
+  return {
+    t: (key: string) => t(key, locale),
+    locale,
+  };
 }
 
 export { it, en };

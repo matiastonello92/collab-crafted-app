@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n';
+import { t, getCurrentLocale } from '@/lib/i18n';
 
 // Standardized English keys for API communication
 export const MONTHS = [
@@ -22,8 +22,9 @@ export function getCurrentMonth(): string {
 
 export function formatSeasonRange(months: string[]): string {
   if (!months || months.length === 0) return '';
+  const locale = getCurrentLocale();
   if (months.length === 1) {
-    return t(`months.${months[0]}`).slice(0, 3);
+    return t(`months.${months[0]}`, locale).slice(0, 3);
   }
   
   const sorted = [...months].sort((a, b) => {
@@ -32,8 +33,8 @@ export function formatSeasonRange(months: string[]): string {
     return idxA - idxB;
   });
   
-  const first = t(`months.${sorted[0]}`).slice(0, 3);
-  const last = t(`months.${sorted[sorted.length - 1]}`).slice(0, 3);
+  const first = t(`months.${sorted[0]}`, locale).slice(0, 3);
+  const last = t(`months.${sorted[sorted.length - 1]}`, locale).slice(0, 3);
   return `${first}–${last}`;
 }
 
@@ -44,5 +45,6 @@ export function getSeasonColor(months: string[]): string {
 }
 
 export function getMonthLabel(key: string): string {
-  return t(`months.${key}`);
+  const locale = getCurrentLocale();
+  return t(`months.${key}`, locale);
 }

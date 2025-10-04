@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { t } from '@/lib/i18n';
+import { useTranslation } from '@/lib/i18n';
 
 const STATUS_CONFIG = {
   draft: {
@@ -29,6 +29,7 @@ interface RecipeWorkflowBadgeProps {
 }
 
 export function RecipeWorkflowBadge({ status, showTooltip = true }: RecipeWorkflowBadgeProps) {
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
   const label = t(`recipeStatus.${status}`);
   const tooltip = t(`recipeStatusTooltip.${status}`);

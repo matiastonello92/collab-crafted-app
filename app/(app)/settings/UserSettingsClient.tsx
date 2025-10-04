@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
-import { t } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface UserSettingsClientProps {
   user: any
@@ -34,6 +34,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
   const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
   const supabase = createSupabaseBrowserClient()
   const { locale, setLocale } = useLocale()
+  const { t } = useTranslation()
 
 
   const handleSave = async () => {

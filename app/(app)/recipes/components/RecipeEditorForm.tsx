@@ -17,16 +17,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { COMMON_ALLERGENS, getAllergenLabel } from '../constants/allergens';
 import { MONTHS, getMonthLabel } from '../constants/seasons';
-import { t } from '@/lib/i18n';
+import { useTranslation } from '@/lib/i18n';
 
-const CATEGORIES = [
-  { value: 'appetizer', label: 'Antipasto' },
-  { value: 'main_course', label: 'Primo' },
-  { value: 'second_course', label: 'Secondo' },
-  { value: 'side_dish', label: 'Contorno' },
-  { value: 'dessert', label: 'Dessert' },
-  { value: 'beverage', label: 'Bevanda' },
-];
+// Category keys for API communication (English)
 
 interface RecipeEditorFormProps {
   recipeId?: string;
@@ -57,6 +50,18 @@ export function RecipeEditorForm({
   onSuccess,
   onCancel
 }: RecipeEditorFormProps) {
+  const { t } = useTranslation();
+  
+  // Categories with translated labels
+  const CATEGORIES = [
+    { value: 'appetizer', label: t('categories.appetizer') },
+    { value: 'main_course', label: t('categories.main_course') },
+    { value: 'second_course', label: t('categories.second_course') },
+    { value: 'side_dish', label: t('categories.side_dish') },
+    { value: 'dessert', label: t('categories.dessert') },
+    { value: 'beverage', label: t('categories.beverage') },
+  ];
+  
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [category, setCategory] = useState(initialData?.category || '');

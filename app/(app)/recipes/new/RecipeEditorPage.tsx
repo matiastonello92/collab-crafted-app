@@ -9,9 +9,10 @@ import { RecipeBreadcrumb } from '../components/RecipeBreadcrumb';
 import { RecipeProgressStepper } from '../components/RecipeProgressStepper';
 import { RecipeSummaryCard } from '../components/RecipeSummaryCard';
 import { useState } from 'react';
-import { t } from '@/lib/i18n';
+import { useTranslation } from '@/lib/i18n';
 
 export default function RecipeEditorPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as 'info' | 'ingredients' | 'steps') || 'info';

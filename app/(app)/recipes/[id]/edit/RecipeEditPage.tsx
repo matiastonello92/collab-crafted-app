@@ -10,13 +10,14 @@ import { RecipeEditorForm } from '../../components/RecipeEditorForm';
 import { RecipeBreadcrumb } from '../../components/RecipeBreadcrumb';
 import { RecipeProgressStepper } from '../../components/RecipeProgressStepper';
 import { RecipeSummaryCard } from '../../components/RecipeSummaryCard';
-import { t } from '@/lib/i18n';
+import { useTranslation } from '@/lib/i18n';
 
 interface RecipeEditPageProps {
   recipeId: string;
 }
 
 export default function RecipeEditPage({ recipeId }: RecipeEditPageProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as 'info' | 'ingredients' | 'steps') || 'info';

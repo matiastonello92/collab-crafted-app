@@ -1,4 +1,4 @@
-import { t } from '@/lib/i18n';
+import { t, getCurrentLocale } from '@/lib/i18n';
 
 export interface AllergenInfo {
   key: string;
@@ -29,5 +29,6 @@ export function getAllergenColor(allergenKey: string): string {
 }
 
 export function getAllergenLabel(allergenKey: string): string {
-  return t(`allergens.${allergenKey}`);
+  const locale = getCurrentLocale();
+  return t(`allergens.${allergenKey}`, locale);
 }
