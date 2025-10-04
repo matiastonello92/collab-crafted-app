@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { CreateLocationForm } from './components/CreateLocationForm'
+import { t } from '@/lib/i18n'
 
 export default async function CreateLocationPage() {
   await requireOrgAdmin()
@@ -16,13 +17,13 @@ export default async function CreateLocationPage() {
         <Link href="/admin/locations">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Torna alla Lista
+            {t('admin.backToList')}
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Crea Nuova Location</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('admin.createLocation')}</h1>
           <p className="text-muted-foreground">
-            Aggiungi una nuova sede aziendale al sistema
+            {t('admin.createLocationDesc')}
           </p>
         </div>
       </div>
@@ -30,7 +31,7 @@ export default async function CreateLocationPage() {
       {/* Create Form */}
       <Card>
         <CardHeader>
-          <CardTitle>Informazioni Location</CardTitle>
+          <CardTitle>{t('admin.locationInfo')}</CardTitle>
         </CardHeader>
         <CardContent>
           <CreateLocationForm />

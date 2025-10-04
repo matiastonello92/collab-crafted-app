@@ -68,34 +68,34 @@ export function LocationInfoTab({ location }: Props) {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Informazioni Generali</CardTitle>
+          <CardTitle>{t('admin.locationInfoGeneral')}</CardTitle>
           <Button variant="outline" onClick={() => setIsEditing(true)}>
             <Edit2 className="mr-2 h-4 w-4" />
-            Modifica
+            {t('admin.edit')}
           </Button>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-2">
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium">Nome</Label>
+              <Label className="text-sm font-medium">{t('admin.locationName')}</Label>
               <p className="text-sm text-muted-foreground">{location.name}</p>
             </div>
             
             <div>
-              <Label className="text-sm font-medium">Città</Label>
+              <Label className="text-sm font-medium">{t('admin.locationCity')}</Label>
               <p className="text-sm text-muted-foreground">{location.city}</p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Paese</Label>
+              <Label className="text-sm font-medium">{t('admin.locationCountry')}</Label>
               <p className="text-sm text-muted-foreground">{location.country}</p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Status</Label>
+              <Label className="text-sm font-medium">{t('admin.status')}</Label>
               <div>
                 <Badge variant={location.is_active ? "default" : "secondary"}>
-                  {location.is_active ? "Attivo" : "Archiviato"}
+                  {location.is_active ? t('admin.active') : t('admin.archived')}
                 </Badge>
               </div>
             </div>
@@ -103,23 +103,23 @@ export function LocationInfoTab({ location }: Props) {
 
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium">Telefono</Label>
+              <Label className="text-sm font-medium">{t('admin.locationPhone')}</Label>
               <p className="text-sm text-muted-foreground">
-                {location.phone || 'Non specificato'}
+                {location.phone || t('admin.notSpecified')}
               </p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Email</Label>
+              <Label className="text-sm font-medium">{t('admin.locationEmail')}</Label>
               <p className="text-sm text-muted-foreground">
-                {location.email || 'Non specificato'}
+                {location.email || t('admin.notSpecified')}
               </p>
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Indirizzo</Label>
+              <Label className="text-sm font-medium">{t('admin.locationAddress')}</Label>
               <p className="text-sm text-muted-foreground">
-                {location.address || 'Non specificato'}
+                {location.address || t('admin.notSpecified')}
               </p>
             </div>
           </div>
@@ -131,22 +131,22 @@ export function LocationInfoTab({ location }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Modifica Informazioni</CardTitle>
+        <CardTitle>{t('admin.locationInfoEdit')}</CardTitle>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleCancel}>
             <X className="mr-2 h-4 w-4" />
-            Annulla
+            {t('admin.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             <Save className="mr-2 h-4 w-4" />
-            {loading ? 'Salvataggio...' : 'Salva'}
+            {loading ? t('admin.saving') : t('admin.save')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name">Nome *</Label>
+            <Label htmlFor="name">{t('admin.locationName')} *</Label>
             <Input
               id="name"
               value={formData.name}
@@ -156,7 +156,7 @@ export function LocationInfoTab({ location }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="city">Città</Label>
+            <Label htmlFor="city">{t('admin.locationCity')}</Label>
             <Input
               id="city"
               value={formData.city || ''}
@@ -165,7 +165,7 @@ export function LocationInfoTab({ location }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="country">Paese</Label>
+            <Label htmlFor="country">{t('admin.locationCountry')}</Label>
             <Input
               id="country"
               value={formData.country || ''}
@@ -174,7 +174,7 @@ export function LocationInfoTab({ location }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="is_active">Status</Label>
+            <Label htmlFor="is_active">{t('admin.status')}</Label>
             <Select
               value={formData.is_active ? "true" : "false"}
               onValueChange={(value) => setFormData({...formData, is_active: value === "true"})}
@@ -183,8 +183,8 @@ export function LocationInfoTab({ location }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="true">Attivo</SelectItem>
-                <SelectItem value="false">Archiviato</SelectItem>
+                <SelectItem value="true">{t('admin.active')}</SelectItem>
+                <SelectItem value="false">{t('admin.archived')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -192,7 +192,7 @@ export function LocationInfoTab({ location }: Props) {
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="phone">Telefono</Label>
+            <Label htmlFor="phone">{t('admin.locationPhone')}</Label>
             <Input
               id="phone"
               value={formData.phone || ''}
@@ -201,7 +201,7 @@ export function LocationInfoTab({ location }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('admin.locationEmail')}</Label>
             <Input
               id="email"
               type="email"
@@ -211,7 +211,7 @@ export function LocationInfoTab({ location }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="address">Indirizzo</Label>
+            <Label htmlFor="address">{t('admin.locationAddress')}</Label>
             <Textarea
               id="address"
               value={formData.address || ''}

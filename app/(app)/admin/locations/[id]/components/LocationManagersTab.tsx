@@ -108,13 +108,13 @@ export function LocationManagersTab({ locationId }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Aggiungi Responsabile
+            {t('admin.locationManagersAdd')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label htmlFor="managerEmail">Email del nuovo responsabile</Label>
+              <Label htmlFor="managerEmail">{t('admin.locationManagerEmail')}</Label>
               <Input
                 id="managerEmail"
                 type="email"
@@ -129,7 +129,7 @@ export function LocationManagersTab({ locationId }: Props) {
                 onClick={handleAddManager} 
                 disabled={!newManagerEmail.trim() || addLoading}
               >
-                {addLoading ? 'Aggiungendo...' : 'Aggiungi'}
+                {addLoading ? t('admin.adding') : t('admin.add')}
               </Button>
             </div>
           </div>
@@ -141,26 +141,26 @@ export function LocationManagersTab({ locationId }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Responsabili Attuali ({managers.length})
+            {t('admin.locationManagers')} ({managers.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-4">Caricamento...</div>
+            <div className="text-center py-4">{t('admin.loading')}</div>
           ) : managers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="mx-auto h-12 w-12 mb-4" />
-              <p>Nessun responsabile assegnato a questa location.</p>
-              <p className="text-sm">Usa il form sopra per aggiungere il primo responsabile.</p>
+              <p>{t('admin.noManagers')}</p>
+              <p className="text-sm">{t('admin.noManagersDesc')}</p>
             </div>
           ) : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Assegnato il</TableHead>
-                    <TableHead className="text-right">Azioni</TableHead>
+                    <TableHead>{t('admin.locationEmail')}</TableHead>
+                    <TableHead>{t('admin.locationManagerAssigned')}</TableHead>
+                    <TableHead className="text-right">{t('admin.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -182,7 +182,7 @@ export function LocationManagersTab({ locationId }: Props) {
                           onClick={() => handleRemoveManager(manager.email)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Rimuovi
+                          {t('admin.remove')}
                         </Button>
                       </TableCell>
                     </TableRow>

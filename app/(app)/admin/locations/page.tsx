@@ -18,6 +18,7 @@ import {
 import { Plus, MapPin, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { orgFeatureLimits } from '@/lib/server/features'
+import { t } from '@/lib/i18n'
 
 export default async function AdminLocationsPage() {
   // Require admin access
@@ -59,16 +60,16 @@ export default async function AdminLocationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestione Locations</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('admin.locationsTitle')}</h1>
           <p className="text-muted-foreground">
-            Gestisci le sedi aziendali e assegna i responsabili
+            {t('admin.locationsDesc')}
             {maxLocations && ` (${currentCount}/${maxLocations})`}
           </p>
         </div>
         <Button asChild disabled={!canAddLocation}>
           <Link href="/admin/locations/create">
             <Plus className="mr-2 h-4 w-4" />
-            Aggiungi Location
+            {t('admin.addLocation')}
           </Link>
         </Button>
       </div>
@@ -77,7 +78,7 @@ export default async function AdminLocationsPage() {
       {maxLocations && currentCount >= maxLocations && (
         <Alert>
           <AlertDescription>
-            Hai raggiunto il limite del piano ({maxLocations} locations). Aggiorna il tuo piano per aggiungerne altre.
+            {t('admin.planLimit')} ({maxLocations} locations). {t('admin.planLimitDesc')}
           </AlertDescription>
         </Alert>
       )}
@@ -85,22 +86,22 @@ export default async function AdminLocationsPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filtri</CardTitle>
+          <CardTitle>{t('admin.filters')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Input
-              placeholder="Cerca per nome o città..."
+              placeholder={t('admin.searchPlaceholder')}
               className="max-w-sm"
             />
             <Select defaultValue="all">
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('admin.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti</SelectItem>
-                <SelectItem value="active">Attivi</SelectItem>
-                <SelectItem value="inactive">Archiviati</SelectItem>
+                <SelectItem value="all">{t('admin.allStatuses')}</SelectItem>
+                <SelectItem value="active">{t('admin.active')}</SelectItem>
+                <SelectItem value="inactive">{t('admin.archived')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -120,11 +121,11 @@ export default async function AdminLocationsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Città</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ultimo Aggiornamento</TableHead>
-                  <TableHead className="text-right">Azioni</TableHead>
+                  <TableHead>{t('admin.locationName')}</TableHead>
+                  <TableHead>{t('admin.locationCity')}</TableHead>
+                  <TableHead>{t('admin.status')}</TableHead>
+                  <TableHead>{t('admin.lastUpdate')}</TableHead>
+                  <TableHead className="text-right">{t('admin.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -138,7 +139,7 @@ export default async function AdminLocationsPage() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={location.is_active ? "default" : "secondary"}>
-                        {location.is_active ? "Attivo" : "Archiviato"}
+                        {location.is_active ? t('admin.active') : t('admin.archived')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -148,7 +149,7 @@ export default async function AdminLocationsPage() {
                       <Link href={`/admin/locations/${location.id}`}>
                         <Button variant="outline" size="sm">
                           <Eye className="mr-2 h-4 w-4" />
-                          Apri
+                          {t('admin.openLocation')}
                         </Button>
                       </Link>
                     </TableCell>
