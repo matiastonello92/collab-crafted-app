@@ -52,7 +52,7 @@ interface InventoryHeader {
 }
 
 export function InventoryListPage({ category }: InventoryListPageProps) {
-  const { t, isMounted } = useTranslation();
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -125,7 +125,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
     return format(new Date(dateString), 'dd MMM yyyy HH:mm', { locale: it });
   };
 
-  if (!selectedLocation || permissionsLoading || isLoading || !isMounted) {
+  if (!selectedLocation || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex justify-between items-center">

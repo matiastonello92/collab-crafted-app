@@ -47,7 +47,7 @@ const statusColors = {
 };
 
 export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
-  const { t, isMounted } = useTranslation();
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
@@ -109,7 +109,7 @@ export function InventoryPage({ category, inventoryId }: InventoryPageProps) {
   const canApprove = isAdmin;
   const canComplete = true;
 
-  if (!selectedLocation || permissionsLoading || isLoading || !isMounted) {
+  if (!selectedLocation || permissionsLoading || isLoading) {
     return (
       <div className="container mx-auto py-8 space-y-6">
         <Card>
