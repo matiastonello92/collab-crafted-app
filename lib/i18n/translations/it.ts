@@ -518,6 +518,70 @@ export const it = {
     featureFlagsEnabledDefault: 'Attivo di default',
     featureFlagsSearch: 'Cerca feature flags...',
     featureFlagsPlaceholder: 'Placeholder UI: Questa è una versione dimostrativa.',
+    
+    // Feature Flags - Mock data
+    mockFlagAutoApproval: 'Auto Approval Ordini',
+    mockFlagAutoApprovalDesc: 'Approva automaticamente gli ordini sotto una certa soglia',
+    mockFlagRealtime: 'Chat Real-time',
+    mockFlagRealtimeDesc: 'Abilita messaggistica in tempo reale',
+    mockFlagTracking: 'Tracking Avanzato',
+    mockFlagTrackingDesc: 'Sistema di tracciamento avanzato per inventario',
+    
+    // Feature Flags - Table & Filters
+    featureFlagsFilters: 'Filtri',
+    featureFlagsOnlyGlobal: 'Solo globali',
+    featureFlagsOnlyLocation: 'Solo per location',
+    featureFlagsActiveTitle: 'Feature Flags Attivi',
+    featureFlagsActiveDesc: 'Gestisci le funzionalità attive per la tua organizzazione',
+    featureFlagsTableFlag: 'Flag',
+    featureFlagsTableModule: 'Modulo',
+    featureFlagsTableScope: 'Ambito',
+    featureFlagsTableStatus: 'Stato',
+    featureFlagsTableActions: 'Azioni',
+    featureFlagsScopeGlobalLabel: 'Globale',
+    featureFlagsStatusActive: 'Attivo',
+    featureFlagsStatusInactive: 'Inattivo',
+    featureFlagsEditAction: 'Modifica',
+    
+    // Feature Flags - Stats
+    featureFlagsStatsTotal: 'Flags Totali',
+    featureFlagsStatsActive: 'Flags Attivi',
+    featureFlagsStatsGlobal: 'Flags Globali',
+    featureFlagsStatsLocation: 'Per Location',
+    
+    // Timesheet Detail
+    timesheetDetailNotFound: 'Timesheet non trovato',
+    timesheetDetailApproving: 'Approvazione...',
+    timesheetDetailApproveButton: 'Approva e Blocca',
+    timesheetDetailRegularHours: 'Ore Ordinarie',
+    timesheetDetailOvertime: 'Straordinari',
+    timesheetDetailDaysWorked: 'Giorni Lavorati',
+    timesheetDetailBreakdown: 'Dettaglio',
+    timesheetDetailBreakTotal: 'Pause totali',
+    timesheetDetailPlannedHours: 'Ore pianificate',
+    timesheetDetailVariance: 'Differenza vs pianificate',
+    timesheetDetailNotes: 'Note',
+    timesheetDetailNotesPlaceholder: 'Aggiungi note al timesheet...',
+    timesheetDetailApprovedOn: 'Approvato il',
+    
+    // Location Schedule
+    locationScheduleTitle: 'Orari di Apertura',
+    locationScheduleClosed: 'Chiuso',
+    locationScheduleEdit: 'Modifica',
+    locationScheduleCancel: 'Annulla',
+    locationScheduleSaving: 'Salvataggio...',
+    locationScheduleSave: 'Salva',
+    locationScheduleMorning: 'Mattino',
+    locationScheduleAfternoon: 'Pomeriggio',
+    
+    // Days of week
+    dayMonday: 'Lunedì',
+    dayTuesday: 'Martedì',
+    dayWednesday: 'Mercoledì',
+    dayThursday: 'Giovedì',
+    dayFriday: 'Venerdì',
+    daySaturday: 'Sabato',
+    daySunday: 'Domenica',
   },
 
   // Planner & Shifts
@@ -2093,7 +2157,9 @@ export const it = {
       errorUpdatingSchedule: 'Impossibile salvare gli orari',
       errorAddingManager: 'Impossibile aggiungere il manager',
       errorRemovingManager: 'Impossibile rimuovere il manager',
-      nameRequired: 'Il nome della location è obbligatorio',
+      nameRequired: 'Location name is required',
+      uploadFailed: 'Upload failed',
+      createFailed: 'Failed to create location',
     },
 
     // Users
@@ -2164,7 +2230,9 @@ export const it = {
       errorLoading: 'Errore nel caricamento dei timesheets',
       errorProcessing: 'Errore durante la decisione',
       errorApproving: 'Errore nell\'approvazione del timesheet',
-      noEvents: 'Non ci sono eventi time clock nel mese corrente',
+      noEvents: 'No timeclock events in the current month',
+      notAuthenticated: 'Not authenticated',
+      approvalFailed: 'Approval failed',
     },
 
     // Compliance

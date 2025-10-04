@@ -16,54 +16,6 @@ import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { useRequireSession } from '@/lib/useRequireSession'
 import { useTranslation } from '@/lib/i18n'
 
-// Mock data for demonstration
-const mockFlags = [
-  {
-    id: '1',
-    module_code: 'orders',
-    flag_code: 'auto_approval',
-    name: 'Auto Approval Ordini',
-    description: 'Approva automaticamente gli ordini sotto una certa soglia',
-    enabled: false,
-    scope: 'global',
-    location_id: null,
-    location_name: null
-  },
-  {
-    id: '2',
-    module_code: 'chat',
-    flag_code: 'real_time',
-    name: 'Chat Real-time',
-    description: 'Abilita messaggistica in tempo reale',
-    enabled: true,
-    scope: 'global',
-    location_id: null,
-    location_name: null
-  },
-  {
-    id: '3',
-    module_code: 'inventory',
-    flag_code: 'advanced_tracking',
-    name: 'Tracking Avanzato',
-    description: 'Sistema di tracciamento avanzato per inventario',
-    enabled: true,
-    scope: 'location',
-    location_id: '1',
-    location_name: 'Lyon'
-  },
-  {
-    id: '4',
-    module_code: 'inventory',
-    flag_code: 'advanced_tracking',
-    name: 'Tracking Avanzato',
-    description: 'Sistema di tracciamento avanzato per inventario',
-    enabled: false,
-    scope: 'location',
-    location_id: '2',
-    location_name: 'Menton'
-  }
-]
-
 const mockModules = [
   'locations', 'inventory', 'technicians', 'incidents', 'suppliers', 'orders', 'tasks', 'chat', 'api'
 ]
@@ -74,6 +26,57 @@ export default function FeatureFlagsPage() {
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedScope, setSelectedScope] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+
+  // Check if user can manage feature flags
+  const canManageFlags = hasPermission('locations.manage_flags')
+  
+  // Mock data must be inside component to use t()
+  const mockFlags = [
+    {
+      id: '1',
+      module_code: 'orders',
+      flag_code: 'auto_approval',
+      name: t('admin.mockFlagAutoApproval'),
+      description: t('admin.mockFlagAutoApprovalDesc'),
+      enabled: false,
+      scope: 'global',
+      location_id: null,
+      location_name: null
+    },
+    {
+      id: '2',
+      module_code: 'chat',
+      flag_code: 'real_time',
+      name: t('admin.mockFlagRealtime'),
+      description: t('admin.mockFlagRealtimeDesc'),
+      enabled: true,
+      scope: 'global',
+      location_id: null,
+      location_name: null
+    },
+    {
+      id: '3',
+      module_code: 'inventory',
+      flag_code: 'advanced_tracking',
+      name: t('admin.mockFlagTracking'),
+      description: t('admin.mockFlagTrackingDesc'),
+      enabled: true,
+      scope: 'location',
+      location_id: '1',
+      location_name: 'Lyon'
+    },
+    {
+      id: '4',
+      module_code: 'inventory',
+      flag_code: 'advanced_tracking',
+      name: t('admin.mockFlagTracking'),
+      description: t('admin.mockFlagTrackingDesc'),
+      enabled: false,
+      scope: 'location',
+      location_id: '2',
+      location_name: 'Menton'
+    }
+  ]
 
   // Check if user can manage feature flags
   const canManageFlags = hasPermission('locations.manage_flags')
@@ -202,17 +205,17 @@ export default function FeatureFlagsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Filtri
+            {t('admin.featureFlagsFilters')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Select value={selectedModule} onValueChange={setSelectedModule}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tutti i moduli" />
+                <SelectValue placeholder={t('admin.featureFlagsAllModules')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti i moduli</SelectItem>
+                <SelectItem value="all">{t('admin.featureFlagsAllModules')}</SelectItem>
                 {mockModules.map((module) => (
                   <SelectItem key={module} value={module}>
                     {module}
@@ -223,12 +226,12 @@ export default function FeatureFlagsPage() {
             
             <Select value={selectedScope} onValueChange={setSelectedScope}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tutti gli ambiti" />
+                <SelectValue placeholder={t('admin.featureFlagsAllScopes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tutti gli ambiti</SelectItem>
-                <SelectItem value="global">Solo globali</SelectItem>
-                <SelectItem value="location">Solo per location</SelectItem>
+                <SelectItem value="all">{t('admin.featureFlagsAllScopes')}</SelectItem>
+                <SelectItem value="global">{t('admin.featureFlagsOnlyGlobal')}</SelectItem>
+                <SelectItem value="location">{t('admin.featureFlagsOnlyLocation')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -240,21 +243,21 @@ export default function FeatureFlagsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Flag className="h-5 w-5" />
-            Feature Flags Attivi
+            {t('admin.featureFlagsActiveTitle')}
           </CardTitle>
           <CardDescription>
-            Gestisci le funzionalità attive per la tua organizzazione
+            {t('admin.featureFlagsActiveDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Flag</TableHead>
-                <TableHead>Modulo</TableHead>
-                <TableHead>Ambito</TableHead>
-                <TableHead>Stato</TableHead>
-                <TableHead>Azioni</TableHead>
+                <TableHead>{t('admin.featureFlagsTableFlag')}</TableHead>
+                <TableHead>{t('admin.featureFlagsTableModule')}</TableHead>
+                <TableHead>{t('admin.featureFlagsTableScope')}</TableHead>
+                <TableHead>{t('admin.featureFlagsTableStatus')}</TableHead>
+                <TableHead>{t('admin.featureFlagsTableActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -279,7 +282,7 @@ export default function FeatureFlagsPage() {
                       {flag.scope === 'global' ? (
                         <>
                           <Globe className="h-4 w-4" />
-                          <span>Globale</span>
+                          <span>{t('admin.featureFlagsScopeGlobalLabel')}</span>
                         </>
                       ) : (
                         <>
@@ -296,13 +299,13 @@ export default function FeatureFlagsPage() {
                         onCheckedChange={() => toggleFlag(flag.id)}
                       />
                       <Badge variant={flag.enabled ? 'default' : 'secondary'}>
-                        {flag.enabled ? 'Attivo' : 'Inattivo'}
+                        {flag.enabled ? t('admin.featureFlagsStatusActive') : t('admin.featureFlagsStatusInactive')}
                       </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm">
-                      Modifica
+                      {t('admin.featureFlagsEditAction')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -318,7 +321,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Totali</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('admin.featureFlagsStatsTotal')}</p>
                 <p className="text-2xl font-bold">{mockFlags.length}</p>
               </div>
               <Flag className="h-8 w-8 text-muted-foreground" />
@@ -330,7 +333,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Attivi</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('admin.featureFlagsStatsActive')}</p>
                 <p className="text-2xl font-bold text-green-600">
                   {mockFlags.filter(f => f.enabled).length}
                 </p>
@@ -346,7 +349,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Flags Globali</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('admin.featureFlagsStatsGlobal')}</p>
                 <p className="text-2xl font-bold">
                   {mockFlags.filter(f => f.scope === 'global').length}
                 </p>
@@ -360,7 +363,7 @@ export default function FeatureFlagsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Per Location</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('admin.featureFlagsStatsLocation')}</p>
                 <p className="text-2xl font-bold">
                   {mockFlags.filter(f => f.scope === 'location').length}
                 </p>

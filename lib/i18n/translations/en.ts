@@ -520,6 +520,70 @@ export const en = {
     featureFlagsEnabledDefault: 'Enabled by default',
     featureFlagsSearch: 'Search feature flags...',
     featureFlagsPlaceholder: 'Placeholder UI: This is a demo version.',
+    
+    // Feature Flags - Mock data
+    mockFlagAutoApproval: 'Auto Approval Orders',
+    mockFlagAutoApprovalDesc: 'Automatically approve orders below a certain threshold',
+    mockFlagRealtime: 'Real-time Chat',
+    mockFlagRealtimeDesc: 'Enable real-time messaging',
+    mockFlagTracking: 'Advanced Tracking',
+    mockFlagTrackingDesc: 'Advanced tracking system for inventory',
+    
+    // Feature Flags - Table & Filters
+    featureFlagsFilters: 'Filters',
+    featureFlagsOnlyGlobal: 'Global only',
+    featureFlagsOnlyLocation: 'Per location only',
+    featureFlagsActiveTitle: 'Active Feature Flags',
+    featureFlagsActiveDesc: 'Manage active features for your organization',
+    featureFlagsTableFlag: 'Flag',
+    featureFlagsTableModule: 'Module',
+    featureFlagsTableScope: 'Scope',
+    featureFlagsTableStatus: 'Status',
+    featureFlagsTableActions: 'Actions',
+    featureFlagsScopeGlobalLabel: 'Global',
+    featureFlagsStatusActive: 'Active',
+    featureFlagsStatusInactive: 'Inactive',
+    featureFlagsEditAction: 'Edit',
+    
+    // Feature Flags - Stats
+    featureFlagsStatsTotal: 'Total Flags',
+    featureFlagsStatsActive: 'Active Flags',
+    featureFlagsStatsGlobal: 'Global Flags',
+    featureFlagsStatsLocation: 'Per Location',
+    
+    // Timesheet Detail
+    timesheetDetailNotFound: 'Timesheet not found',
+    timesheetDetailApproving: 'Approving...',
+    timesheetDetailApproveButton: 'Approve and Lock',
+    timesheetDetailRegularHours: 'Regular Hours',
+    timesheetDetailOvertime: 'Overtime',
+    timesheetDetailDaysWorked: 'Days Worked',
+    timesheetDetailBreakdown: 'Breakdown',
+    timesheetDetailBreakTotal: 'Total breaks',
+    timesheetDetailPlannedHours: 'Planned hours',
+    timesheetDetailVariance: 'Variance vs planned',
+    timesheetDetailNotes: 'Notes',
+    timesheetDetailNotesPlaceholder: 'Add notes to timesheet...',
+    timesheetDetailApprovedOn: 'Approved on',
+    
+    // Location Schedule
+    locationScheduleTitle: 'Opening Hours',
+    locationScheduleClosed: 'Closed',
+    locationScheduleEdit: 'Edit',
+    locationScheduleCancel: 'Cancel',
+    locationScheduleSaving: 'Saving...',
+    locationScheduleSave: 'Save',
+    locationScheduleMorning: 'Morning',
+    locationScheduleAfternoon: 'Afternoon',
+    
+    // Days of week
+    dayMonday: 'Monday',
+    dayTuesday: 'Tuesday',
+    dayWednesday: 'Wednesday',
+    dayThursday: 'Thursday',
+    dayFriday: 'Friday',
+    daySaturday: 'Saturday',
+    daySunday: 'Sunday',
   },
 
   // Planner & Shifts
@@ -1970,6 +2034,8 @@ export const en = {
       errorAddingManager: 'Unable to add manager',
       errorRemovingManager: 'Unable to remove manager',
       nameRequired: 'Location name is required',
+      uploadFailed: 'Upload failed',
+      createFailed: 'Failed to create location',
     },
 
     // Users
@@ -2041,6 +2107,8 @@ export const en = {
       errorProcessing: 'Error processing decision',
       errorApproving: 'Failed to approve timesheet',
       noEvents: 'No time clock events in current month',
+      notAuthenticated: 'Not authenticated',
+      approvalFailed: 'Approval failed',
     },
 
     // Compliance

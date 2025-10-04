@@ -23,13 +23,13 @@ interface Props {
 }
 
 const DAYS = [
-  { key: 'monday', label: 'Lunedì' },
-  { key: 'tuesday', label: 'Martedì' },
-  { key: 'wednesday', label: 'Mercoledì' },
-  { key: 'thursday', label: 'Giovedì' },
-  { key: 'friday', label: 'Venerdì' },
-  { key: 'saturday', label: 'Sabato' },
-  { key: 'sunday', label: 'Domenica' },
+  { key: 'monday' },
+  { key: 'tuesday' },
+  { key: 'wednesday' },
+  { key: 'thursday' },
+  { key: 'friday' },
+  { key: 'saturday' },
+  { key: 'sunday' },
 ]
 
 export function LocationScheduleTab({ location }: Props) {
@@ -114,7 +114,7 @@ export function LocationScheduleTab({ location }: Props) {
           <div className="space-y-4">
             {DAYS.map(day => (
               <div key={day.key} className="flex items-center justify-between border-b pb-2">
-                <span className="font-medium">{day.label}</span>
+                <span className="font-medium">{t(`admin.day${day.key.charAt(0).toUpperCase() + day.key.slice(1)}`)}</span>
                 <div className="text-sm text-muted-foreground">
                   {openDays.includes(day.key) ? (
                     <div className="space-x-4">

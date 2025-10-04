@@ -97,7 +97,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <p className="text-center text-muted-foreground">Caricamento...</p>
+        <p className="text-center text-muted-foreground">{t('admin.loading')}</p>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
   if (!timesheet) {
     return (
       <div className="container mx-auto p-6">
-        <p className="text-center text-muted-foreground">Timesheet non trovato</p>
+        <p className="text-center text-muted-foreground">{t('admin.timesheetDetailNotFound')}</p>
       </div>
     )
   }
@@ -141,7 +141,7 @@ export default function TimesheetDetailClient({ timesheetId }: { timesheetId: st
         {!timesheet.approved_at && (
           <Button onClick={handleApprove} disabled={approving}>
             <CheckCircle className="w-4 h-4 mr-2" />
-            {approving ? 'Approvazione...' : 'Approva e Blocca'}
+            {approving ? t('admin.timesheetDetailApproving') : t('admin.timesheetDetailApproveButton')}
           </Button>
         )}
       </div>
