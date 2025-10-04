@@ -96,6 +96,7 @@ export const en = {
     expandNav: 'Expand navigation menu',
     collapseNav: 'Collapse navigation menu',
     openMenu: 'Open menu',
+    toggleLanguage: 'Change language',
   },
 
   // Recipe Categories

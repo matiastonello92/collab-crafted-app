@@ -7,6 +7,7 @@ import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
 
 export default function HeaderClient({
@@ -123,6 +124,8 @@ export default function HeaderClient({
 
         <div className="flex items-center gap-1 rounded-full border border-border/60 bg-card/80 px-1.5 py-1 shadow-sm">
           <ThemeToggle />
+          <span className="h-6 w-px rounded-full bg-border/60" aria-hidden="true" />
+          <LanguageSwitcher />
           <span className="h-6 w-px rounded-full bg-border/60" aria-hidden="true" />
           <UserDropdown />
         </div>
