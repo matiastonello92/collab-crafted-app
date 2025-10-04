@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddItemDialog } from './AddItemDialog';
+import { useTranslation } from '@/lib/i18n';
 
 interface InventoryLine {
   id: string;
@@ -28,6 +29,7 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ headerId, canManage, canEdit, locationId, category, onHeaderUpdate }: InventoryTableProps) {
+  const { t } = useTranslation();
   const [lines, setLines] = useState<InventoryLine[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingItems, setSavingItems] = useState<Set<string>>(new Set());
@@ -41,18 +43,18 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
         setLines(data.lines || []);
       }
     } catch (error) {
-      console.error('Error loading lines:', error);
+      console.error(t('inventory.toast.errorLoadingProducts'), error);
     } finally {
       setLoading(false);
     }
-  }, [headerId]);
+  }, [headerId, t]);
 
   useEffect(() => {
     loadLines();
   }, [loadLines]);
 
   const handleDeleteLine = async (lineId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo prodotto dall\'inventario?')) return;
+    if (!confirm(t('inventory.confirmations.deleteItem'))) return;
     
     try {
       const response = await fetch(`/api/v1/inventory/lines?id=${lineId}`, {
@@ -60,17 +62,17 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
       });
 
       if (response.ok) {
-        toast.success('Prodotto eliminato');
+        toast.success(t('inventory.toast.productDeleted'));
         loadLines();
         if (onHeaderUpdate) {
           onHeaderUpdate();
         }
       } else {
-        toast.error('Errore durante l\'eliminazione');
+        toast.error(t('inventory.toast.errorDeletingProduct'));
       }
     } catch (error) {
-      console.error('Error deleting line:', error);
-      toast.error('Errore durante l\'eliminazione');
+      console.error(t('inventory.toast.errorDeletingProduct'), error);
+      toast.error(t('inventory.toast.errorDeletingProduct'));
     }
   };
 
@@ -111,11 +113,11 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
                 onHeaderUpdate();
               }
             } else {
-              toast.error("Errore durante il salvataggio");
+              toast.error(t('inventory.toast.errorUpdatingQuantity'));
             }
           } catch (error) {
-            console.error('Error updating quantity:', error);
-            toast.error("Errore durante il salvataggio");
+            console.error(t('inventory.toast.errorUpdatingQuantity'), error);
+            toast.error(t('inventory.toast.errorUpdatingQuantity'));
           } finally {
             setSavingItems(prev => {
               const newSet = new Set(prev);
@@ -129,11 +131,11 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
         timeouts.set(lineId, timeout);
       };
     })(),
-    [onHeaderUpdate]
+    [onHeaderUpdate, t]
   );
 
   if (loading) {
-    return <div>Caricamento...</div>;
+    return <div>{t('inventory.loading.products')}</div>;
   }
 
   return (
@@ -142,7 +144,7 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
         <div className="flex justify-end">
           <Button onClick={() => setShowAddDialog(true)} className="gap-2">
             <Plus className="h-4 w-4" />
-            Aggiungi Prodotto
+            {t('inventory.buttons.addProduct')}
           </Button>
         </div>
       )}
@@ -151,13 +153,13 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Articolo</TableHead>
-              <TableHead>Sezione</TableHead>
-              <TableHead>U.M.</TableHead>
-              <TableHead>Quantità</TableHead>
-              <TableHead>Prezzo Unitario</TableHead>
-              <TableHead>Valore</TableHead>
-              {canManage && <TableHead>Azioni</TableHead>}
+              <TableHead>{t('inventory.labels.product')}</TableHead>
+              <TableHead>{t('inventory.labels.section')}</TableHead>
+              <TableHead>{t('inventory.labels.uom')}</TableHead>
+              <TableHead>{t('inventory.labels.quantity')}</TableHead>
+              <TableHead>{t('inventory.labels.unitPrice')}</TableHead>
+              <TableHead>{t('inventory.labels.totalValue')}</TableHead>
+              {canManage && <TableHead>{t('common.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -166,7 +168,7 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
                 <TableCell>{line.name_snapshot}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="text-xs">
-                    Generico
+                    {t('inventory.labels.none')}
                   </Badge>
                 </TableCell>
                 <TableCell>{line.uom_snapshot}</TableCell>
@@ -192,7 +194,7 @@ export function InventoryTable({ headerId, canManage, canEdit, locationId, categ
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleDeleteLine(line.id)}
-                      title="Elimina prodotto"
+                      title={t('inventory.buttons.delete')}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface EditProductDialogProps {
   product: {
@@ -23,13 +24,8 @@ interface EditProductDialogProps {
   onSuccess: () => void;
 }
 
-const categoryOptions = {
-  kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
-  bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
-  cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
-};
-
 export function EditProductDialog({ product, category, onClose, onSuccess }: EditProductDialogProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: product.name,
     uom: product.uom,
@@ -40,11 +36,38 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
   });
   const [loading, setLoading] = useState(false);
 
+  const getCategoryOptions = (cat: string) => {
+    if (cat === 'kitchen') return [
+      t('inventory.productCategories.kitchen.fresh'),
+      t('inventory.productCategories.kitchen.frozen'),
+      t('inventory.productCategories.kitchen.dry'),
+      t('inventory.productCategories.kitchen.spices'),
+      t('inventory.productCategories.kitchen.oils'),
+      t('inventory.productCategories.kitchen.other')
+    ];
+    if (cat === 'bar') return [
+      t('inventory.productCategories.bar.spirits'),
+      t('inventory.productCategories.bar.wines'),
+      t('inventory.productCategories.bar.beers'),
+      t('inventory.productCategories.bar.softDrinks'),
+      t('inventory.productCategories.bar.mixers'),
+      t('inventory.productCategories.bar.garnishes'),
+      t('inventory.productCategories.bar.other')
+    ];
+    return [
+      t('inventory.productCategories.cleaning.detergents'),
+      t('inventory.productCategories.cleaning.sanitizers'),
+      t('inventory.productCategories.cleaning.tools'),
+      t('inventory.productCategories.cleaning.disposables'),
+      t('inventory.productCategories.cleaning.other')
+    ];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name.trim() || !formData.uom.trim() || !formData.default_unit_price) {
-      toast.error('Compila tutti i campi obbligatori');
+      toast.error(t('inventory.toast.allFieldsRequired'));
       return;
     }
 
@@ -65,15 +88,15 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
       });
 
       if (response.ok) {
-        toast.success('Prodotto aggiornato con successo');
+        toast.success(t('inventory.toast.productUpdated'));
         onSuccess();
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Errore durante l\'aggiornamento del prodotto');
+        toast.error(error.error || t('inventory.toast.errorUpdatingProduct'));
       }
     } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error('Errore durante l\'aggiornamento del prodotto');
+      console.error(t('inventory.toast.errorUpdatingProduct'), error);
+      toast.error(t('inventory.toast.errorUpdatingProduct'));
     } finally {
       setLoading(false);
     }
@@ -83,12 +106,12 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Modifica Prodotto</DialogTitle>
+          <DialogTitle>{t('inventory.dialogs.editProductTitle')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Nome Prodotto *</Label>
+            <Label htmlFor="edit-name">{t('inventory.labels.name')} *</Label>
             <Input
               id="edit-name"
               value={formData.name}
@@ -97,16 +120,16 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-category">Categoria Prodotto</Label>
+            <Label htmlFor="edit-category">{t('inventory.labels.category')}</Label>
             <Select
               value={formData.product_category}
               onValueChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleziona categoria" />
+                <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
               </SelectTrigger>
               <SelectContent>
-                {categoryOptions[category].map((cat) => (
+                {getCategoryOptions(category).map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>
@@ -116,7 +139,7 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-uom">Unità di Misura *</Label>
+            <Label htmlFor="edit-uom">{t('inventory.labels.uom')} *</Label>
             <Select
               value={formData.showCustomUom ? 'custom' : formData.uom}
               onValueChange={(value) => {
@@ -137,12 +160,12 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
                 <SelectItem value="ml">ml</SelectItem>
                 <SelectItem value="cl">cl</SelectItem>
                 <SelectItem value="Pce">Pce</SelectItem>
-                <SelectItem value="custom">Altro...</SelectItem>
+                <SelectItem value="custom">{t('inventory.placeholders.customUnit')}</SelectItem>
               </SelectContent>
             </Select>
             {formData.showCustomUom && (
               <Input
-                placeholder="Inserisci unità personalizzata"
+                placeholder={t('inventory.placeholders.enterCustomUnit')}
                 value={formData.uom}
                 onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
               />
@@ -150,7 +173,7 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-price">Prezzo Unitario (€) *</Label>
+            <Label htmlFor="edit-price">{t('inventory.labels.unitPrice')} (€) *</Label>
             <Input
               id="edit-price"
               type="number"
@@ -166,15 +189,15 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
               checked={formData.is_active}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
             />
-            <Label htmlFor="edit-active">Prodotto attivo</Label>
+            <Label htmlFor="edit-active">{t('inventory.status.active')}</Label>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Annulla
+              {t('inventory.buttons.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Salvataggio...' : 'Salva Modifiche'}
+              {loading ? t('inventory.loading.saving') : t('inventory.buttons.saveChanges')}
             </Button>
           </div>
         </form>

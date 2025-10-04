@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface CatalogItem {
   id: string;
@@ -35,6 +36,7 @@ export function AddItemDialog({
   locationId,
   category
 }: AddItemDialogProps) {
+  const { t } = useTranslation();
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -52,10 +54,31 @@ export function AddItemDialog({
   });
 
   // Category options per department
-  const categoryOptions = {
-    kitchen: ['Carne', 'Pesce', 'Vegetali', 'Latticini', 'Conserve', 'Surgelati'],
-    bar: ['Vini', 'Birre', 'Soft Drink', 'Consumabili', 'Altro'],
-    cleaning: ['Pulizia', 'Consumabili', 'Manutenzione', 'Altro']
+  const getCategoryOptions = (cat: string) => {
+    if (cat === 'kitchen') return [
+      t('inventory.productCategories.kitchen.fresh'),
+      t('inventory.productCategories.kitchen.frozen'),
+      t('inventory.productCategories.kitchen.dry'),
+      t('inventory.productCategories.kitchen.spices'),
+      t('inventory.productCategories.kitchen.oils'),
+      t('inventory.productCategories.kitchen.other')
+    ];
+    if (cat === 'bar') return [
+      t('inventory.productCategories.bar.spirits'),
+      t('inventory.productCategories.bar.wines'),
+      t('inventory.productCategories.bar.beers'),
+      t('inventory.productCategories.bar.softDrinks'),
+      t('inventory.productCategories.bar.mixers'),
+      t('inventory.productCategories.bar.garnishes'),
+      t('inventory.productCategories.bar.other')
+    ];
+    return [
+      t('inventory.productCategories.cleaning.detergents'),
+      t('inventory.productCategories.cleaning.sanitizers'),
+      t('inventory.productCategories.cleaning.tools'),
+      t('inventory.productCategories.cleaning.disposables'),
+      t('inventory.productCategories.cleaning.other')
+    ];
   };
 
   useEffect(() => {
@@ -72,14 +95,14 @@ export function AddItemDialog({
         setCatalogItems(data.items || []);
       }
     } catch (error) {
-      console.error('Error loading catalog items:', error);
-      toast.error('Errore nel caricamento prodotti');
+      console.error(t('inventory.toast.errorLoadingProducts'), error);
+      toast.error(t('inventory.toast.errorLoadingProducts'));
     }
   };
 
   const handleAddItem = async () => {
     if (!selectedItem) {
-      toast.error('Seleziona un prodotto');
+      toast.error(t('inventory.toast.selectProduct'));
       return;
     }
 
@@ -102,16 +125,16 @@ export function AddItemDialog({
       });
 
       if (response.ok) {
-        toast.success('Prodotto aggiunto con successo');
+        toast.success(t('inventory.toast.productAdded'));
         onSuccess();
         resetForm();
         onClose();
       } else {
-        toast.error('Errore durante l\'aggiunta del prodotto');
+        toast.error(t('inventory.toast.errorAddingProduct'));
       }
     } catch (error) {
-      console.error('Error adding item:', error);
-      toast.error('Errore durante l\'aggiunta del prodotto');
+      console.error(t('inventory.toast.errorAddingProduct'), error);
+      toast.error(t('inventory.toast.errorAddingProduct'));
     } finally {
       setLoading(false);
     }
@@ -119,7 +142,7 @@ export function AddItemDialog({
 
   const handleCreateAndAdd = async () => {
     if (!newProduct.name.trim() || !newProduct.uom.trim() || !newProduct.default_unit_price || !newProduct.product_category) {
-      toast.error('Compila tutti i campi obbligatori (inclusa categoria)');
+      toast.error(t('inventory.toast.allFieldsRequired'));
       return;
     }
 
@@ -140,7 +163,7 @@ export function AddItemDialog({
       });
 
       if (!createResponse.ok) {
-        toast.error('Errore durante la creazione del prodotto');
+        toast.error(t('inventory.toast.errorCreatingProduct'));
         return;
       }
 
@@ -161,16 +184,16 @@ export function AddItemDialog({
       });
 
       if (addResponse.ok) {
-        toast.success('Prodotto creato e aggiunto con successo');
+        toast.success(t('inventory.toast.productAdded'));
         onSuccess();
         resetForm();
         onClose();
       } else {
-        toast.error('Prodotto creato ma errore nell\'aggiunta all\'inventario');
+        toast.error(t('inventory.toast.errorAddingProduct'));
       }
     } catch (error) {
-      console.error('Error creating and adding product:', error);
-      toast.error('Errore durante l\'operazione');
+      console.error(t('inventory.toast.errorCreatingProduct'), error);
+      toast.error(t('inventory.toast.errorCreatingProduct'));
     } finally {
       setLoading(false);
     }
@@ -194,21 +217,21 @@ export function AddItemDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Aggiungi Prodotto all'Inventario</DialogTitle>
+          <DialogTitle>{t('inventory.dialogs.addItemTitle')}</DialogTitle>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="existing">Prodotto Esistente</TabsTrigger>
-            <TabsTrigger value="new">Nuovo Prodotto</TabsTrigger>
+            <TabsTrigger value="existing">{t('inventory.tabs.existing')}</TabsTrigger>
+            <TabsTrigger value="new">{t('inventory.tabs.newProduct')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="existing" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="product">Prodotto</Label>
+              <Label htmlFor="product">{t('inventory.labels.product')}</Label>
               <Select value={selectedItem} onValueChange={setSelectedItem}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona un prodotto" />
+                  <SelectValue placeholder={t('inventory.placeholders.selectProduct')} />
                 </SelectTrigger>
                 <SelectContent>
                   {catalogItems.map((item) => (
@@ -221,7 +244,7 @@ export function AddItemDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantità</Label>
+              <Label htmlFor="quantity">{t('inventory.labels.quantity')}</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -232,40 +255,28 @@ export function AddItemDialog({
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="add-to-template"
-                checked={addToTemplate}
-                onCheckedChange={setAddToTemplate}
-                disabled
-              />
-              <Label htmlFor="add-to-template" className="opacity-50">
-                Aggiungi anche al template (non disponibile)
-              </Label>
-            </div>
-
             <div className="flex justify-end space-x-2 pt-4">
               <Button variant="outline" onClick={onClose}>
-                Annulla
+                {t('inventory.buttons.cancel')}
               </Button>
               <Button onClick={handleAddItem} disabled={loading}>
-                {loading ? 'Aggiungendo...' : 'Aggiungi'}
+                {loading ? t('inventory.loading.saving') : t('inventory.buttons.add')}
               </Button>
             </div>
           </TabsContent>
 
           <TabsContent value="new" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-category">Categoria Prodotto *</Label>
+              <Label htmlFor="new-category">{t('inventory.labels.category')} *</Label>
               <Select
                 value={newProduct.product_category}
                 onValueChange={(value) => setNewProduct(prev => ({ ...prev, product_category: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona categoria" />
+                  <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {(categoryOptions[category as keyof typeof categoryOptions] || []).map((cat: string) => (
+                  {getCategoryOptions(category).map((cat: string) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
@@ -275,17 +286,17 @@ export function AddItemDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-name">Nome Prodotto *</Label>
+              <Label htmlFor="new-name">{t('inventory.labels.name')} *</Label>
               <Input
                 id="new-name"
-                placeholder="Es. Olio Extra Vergine"
+                placeholder={t('inventory.placeholders.enterName')}
                 value={newProduct.name}
                 onChange={(e) => setNewProduct(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-uom">Unità di Misura *</Label>
+              <Label htmlFor="new-uom">{t('inventory.labels.uom')} *</Label>
               <Select
                 value={newProduct.uom}
                 onValueChange={(value) => {
@@ -297,7 +308,7 @@ export function AddItemDialog({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleziona unità di misura" />
+                  <SelectValue placeholder={t('inventory.placeholders.selectUom')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Kg">Kg</SelectItem>
@@ -306,12 +317,12 @@ export function AddItemDialog({
                   <SelectItem value="ml">ml</SelectItem>
                   <SelectItem value="cl">cl</SelectItem>
                   <SelectItem value="Pce">Pce</SelectItem>
-                  <SelectItem value="custom">Altro...</SelectItem>
+                  <SelectItem value="custom">{t('inventory.placeholders.customUnit')}</SelectItem>
                 </SelectContent>
               </Select>
               {newProduct.showCustomUom && (
                 <Input
-                  placeholder="Inserisci unità personalizzata"
+                  placeholder={t('inventory.placeholders.enterCustomUnit')}
                   value={newProduct.uom}
                   onChange={(e) => setNewProduct(prev => ({ ...prev, uom: e.target.value }))}
                 />
@@ -319,19 +330,19 @@ export function AddItemDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-price">Prezzo Unitario (€) *</Label>
+              <Label htmlFor="new-price">{t('inventory.labels.unitPrice')} (€) *</Label>
               <Input
                 id="new-price"
                 type="number"
                 step="0.01"
-                placeholder="0.00"
+                placeholder={t('inventory.placeholders.enterPrice')}
                 value={newProduct.default_unit_price}
                 onChange={(e) => setNewProduct(prev => ({ ...prev, default_unit_price: e.target.value }))}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-quantity">Quantità</Label>
+              <Label htmlFor="new-quantity">{t('inventory.labels.quantity')}</Label>
               <Input
                 id="new-quantity"
                 type="number"
@@ -344,10 +355,10 @@ export function AddItemDialog({
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button variant="outline" onClick={onClose}>
-                Annulla
+                {t('inventory.buttons.cancel')}
               </Button>
               <Button onClick={handleCreateAndAdd} disabled={loading}>
-                {loading ? 'Creando...' : 'Crea e Aggiungi'}
+                {loading ? t('inventory.loading.creating') : t('inventory.buttons.createAndAdd')}
               </Button>
             </div>
           </TabsContent>

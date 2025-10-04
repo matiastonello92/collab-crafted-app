@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useTranslation } from '@/lib/i18n';
 
 interface CreateInventoryModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export function CreateInventoryModal({
   locationId,
   category
 }: CreateInventoryModalProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -57,7 +59,7 @@ export function CreateInventoryModal({
         }
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
+      console.error(t('inventory.toast.errorLoadingTemplate'), error);
     }
   };
 
@@ -83,16 +85,16 @@ export function CreateInventoryModal({
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Inventario creato con successo');
+        toast.success(t('inventory.toast.inventoryCreated'));
         onSuccess(data.id);
         onClose();
         setNotes('');
       } else {
-        toast.error(data.error || 'Errore durante la creazione dell\'inventario');
+        toast.error(data.error || t('inventory.toast.errorCreatingInventory'));
       }
     } catch (error) {
-      console.error('Error creating inventory:', error);
-      toast.error('Errore durante la creazione dell\'inventario');
+      console.error(t('inventory.toast.errorCreatingInventory'), error);
+      toast.error(t('inventory.toast.errorCreatingInventory'));
     } finally {
       setLoading(false);
     }
@@ -105,27 +107,27 @@ export function CreateInventoryModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Crea Nuovo Inventario</DialogTitle>
+          <DialogTitle>{t('inventory.dialogs.createInventoryTitle')}</DialogTitle>
         </DialogHeader>
 
         <Tabs value={mode} onValueChange={(value) => setMode(value as any)} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="template" disabled={!hasTemplates}>
-              Da Template
+              {t('inventory.tabs.fromTemplate')}
             </TabsTrigger>
-            <TabsTrigger value="last">Da Ultimo</TabsTrigger>
+            <TabsTrigger value="last">{t('inventory.tabs.fromLast')}</TabsTrigger>
             <TabsTrigger value="empty" disabled={!canCreateEmpty}>
-              Vuoto
+              {t('inventory.tabs.empty')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="template" className="space-y-4">
             {hasTemplates ? (
               <div className="space-y-2">
-                <Label htmlFor="template">Template</Label>
+                <Label htmlFor="template">{t('inventory.labels.none')}</Label>
                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleziona un template" />
+                    <SelectValue placeholder={t('inventory.placeholders.selectProduct')} />
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map((template) => (
@@ -138,7 +140,7 @@ export function CreateInventoryModal({
               </div>
             ) : (
               <div className="text-center text-muted-foreground py-4">
-                <p>Nessun template disponibile per questa categoria.</p>
+                <p>{t('inventory.empty.noTemplates')}</p>
                 <p className="text-sm">Contatta il tuo Manager per crearne uno.</p>
               </div>
             )}
@@ -146,22 +148,22 @@ export function CreateInventoryModal({
 
           <TabsContent value="last" className="space-y-4">
             <div className="text-center text-muted-foreground py-2">
-              <p>L'inventario sarà pre-compilato con le quantità dell'ultimo inventario approvato.</p>
+              <p>{t('inventory.createModes.last')}</p>
             </div>
           </TabsContent>
 
           <TabsContent value="empty" className="space-y-4">
             <div className="text-center text-muted-foreground py-2">
-              <p>L'inventario sarà creato vuoto. Dovrai aggiungere manualmente tutti i prodotti.</p>
+              <p>{t('inventory.createModes.empty')}</p>
             </div>
           </TabsContent>
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="notes">Note (opzionali)</Label>
+          <Label htmlFor="notes">{t('inventory.labels.notes')}</Label>
           <Textarea
             id="notes"
-            placeholder="Aggiungi note per questo inventario..."
+            placeholder={t('inventory.placeholders.enterNotes')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
@@ -170,13 +172,13 @@ export function CreateInventoryModal({
 
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={onClose}>
-            Annulla
+            {t('inventory.buttons.cancel')}
           </Button>
           <Button 
             onClick={handleCreateInventory} 
             disabled={loading || (mode === 'template' && !selectedTemplate)}
           >
-            {loading ? 'Creazione...' : 'Crea Inventario'}
+            {loading ? t('inventory.loading.creating') : t('inventory.buttons.createInventory')}
           </Button>
         </div>
       </DialogContent>
