@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { User, Mail, MapPin, Shield, Settings, Building } from 'lucide-react'
 import Link from 'next/link'
 import ClientOnly from '@/components/ClientOnly'
+import { getTranslation } from '@/lib/i18n/server'
 
 export const runtime = 'nodejs'
 
@@ -99,6 +100,7 @@ async function getUserData(): Promise<{
 
 export default async function MePage() {
   const { profile, roles, locations } = await getUserData()
+  const t = await getTranslation()
 
   const displayName = profile.first_name && profile.last_name
     ? `${profile.first_name} ${profile.last_name}`
@@ -111,10 +113,10 @@ export default async function MePage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <User className="h-8 w-8" />
-            Il Mio Profilo
+            {t('me.title')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Visualizza le tue informazioni personali e le tue assegnazioni
+            {t('me.description')}
           </p>
         </div>
       </div>
@@ -124,10 +126,10 @@ export default async function MePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Informazioni Personali
+            {t('me.personalInfo')}
           </CardTitle>
           <CardDescription>
-            I tuoi dati personali e di contatto
+            {t('me.personalInfoDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -135,7 +137,7 @@ export default async function MePage() {
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Nome Completo</p>
+                <p className="text-sm font-medium">{t('me.fullName')}</p>
                 <p className="text-sm text-muted-foreground">
                   {displayName}
                 </p>
@@ -145,7 +147,7 @@ export default async function MePage() {
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Email</p>
+                <p className="text-sm font-medium">{t('me.email')}</p>
                 <p className="text-sm text-muted-foreground">
                   {profile.email}
                 </p>
@@ -156,7 +158,7 @@ export default async function MePage() {
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Telefono</p>
+                  <p className="text-sm font-medium">{t('me.phone')}</p>
                   <p className="text-sm text-muted-foreground">
                     {profile.phone}
                   </p>
@@ -172,14 +174,14 @@ export default async function MePage() {
               <div>
                 <h4 className="font-medium flex items-center gap-2">
                   <Settings className="h-4 w-4" />
-                  Modifica Profilo
+                  {t('me.editProfile')}
                 </h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Aggiorna le tue informazioni personali
+                  {t('me.editProfileDesc')}
                 </p>
               </div>
               <Button disabled variant="outline">
-                Coming Soon
+                {t('me.comingSoon')}
               </Button>
             </div>
           </div>
@@ -191,10 +193,10 @@ export default async function MePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Ruoli Assegnati
+            {t('me.rolesAssigned')}
           </CardTitle>
           <CardDescription>
-            I ruoli attivi per ogni location
+            {t('me.rolesAssignedDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -202,7 +204,7 @@ export default async function MePage() {
             <div className="text-center py-8">
               <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                Nessun ruolo assegnato al momento
+                {t('common.messages.noRolesAtMoment')}
               </p>
             </div>
           ) : (
@@ -217,15 +219,15 @@ export default async function MePage() {
                     <div>
                       <p className="font-medium">{role.role_display_name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {role.location_name ? `Location: ${role.location_name}` : 'Globale'}
+                        {role.location_name ? `${t('me.locationLabel')}: ${role.location_name}` : t('me.global')}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="secondary">Attivo</Badge>
-                    <ClientOnly fallback={<p className="text-xs text-muted-foreground mt-1">Dal {role.assigned_at}</p>}>
+                    <Badge variant="secondary">{t('common.active')}</Badge>
+                    <ClientOnly fallback={<p className="text-xs text-muted-foreground mt-1">{t('me.since')} {role.assigned_at}</p>}>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Dal {new Date(role.assigned_at).toLocaleDateString('it-IT')}
+                        {t('me.since')} {new Date(role.assigned_at).toLocaleDateString('it-IT')}
                       </p>
                     </ClientOnly>
                   </div>
@@ -241,10 +243,10 @@ export default async function MePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Location Assegnate
+            {t('me.locationsAssigned')}
           </CardTitle>
           <CardDescription>
-            Le location a cui hai accesso
+            {t('me.locationsAssignedDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -252,7 +254,7 @@ export default async function MePage() {
             <div className="text-center py-8">
               <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                Nessuna location assegnata
+                {t('common.messages.noLocationsAssigned')}
               </p>
             </div>
           ) : (
@@ -266,7 +268,7 @@ export default async function MePage() {
                   <div>
                     <p className="font-medium">{location.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {roles.filter(r => r.location_id === location.id).length} ruol{roles.filter(r => r.location_id === location.id).length === 1 ? 'o' : 'i'}
+                      {roles.filter(r => r.location_id === location.id).length} {roles.filter(r => r.location_id === location.id).length === 1 ? t('me.rolesCount') : t('me.rolesCountPlural')}
                     </p>
                   </div>
                 </div>
@@ -280,7 +282,7 @@ export default async function MePage() {
       <div className="flex justify-start">
         <Button asChild variant="outline">
           <Link href="/">
-            Torna alla Dashboard
+            {t('common.backToDashboard')}
           </Link>
         </Button>
       </div>

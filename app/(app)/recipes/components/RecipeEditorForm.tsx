@@ -300,7 +300,7 @@ export function RecipeEditorForm({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Errore salvataggio');
+        throw new Error(data.error || t('common.messages.errorSaving'));
       }
 
       const data = await response.json();

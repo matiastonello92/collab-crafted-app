@@ -283,7 +283,7 @@ export function CatalogoTagTab() {
                   value={formData.color || '#6B7280'}
                   onChange={(e) => setFormData({ ...formData, color: e.target.value.toUpperCase() })}
                   className="w-14 h-10 rounded border cursor-pointer"
-                  title="Seleziona colore"
+                  title={t('common.ariaLabels.selectColor')}
                 />
                 
                 

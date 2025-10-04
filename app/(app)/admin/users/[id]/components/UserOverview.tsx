@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { User, MapPin, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface UserOverviewProps {
   user: {
@@ -30,6 +31,7 @@ interface UserOverviewProps {
 }
 
 export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
+  const { t } = useTranslation()
   const initials = user.name
     .split(' ')
     .map(n => n.charAt(0))
@@ -53,7 +55,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold">{user.name}</h2>
                 <Badge variant={user.is_active ? "default" : "secondary"}>
-                  {user.is_active ? 'Attivo' : 'Disabilitato'}
+                  {user.is_active ? t('common.active') : t('common.inactive')}
                 </Badge>
               </div>
               
@@ -65,7 +67,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle className="h-4 w-4" />
-                Email verificata: {user.email_confirmed ? 'Sì' : 'No'}
+                {t('userOverview.emailVerified')}: {user.email_confirmed ? t('common.yes') : t('common.no')}
               </div>
             </div>
           </div>
@@ -79,7 +81,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <MapPin className="h-5 w-5" />
-              Locations Assegnate
+              {t('userOverview.locationsAssigned')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -93,7 +95,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nessuna location assegnata
+                {t('userOverview.noLocationsAssigned')}
               </p>
             )}
           </CardContent>
@@ -104,7 +106,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <User className="h-5 w-5" />
-              Ruoli Principali
+              {t('userOverview.topRoles')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -118,7 +120,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nessun ruolo assegnato
+                {t('common.messages.noRoles')}
               </p>
             )}
           </CardContent>
@@ -129,12 +131,12 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Calendar className="h-5 w-5" />
-              Informazioni Account
+              {t('userOverview.accountInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-sm font-medium">Registrato</p>
+              <p className="text-sm font-medium">{t('userOverview.registered')}</p>
               <p className="text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(user.created_at), { 
                   addSuffix: true, 
@@ -145,7 +147,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
             
             {user.last_activity && (
               <div>
-                <p className="text-sm font-medium">Ultima attività</p>
+                <p className="text-sm font-medium">{t('userOverview.lastActivity')}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatDistanceToNow(new Date(user.last_activity), { 
                     addSuffix: true, 
@@ -162,12 +164,12 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <CheckCircle className="h-5 w-5" />
-              Stato Account
+              {t('userOverview.accountStatus')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm">Account attivo</span>
+              <span className="text-sm">{t('userOverview.accountActive')}</span>
               {user.is_active ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (
@@ -176,7 +178,7 @@ export function UserOverview({ user, locations, topRoles }: UserOverviewProps) {
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm">Email verificata</span>
+              <span className="text-sm">{t('userOverview.emailVerifiedStatus')}</span>
               {user.email_confirmed ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (

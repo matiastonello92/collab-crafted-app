@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAppStore } from '@/lib/store/unified'
+import { useTranslation } from '@/lib/i18n'
 
 interface Location {
   id: string
@@ -36,6 +37,7 @@ interface Shift {
 }
 
 export function useWizardData() {
+  const { t } = useTranslation()
   // Global context (like inventory modules)
   const rawLocationId = useAppStore(state => state.context.location_id)
   const locationId = rawLocationId === 'null' || !rawLocationId ? undefined : rawLocationId
@@ -57,7 +59,7 @@ export function useWizardData() {
       setLocations(data.locations || [])
     } catch (error) {
       console.error('Error fetching locations:', error)
-      toast.error('Errore nel caricamento delle location')
+      toast.error(t('common.messages.errorLoadingLocations'))
     } finally {
       setLoading(false)
     }
@@ -72,7 +74,7 @@ export function useWizardData() {
       setJobTags(data.jobTags || [])
     } catch (error) {
       console.error('Error fetching job tags:', error)
-      toast.error('Errore nel caricamento dei ruoli')
+      toast.error(t('common.messages.errorLoadingRoles'))
     } finally {
       setLoading(false)
     }
@@ -96,7 +98,7 @@ export function useWizardData() {
       setUsers(data.users || [])
     } catch (error) {
       console.error('Error fetching users:', error)
-      toast.error('Errore nel caricamento degli utenti')
+      toast.error(t('common.messages.errorLoadingUsers'))
     } finally {
       setLoading(false)
     }
@@ -111,7 +113,7 @@ export function useWizardData() {
       setShifts(data.shifts || [])
     } catch (error) {
       console.error('Error fetching shifts:', error)
-      toast.error('Errore nel caricamento dei turni')
+      toast.error(t('common.messages.errorLoadingShifts'))
     } finally {
       setLoading(false)
     }

@@ -7,6 +7,7 @@ import { XCircle, User } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { createSupabaseServerClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
   params: { token: string }
@@ -14,6 +15,7 @@ interface Props {
 
 export default async function CompleteProfilePage({ params }: Props) {
   const { token } = params
+  const t = await getTranslation()
 
   // Check if user is authenticated
   const supabase = await createSupabaseServerClient()
@@ -36,23 +38,23 @@ export default async function CompleteProfilePage({ params }: Props) {
     if (error) {
       console.error('Token validation error:', error)
       isValidToken = false
-      errorMessage = 'Errore nella validazione dell\'invito'
+      errorMessage = t('invite.errorValidation')
     } else if (!validationData || validationData.length === 0) {
       isValidToken = false
-      errorMessage = 'Invito non trovato'
+      errorMessage = t('invite.notFound')
     } else {
       inviteData = validationData[0]
       
       // Check if invitation email matches current user
       if (user.email?.toLowerCase() !== inviteData.email?.toLowerCase()) {
         isValidToken = false
-        errorMessage = 'L\'invito non corrisponde all\'utente corrente'
+        errorMessage = t('invite.userMismatch')
       }
     }
   } catch (error) {
     console.error('SSR validation error:', error)
     isValidToken = false
-    errorMessage = 'Errore nella validazione dell\'invito'
+    errorMessage = t('invite.errorValidation')
   }
 
   // Get current profile if exists
@@ -76,10 +78,10 @@ export default async function CompleteProfilePage({ params }: Props) {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl flex items-center justify-center gap-2">
               <User className="h-6 w-6" />
-              Completa il tuo Profilo
+              {t('invite.completeProfile')}
             </CardTitle>
             <CardDescription>
-              Completa le informazioni del tuo profilo per iniziare
+              {t('invite.completeProfileDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
