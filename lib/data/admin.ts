@@ -113,12 +113,7 @@ export async function getUsersWithDetails(
 
     const orgId = profile.org_id
     
-    // Verifica autorizzazioni admin
-    const isAdmin = await checkIsAdmin()
-    if (!isAdmin) {
-      return { users: [], total: 0, hasMore: false }
-    }
-
+    // Route already protected by requireOrgAdmin() + RLS policies handle data access
     const offset = (page - 1) * limit
     let users: UserWithDetails[] = []
     let total = 0
