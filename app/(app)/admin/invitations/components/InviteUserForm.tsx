@@ -8,52 +8,37 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { Send, X, Copy, Check } from 'lucide-react'
-import { fetchAvailableLocations, fetchAvailableRoles, fetchAvailableJobTags } from '@/lib/admin/data-fetchers'
+import { Send, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { fetchAvailableLocations, fetchAvailableRoles } from '@/lib/admin/data-fetchers'
 import { PERMISSIONS } from '@/lib/permissions/registry'
-import { normalizePermission } from '@/lib/permissions'
-import type { Location, Role, JobTag } from '@/lib/admin/data-fetchers'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
+import type { Location, Role } from '@/lib/admin/data-fetchers'
 import { useTranslation } from '@/lib/i18n'
+import { RolePresetSelector, type RolePresetType } from '@/components/admin/invitations/RolePresetSelector'
+import { PermissionCategoryAccordion } from '@/components/admin/invitations/PermissionCategoryAccordion'
+import { getAllCategorizedPermissions } from '@/lib/permissions/categories'
 
 const inviteSchema = z.object({
-  email: z.string().email(),
-  days: z.number().min(1).max(30),
+  email: z.string().email('Invalid email address'),
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  notes: z.string().optional(),
 })
 
 type InviteForm = z.infer<typeof inviteSchema>
-
-interface OverrideItem {
-  location_id: string
-  permission_name: string 
-  granted: boolean
-}
-
-interface JobTagItem {
-  location_id: string
-  tag_name: string
-}
-
-interface RolePreset {
-  [permissionName: string]: boolean
-}
 
 export function InviteUserForm() {
   const [isPending, startTransition] = useTransition()
   const [locations, setLocations] = useState<Location[]>([])
   const [roles, setRoles] = useState<Role[]>([])
-  const [jobTags, setJobTags] = useState<JobTag[]>([])
   const [selectedRoleId, setSelectedRoleId] = useState<string>('')
   const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([])
-  const [selectedJobTagIds, setSelectedJobTagIds] = useState<string[]>([])
-  const [rolePresets, setRolePresets] = useState<RolePreset>({})
-  const [overrides, setOverrides] = useState<{ [locationId: string]: { [permissionName: string]: boolean } }>({})
+  const [selectedPreset, setSelectedPreset] = useState<RolePresetType | null>(null)
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set())
   const [invitationLink, setInvitationLink] = useState<string>('')
   const [copied, setCopied] = useState(false)
-  const [isLoadingPresets, setIsLoadingPresets] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const { t } = useTranslation()
 
   const allPermissions = Object.values(PERMISSIONS).flat()
@@ -63,173 +48,139 @@ export function InviteUserForm() {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { days: 7 }
   })
 
-  const selectedDays = watch('days')
-
-  // Load locations, roles, and job tags
+  // Load locations and roles
   useEffect(() => {
     const loadData = async () => {
-      const [locationsData, rolesData, jobTagsData] = await Promise.all([
+      const [locationsData, rolesData] = await Promise.all([
         fetchAvailableLocations(),
-        fetchAvailableRoles(true), // Pass true to filter to base/manager only
-        fetchAvailableJobTags(),
+        fetchAvailableRoles(true),
       ])
       setLocations(locationsData)
-      setRoles(rolesData) // Already filtered on server side
-      setJobTags(jobTagsData) // Already filtered to active only on server side
+      setRoles(rolesData)
     }
     void loadData()
   }, [])
 
-  // Load role presets using server route - anti-RLS & single source
+  // Auto-apply preset permissions when preset or role changes
   useEffect(() => {
-    if (!selectedRoleId) {
-      setRolePresets({})
-      setIsLoadingPresets(false)
-      return
-    }
+    if (!selectedPreset || !selectedRoleId) return
 
-    async function loadRolePresets(roleId: string, selectedLocs: string[]) {
+    const applyPresetPermissions = async () => {
       try {
-        setIsLoadingPresets(true)
-        const res = await fetch(`/api/admin/roles/${roleId}/defaults`, { cache: 'no-store' })
-        if (!res.ok) throw new Error(await res.text())
+        // Load role default permissions
+        const res = await fetch(`/api/admin/roles/${selectedRoleId}/defaults`, { cache: 'no-store' })
+        if (!res.ok) return
+        
         const { permissions } = await res.json() as { permissions: string[] }
-
-        const presets: RolePreset = {}
-        permissions.forEach((n) => { presets[n] = true })
-        setRolePresets(presets)
-
-        // preserva i delta dell'utente rispetto ai nuovi presets
-        const newOverrides: typeof overrides = {}
-        selectedLocs.forEach((locId) => {
-          const prev = overrides[locId] ?? {}
-          const delta: Record<string, boolean> = {}
-          allPermissions.forEach((perm) => {
-            if (prev[perm] !== undefined && prev[perm] !== (presets[perm] ?? false)) {
-              delta[perm] = prev[perm]
-            }
-          })
-          newOverrides[locId] = { ...presets, ...delta }
-        })
-        setOverrides(newOverrides)
+        
+        // Apply based on preset type
+        let permissionsToSet: string[] = []
+        
+        switch (selectedPreset) {
+          case 'admin':
+            // All permissions
+            permissionsToSet = allPermissions
+            break
+          case 'manager':
+            // Role permissions + some extras
+            permissionsToSet = permissions
+            break
+          case 'staff':
+            // Minimal permissions
+            permissionsToSet = permissions.filter(p => 
+              p.includes(':view') || p.includes('shifts:') || p.includes('tasks:')
+            )
+            break
+          case 'custom':
+            // Use role defaults as starting point
+            permissionsToSet = permissions
+            break
+        }
+        
+        setSelectedPermissions(new Set(permissionsToSet))
       } catch (err) {
-        console.error('loadRolePresets failed', err)
-        toast.error(t('toast.error.loading'))
-        setRolePresets({})
-      } finally {
-        setIsLoadingPresets(false)
+        console.error('Failed to load preset permissions', err)
       }
     }
 
-    loadRolePresets(selectedRoleId, selectedLocationIds)
-  }, [selectedRoleId, selectedLocationIds])
+    applyPresetPermissions()
+  }, [selectedPreset, selectedRoleId, allPermissions])
 
   const handleLocationChange = (locationId: string, checked: boolean) => {
-    setSelectedLocationIds(prev => {
-      const newIds = checked 
-        ? [...prev, locationId]
-        : prev.filter(id => id !== locationId)
-      
-      // Update overrides when locations change
-      const newOverrides = { ...overrides }
-      if (checked) {
-        newOverrides[locationId] = { ...rolePresets }
-      } else {
-        delete newOverrides[locationId]
-      }
-      setOverrides(newOverrides)
-      
-      return newIds
-    })
+    setSelectedLocationIds(prev => 
+      checked ? [...prev, locationId] : prev.filter(id => id !== locationId)
+    )
   }
 
-  const handlePermissionOverride = (locationId: string, permissionName: string, granted: boolean) => {
-    setOverrides(prev => ({
-      ...prev,
-      [locationId]: {
-        ...prev[locationId],
-        [permissionName]: granted
+  const handlePermissionToggle = (permission: string, checked: boolean) => {
+    setSelectedPermissions(prev => {
+      const newSet = new Set(prev)
+      if (checked) {
+        newSet.add(permission)
+      } else {
+        newSet.delete(permission)
       }
-    }))
+      return newSet
+    })
   }
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(invitationLink)
       setCopied(true)
-      toast.success(t('toast.invitation.linkCopied'))
+      toast.success('Link copied to clipboard')
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error(t('toast.invitation.errorCopying'))
+      toast.error('Failed to copy link')
     }
   }
 
   const onSubmit = async (data: InviteForm) => {
     if (!selectedRoleId || selectedLocationIds.length === 0) {
-      toast.error(t('toast.invitation.selectRoleLocation'))
+      toast.error('Please select a role and at least one location')
+      return
+    }
+
+    if (!selectedPreset) {
+      toast.error('Please select a role preset')
       return
     }
 
     startTransition(async () => {
       try {
-        // Calculate only the differences from role presets
-        const calculatedOverrides: OverrideItem[] = []
-        
-        selectedLocationIds.forEach(locationId => {
-          const locationOverrides = overrides[locationId] || {}
-          
-          allPermissions.forEach(permissionName => {
-            const roleHasPermission = rolePresets[permissionName] || false
-            const overrideValue = locationOverrides[permissionName]
-            
-            // Only include if different from role preset
-            if (overrideValue !== undefined && overrideValue !== roleHasPermission) {
-              calculatedOverrides.push({
-                location_id: locationId,
-                permission_name: permissionName,
-                granted: overrideValue
-              })
-            }
-          })
+        // Prepare payload for API route (compatible with existing route)
+        const payload = {
+          email: data.email.toLowerCase(),
+          firstName: data.firstName,
+          lastName: data.lastName,
+          notes: data.notes || '',
+          locationRoles: selectedLocationIds.map(locationId => ({
+            locationId,
+            roleId: selectedRoleId,
+          })),
+        }
+
+        // Call API route (which handles email sending via Resend)
+        const response = await fetch('/api/v1/admin/invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         })
 
-        // Prepare job tags for all selected locations
-        const jobTagsForLocations: JobTagItem[] = []
-        selectedJobTagIds.forEach(tagId => {
-          const jobTag = jobTags.find(tag => tag.id === tagId)
-          if (jobTag) {
-            selectedLocationIds.forEach(locationId => {
-              jobTagsForLocations.push({
-                location_id: locationId,
-                tag_name: jobTag.key
-              })
-            })
-          }
-        })
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Failed to create invitation')
+        }
 
-        const supabase = createSupabaseBrowserClient()
-        const { data: result, error } = await supabase
-          .rpc('invitation_create_v2', {
-            p_email: data.email.toLowerCase(),
-            p_role_id: selectedRoleId,
-            p_location_ids: selectedLocationIds,
-            p_days: data.days,
-            p_overrides: calculatedOverrides,
-            p_job_tags: jobTagsForLocations
-          })
-
-        if (error) throw error
-
-        const link = `${window.location.origin}/invite/${result.token}`
+        const result = await response.json()
+        const link = `${window.location.origin}/invite/${result.invitation.token}`
         setInvitationLink(link)
         
-        toast.success(t('toast.invitation.created'))
+        toast.success('Invitation created and email sent!')
         
         // Dispatch event for list refresh
         window.dispatchEvent(new CustomEvent('invitation:created'))
@@ -238,13 +189,11 @@ export function InviteUserForm() {
         reset()
         setSelectedRoleId('')
         setSelectedLocationIds([])
-        setSelectedJobTagIds([])
-        setRolePresets({})
-        setOverrides({})
-        setIsLoadingPresets(false)
+        setSelectedPreset(null)
+        setSelectedPermissions(new Set())
       } catch (error: any) {
         console.error('Error creating invitation:', error)
-        toast.error(error.message || t('toast.invitation.errorCreating'))
+        toast.error(error.message || 'Failed to create invitation')
       }
     })
   }
@@ -254,10 +203,10 @@ export function InviteUserForm() {
       <div className="space-y-4">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-green-600 mb-2">
-            {t('admin.inviteUserForm.successTitle')}
+            Invitation Created Successfully!
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {t('admin.inviteUserForm.successMessage')}
+            An email has been sent with the invitation link. You can also share it manually:
           </p>
         </div>
         
@@ -276,11 +225,10 @@ export function InviteUserForm() {
           onClick={() => {
             setInvitationLink('')
             setCopied(false)
-            setSelectedJobTagIds([])
           }}
           className="w-full"
         >
-          {t('admin.inviteUserForm.createNew')}
+          Create Another Invitation
         </Button>
       </div>
     )
@@ -290,11 +238,11 @@ export function InviteUserForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="email">{t('admin.inviteUserForm.email')} *</Label>
+        <Label htmlFor="email">Email *</Label>
         <Input
           id="email"
           type="email"
-          placeholder={t('admin.inviteUserForm.emailPlaceholder')}
+          placeholder="user@example.com"
           {...register('email')}
         />
         {errors.email && (
@@ -302,181 +250,155 @@ export function InviteUserForm() {
         )}
       </div>
 
-      {/* Role Selection */}
-      <div className="space-y-2">
-        <Label>{t('admin.inviteUserForm.role')} *</Label>
-        <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
-          <SelectTrigger>
-            <SelectValue placeholder={t('admin.inviteUserForm.roleRequired')} />
-          </SelectTrigger>
-          <SelectContent 
-            className="bg-white dark:bg-gray-900 border shadow-md z-50" 
-            position="popper"
-            sideOffset={4}
-          >
-            {roles.map(role => (
-              <SelectItem key={role.id} value={role.id}>
-                {role.display_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Location Selection */}
-      <div className="space-y-3">
-        <Label>{t('admin.inviteUserForm.locations')} * ({t('admin.inviteUserForm.locationsAtLeastOne')})</Label>
-        <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-          {locations.map(location => (
-            <div key={location.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={location.id}
-                checked={selectedLocationIds.includes(location.id)}
-                onCheckedChange={(checked) => 
-                  handleLocationChange(location.id, checked as boolean)
-                }
-              />
-              <Label htmlFor={location.id} className="flex-1 cursor-pointer">
-                {location.name}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Job Tags Selection */}
-      <div className="space-y-3">
-        <Label>{t('admin.inviteUserForm.jobTitles')} ({t('admin.inviteUserForm.jobTitlesOptional')})</Label>
-        <p className="text-sm text-muted-foreground">
-          {t('admin.inviteUserForm.jobTitlesDescription')}
-        </p>
-        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-          {jobTags.map(jobTag => (
-            <div key={jobTag.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={jobTag.id}
-                checked={selectedJobTagIds.includes(jobTag.id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedJobTagIds(prev => [...prev, jobTag.id])
-                  } else {
-                    setSelectedJobTagIds(prev => prev.filter(id => id !== jobTag.id))
-                  }
-                }}
-              />
-              <Label htmlFor={jobTag.id} className="flex-1 cursor-pointer text-sm">
-                {jobTag.label_it}
-              </Label>
-            </div>
-          ))}
-        </div>
-        {selectedJobTagIds.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {selectedJobTagIds.map(tagId => {
-              const tag = jobTags.find(t => t.id === tagId)
-              return tag ? (
-                <Badge key={tagId} variant="secondary" className="text-xs">
-                  {tag.label_it}
-                </Badge>
-              ) : null
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Permission Overrides */}
-      {selectedLocationIds.length > 0 && selectedRoleId && (
-        <div className="space-y-3">
-          <Label>{t('admin.inviteUserForm.permissionOverrides')}</Label>
-          <div className="border rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="text-left p-2 font-medium">{t('admin.inviteUserForm.permission')}</th>
-                    {selectedLocationIds.map(locationId => {
-                      const location = locations.find(l => l.id === locationId)
-                      return (
-                        <th key={locationId} className="text-center p-2 font-medium min-w-24">
-                          {location?.name}
-                        </th>
-                      )
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {allPermissions.map(permission => {
-                    const normalizedPermission = normalizePermission(permission)
-                    return (
-                      <tr key={permission} className="border-t">
-                        <td className="p-2 font-mono text-xs">{permission}</td>
-                        {selectedLocationIds.map(locationId => {
-                          const isRoleDefault = rolePresets[normalizedPermission] || false
-                          const overrideValue = overrides[locationId]?.[normalizedPermission]
-                          const currentValue = overrideValue !== undefined ? overrideValue : isRoleDefault
-                          
-                          return (
-                            <td key={locationId} className="p-2 text-center">
-                              <Checkbox
-                                checked={currentValue}
-                                disabled={isLoadingPresets}
-                                onCheckedChange={(checked) =>
-                                  handlePermissionOverride(locationId, normalizedPermission, checked as boolean)
-                                }
-                                className={
-                                  overrideValue !== undefined && overrideValue !== isRoleDefault
-                                    ? 'border-orange-500'
-                                    : ''
-                                }
-                              />
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {isLoadingPresets && (
-            <div className="text-center py-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto"></div>
-              <p className="text-xs text-muted-foreground mt-1">{t('admin.inviteUserForm.loadingPermissions')}</p>
-            </div>
+      {/* First & Last Name - Required */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name *</Label>
+          <Input
+            id="firstName"
+            placeholder="John"
+            {...register('firstName')}
+          />
+          {errors.firstName && (
+            <p className="text-sm text-destructive">{errors.firstName.message}</p>
           )}
-          <p className="text-xs text-muted-foreground">
-            {t('admin.inviteUserForm.overrideIndicator')}
-          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name *</Label>
+          <Input
+            id="lastName"
+            placeholder="Doe"
+            {...register('lastName')}
+          />
+          {errors.lastName && (
+            <p className="text-sm text-destructive">{errors.lastName.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Role Preset Selection */}
+      <div className="space-y-3">
+        <Label>Role Template *</Label>
+        <p className="text-sm text-muted-foreground">
+          Choose a template to quickly set up permissions
+        </p>
+        <RolePresetSelector
+          selected={selectedPreset}
+          onSelect={setSelectedPreset}
+        />
+      </div>
+
+      {/* Role Selection (actual DB role) */}
+      {selectedPreset && (
+        <div className="space-y-2">
+          <Label>Assign Database Role *</Label>
+          <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              {roles.map(role => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.display_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
 
-      {/* Expiry Days */}
+      {/* Location Selection */}
+      {selectedRoleId && (
+        <div className="space-y-3">
+          <Label>Locations * (At least one)</Label>
+          <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
+            {locations.map(location => (
+              <div key={location.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={location.id}
+                  checked={selectedLocationIds.includes(location.id)}
+                  onCheckedChange={(checked) => 
+                    handleLocationChange(location.id, checked as boolean)
+                  }
+                />
+                <Label htmlFor={location.id} className="flex-1 cursor-pointer">
+                  {location.name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Permission Management (only for Custom preset) */}
+      {selectedPreset === 'custom' && selectedLocationIds.length > 0 && (
+        <div className="space-y-3">
+          <Label>Customize Permissions</Label>
+          <p className="text-sm text-muted-foreground">
+            Select which permissions this user should have
+          </p>
+          <PermissionCategoryAccordion
+            selectedPermissions={selectedPermissions}
+            onPermissionToggle={handlePermissionToggle}
+            disabled={isPending}
+          />
+        </div>
+      )}
+
+      {/* Advanced: Show all permissions for non-custom presets */}
+      {selectedPreset && selectedPreset !== 'custom' && selectedLocationIds.length > 0 && (
+        <div className="space-y-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full"
+          >
+            {showAdvanced ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide Advanced Options
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                Show Advanced Options
+              </>
+            )}
+          </Button>
+          
+          {showAdvanced && (
+            <div className="border rounded-lg p-4 bg-muted/30">
+              <Label className="mb-3 block">Fine-tune Permissions</Label>
+              <PermissionCategoryAccordion
+                selectedPermissions={selectedPermissions}
+                onPermissionToggle={handlePermissionToggle}
+                disabled={isPending}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Notes */}
       <div className="space-y-2">
-        <Label htmlFor="days">{t('admin.inviteUserForm.expiryDays')}</Label>
+        <Label htmlFor="notes">Internal Notes (optional)</Label>
         <Input
-          id="days"
-          type="number"
-          min="1"
-          max="30"
-          {...register('days', { valueAsNumber: true })}
+          id="notes"
+          placeholder="Add any internal notes..."
+          {...register('notes')}
         />
-        {errors.days && (
-          <p className="text-sm text-destructive">{errors.days.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {t('admin.inviteUserForm.expiryMessage').replace('{days}', selectedDays.toString())}
-        </p>
       </div>
 
       {/* Submit */}
       <Button
         type="submit"
-        disabled={isPending || !selectedRoleId || selectedLocationIds.length === 0}
+        disabled={isPending || !selectedRoleId || selectedLocationIds.length === 0 || !selectedPreset}
         className="w-full"
       >
         <Send className="h-4 w-4 mr-2" />
-        {isPending ? t('admin.inviteUserForm.creating') : t('admin.inviteUserForm.createInvite')}
+        {isPending ? 'Creating Invitation...' : 'Create & Send Invitation'}
       </Button>
     </form>
   )
