@@ -29,14 +29,14 @@ export function UserDropdown() {
       if (data.user) {
         // Try to get profile data
         const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('first_name, last_name')
+          .from('profiles')
+          .select('first_name, last_name, full_name')
           .eq('id', data.user.id)
-          .single()
+          .maybeSingle()
 
         const displayName = profile?.first_name && profile?.last_name
           ? `${profile.first_name} ${profile.last_name}`
-          : profile?.first_name || data.user.email?.split('@')[0]
+          : profile?.full_name || data.user.email?.split('@')[0]
 
         setUser({
           email: data.user.email || '',

@@ -43,7 +43,7 @@ CREATE SCHEMA IF NOT EXISTS public;
 -- Job Tags & User Management
 -- job_tags: Available job titles/roles
 -- user_job_tags: User job tag assignments
--- user_profiles: Extended user profile data
+-- profiles: Extended user profile data (consolidated from user_profiles)
 
 -- System Management
 -- app_settings: Application configuration

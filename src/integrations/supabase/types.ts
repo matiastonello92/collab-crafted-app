@@ -1669,10 +1669,14 @@ export type Database = {
           default_location_id: string | null
           email: string | null
           email_preferences: Json | null
+          first_name: string | null
           full_name: string | null
           id: string
+          is_active: boolean | null
+          last_name: string | null
           locale: string | null
           marketing_opt_in: boolean | null
+          notes: string | null
           notif_prefs: Json | null
           org_id: string
           phone: string | null
@@ -1686,10 +1690,14 @@ export type Database = {
           default_location_id?: string | null
           email?: string | null
           email_preferences?: Json | null
+          first_name?: string | null
           full_name?: string | null
           id: string
+          is_active?: boolean | null
+          last_name?: string | null
           locale?: string | null
           marketing_opt_in?: boolean | null
+          notes?: string | null
           notif_prefs?: Json | null
           org_id: string
           phone?: string | null
@@ -1703,10 +1711,14 @@ export type Database = {
           default_location_id?: string | null
           email?: string | null
           email_preferences?: Json | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean | null
+          last_name?: string | null
           locale?: string | null
           marketing_opt_in?: boolean | null
+          notes?: string | null
           notif_prefs?: Json | null
           org_id?: string
           phone?: string | null
@@ -3048,56 +3060,6 @@ export type Database = {
           },
         ]
       }
-      user_profiles: {
-        Row: {
-          avatar_url: string | null
-          can_invite_users: boolean | null
-          created_at: string | null
-          first_name: string | null
-          id: string
-          is_active: boolean | null
-          last_name: string | null
-          notes: string | null
-          org_id: string
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          can_invite_users?: boolean | null
-          created_at?: string | null
-          first_name?: string | null
-          id: string
-          is_active?: boolean | null
-          last_name?: string | null
-          notes?: string | null
-          org_id: string
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          can_invite_users?: boolean | null
-          created_at?: string | null
-          first_name?: string | null
-          id?: string
-          is_active?: boolean | null
-          last_name?: string | null
-          notes?: string | null
-          org_id?: string
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_profiles_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["org_id"]
-          },
-        ]
-      }
       user_roles_locations: {
         Row: {
           assigned_at: string | null
@@ -3490,10 +3452,14 @@ export type Database = {
           default_location_id: string | null
           email: string | null
           email_preferences: Json | null
+          first_name: string | null
           full_name: string | null
           id: string
+          is_active: boolean | null
+          last_name: string | null
           locale: string | null
           marketing_opt_in: boolean | null
+          notes: string | null
           notif_prefs: Json | null
           org_id: string
           phone: string | null

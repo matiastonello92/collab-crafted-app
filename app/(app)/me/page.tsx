@@ -41,17 +41,17 @@ async function getUserData(): Promise<{
 
   // Get user profile
   const { data: profileData } = await supabase
-    .from('user_profiles')
+    .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   const profile = {
     id: user.id,
-    email: user.email || '',
-    first_name: profileData?.first_name,
-    last_name: profileData?.last_name,
-    phone: profileData?.phone,
+    email: profileData?.email || user.email || '',
+    first_name: profileData?.first_name || '',
+    last_name: profileData?.last_name || '',
+    phone: profileData?.phone || ''
   }
 
   // Get user roles and locations

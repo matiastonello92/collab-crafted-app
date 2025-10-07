@@ -124,13 +124,14 @@ export async function getUsersWithDetails(
     let total = 0
 
     try {
-      // Prima prova con user_profiles FILTERED BY ORG_ID
+      // Query profiles FILTERED BY ORG_ID
       let query = supabase
-        .from('user_profiles')
+        .from('profiles')
         .select(`
           id,
           first_name,
           last_name,
+          email,
           phone,
           is_active,
           created_at,
@@ -141,7 +142,7 @@ export async function getUsersWithDetails(
 
       // Applica filtro di ricerca se presente
       if (search.trim()) {
-        query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`)
+        query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
       }
 
       // Applica paginazione
@@ -150,11 +151,8 @@ export async function getUsersWithDetails(
       const { data: profileUsers, error: profileError, count } = await query
 
       if (!profileError && profileUsers && profileUsers.length > 0) {
-        // Usa user_profiles
-        users = profileUsers.map(user => ({
-          ...user,
-          email: null // Will be populated later if needed
-        }))
+        // Usa profiles direttamente
+        users = profileUsers
         total = count || 0
       } else {
         // Fallback a auth.admin.listUsers con filtro per org
@@ -239,31 +237,36 @@ export async function getUserById(userId: string): Promise<UserWithDetails | nul
       return null
     }
 
+    // Get org_id first to filter correctly
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', currentUser?.id)
+      .maybeSingle()
+
     const { data: user, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select(`
         id,
         first_name,
         last_name,
+        email,
         phone,
         is_active,
-        created_at
+        created_at,
+        org_id
       `)
       .eq('id', userId)
-      .single()
+      .eq('org_id', currentProfile?.org_id)
+      .maybeSingle()
 
     if (error || !user) {
       console.error('Error fetching user:', error)
       return null
     }
 
-    // Placeholder email
-    const userWithEmail: UserWithDetails = {
-      ...user,
-      email: `user_${user.id.slice(0, 8)}@example.com`
-    }
-
-    return userWithEmail
+    return user
   } catch (error) {
     console.error('Error in getUserById:', error)
     return null

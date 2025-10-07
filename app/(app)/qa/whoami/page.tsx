@@ -107,7 +107,7 @@ export default async function QAWhoAmIPage() {
           <CardHeader>
             <CardTitle>Profilo Utente</CardTitle>
             <CardDescription>
-              Dati dalla tabella user_profiles
+              Dati dalla tabella profiles
             </CardDescription>
           </CardHeader>
           <CardContent>
