@@ -88,13 +88,13 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
     {
       name: 'Financial Hub',
       icon: DollarSign,
-      permission: null,
+      permission: 'finance:view',
       children: [
-        { name: 'Dashboard', href: '/admin/finance/dashboard', icon: TrendingUp, permission: null },
-        { name: 'Nuova Chiusura', href: '/admin/finance/closures/new', icon: Plus, permission: null },
-        { name: 'Storico Chiusure', href: '/admin/finance/closures/history', icon: History, permission: null },
-        { name: 'Import CSV', href: '/admin/finance/import', icon: Upload, permission: null },
-        { name: 'Gestione Email', href: '/admin/finance/settings/recipients', icon: Mail, permission: 'view_settings', adminOnly: true },
+        { name: 'Dashboard', href: '/admin/finance/dashboard', icon: TrendingUp, permission: 'finance:view' },
+        { name: 'Nuova Chiusura', href: '/admin/finance/closures/new', icon: Plus, permission: 'finance:create' },
+        { name: 'Storico Chiusure', href: '/admin/finance/closures/history', icon: History, permission: 'finance:view' },
+        { name: 'Import CSV', href: '/admin/finance/import', icon: Upload, permission: 'finance:create' },
+        { name: 'Gestione Email', href: '/admin/finance/settings/recipients', icon: Mail, permission: 'finance:manage', adminOnly: true },
       ]
     },
     { name: t('nav.admin'), href: '/admin/users', icon: Users, permission: 'manage_users' },

@@ -1,31 +1,31 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { RecipientsManager } from "./components/RecipientsManager";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
 export default async function RecipientsPage() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get("sb-jwchmdivuwgfjrwvgtia-auth-token");
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!authCookie) {
+  if (!user) {
     redirect("/auth/login");
   }
 
-  let userId: string;
-  try {
-    const authData = JSON.parse(authCookie.value);
-    userId = authData.user?.id;
-    if (!userId) {
-      redirect("/auth/login");
-    }
-  } catch {
-    redirect("/auth/login");
+  // Check finance:manage permission
+  const { data: hasPermission } = await supabase
+    .rpc('user_has_permission', { 
+      p_user: user.id, 
+      p_permission: 'finance:manage'
+    });
+
+  if (!hasPermission) {
+    redirect("/access-denied");
   }
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("org_id")
-    .eq("id", userId)
+    .eq("id", user.id)
     .single();
 
   if (!profile?.org_id) {

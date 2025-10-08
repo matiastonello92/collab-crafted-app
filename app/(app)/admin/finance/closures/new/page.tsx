@@ -1,34 +1,32 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { CashClosureForm } from "./components/CashClosureForm";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
 export default async function NewClosurePage() {
-  // Get auth token from cookies
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get("sb-jwchmdivuwgfjrwvgtia-auth-token");
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!authCookie) {
+  if (!user) {
     redirect("/auth/login");
   }
 
-  // Parse the auth token to get user info
-  let userId: string;
-  try {
-    const authData = JSON.parse(authCookie.value);
-    userId = authData.user?.id;
-    if (!userId) {
-      redirect("/auth/login");
-    }
-  } catch {
-    redirect("/auth/login");
+  // Check finance:create permission
+  const { data: hasPermission } = await supabase
+    .rpc('user_has_permission', { 
+      p_user: user.id, 
+      p_permission: 'finance:create'
+    });
+
+  if (!hasPermission) {
+    redirect("/access-denied");
   }
 
   // Get user's profile with org and location info using admin client
   const { data: profile, error: profileError } = await supabaseAdmin
     .from("profiles")
     .select("default_location_id, org_id")
-    .eq("id", userId)
+    .eq("id", user.id)
     .single();
 
   if (profileError || !profile?.default_location_id || !profile?.org_id) {
@@ -39,7 +37,7 @@ export default async function NewClosurePage() {
   const { data: membership } = await supabaseAdmin
     .from("memberships")
     .select("role")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .eq("org_id", profile.org_id)
     .single();
 

@@ -48,6 +48,11 @@ export const PERMISSIONS = {
     'users:manage',
     'users:view',
   ],
+  finance: [
+    'finance:view',
+    'finance:create',
+    'finance:manage',
+  ],
 } as const;
 
 export type Module = keyof typeof PERMISSIONS;

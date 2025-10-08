@@ -1,31 +1,31 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { ClosuresHistory } from "./components/ClosuresHistory";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
 export default async function ClosuresHistoryPage() {
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get("sb-jwchmdivuwgfjrwvgtia-auth-token");
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (!authCookie) {
+  if (!user) {
     redirect("/auth/login");
   }
 
-  let userId: string;
-  try {
-    const authData = JSON.parse(authCookie.value);
-    userId = authData.user?.id;
-    if (!userId) {
-      redirect("/auth/login");
-    }
-  } catch {
-    redirect("/auth/login");
+  // Check finance:view permission
+  const { data: hasPermission } = await supabase
+    .rpc('user_has_permission', { 
+      p_user: user.id, 
+      p_permission: 'finance:view'
+    });
+
+  if (!hasPermission) {
+    redirect("/access-denied");
   }
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("default_location_id, org_id")
-    .eq("id", userId)
+    .eq("id", user.id)
     .single();
 
   if (!profile?.org_id) {
