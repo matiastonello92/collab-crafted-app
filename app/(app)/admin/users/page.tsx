@@ -13,16 +13,18 @@ interface SearchParams {
 export default async function AdminUsersPage({ 
   searchParams 
 }: { 
-  searchParams: SearchParams 
+  searchParams: Promise<SearchParams> 
 }) {
   // Guard: require admin permissions
   await requireOrgAdmin()
   
-  const currentPage = parseInt(searchParams.page || '1')
-  const search = searchParams.search || ''
-  const sortBy = searchParams.sortBy || 'created_at'
-  const sortOrder = searchParams.sortOrder || 'desc'
-  const statusFilter = searchParams.status || 'all'
+  const params = await searchParams
+  
+  const currentPage = parseInt(params.page || '1')
+  const search = params.search || ''
+  const sortBy = params.sortBy || 'created_at'
+  const sortOrder = params.sortOrder || 'desc'
+  const statusFilter = params.status || 'all'
   
   const { users, total, hasMore } = await getUsersWithDetails(
     currentPage, 
