@@ -4,4 +4,10 @@ project_id = "jwchmdivuwgfjrwvgtia"
 verify_jwt = true
 
 [functions.send-closure-report]
+verify_jwt = false
+
+[functions.analyze-financial-data]
+verify_jwt = true
+
+[functions.process-financial-import]
 verify_jwt = true
