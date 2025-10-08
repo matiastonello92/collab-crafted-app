@@ -7,6 +7,10 @@ export interface UserWithDetails {
   last_name: string | null
   is_active: boolean | null
   created_at: string | null
+  user_type: 'registered' | 'invited'
+  invitation_status?: 'pending' | 'expired' | null
+  invitation_token?: string | null
+  expires_at?: string | null
   user_roles_locations?: {
     role_id: string | null
     location_id: string | null
@@ -84,12 +88,15 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 /**
- * Fetch lista utenti con dettagli (paginata)
+ * Fetch lista utenti con dettagli (paginata) - include profili registrati e inviti pending
  */
 export async function getUsersWithDetails(
   page: number = 1,
   limit: number = 20,
-  search: string = ''
+  search: string = '',
+  sortBy: 'name' | 'email' | 'status' | 'created_at' = 'created_at',
+  sortOrder: 'asc' | 'desc' = 'desc',
+  statusFilter: 'all' | 'active' | 'inactive' | 'pending' | 'expired' = 'all'
 ): Promise<{ users: UserWithDetails[]; total: number; hasMore: boolean }> {
   try {
     const supabase = await createSupabaseServerClient()
@@ -113,103 +120,104 @@ export async function getUsersWithDetails(
 
     const orgId = profile.org_id
     
-    // Route already protected by requireOrgAdmin() + RLS policies handle data access
-    const offset = (page - 1) * limit
-    let users: UserWithDetails[] = []
-    let total = 0
+    // 1. Fetch registered users from profiles
+    let profilesQuery = supabase
+      .from('profiles')
+      .select('id, first_name, last_name, email, is_active, created_at, org_id')
+      .eq('org_id', orgId)
 
-    try {
-      // Query profiles FILTERED BY ORG_ID
-      let query = supabase
-        .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          is_active,
-          created_at,
-          org_id
-        `, { count: 'exact' })
-        .eq('org_id', orgId)
-        .order('created_at', { ascending: false })
-
-      // Applica filtro di ricerca se presente
-      if (search.trim()) {
-        query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
-      }
-
-      // Applica paginazione
-      query = query.range(offset, offset + limit - 1)
-
-      const { data: profileUsers, error: profileError, count } = await query
-
-      if (!profileError && profileUsers && profileUsers.length > 0) {
-        // Usa profiles direttamente
-        users = profileUsers
-        total = count || 0
-      } else {
-        // Fallback a auth.admin.listUsers con filtro per org
-        console.log('Fallback to auth.admin.listUsers')
-        
-        // Use admin client for auth operations
-        const { createSupabaseAdminClient } = await import('@/lib/supabase/server')
-        const adminSupabase = createSupabaseAdminClient()
-
-        // Get user IDs from memberships for org filtering
-        const { data: memberships } = await adminSupabase
-          .from('memberships')
-          .select('user_id')
-          .eq('org_id', orgId)
-
-        if (!memberships) {
-          return { users: [], total: 0, hasMore: false }
-        }
-
-        const orgUserIds = memberships.map(m => m.user_id)
-        
-        const { data: authData, error: authError } = await adminSupabase.auth.admin.listUsers({
-          page: page,
-          perPage: limit
-        })
-
-        if (authError) {
-          console.error('Error fetching auth users:', authError)
-          return { users: [], total: 0, hasMore: false }
-        }
-
-        // Filter by org membership AND search
-        let filteredUsers = (authData.users || []).filter(u => orgUserIds.includes(u.id))
-        
-        if (search.trim()) {
-          const searchLower = search.toLowerCase()
-          filteredUsers = filteredUsers.filter(user => 
-            user.email?.toLowerCase().includes(searchLower) ||
-            user.user_metadata?.full_name?.toLowerCase().includes(searchLower)
-          )
-        }
-
-        users = filteredUsers.map(user => ({
-          id: user.id,
-          email: user.email || null,
-          first_name: user.user_metadata?.first_name || null,
-          last_name: user.user_metadata?.last_name || null,
-          is_active: true, // Assume active from auth
-          created_at: user.created_at,
-        }))
-
-        total = filteredUsers.length
-      }
-    } catch (fallbackError) {
-      console.error('Error in fallback query:', fallbackError)
-      return { users: [], total: 0, hasMore: false }
+    if (search.trim()) {
+      profilesQuery = profilesQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
     }
 
+    const { data: registeredUsers, error: profileError } = await profilesQuery
+
+    // 2. Fetch pending/expired invitations
+    let invitationsQuery = supabase
+      .from('invitations')
+      .select('id, email, first_name, last_name, created_at, expires_at, token, status, org_id')
+      .eq('org_id', orgId)
+      .in('status', ['pending', 'expired'])
+
+    if (search.trim()) {
+      invitationsQuery = invitationsQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
+    }
+
+    const { data: invitations, error: invitationError } = await invitationsQuery
+
+    // 3. Map to unified interface
+    const registeredUsersMapped: UserWithDetails[] = (registeredUsers || []).map(u => ({
+      id: u.id,
+      email: u.email,
+      first_name: u.first_name,
+      last_name: u.last_name,
+      is_active: u.is_active,
+      created_at: u.created_at,
+      user_type: 'registered' as const,
+      invitation_status: null,
+      invitation_token: null,
+      expires_at: null,
+    }))
+
+    const invitationsMapped: UserWithDetails[] = (invitations || []).map(inv => ({
+      id: inv.id,
+      email: inv.email,
+      first_name: inv.first_name,
+      last_name: inv.last_name,
+      is_active: null,
+      created_at: inv.created_at,
+      user_type: 'invited' as const,
+      invitation_status: (inv.status === 'expired' || (inv.expires_at && new Date(inv.expires_at) < new Date())) 
+        ? 'expired' as const 
+        : 'pending' as const,
+      invitation_token: inv.token,
+      expires_at: inv.expires_at,
+    }))
+
+    // 4. Merge and filter by status
+    let allUsers = [...registeredUsersMapped, ...invitationsMapped]
+
+    if (statusFilter !== 'all') {
+      allUsers = allUsers.filter(u => {
+        if (statusFilter === 'active') return u.user_type === 'registered' && u.is_active === true
+        if (statusFilter === 'inactive') return u.user_type === 'registered' && u.is_active === false
+        if (statusFilter === 'pending') return u.user_type === 'invited' && u.invitation_status === 'pending'
+        if (statusFilter === 'expired') return u.user_type === 'invited' && u.invitation_status === 'expired'
+        return true
+      })
+    }
+
+    // 5. Sort combined list
+    allUsers.sort((a, b) => {
+      let compareResult = 0
+      
+      if (sortBy === 'name') {
+        const nameA = [a.first_name, a.last_name].filter(Boolean).join(' ').toLowerCase()
+        const nameB = [b.first_name, b.last_name].filter(Boolean).join(' ').toLowerCase()
+        compareResult = nameA.localeCompare(nameB)
+      } else if (sortBy === 'email') {
+        compareResult = (a.email || '').localeCompare(b.email || '')
+      } else if (sortBy === 'status') {
+        const statusA = a.user_type === 'registered' ? (a.is_active ? 'active' : 'inactive') : (a.invitation_status || 'pending')
+        const statusB = b.user_type === 'registered' ? (b.is_active ? 'active' : 'inactive') : (b.invitation_status || 'pending')
+        compareResult = statusA.localeCompare(statusB)
+      } else if (sortBy === 'created_at') {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0
+        compareResult = dateA - dateB
+      }
+
+      return sortOrder === 'asc' ? compareResult : -compareResult
+    })
+
+    // 6. Pagination
+    const total = allUsers.length
+    const offset = (page - 1) * limit
+    const paginatedUsers = allUsers.slice(offset, offset + limit)
     const hasMore = total > offset + limit
 
     return {
-      users,
+      users: paginatedUsers,
       total,
       hasMore
     }
@@ -261,7 +269,13 @@ export async function getUserById(userId: string): Promise<UserWithDetails | nul
       return null
     }
 
-    return user
+    return {
+      ...user,
+      user_type: 'registered' as const,
+      invitation_status: null,
+      invitation_token: null,
+      expires_at: null,
+    }
   } catch (error) {
     console.error('Error in getUserById:', error)
     return null

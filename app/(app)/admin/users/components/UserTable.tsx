@@ -2,15 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Users, Eye } from 'lucide-react'
+import { Search, Users, Eye, ArrowUpDown, ArrowUp, ArrowDown, Copy } from 'lucide-react'
 import type { UserWithDetails } from '@/lib/data/admin'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
 import { useTranslation } from '@/lib/i18n'
+import { toast } from 'sonner'
 
 interface UserTableProps {
   users: UserWithDetails[]
@@ -22,24 +24,66 @@ interface UserTableProps {
 export default function UserTable({ users, total, currentPage, hasMore }: UserTableProps) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
-  const [search, setSearch] = useState('')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('search') || '')
+  
+  const currentSortBy = searchParams.get('sortBy') || 'created_at'
+  const currentSortOrder = searchParams.get('sortOrder') || 'desc'
+  const currentStatusFilter = searchParams.get('status') || 'all'
+
+  const updateParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === '') {
+        params.delete(key)
+      } else {
+        params.set(key, value)
+      }
+    })
+    router.push(`?${params.toString()}`)
+  }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const params = new URLSearchParams(window.location.search)
-    if (search.trim()) {
-      params.set('search', search)
-    } else {
-      params.delete('search')
-    }
-    params.delete('page') // Reset to first page on new search
-    window.location.search = params.toString()
+    updateParams({ search: search.trim(), page: null })
+  }
+
+  const handleSort = (field: string) => {
+    const newOrder = currentSortBy === field && currentSortOrder === 'asc' ? 'desc' : 'asc'
+    updateParams({ sortBy: field, sortOrder: newOrder, page: null })
+  }
+
+  const handleStatusFilter = (status: string) => {
+    updateParams({ status: status === 'all' ? null : status, page: null })
   }
 
   const getFullName = (user: UserWithDetails) => {
     const parts = [user.first_name, user.last_name].filter(Boolean)
     return parts.length > 0 ? parts.join(' ') : t('admin.users.nameNotAvailable')
   }
+
+  const copyInviteLink = (token: string) => {
+    const url = `${window.location.origin}/auth/accept-invite?token=${token}`
+    navigator.clipboard.writeText(url)
+    toast.success('Link copiato negli appunti!')
+  }
+
+  const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
+    <TableHead 
+      onClick={() => handleSort(field)}
+      className="cursor-pointer hover:bg-muted/50 transition-colors select-none"
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        {currentSortBy === field ? (
+          currentSortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-30" />
+        )}
+      </div>
+    </TableHead>
+  )
 
   return (
     <Card>
@@ -67,6 +111,26 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
           <Button type="submit">{t('admin.users.search')}</Button>
         </form>
 
+        {/* Status Filters */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { key: 'all', label: 'Tutti' },
+            { key: 'active', label: 'Attivi' },
+            { key: 'inactive', label: 'Inattivi' },
+            { key: 'pending', label: 'Inviti Pending' },
+            { key: 'expired', label: 'Inviti Scaduti' },
+          ].map(({ key, label }) => (
+            <Button
+              key={key}
+              variant={currentStatusFilter === key ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleStatusFilter(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+
         {/* Mobile: Card Layout */}
         {isMobile ? (
           <div className="space-y-3">
@@ -87,8 +151,18 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                           {getFullName(user)}
                         </p>
                       </div>
-                      <Badge variant={user.is_active ? 'default' : 'secondary'} className="shrink-0">
-                        {user.is_active ? t('admin.users.active') : t('admin.users.inactive')}
+                      <Badge 
+                        variant={
+                          user.user_type === 'registered' 
+                            ? (user.is_active ? 'default' : 'secondary')
+                            : 'outline'
+                        } 
+                        className="shrink-0"
+                      >
+                        {user.user_type === 'registered' 
+                          ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
+                          : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
+                        }
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between gap-2">
@@ -98,12 +172,24 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                           : 'N/D'
                         }
                       </p>
-                      <Button asChild variant="outline" size="sm" className="shrink-0">
-                        <Link href={`/admin/users/${user.id}`}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          {t('admin.users.viewDetails')}
-                        </Link>
-                      </Button>
+                      {user.user_type === 'registered' ? (
+                        <Button asChild variant="outline" size="sm" className="shrink-0">
+                          <Link href={`/admin/users/${user.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            {t('admin.users.viewDetails')}
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="shrink-0"
+                          onClick={() => copyInviteLink(user.invitation_token!)}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copia Link
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -116,10 +202,10 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
             <TableHeader>
               <TableRow>
                 <TableHead>{t('admin.users.id')}</TableHead>
-                <TableHead>{t('admin.users.email')}</TableHead>
-                <TableHead>{t('admin.users.name')}</TableHead>
-                <TableHead>{t('admin.users.status')}</TableHead>
-                <TableHead>{t('admin.users.registered')}</TableHead>
+                <SortableHeader field="email">{t('admin.users.email')}</SortableHeader>
+                <SortableHeader field="name">{t('admin.users.name')}</SortableHeader>
+                <SortableHeader field="status">{t('admin.users.status')}</SortableHeader>
+                <SortableHeader field="created_at">{t('admin.users.registered')}</SortableHeader>
                 <TableHead>{t('admin.users.actions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -143,8 +229,17 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                       {getFullName(user)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                        {user.is_active ? t('admin.users.active') : t('admin.users.inactive')}
+                      <Badge 
+                        variant={
+                          user.user_type === 'registered' 
+                            ? (user.is_active ? 'default' : 'secondary')
+                            : 'outline'
+                        }
+                      >
+                        {user.user_type === 'registered' 
+                          ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
+                          : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
+                        }
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -154,12 +249,23 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                       }
                     </TableCell>
                     <TableCell>
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/admin/users/${user.id}`}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          {t('admin.users.viewDetails')}
-                        </Link>
-                      </Button>
+                      {user.user_type === 'registered' ? (
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/admin/users/${user.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            {t('admin.users.viewDetails')}
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => copyInviteLink(user.invitation_token!)}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copia Link
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

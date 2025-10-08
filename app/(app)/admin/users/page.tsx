@@ -5,6 +5,9 @@ import AdminUsersClient from './AdminUsersClient'
 interface SearchParams {
   page?: string
   search?: string
+  sortBy?: 'name' | 'email' | 'status' | 'created_at'
+  sortOrder?: 'asc' | 'desc'
+  status?: 'all' | 'active' | 'inactive' | 'pending' | 'expired'
 }
 
 export default async function AdminUsersPage({ 
@@ -17,8 +20,18 @@ export default async function AdminUsersPage({
   
   const currentPage = parseInt(searchParams.page || '1')
   const search = searchParams.search || ''
+  const sortBy = searchParams.sortBy || 'created_at'
+  const sortOrder = searchParams.sortOrder || 'desc'
+  const status = searchParams.status || 'all'
   
-  const { users, total, hasMore } = await getUsersWithDetails(currentPage, 20, search)
+  const { users, total, hasMore } = await getUsersWithDetails(
+    currentPage, 
+    20, 
+    search,
+    sortBy,
+    sortOrder,
+    status
+  )
 
   return (
     <AdminUsersClient 
