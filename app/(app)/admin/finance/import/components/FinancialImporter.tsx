@@ -25,6 +25,9 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
+  const [uploadedImportId, setUploadedImportId] = useState<string | null>(null);
+  const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -81,6 +84,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
 
       setProgress(100);
       setResult(data);
+      setUploadedImportId(importRecord.id);
       toast.success("Import completato con successo");
 
     } catch (error) {
@@ -89,6 +93,28 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
     } finally {
       setIsProcessing(false);
       setProgress(0);
+    }
+  };
+
+  const analyzeWithAI = async () => {
+    if (!uploadedImportId) return;
+
+    setIsAnalyzingAI(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-import-ai", {
+        body: { importId: uploadedImportId }
+      });
+
+      if (error) throw error;
+
+      setAiSummary(data.summary);
+      toast.success("Analisi AI completata");
+    } catch (error) {
+      console.error(error);
+      toast.error("Errore durante l'analisi AI");
+    } finally {
+      setIsAnalyzingAI(false);
     }
   };
 
@@ -121,14 +147,28 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
             </div>
           )}
 
-          <Button 
-            onClick={processImport} 
-            disabled={!file || isProcessing}
-            className="w-full"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {isProcessing ? "Elaborazione..." : "Carica e Analizza"}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={processImport} 
+              disabled={!file || isProcessing}
+              className="flex-1"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {isProcessing ? "Elaborazione..." : "Carica CSV"}
+            </Button>
+            
+            {uploadedImportId && (
+              <Button 
+                onClick={analyzeWithAI} 
+                disabled={isAnalyzingAI}
+                variant="secondary"
+                className="flex-1"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isAnalyzingAI ? "Analizzando..." : "Analizza con AI"}
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
 
@@ -144,14 +184,14 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
             </div>
           </div>
 
-          {result.aiSummary && (
+          {aiSummary && (
             <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-primary mt-0.5" />
                 <div>
                   <h4 className="font-medium mb-2">Analisi AI</h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {result.aiSummary}
+                    {aiSummary}
                   </p>
                 </div>
               </div>

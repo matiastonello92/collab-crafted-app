@@ -27,6 +27,10 @@ import {
   CalendarDays,
   Mail,
   Tag,
+  DollarSign,
+  TrendingUp,
+  Plus,
+  Upload,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -79,6 +83,18 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
       permission: null,
       children: [
         { name: t('nav.recipesList'), href: '/recipes', icon: ChefHat, permission: null },
+      ]
+    },
+    {
+      name: 'Financial Hub',
+      icon: DollarSign,
+      permission: null,
+      children: [
+        { name: 'Dashboard', href: '/admin/finance/dashboard', icon: TrendingUp, permission: null },
+        { name: 'Nuova Chiusura', href: '/admin/finance/closures/new', icon: Plus, permission: null },
+        { name: 'Storico Chiusure', href: '/admin/finance/closures/history', icon: History, permission: null },
+        { name: 'Import CSV', href: '/admin/finance/import', icon: Upload, permission: null },
+        { name: 'Gestione Email', href: '/admin/finance/settings/recipients', icon: Mail, permission: 'view_settings', adminOnly: true },
       ]
     },
     { name: t('nav.admin'), href: '/admin/users', icon: Users, permission: 'manage_users' },

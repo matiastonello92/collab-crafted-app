@@ -48,64 +48,14 @@ serve(async (req) => {
       }
     }
 
-    const openAIKey = Deno.env.get('OPENAI_API_KEY');
-    let aiSummary = "";
-
-    if (openAIKey && parsedData.length > 0) {
-      const total = parsedData.reduce((sum, r) => sum + parseFloat(r.importo || 0), 0);
-      const avg = total / parsedData.length;
-      
-      const summaryPrompt = `
-Analizza questo import di dati finanziari:
-
-- Righe importate: ${rowsProcessed}
-- Totale importo: €${total.toFixed(2)}
-- Media per transazione: €${avg.toFixed(2)}
-- Periodo: dal ${parsedData[0].data} al ${parsedData[parsedData.length - 1].data}
-
-Fornisci un'analisi breve (max 150 parole) con:
-1. Valutazione generale dei dati
-2. Pattern interessanti
-3. Suggerimenti per ottimizzazione
-
-Rispondi in italiano, tono professionale.
-      `;
-
-      try {
-        const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { role: 'system', content: 'Sei un analista finanziario esperto.' },
-              { role: 'user', content: summaryPrompt }
-            ],
-            max_tokens: 300,
-            temperature: 0.7,
-          }),
-        });
-
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          aiSummary = aiData.choices[0].message.content;
-        }
-      } catch (aiError) {
-        console.error('AI analysis error:', aiError);
-      }
-    }
-
+    // Update import record - NO AI HERE
     await supabaseClient
       .from('financial_imports')
       .update({
         status: 'completed',
         rows_imported: rowsProcessed,
         rows_failed: errors,
-        completed_at: new Date().toISOString(),
-        ai_summary: aiSummary ? { summary: aiSummary } : null
+        completed_at: new Date().toISOString()
       })
       .eq('id', importId);
 
@@ -113,8 +63,7 @@ Rispondi in italiano, tono professionale.
       JSON.stringify({
         success: true,
         rowsProcessed,
-        errors,
-        aiSummary
+        errors
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
