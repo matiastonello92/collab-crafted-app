@@ -156,6 +156,167 @@ export type Database = {
           },
         ]
       }
+      cash_closures: {
+        Row: {
+          closure_date: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          closure_date: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          closure_date?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_closures_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_closures_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_closures_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      closure_email_recipients: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          is_active: boolean
+          location_id: string | null
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "closure_email_recipients_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closure_email_recipients_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closure_email_recipients_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      closure_items: {
+        Row: {
+          amount: number
+          closure_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          payment_method_id: string
+        }
+        Insert: {
+          amount?: number
+          closure_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method_id: string
+        }
+        Update: {
+          amount?: number
+          closure_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "closure_items_closure_id_fkey"
+            columns: ["closure_id"]
+            isOneToOne: false
+            referencedRelation: "cash_closures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closure_items_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_rules: {
         Row: {
           created_at: string
@@ -350,6 +511,76 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      financial_imports: {
+        Row: {
+          ai_summary: Json | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          error_log: Json | null
+          file_name: string
+          file_size: number | null
+          id: string
+          location_id: string
+          org_id: string
+          rows_failed: number
+          rows_imported: number
+          status: string
+        }
+        Insert: {
+          ai_summary?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          error_log?: Json | null
+          file_name: string
+          file_size?: number | null
+          id?: string
+          location_id: string
+          org_id: string
+          rows_failed?: number
+          rows_imported?: number
+          status?: string
+        }
+        Update: {
+          ai_summary?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          error_log?: Json | null
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          location_id?: string
+          org_id?: string
+          rows_failed?: number
+          rows_imported?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_imports_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_imports_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_imports_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
       }
       inventory_catalog_items: {
         Row: {
@@ -1474,6 +1705,67 @@ export type Database = {
           timezone?: string
         }
         Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key: string
+          location_id: string | null
+          name: string
+          org_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          location_id?: string | null
+          name: string
+          org_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          location_id?: string | null
+          name?: string
+          org_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_methods_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_methods_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
       }
       permission_preset_items: {
         Row: {
