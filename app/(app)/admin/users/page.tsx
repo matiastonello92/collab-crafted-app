@@ -22,7 +22,7 @@ export default async function AdminUsersPage({
   const search = searchParams.search || ''
   const sortBy = searchParams.sortBy || 'created_at'
   const sortOrder = searchParams.sortOrder || 'desc'
-  const status = searchParams.status || 'all'
+  const statusFilter = searchParams.status || 'all'
   
   const { users, total, hasMore } = await getUsersWithDetails(
     currentPage, 
@@ -30,7 +30,7 @@ export default async function AdminUsersPage({
     search,
     sortBy,
     sortOrder,
-    status
+    statusFilter
   )
 
   return (
