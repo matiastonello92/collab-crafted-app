@@ -23,11 +23,33 @@ interface CSVMappingWizardProps {
 }
 
 const targetFields = [
-  { value: "data", label: "📅 Data/Timestamp", required: true },
-  { value: "importo", label: "💰 Importo", required: true },
-  { value: "metodo_pagamento", label: "💳 Metodo di Pagamento", required: false },
-  { value: "note", label: "📝 Note (opzionale)", required: false },
-  { value: "_ignore", label: "🚫 Ignora questa colonna", required: false }
+  // Date fields
+  { value: 'record_date', label: '📅 Data del Record (YYYY-MM-DD)', required: true },
+  { value: 'datetime_from', label: '🕐 Data/Ora Inizio Periodo', required: false },
+  { value: 'datetime_to', label: '🕐 Data/Ora Fine Periodo', required: false },
+  { value: 'interval_title', label: '📝 Titolo Intervallo (es: "day 1")', required: false },
+  
+  // Sales metrics
+  { value: 'net_sales_amount', label: '💰 Vendite Nette', required: false },
+  { value: 'gross_sales_amount', label: '💰 Vendite Lorde', required: false },
+  { value: 'total_amount', label: '💰 Importo Totale', required: true },
+  
+  // Customer metrics
+  { value: 'covers', label: '👥 Coperti/Covers', required: false },
+  { value: 'orders', label: '📋 Numero Ordini', required: false },
+  
+  // Financial breakdown
+  { value: 'taxes_amount', label: '💳 Tasse', required: false },
+  { value: 'refunds_amount', label: '↩️ Rimborsi', required: false },
+  { value: 'voids_amount', label: '🚫 Annullamenti', required: false },
+  { value: 'discounts_amount', label: '🏷️ Sconti', required: false },
+  { value: 'complimentary_amount', label: '🎁 Omaggi', required: false },
+  { value: 'losses_amount', label: '📉 Perdite', required: false },
+  { value: 'tips_amount', label: '💵 Mance', required: false },
+  { value: 'service_charges', label: '⚙️ Costi di Servizio', required: false },
+  
+  // Utility
+  { value: '_ignore', label: '🚫 Ignora questa colonna', required: false }
 ];
 
 export function CSVMappingWizard({ 
@@ -62,14 +84,14 @@ export function CSVMappingWizard({
 
   const validateMapping = () => {
     const mappedValues = Object.values(mapping);
-    const hasData = mappedValues.includes('data');
-    const hasImporto = mappedValues.includes('importo');
+    const hasRecordDate = mappedValues.includes('record_date');
+    const hasTotalAmount = mappedValues.includes('total_amount');
     
     return {
-      isValid: hasData && hasImporto,
+      isValid: hasRecordDate && hasTotalAmount,
       missingFields: [
-        !hasData ? 'data' : null,
-        !hasImporto ? 'importo' : null
+        !hasRecordDate ? 'Data del Record (record_date)' : null,
+        !hasTotalAmount ? 'Importo Totale (total_amount)' : null,
       ].filter(Boolean) as string[]
     };
   };

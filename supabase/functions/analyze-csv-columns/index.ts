@@ -85,11 +85,12 @@ Return a COMPLETE mapping object where EVERY CSV header is mapped to a target fi
             properties: {
               mapping: {
                 type: 'object',
-                description: 'Object where keys are CSV headers and values are target field names. MUST include ALL CSV headers.',
+                description: 'COMPLETE mapping object where EVERY CSV header is mapped to a target field',
                 additionalProperties: {
                   type: 'string',
                   enum: targetFields.map(f => f.value)
-                }
+                },
+                minProperties: 1
               },
               confidence: {
                 type: 'number',
@@ -123,6 +124,15 @@ Return a COMPLETE mapping object where EVERY CSV header is mapped to a target fi
     }
 
     const result = JSON.parse(functionCall.arguments);
+    
+    // Validazione: se mapping è vuoto o undefined, genera mapping default
+    if (!result.mapping || Object.keys(result.mapping).length === 0) {
+      console.log('⚠️ OpenAI returned empty mapping, generating fallback...');
+      result.mapping = {};
+      headers.forEach(h => {
+        result.mapping[h] = '_ignore'; // Default tutti a ignore
+      });
+    }
 
     // Validation: ensure required fields are mapped
     const hasDate = Object.values(result.mapping).includes('record_date');

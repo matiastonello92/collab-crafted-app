@@ -82,6 +82,7 @@ serve(async (req) => {
         if (!targetField || targetField === '_ignore') return;
         
         const value = values[idx];
+        console.log(`  📋 ${header} (${value}) → ${targetField}`);
         
         // Field-specific parsing
         if (targetField === 'record_date' || targetField === 'datetime_from' || targetField === 'datetime_to') {
@@ -98,9 +99,15 @@ serve(async (req) => {
       });
 
       // Validate required fields
-      if (!row.record_date || !row.total_amount) {
+      console.log('🔍 Row before validation:', row);
+      if (!row.record_date) {
         errors++;
-        console.log('⚠️ Skipping row - missing required fields:', row);
+        console.log('❌ Missing record_date in row:', row);
+        continue;
+      }
+      if (!row.total_amount) {
+        errors++;
+        console.log('❌ Missing total_amount in row:', row);
         continue;
       }
 
