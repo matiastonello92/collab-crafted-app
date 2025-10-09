@@ -36,6 +36,8 @@ interface Closure {
 }
 
 serve(async (req) => {
+  let closure_id: string | null = null;
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -46,7 +48,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { closure_id } = await req.json() as ClosureReportRequest;
+    const requestBody = await req.json() as ClosureReportRequest;
+    closure_id = requestBody.closure_id;
 
     if (!closure_id) {
       throw new Error("closure_id is required");
@@ -99,7 +102,7 @@ serve(async (req) => {
 
     // Send email via Resend
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "Klyra Shifts <noreply@klyra.app>",
+      from: "Klyra Shifts <noreply@managementpn.services>",
       to: recipients.map(r => r.email),
       subject: `Chiusura di Cassa - ${typedClosure.locations.name} - ${new Date(typedClosure.closure_date).toLocaleDateString("it-IT")}`,
       html: emailHtml,
@@ -155,7 +158,14 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("❌ Error in send-closure-report:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    console.error("❌ Error in send-closure-report:", {
+      message: errorMessage,
+      stack: errorStack,
+      closure_id: closure_id,
+    });
     
     // Sprint 3: Log failed email attempt
     try {
@@ -164,24 +174,25 @@ serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
       
-      const { closure_id } = await req.json() as ClosureReportRequest;
-      const { data: closure } = await supabase
+      if (closure_id) {
+        const { data: closure } = await supabase
         .from("cash_closures")
         .select("org_id, created_by")
-        .eq("id", closure_id)
-        .single();
-      
-      if (closure) {
-        await supabase.from('email_logs').insert({
+          .eq("id", closure_id)
+          .single();
+        
+        if (closure) {
+          await supabase.from('email_logs').insert({
           org_id: closure.org_id,
           user_id: closure.created_by,
           recipient_email: 'unknown',
           email_type: 'closure_report',
           subject: `Chiusura di Cassa - Failed`,
           status: 'failed',
-          error_message: error instanceof Error ? error.message : 'Unknown error',
+          error_message: errorMessage,
           metadata: { closure_id }
         });
+        }
       }
     } catch (logErr) {
       console.error('Failed to log error:', logErr);

@@ -320,15 +320,17 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
               .eq('id', closureId);
             
             toast.error(
-              `Chiusura salvata ma email non inviata: ${emailError.message || 'Errore sconosciuto'}`,
+              `Chiusura salvata ma email NON inviata!\n\nErrore: ${emailError.message || 'Errore sconosciuto'}`,
               { 
-                duration: 8000,
+                duration: 15000,
                 action: {
                   label: 'Riprova',
                   onClick: () => retryEmailSend(closureId)
                 }
               }
             );
+            setIsSending(false);
+            return;
           } else {
             console.log('✅ Email inviata con successo:', emailResponse);
             const recipientCount = emailResponse?.recipients?.length || recipients.length;
@@ -336,14 +338,14 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
               `Report inviato con successo a ${recipientCount} destinatario${recipientCount !== 1 ? 'i' : ''}`,
               { duration: 5000 }
             );
+            setIsSending(false);
+            router.push("/admin/finance/closures");
           }
-          setIsSending(false);
         }
       } else {
         toast.success("Bozza salvata correttamente");
+        router.push("/admin/finance/closures");
       }
-
-      router.push("/admin/finance/closures");
     } catch (error) {
       console.error("Error saving closure:", error);
       toast.error(error instanceof Error ? error.message : "Errore nel salvataggio");

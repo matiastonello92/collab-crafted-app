@@ -253,7 +253,7 @@ export async function POST(request: Request) {
         // Send email with retry logic
         const result = await withRetry(async () => {
           const { data, error } = await resend.emails.send({
-            from: process.env.RESEND_FROM || 'noreply@klyra.fr',
+            from: process.env.RESEND_FROM || 'Klyra Shifts <noreply@managementpn.services>',
             to: [validatedData.email],
             subject: 'Klyra • Invito alla piattaforma',
             html: `

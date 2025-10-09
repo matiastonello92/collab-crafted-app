@@ -9,7 +9,7 @@ export class ResendMailer implements IMailer {
   private apiKey: string;
   private defaultFrom: string;
 
-  constructor(apiKey: string, defaultFrom: string = 'Klyra Shifts <noreply@klyra.app>') {
+  constructor(apiKey: string, defaultFrom: string = 'Klyra Shifts <noreply@managementpn.services>') {
     this.apiKey = apiKey;
     this.defaultFrom = defaultFrom;
   }
