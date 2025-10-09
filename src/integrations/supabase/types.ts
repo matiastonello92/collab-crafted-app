@@ -2690,6 +2690,92 @@ export type Database = {
           },
         ]
       }
+      sales_records: {
+        Row: {
+          complimentary_amount: number | null
+          covers: number | null
+          created_at: string
+          datetime_from: string | null
+          datetime_to: string | null
+          discounts_amount: number | null
+          gross_sales_amount: number | null
+          id: string
+          import_id: string | null
+          interval_title: string | null
+          location_id: string
+          losses_amount: number | null
+          net_sales_amount: number | null
+          orders: number | null
+          org_id: string
+          record_date: string
+          refunds_amount: number | null
+          service_charges: number | null
+          taxes_amount: number | null
+          tips_amount: number | null
+          total_amount: number | null
+          updated_at: string
+          voids_amount: number | null
+        }
+        Insert: {
+          complimentary_amount?: number | null
+          covers?: number | null
+          created_at?: string
+          datetime_from?: string | null
+          datetime_to?: string | null
+          discounts_amount?: number | null
+          gross_sales_amount?: number | null
+          id?: string
+          import_id?: string | null
+          interval_title?: string | null
+          location_id: string
+          losses_amount?: number | null
+          net_sales_amount?: number | null
+          orders?: number | null
+          org_id: string
+          record_date: string
+          refunds_amount?: number | null
+          service_charges?: number | null
+          taxes_amount?: number | null
+          tips_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string
+          voids_amount?: number | null
+        }
+        Update: {
+          complimentary_amount?: number | null
+          covers?: number | null
+          created_at?: string
+          datetime_from?: string | null
+          datetime_to?: string | null
+          discounts_amount?: number | null
+          gross_sales_amount?: number | null
+          id?: string
+          import_id?: string | null
+          interval_title?: string | null
+          location_id?: string
+          losses_amount?: number | null
+          net_sales_amount?: number | null
+          orders?: number | null
+          org_id?: string
+          record_date?: string
+          refunds_amount?: number | null
+          service_charges?: number | null
+          taxes_amount?: number | null
+          tips_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string
+          voids_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_records_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "financial_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_assignments: {
         Row: {
           acknowledged_at: string | null

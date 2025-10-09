@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, DollarSign, Calendar, Sparkles } from "lucide-react";
+import { TrendingUp, DollarSign, Calendar, Sparkles, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { SalesRecordsDashboard } from "./SalesRecordsDashboard";
 
 interface FinancialDashboardProps {
   orgId: string;
@@ -114,84 +116,115 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard Finanziaria</h1>
-          <p className="text-muted-foreground mt-2">
-            Analisi e insights ultimi 30 giorni
-          </p>
-        </div>
-        <Button onClick={generateAIInsights} disabled={isLoadingInsights}>
+    <Tabs defaultValue="imported" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="imported">
+          <FileText className="w-4 h-4 mr-2" />
+          Dati Importati
+        </TabsTrigger>
+        <TabsTrigger value="closures">
+          <DollarSign className="w-4 h-4 mr-2" />
+          Chiusure Manuali
+        </TabsTrigger>
+        <TabsTrigger value="combined">
           <Sparkles className="w-4 h-4 mr-2" />
-          {isLoadingInsights ? "Analisi in corso..." : "Genera Insights AI"}
-        </Button>
-      </div>
+          Vista Combinata
+        </TabsTrigger>
+      </TabsList>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <TabsContent value="imported" className="space-y-6">
+        <SalesRecordsDashboard orgId={orgId} locationId={locationId} />
+      </TabsContent>
+
+      <TabsContent value="closures" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Chiusure Manuali</h2>
+            <p className="text-muted-foreground mt-2">
+              Analisi ultimi 30 giorni
+            </p>
+          </div>
+          <Button onClick={generateAIInsights} disabled={isLoadingInsights}>
+            <Sparkles className="w-4 h-4 mr-2" />
+            {isLoadingInsights ? "Analisi in corso..." : "Genera Insights AI"}
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <DollarSign className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Totale Incassato</p>
+                <p className="text-2xl font-bold">€{stats.total.toFixed(2)}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Media Giornaliera</p>
+                <p className="text-2xl font-bold">€{stats.average.toFixed(2)}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Trend Settimanale</p>
+                <p className={`text-2xl font-bold ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(1)}%
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
         <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <DollarSign className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Totale Incassato</p>
-              <p className="text-2xl font-bold">€{stats.total.toFixed(2)}</p>
-            </div>
-          </div>
+          <h3 className="text-xl font-semibold mb-4">Andamento Incassi</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(value) => `€${Number(value).toFixed(2)}`} />
+              <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-primary" />
+        {aiInsights && (
+          <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-6 h-6 text-primary mt-1" />
+              <div>
+                <h4 className="text-lg font-semibold mb-2">Insights AI</h4>
+                <p className="text-muted-foreground whitespace-pre-line">{aiInsights}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Media Giornaliera</p>
-              <p className="text-2xl font-bold">€{stats.average.toFixed(2)}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
+      </TabsContent>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Trend Settimanale</p>
-              <p className={`text-2xl font-bold ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(1)}%
-              </p>
-            </div>
-          </div>
+      <TabsContent value="combined" className="space-y-6">
+        <Card className="p-8 text-center">
+          <Sparkles className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Vista Combinata in Sviluppo</h3>
+          <p className="text-muted-foreground">
+            Presto potrai visualizzare chiusure manuali e dati importati insieme
+          </p>
         </Card>
-      </div>
-
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Andamento Incassi</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip formatter={(value) => `€${Number(value).toFixed(2)}`} />
-            <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
-
-      {aiInsights && (
-        <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-6 h-6 text-primary mt-1" />
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Insights AI</h3>
-              <p className="text-muted-foreground whitespace-pre-line">{aiInsights}</p>
-            </div>
-          </div>
-        </Card>
-      )}
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }

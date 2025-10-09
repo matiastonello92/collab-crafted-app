@@ -28,7 +28,40 @@ serve(async (req) => {
     let rowsProcessed = 0;
     let errors = 0;
 
-    const parsedData: any[] = [];
+    const salesToInsert: any[] = [];
+
+    // Helper: parse date from various formats
+    const parseDate = (val: string): string | null => {
+      if (!val || val.trim() === '') return null;
+      
+      // Try ISO format first (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)
+      const isoMatch = val.match(/^(\d{4}-\d{2}-\d{2})/);
+      if (isoMatch) return isoMatch[1];
+      
+      // Try DD/MM/YYYY
+      const ddmmyyyy = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (ddmmyyyy) {
+        const [_, day, month, year] = ddmmyyyy;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      return null;
+    };
+
+    // Helper: parse numeric value
+    const parseNumeric = (val: string): number => {
+      if (!val || val.trim() === '') return 0;
+      const cleaned = val.replace(/[^\d.-]/g, '');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    };
+
+    // Helper: parse integer
+    const parseInt = (val: string): number => {
+      if (!val || val.trim() === '') return 0;
+      const num = Number.parseInt(val);
+      return isNaN(num) ? 0 : num;
+    };
 
     for (const line of dataRows) {
       const values = line.split(',').map((v: string) => v.trim());
@@ -37,28 +70,62 @@ serve(async (req) => {
         continue;
       }
 
-      const row: any = {};
+      const row: any = {
+        org_id: orgId,
+        location_id: locationId,
+        import_id: importId
+      };
       
-      // Use dynamic column mapping
+      // Map CSV columns to database fields
       headers.forEach((header, idx) => {
         const targetField = columnMapping[header];
-        if (targetField && targetField !== '_ignore') {
-          row[targetField] = values[idx];
+        if (!targetField || targetField === '_ignore') return;
+        
+        const value = values[idx];
+        
+        // Field-specific parsing
+        if (targetField === 'record_date' || targetField === 'datetime_from' || targetField === 'datetime_to') {
+          const parsed = parseDate(value);
+          if (parsed) row[targetField] = parsed;
+        } else if (targetField === 'covers' || targetField === 'orders') {
+          row[targetField] = parseInt(value);
+        } else if (targetField === 'interval_title') {
+          row[targetField] = value;
+        } else {
+          // All amount fields
+          row[targetField] = parseNumeric(value);
         }
       });
 
       // Validate required fields
-      if (row.data && row.importo) {
-        parsedData.push(row);
-        rowsProcessed++;
-      } else {
+      if (!row.record_date || !row.total_amount) {
         errors++;
+        console.log('⚠️ Skipping row - missing required fields:', row);
+        continue;
       }
+
+      salesToInsert.push(row);
+      rowsProcessed++;
     }
 
-    console.log(`✅ Processed ${rowsProcessed} rows, ${errors} errors`);
+    console.log(`✅ Parsed ${rowsProcessed} rows, ${errors} errors`);
+    console.log('📦 Sample data to insert:', salesToInsert.slice(0, 2));
 
-    // Update import record - NO AI HERE
+    // Batch insert sales records
+    if (salesToInsert.length > 0) {
+      const { error: insertError } = await supabaseClient
+        .from('sales_records')
+        .insert(salesToInsert);
+
+      if (insertError) {
+        console.error('❌ Error inserting sales records:', insertError);
+        throw insertError;
+      }
+
+      console.log(`✅ Inserted ${salesToInsert.length} sales records`);
+    }
+
+    // Update import record
     await supabaseClient
       .from('financial_imports')
       .update({

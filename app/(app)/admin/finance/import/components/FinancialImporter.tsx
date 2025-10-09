@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Upload, FileText, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 import { CSVMappingWizard } from "./CSVMappingWizard";
 import { ImportModeSelector } from "./ImportModeSelector";
+import { FileDropzone } from "./FileDropzone";
 
 interface FinancialImporterProps {
   orgId: string;
@@ -227,21 +228,12 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
       {step === 'upload' && (
         <Card className="p-6">
           <div className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                className="max-w-xs mx-auto"
-                disabled={step !== 'upload'}
-              />
-              {file && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  File selezionato: {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                </p>
-              )}
-            </div>
+            <FileDropzone
+              onFileSelect={setFile}
+              accept=".csv"
+              disabled={step !== 'upload'}
+              currentFile={file}
+            />
 
             <Button 
               onClick={proceedToModeSelection} 
