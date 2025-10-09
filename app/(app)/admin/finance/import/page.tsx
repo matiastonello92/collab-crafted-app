@@ -2,8 +2,10 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { FinancialImporter } from "./components/FinancialImporter";
 import { redirect } from "next/navigation";
+import { getTranslation } from "@/lib/i18n/server";
 
 export default async function FinanceImportPage() {
+  const t = await getTranslation();
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -35,9 +37,9 @@ export default async function FinanceImportPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Import Dati Finanziari</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('finance.import.pageTitle')}</h1>
         <p className="text-muted-foreground mt-2">
-          Carica file CSV con dati di vendita per analisi automatizzata AI
+          {t('finance.import.pageDescription')}
         </p>
       </div>
 

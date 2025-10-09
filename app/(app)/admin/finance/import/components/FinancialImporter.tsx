@@ -11,6 +11,7 @@ import { Upload, FileText, Sparkles, CheckCircle2, Loader2 } from "lucide-react"
 import { CSVMappingWizard } from "./CSVMappingWizard";
 import { ImportModeSelector } from "./ImportModeSelector";
 import { FileDropzone } from "./FileDropzone";
+import { useTranslation } from "@/lib/i18n";
 
 interface FinancialImporterProps {
   orgId: string;
@@ -19,6 +20,7 @@ interface FinancialImporterProps {
 }
 
 export function FinancialImporter({ orgId, locationId, userId }: FinancialImporterProps) {
+  const { t } = useTranslation();
   const supabase = useSupabase();
   const [file, setFile] = useState<File | null>(null);
   const [step, setStep] = useState<'upload' | 'mode-selection' | 'analyzing' | 'mapping' | 'importing'>('upload');
@@ -39,7 +41,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       if (!selectedFile.name.endsWith('.csv')) {
-        toast.error("Solo file CSV sono supportati");
+        toast.error(t('finance.import.messages.onlyCsvSupported'));
         return;
       }
       setFile(selectedFile);
@@ -88,14 +90,14 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
       setStep('mapping');
     } catch (error) {
       console.error('❌ Error loading CSV:', error);
-      toast.error("Errore durante il caricamento del CSV");
+      toast.error(t('finance.import.messages.errorLoadingCsv'));
       setStep('mode-selection');
     }
   };
 
   const analyzeCSVColumns = async () => {
     if (!file) {
-      toast.error("Seleziona un file");
+      toast.error(t('finance.import.messages.selectFile'));
       return;
     }
 
@@ -130,7 +132,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
 
     } catch (error) {
       console.error('❌ Error analyzing CSV:', error);
-      toast.error("Errore durante l'analisi del CSV");
+      toast.error(t('finance.import.messages.errorAnalyzing'));
       setStep('upload');
       setProgress(0);
     }
@@ -174,11 +176,11 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
       setResult(data);
       setUploadedImportId(importRecord.id);
       setStep('upload');
-      toast.success(`Import completato: ${data.rowsProcessed} righe importate`);
+      toast.success(t('finance.import.messages.importComplete').replace('{count}', data.rowsProcessed));
 
     } catch (error) {
       console.error(error);
-      toast.error("Errore durante l'import");
+      toast.error(t('finance.import.messages.errorImporting'));
       setStep('upload');
     } finally {
       setProgress(0);
@@ -195,7 +197,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
 
   const proceedToModeSelection = () => {
     if (!file) {
-      toast.error("Seleziona un file");
+      toast.error(t('finance.import.messages.selectFile'));
       return;
     }
     setStep('mode-selection');
@@ -214,10 +216,10 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
       if (error) throw error;
 
       setAiSummary(data.summary);
-      toast.success("Analisi AI completata");
+      toast.success(t('finance.import.messages.aiAnalysisComplete'));
     } catch (error) {
       console.error(error);
-      toast.error("Errore durante l'analisi AI");
+      toast.error(t('finance.import.messages.errorAIAnalysis'));
     } finally {
       setIsAnalyzingAI(false);
     }
@@ -242,7 +244,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
               size="lg"
             >
               <Upload className="w-4 h-4 mr-2" />
-              Continua
+              {t('finance.import.continue')}
             </Button>
           </div>
         </Card>
@@ -260,11 +262,11 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <p className="text-lg font-medium">Analisi AI in corso...</p>
+              <p className="text-lg font-medium">{t('finance.import.analyzing')}</p>
             </div>
             <Progress value={progress} />
             <p className="text-sm text-center text-muted-foreground">
-              L'AI sta analizzando le colonne del tuo CSV per suggerire il mapping migliore
+              {t('finance.import.progress.analyzingAI')}
             </p>
           </div>
         </Card>
@@ -286,11 +288,11 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <p className="text-lg font-medium">Import in corso...</p>
+              <p className="text-lg font-medium">{t('finance.import.importing')}</p>
             </div>
             <Progress value={progress} />
             <p className="text-sm text-center text-muted-foreground">
-              Stiamo importando i dati nel sistema
+              {t('finance.import.importingDesc')}
             </p>
           </div>
         </Card>
@@ -301,9 +303,9 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
           <div className="flex items-start gap-3 mb-4">
             <CheckCircle2 className="w-6 h-6 text-green-600" />
             <div>
-              <h3 className="text-lg font-semibold">Import Completato</h3>
+              <h3 className="text-lg font-semibold">{t('finance.import.results.importComplete')}</h3>
               <p className="text-sm text-muted-foreground">
-                Righe processate: {result.rowsProcessed} | Errori: {result.errors}
+                {t('finance.import.results.rowsProcessed')}: {result.rowsProcessed} | {t('finance.import.results.errors')}: {result.errors}
               </p>
             </div>
           </div>
@@ -313,7 +315,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
               <div className="flex items-start gap-3">
                 <Sparkles className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <h4 className="font-medium mb-2">Analisi AI</h4>
+                  <h4 className="font-medium mb-2">{t('finance.import.results.aiAnalysis')}</h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {aiSummary}
                   </p>
@@ -328,24 +330,23 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
         <Card className="p-6 bg-muted/50">
           <h3 className="font-semibold mb-2 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            Sistema Intelligente di Import
+            {t('finance.import.smartSystem.title')}
           </h3>
           <p className="text-sm text-muted-foreground mb-3">
-            Il nostro sistema usa AI per rilevare automaticamente le colonne del tuo CSV, 
-            indipendentemente dalla lingua o dal formato. Non serve più un formato specifico!
+            {t('finance.import.smartSystem.description')}
           </p>
           <div className="space-y-2 text-xs">
             <p className="flex items-center gap-2">
               <CheckCircle2 className="w-3 h-3 text-green-600" />
-              <span>Supporta colonne in italiano, inglese, spagnolo, francese...</span>
+              <span>{t('finance.import.smartSystem.feature1')}</span>
             </p>
             <p className="flex items-center gap-2">
               <CheckCircle2 className="w-3 h-3 text-green-600" />
-              <span>Rileva automaticamente data, importo, metodo di pagamento</span>
+              <span>{t('finance.import.smartSystem.feature2')}</span>
             </p>
             <p className="flex items-center gap-2">
               <CheckCircle2 className="w-3 h-3 text-green-600" />
-              <span>Permette di correggere il mapping prima dell'import</span>
+              <span>{t('finance.import.smartSystem.feature3')}</span>
             </p>
           </div>
         </Card>
@@ -360,7 +361,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
             className="flex-1"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            {isAnalyzingAI ? "Analizzando..." : "Analizza con AI"}
+            {isAnalyzingAI ? t('finance.import.analyzing') : t('finance.import.analyzeWithAI')}
           </Button>
         </div>
       )}

@@ -12,6 +12,7 @@ import {
 import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Receipt } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n";
 
 interface SalesRecordsDashboardProps {
   orgId: string;
@@ -19,6 +20,7 @@ interface SalesRecordsDashboardProps {
 }
 
 export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboardProps) {
+  const { t } = useTranslation();
   const supabase = useSupabase();
   const [loading, setLoading] = useState(true);
   const [salesData, setSalesData] = useState<any[]>([]);
@@ -105,7 +107,7 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Caricamento dati vendite...</p>
+          <p className="text-muted-foreground">{t('finance.dashboard.loadingSalesData')}</p>
         </div>
       </div>
     );
@@ -115,9 +117,9 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
     return (
       <Card className="p-8 text-center">
         <Receipt className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Nessun dato disponibile</h3>
+        <h3 className="text-lg font-semibold mb-2">{t('finance.dashboard.noData')}</h3>
         <p className="text-muted-foreground">
-          Importa dati CSV per visualizzare statistiche e grafici
+          {t('finance.dashboard.noDataDesc')}
         </p>
       </Card>
     );
@@ -137,7 +139,7 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Fatturato Totale</span>
+            <span className="text-sm text-muted-foreground">{t('finance.dashboard.stats.totalRevenue')}</span>
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div className="text-2xl font-bold">
@@ -155,42 +157,42 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
                 <span className="text-sm text-red-600">{stats.trend.toFixed(1)}%</span>
               </>
             )}
-            <span className="text-xs text-muted-foreground">vs 7 giorni fa</span>
+            <span className="text-xs text-muted-foreground">{t('finance.dashboard.stats.vs7DaysAgo')}</span>
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Ordini Totali</span>
+            <span className="text-sm text-muted-foreground">{t('finance.dashboard.stats.totalOrders')}</span>
             <ShoppingCart className="w-5 h-5 text-primary" />
           </div>
           <div className="text-2xl font-bold">{stats.totalOrders.toLocaleString('it-IT')}</div>
           <div className="text-sm text-muted-foreground mt-2">
-            Ultimi 30 giorni
+            {t('finance.dashboard.stats.last30Days')}
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Coperti Totali</span>
+            <span className="text-sm text-muted-foreground">{t('finance.dashboard.stats.totalCovers')}</span>
             <Users className="w-5 h-5 text-primary" />
           </div>
           <div className="text-2xl font-bold">{stats.totalCovers.toLocaleString('it-IT')}</div>
           <div className="text-sm text-muted-foreground mt-2">
-            Clienti serviti
+            {t('finance.dashboard.stats.customersServed')}
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Scontrino Medio</span>
+            <span className="text-sm text-muted-foreground">{t('finance.dashboard.stats.avgOrderValue')}</span>
             <Receipt className="w-5 h-5 text-primary" />
           </div>
           <div className="text-2xl font-bold">
             €{stats.avgOrderValue.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
           </div>
           <div className="text-sm text-muted-foreground mt-2">
-            Per ordine
+            {t('finance.dashboard.stats.perOrder')}
           </div>
         </Card>
       </div>
@@ -198,14 +200,14 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
       {/* Charts */}
       <Tabs defaultValue="revenue" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="revenue">Fatturato</TabsTrigger>
-          <TabsTrigger value="orders">Ordini & Coperti</TabsTrigger>
-          <TabsTrigger value="breakdown">Dettaglio</TabsTrigger>
+          <TabsTrigger value="revenue">{t('finance.dashboard.charts.revenueTab')}</TabsTrigger>
+          <TabsTrigger value="orders">{t('finance.dashboard.charts.ordersTab')}</TabsTrigger>
+          <TabsTrigger value="breakdown">{t('finance.dashboard.charts.breakdownTab')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Andamento Fatturato (30 giorni)</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('finance.dashboard.charts.revenue30Days')}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -215,8 +217,8 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
                   formatter={(value: number) => `€${value.toLocaleString('it-IT', { minimumFractionDigits: 2 })}`}
                 />
                 <Legend />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" name="Fatturato Totale" />
-                <Bar dataKey="netSales" fill="hsl(var(--accent))" name="Vendite Nette" />
+                <Bar dataKey="revenue" fill="hsl(var(--primary))" name={t('finance.dashboard.charts.totalRevenue')} />
+                <Bar dataKey="netSales" fill="hsl(var(--accent))" name={t('finance.dashboard.charts.netSales')} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -224,7 +226,7 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
 
         <TabsContent value="orders">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Ordini e Coperti</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('finance.dashboard.charts.ordersAndCovers')}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -237,14 +239,14 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
                   dataKey="orders" 
                   stroke="hsl(var(--primary))" 
                   strokeWidth={2}
-                  name="Ordini"
+                  name={t('finance.dashboard.charts.orders')}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="covers" 
                   stroke="hsl(var(--accent))" 
                   strokeWidth={2}
-                  name="Coperti"
+                  name={t('finance.dashboard.charts.covers')}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -253,7 +255,7 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
 
         <TabsContent value="breakdown">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Dettaglio Finanziario</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('finance.dashboard.charts.financialBreakdown')}</h3>
             <div className="space-y-3">
               {salesData.slice(0, 10).map((record, idx) => (
                 <div key={idx} className="flex items-center justify-between py-2 border-b">
@@ -262,7 +264,7 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
                       {format(new Date(record.record_date), 'dd MMM yyyy', { locale: it })}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {record.orders || 0} ordini • {record.covers || 0} coperti
+                      {record.orders || 0} {t('finance.dashboard.charts.orders').toLowerCase()} • {record.covers || 0} {t('finance.dashboard.charts.covers').toLowerCase()}
                     </p>
                   </div>
                   <div className="text-right">
@@ -271,10 +273,10 @@ export function SalesRecordsDashboard({ orgId, locationId }: SalesRecordsDashboa
                     </p>
                     <div className="flex gap-2 text-xs text-muted-foreground">
                       {record.tips_amount > 0 && (
-                        <Badge variant="secondary">Mance: €{record.tips_amount}</Badge>
+                        <Badge variant="secondary">{t('finance.dashboard.charts.tips')}: €{record.tips_amount}</Badge>
                       )}
                       {record.refunds_amount > 0 && (
-                        <Badge variant="destructive">Rimborsi: €{record.refunds_amount}</Badge>
+                        <Badge variant="destructive">{t('finance.dashboard.charts.refunds')}: €{record.refunds_amount}</Badge>
                       )}
                     </div>
                   </div>

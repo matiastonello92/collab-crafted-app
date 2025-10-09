@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { FileText, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 interface FileDropzoneProps {
   onFileSelect: (file: File) => void;
@@ -18,6 +19,8 @@ export function FileDropzone({
   disabled = false,
   currentFile 
 }: FileDropzoneProps) {
+  const { t } = useTranslation();
+  
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -32,12 +35,12 @@ export function FileDropzone({
     // Check file type
     const extension = file.name.split('.').pop()?.toLowerCase();
     if (accept.includes('csv') && extension !== 'csv') {
-      toast.error("Solo file CSV sono supportati");
+      toast.error(t('finance.import.dropzone.onlyCsv'));
       return;
     }
 
     onFileSelect(file);
-  }, [onFileSelect, accept, disabled]);
+  }, [onFileSelect, accept, disabled, t]);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -78,19 +81,19 @@ export function FileDropzone({
               {(currentFile.size / 1024).toFixed(1)} KB
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              Clicca o trascina un nuovo file per sostituire
+              {t('finance.import.dropzone.replaceFile')}
             </p>
           </div>
         ) : (
           <div>
             <p className="text-lg font-medium">
-              Trascina il tuo file CSV qui
+              {t('finance.import.dropzone.dragHere')}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              oppure clicca per selezionare
+              {t('finance.import.dropzone.orClick')}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              File supportati: CSV
+              {t('finance.import.dropzone.supportedFiles')}
             </p>
           </div>
         )}

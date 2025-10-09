@@ -2,8 +2,10 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { FinancialDashboard } from "./components/FinancialDashboard";
 import { redirect } from "next/navigation";
+import { getTranslation } from "@/lib/i18n/server";
 
 export default async function FinanceDashboardPage() {
+  const t = await getTranslation();
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   

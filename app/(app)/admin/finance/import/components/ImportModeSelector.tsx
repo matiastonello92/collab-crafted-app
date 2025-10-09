@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Edit3, Zap, Shield } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface ImportModeSelectorProps {
   onSelectMode: (mode: 'ai' | 'manual') => void;
@@ -11,12 +12,14 @@ interface ImportModeSelectorProps {
 }
 
 export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportModeSelectorProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-4">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">Scegli Modalità di Import</h2>
+        <h2 className="text-2xl font-bold mb-2">{t('finance.import.modes.title')}</h2>
         <p className="text-muted-foreground">
-          Seleziona come vuoi importare i tuoi dati finanziari
+          {t('finance.import.modes.description')}
         </p>
       </div>
 
@@ -35,30 +38,30 @@ export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportMod
               </div>
               {!aiEnabled && (
                 <Badge variant="secondary" className="bg-accent">
-                  ✨ Premium
+                  {t('finance.import.modes.premium')}
                 </Badge>
               )}
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold mb-2">🤖 Import con AI</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('finance.import.modes.aiTitle')}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                L'intelligenza artificiale analizza automaticamente le tue colonne CSV e suggerisce il mapping migliore.
+                {t('finance.import.modes.aiDescription')}
               </p>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-primary" />
-                <span>Veloce e automatico</span>
+                <span>{t('finance.import.modes.fastAutomatic')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary" />
-                <span>Rileva colonne in qualsiasi lingua</span>
+                <span>{t('finance.import.modes.detectsLanguage')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span>Suggerimenti intelligenti</span>
+                <span>{t('finance.import.modes.smartSuggestions')}</span>
               </div>
             </div>
 
@@ -71,12 +74,12 @@ export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportMod
               }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              Usa AI
+              {t('finance.import.modes.useAI')}
             </Button>
 
             {!aiEnabled && (
               <p className="text-xs text-center text-muted-foreground mt-2">
-                Disponibile per piani Premium
+                {t('finance.import.modes.availableForPremium')}
               </p>
             )}
           </div>
@@ -93,29 +96,29 @@ export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportMod
                 <Edit3 className="w-6 h-6 text-foreground" />
               </div>
               <Badge variant="outline" className="bg-background">
-                Gratuito
+                {t('finance.import.modes.free')}
               </Badge>
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold mb-2">✏️ Import Manuale</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('finance.import.modes.manualTitle')}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Configuri manualmente il mapping tra le colonne del CSV e i campi del sistema.
+                {t('finance.import.modes.manualDescription')}
               </p>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-foreground" />
-                <span>Controllo totale</span>
+                <span>{t('finance.import.modes.totalControl')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-foreground" />
-                <span>Nessun costo aggiuntivo</span>
+                <span>{t('finance.import.modes.noCost')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-foreground" />
-                <span>Perfetto per formati personalizzati</span>
+                <span>{t('finance.import.modes.customFormats')}</span>
               </div>
             </div>
 
@@ -128,7 +131,7 @@ export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportMod
               }}
             >
               <Edit3 className="w-4 h-4 mr-2" />
-              Configura Manualmente
+              {t('finance.import.modes.configureManually')}
             </Button>
           </div>
         </Card>
@@ -136,7 +139,7 @@ export function ImportModeSelector({ onSelectMode, aiEnabled = true }: ImportMod
 
       <Card className="p-4 bg-muted/50">
         <p className="text-xs text-muted-foreground text-center">
-          💡 <strong>Suggerimento:</strong> Prova l'AI per risparmiare tempo, oppure usa la modalità manuale se hai formati CSV molto specifici.
+          {t('finance.import.modes.tip')}
         </p>
       </Card>
     </div>

@@ -9,6 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, DollarSign, Calendar, Sparkles, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { SalesRecordsDashboard } from "./SalesRecordsDashboard";
+import { useTranslation } from "@/lib/i18n";
 
 interface FinancialDashboardProps {
   orgId: string;
@@ -16,6 +17,7 @@ interface FinancialDashboardProps {
 }
 
 export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProps) {
+  const { t } = useTranslation();
   const supabase = useSupabase();
   const [stats, setStats] = useState<any>(null);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -44,7 +46,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
     const { data: closures, error } = await query;
 
     if (error) {
-      toast.error("Errore nel caricamento dati");
+      toast.error(t('finance.dashboard.errorLoading'));
       return;
     }
 
@@ -85,7 +87,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
 
   const generateAIInsights = async () => {
     if (chartData.length === 0) {
-      toast.error("Non ci sono abbastanza dati per l'analisi");
+      toast.error(t('finance.dashboard.notEnoughData'));
       return;
     }
 
@@ -102,17 +104,17 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
       if (error) throw error;
 
       setAiInsights(data.insights);
-      toast.success("Analisi AI completata");
+      toast.success(t('finance.dashboard.aiAnalysisComplete'));
     } catch (error) {
       console.error(error);
-      toast.error("Errore nell'analisi AI");
+      toast.error(t('finance.dashboard.aiAnalysisError'));
     } finally {
       setIsLoadingInsights(false);
     }
   };
 
   if (!stats) {
-    return <div className="text-center py-12">Caricamento...</div>;
+    return <div className="text-center py-12">{t('finance.dashboard.loading')}</div>;
   }
 
   return (
@@ -120,15 +122,15 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="imported">
           <FileText className="w-4 h-4 mr-2" />
-          Dati Importati
+          {t('finance.dashboard.tabs.imported')}
         </TabsTrigger>
         <TabsTrigger value="closures">
           <DollarSign className="w-4 h-4 mr-2" />
-          Chiusure Manuali
+          {t('finance.dashboard.tabs.closures')}
         </TabsTrigger>
         <TabsTrigger value="combined">
           <Sparkles className="w-4 h-4 mr-2" />
-          Vista Combinata
+          {t('finance.dashboard.tabs.combined')}
         </TabsTrigger>
       </TabsList>
 
@@ -139,14 +141,14 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
       <TabsContent value="closures" className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Chiusure Manuali</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t('finance.dashboard.manualClosures')}</h2>
             <p className="text-muted-foreground mt-2">
-              Analisi ultimi 30 giorni
+              {t('finance.dashboard.analysisLast30Days')}
             </p>
           </div>
           <Button onClick={generateAIInsights} disabled={isLoadingInsights}>
             <Sparkles className="w-4 h-4 mr-2" />
-            {isLoadingInsights ? "Analisi in corso..." : "Genera Insights AI"}
+            {isLoadingInsights ? t('finance.dashboard.analyzing') : t('finance.dashboard.generateAIInsights')}
           </Button>
         </div>
 
@@ -157,7 +159,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
                 <DollarSign className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Totale Incassato</p>
+                <p className="text-sm text-muted-foreground">{t('finance.dashboard.stats.totalRevenue')}</p>
                 <p className="text-2xl font-bold">€{stats.total.toFixed(2)}</p>
               </div>
             </div>
@@ -169,7 +171,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
                 <TrendingUp className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Media Giornaliera</p>
+                <p className="text-sm text-muted-foreground">{t('finance.dashboard.stats.dailyAverage')}</p>
                 <p className="text-2xl font-bold">€{stats.average.toFixed(2)}</p>
               </div>
             </div>
@@ -181,7 +183,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Trend Settimanale</p>
+                <p className="text-sm text-muted-foreground">{t('finance.dashboard.stats.weeklyTrend')}</p>
                 <p className={`text-2xl font-bold ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(1)}%
                 </p>
@@ -191,7 +193,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
         </div>
 
         <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Andamento Incassi</h3>
+          <h3 className="text-xl font-semibold mb-4">{t('finance.dashboard.charts.revenueTitle')}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -208,7 +210,7 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
             <div className="flex items-start gap-3">
               <Sparkles className="w-6 h-6 text-primary mt-1" />
               <div>
-                <h4 className="text-lg font-semibold mb-2">Insights AI</h4>
+                <h4 className="text-lg font-semibold mb-2">{t('finance.dashboard.aiInsightsTitle')}</h4>
                 <p className="text-muted-foreground whitespace-pre-line">{aiInsights}</p>
               </div>
             </div>
@@ -219,9 +221,9 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
       <TabsContent value="combined" className="space-y-6">
         <Card className="p-8 text-center">
           <Sparkles className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Vista Combinata in Sviluppo</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('finance.dashboard.combinedViewTitle')}</h3>
           <p className="text-muted-foreground">
-            Presto potrai visualizzare chiusure manuali e dati importati insieme
+            {t('finance.dashboard.combinedViewDesc')}
           </p>
         </Card>
       </TabsContent>

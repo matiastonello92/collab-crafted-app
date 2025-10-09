@@ -476,10 +476,182 @@ export const en = {
     emailLogsSubject: 'Subject',
     emailLogsDetails: 'Details',
     emailLogsNone: 'No logs found',
-    emailLogsRotaPublished: '📅 Schedule published',
+  emailLogsRotaPublished: '📅 Schedule published',
     emailLogsShiftChange: '🔄 Shift change',
     emailLogsLeaveDecision: '✅ Leave decision',
     emailLogsErrorLoading: 'Error loading logs',
+    
+    // Finance Hub
+    finance: {
+      // Dashboard
+      dashboard: {
+        pageTitle: 'Financial Dashboard',
+        pageDescription: 'Financial analysis and statistics',
+        tabs: {
+          imported: 'Imported Data',
+          closures: 'Manual Closures',
+          combined: 'Combined View'
+        },
+        loading: 'Loading...',
+        errorLoading: 'Error loading data',
+        manualClosures: 'Manual Closures',
+        analysisLast30Days: 'Last 30 days analysis',
+        generateAIInsights: 'Generate AI Insights',
+        analyzing: 'Analyzing...',
+        aiInsightsTitle: 'AI Insights',
+        combinedViewTitle: 'Combined View in Development',
+        combinedViewDesc: 'Soon you will be able to view manual closures and imported data together',
+        notEnoughData: 'Not enough data for analysis',
+        aiAnalysisComplete: 'AI analysis completed',
+        aiAnalysisError: 'Error in AI analysis',
+        stats: {
+          totalRevenue: 'Total Revenue',
+          dailyAverage: 'Daily Average',
+          weeklyTrend: 'Weekly Trend',
+          totalOrders: 'Total Orders',
+          totalCovers: 'Total Covers',
+          avgOrderValue: 'Avg Check',
+          last30Days: 'Last 30 days',
+          customersServed: 'Customers served',
+          perOrder: 'Per order',
+          vs7DaysAgo: 'vs 7 days ago'
+        },
+        charts: {
+          revenueTitle: 'Revenue Trend',
+          revenueTab: 'Revenue',
+          ordersTab: 'Orders & Covers',
+          breakdownTab: 'Breakdown',
+          revenue30Days: 'Revenue Trend (30 days)',
+          ordersAndCovers: 'Orders and Covers',
+          financialBreakdown: 'Financial Breakdown',
+          totalRevenue: 'Total Revenue',
+          netSales: 'Net Sales',
+          orders: 'Orders',
+          covers: 'Covers',
+          tips: 'Tips',
+          refunds: 'Refunds'
+        },
+        noData: 'No data available',
+        noDataDesc: 'Import CSV data to view statistics and charts',
+        loadingSalesData: 'Loading sales data...'
+      },
+      
+      // Import
+      import: {
+        pageTitle: 'Import Financial Data',
+        pageDescription: 'Upload CSV files with sales data for automated AI analysis',
+        uploadFile: 'Upload CSV File',
+        continue: 'Continue',
+        importing: 'Import in progress...',
+        importingDesc: 'We are importing data into the system',
+        analyzeWithAI: 'Analyze with AI',
+        analyzing: 'Analyzing...',
+        
+        // Mode Selection
+        modes: {
+          title: 'Choose Import Mode',
+          description: 'Select how you want to import your financial data',
+          aiTitle: '🤖 AI Import',
+          aiDescription: 'Artificial intelligence automatically analyzes your CSV columns and suggests the best mapping.',
+          manualTitle: '✏️ Manual Import',
+          manualDescription: 'You manually configure the mapping between CSV columns and system fields.',
+          premium: '✨ Premium',
+          free: 'Free',
+          fastAutomatic: 'Fast and automatic',
+          detectsLanguage: 'Detects columns in any language',
+          smartSuggestions: 'Smart suggestions',
+          totalControl: 'Total control',
+          noCost: 'No additional cost',
+          customFormats: 'Perfect for custom formats',
+          useAI: 'Use AI',
+          configureManually: 'Configure Manually',
+          availableForPremium: 'Available for Premium plans',
+          tip: '💡 Tip: Try AI to save time, or use manual mode if you have very specific CSV formats.'
+        },
+        
+        // File Dropzone
+        dropzone: {
+          dragHere: 'Drag your CSV file here',
+          orClick: 'or click to select',
+          supportedFiles: 'Supported files: CSV',
+          replaceFile: 'Click or drag a new file to replace',
+          onlyCsv: 'Only CSV files are supported'
+        },
+        
+        // Progress
+        progress: {
+          analyzingAI: 'AI is analyzing your CSV columns to suggest the best mapping'
+        },
+        
+        // Results
+        results: {
+          importComplete: 'Import Complete',
+          rowsProcessed: 'Rows processed',
+          errors: 'Errors',
+          aiAnalysis: 'AI Analysis'
+        },
+        
+        // Smart System
+        smartSystem: {
+          title: 'Intelligent Import System',
+          description: 'Our system uses AI to automatically detect your CSV columns, regardless of language or format. No specific format required!',
+          feature1: 'Supports columns in Italian, English, Spanish, French...',
+          feature2: 'Automatically detects date, amount, payment method',
+          feature3: 'Allows you to correct mapping before import'
+        },
+        
+        // Messages
+        messages: {
+          selectFile: 'Select a file',
+          onlyCsvSupported: 'Only CSV files are supported',
+          errorAnalyzing: 'Error analyzing CSV',
+          errorImporting: 'Error during import',
+          errorLoadingCsv: 'Error loading CSV',
+          importComplete: 'Import completed: {count} rows imported',
+          aiAnalysisComplete: 'AI analysis completed',
+          errorAIAnalysis: 'Error during AI analysis'
+        },
+        
+        // Mapping Wizard
+        mapping: {
+          title: 'Configure Column Mapping',
+          aiSuggestionTitle: 'AI Suggestion',
+          manualModeTitle: 'Manual Mode',
+          confidence: 'Confidence',
+          warnings: 'Warnings',
+          validationError: 'Validation Errors',
+          requiredFields: 'The following required fields are not mapped',
+          csvColumn: 'CSV Column',
+          targetField: 'Target Field',
+          selectTarget: 'Select target field...',
+          previewTitle: 'Data Preview (First 5 Rows)',
+          cancel: 'Cancel',
+          confirmImport: 'Confirm Import',
+          
+          // Target Fields
+          fields: {
+            ignore: '🚫 Ignore this column',
+            recordDate: '📅 Record Date (YYYY-MM-DD)',
+            datetimeFrom: '🕐 Period Start Date/Time',
+            datetimeTo: '🕐 Period End Date/Time',
+            intervalTitle: '📝 Interval Title (e.g. "day 1")',
+            netSales: '💰 Net Sales',
+            grossSales: '💰 Gross Sales',
+            totalAmount: '💰 Total Amount',
+            covers: '👥 Covers',
+            orders: '📋 Number of Orders',
+            taxes: '💳 Taxes',
+            refunds: '↩️ Refunds',
+            voids: '🚫 Voids',
+            discounts: '🏷️ Discounts',
+            complimentary: '🎁 Complimentary',
+            losses: '📉 Losses',
+            tips: '💵 Tips',
+            serviceCharges: '⚙️ Service Charges'
+          }
+        }
+      }
+    },
     
     // Leave Types
     leaveTypes: 'Leave Types',
