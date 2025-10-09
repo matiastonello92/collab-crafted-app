@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Loader2, Save, Send, Banknote, CreditCard, Smartphone, Building2, User, HelpCircle, Settings } from "lucide-react";
+import { Loader2, Save, Send, Banknote, CreditCard, Smartphone, Building2, User, HelpCircle, Settings, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -39,6 +39,8 @@ interface PaymentMethod {
   name: string;
   key: string;
   type: string;
+  category: string;
+  is_base_method: boolean;
   sort_order: number;
 }
 
@@ -75,7 +77,7 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
     const loadPaymentMethods = async () => {
       const { data, error } = await supabase
         .from("payment_methods")
-        .select("id, name, key, type, sort_order")
+        .select("id, name, key, type, category, is_base_method, sort_order")
         .eq("org_id", orgId)
         .eq("location_id", locationId)
         .eq("is_active", true)
@@ -105,6 +107,68 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
   // Calculate total
   const items = form.watch("items");
   const total = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+  // Get next available POS number
+  const getNextPosNumber = () => {
+    const posNumbers = paymentMethods
+      .filter(pm => pm.category === 'pos_card')
+      .map(pm => {
+        const match = pm.key.match(/pos_(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      })
+      .sort((a, b) => a - b);
+
+    // Find first missing number
+    for (let i = 1; i <= posNumbers.length + 1; i++) {
+      if (!posNumbers.includes(i)) {
+        return i;
+      }
+    }
+    return 1;
+  };
+
+  const handleAddPOS = async () => {
+    const nextNum = getNextPosNumber();
+    const name = `POS ${nextNum}`;
+    const key = `pos_${nextNum}`;
+
+    // Get max sort_order
+    const maxSortOrder = Math.max(...paymentMethods.map(pm => pm.sort_order), 0);
+
+    const { data, error } = await supabase
+      .from("payment_methods")
+      .insert({
+        org_id: orgId,
+        location_id: locationId,
+        name,
+        key,
+        type: 'card',
+        category: 'pos_card',
+        is_base_method: false,
+        is_active: true,
+        sort_order: maxSortOrder + 1,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Errore nell'aggiunta del POS");
+      return;
+    }
+
+    const newMethod = data as PaymentMethod;
+    setPaymentMethods([...paymentMethods, newMethod]);
+    
+    // Add to form items
+    const currentItems = form.getValues("items");
+    form.setValue("items", [...currentItems, {
+      payment_method_id: newMethod.id,
+      amount: 0,
+      notes: "",
+    }]);
+
+    toast.success(`${name} aggiunto`);
+  };
 
   const onSubmit = async (values: ClosureFormValues, sendEmail: boolean = false) => {
     setIsLoading(true);
@@ -210,6 +274,10 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
     }
   };
 
+  // Group payment methods
+  const baseMethods = paymentMethods.filter(pm => pm.category !== 'pos_card');
+  const posMethods = paymentMethods.filter(pm => pm.category === 'pos_card');
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((values) => onSubmit(values, false))}>
@@ -258,12 +326,71 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
                     )}
                   />
 
-                  {/* Payment Methods Grid */}
+                  {/* Base Payment Methods */}
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">Metodi di Pagamento</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">Metodi di Pagamento Base</h3>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      {paymentMethods.map((pm, index) => {
+                      {baseMethods.map((pm) => {
+                        const index = paymentMethods.findIndex(p => p.id === pm.id);
                         const Icon = getPaymentIcon(pm.type);
+                        return (
+                          <FormField
+                            key={pm.id}
+                            control={form.control}
+                            name={`items.${index}.amount`}
+                            render={({ field }) => (
+                              <Card className="border-2">
+                                <CardContent className="p-4 space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                                      <Icon className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <FormLabel className="font-semibold">{pm.name}</FormLabel>
+                                  </div>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00"
+                                        className="text-lg font-semibold pl-8 h-12"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
+                                        €
+                                      </span>
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </CardContent>
+                              </Card>
+                            )}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* POS Cards Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-muted-foreground">Carte POS</h3>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddPOS}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Aggiungi POS
+                      </Button>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {posMethods.map((pm) => {
+                        const index = paymentMethods.findIndex(p => p.id === pm.id);
+                        const Icon = CreditCard;
                         return (
                           <FormField
                             key={pm.id}

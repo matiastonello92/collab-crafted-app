@@ -1708,10 +1708,12 @@ export type Database = {
       }
       payment_methods: {
         Row: {
+          category: string | null
           created_at: string
           created_by: string | null
           id: string
           is_active: boolean
+          is_base_method: boolean | null
           key: string
           location_id: string | null
           name: string
@@ -1721,10 +1723,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_base_method?: boolean | null
           key: string
           location_id?: string | null
           name: string
@@ -1734,10 +1738,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_base_method?: boolean | null
           key?: string
           location_id?: string | null
           name?: string

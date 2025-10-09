@@ -22,6 +22,8 @@ interface PaymentMethod {
   name: string;
   key: string;
   type: string;
+  category: string;
+  is_base_method: boolean;
   is_active: boolean;
   sort_order: number;
 }
@@ -116,7 +118,12 @@ export function PaymentMethodsManager({ orgId, defaultLocationId, locations }: P
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, isBaseMethod: boolean) => {
+    if (isBaseMethod) {
+      toast.error("Non puoi eliminare i metodi di pagamento base");
+      return;
+    }
+
     const { error } = await supabase
       .from("payment_methods")
       .delete()

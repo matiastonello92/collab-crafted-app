@@ -69,6 +69,8 @@ export function AddMethodDialog({ open, onOpenChange, orgId, locationId, onSucce
           name: name.trim(),
           key,
           type,
+          category: 'custom',
+          is_base_method: false,
           is_active: true,
           sort_order: nextSortOrder,
         });
@@ -94,7 +96,7 @@ export function AddMethodDialog({ open, onOpenChange, orgId, locationId, onSucce
         <DialogHeader>
           <DialogTitle>Aggiungi Metodo di Pagamento</DialogTitle>
           <DialogDescription>
-            Crea un nuovo metodo di pagamento per questa location
+            Crea un nuovo metodo di pagamento personalizzato per questa location
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,7 +104,7 @@ export function AddMethodDialog({ open, onOpenChange, orgId, locationId, onSucce
             <Label htmlFor="name">Nome Metodo</Label>
             <Input
               id="name"
-              placeholder="es. PayPal, Contrassegno..."
+              placeholder="es. PayPal, Buoni Pasto..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
