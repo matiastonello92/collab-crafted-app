@@ -128,29 +128,19 @@ export default function HeaderClient({
             <Button
               variant="outline"
               size="sm"
-              className="relative justify-start text-sm text-muted-foreground w-48 hidden md:flex h-10 rounded-xl border-border/60 bg-background/95 backdrop-blur-sm hover:bg-accent/50 transition-all duration-200"
+              className="relative justify-start text-sm text-muted-foreground h-10 rounded-xl border-border/60 bg-background/95 backdrop-blur-sm hover:bg-accent/50 transition-all duration-200 md:w-48 w-auto md:px-4 px-2"
             >
-              <Search className="mr-2 h-4 w-4" />
-              <span>{t('common.search')}</span>
-              <kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded-md border border-border/60 bg-muted/80 px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <Search className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">{t('common.search')}</span>
+              <kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded-md border border-border/60 bg-muted/80 px-1.5 font-mono text-[10px] font-medium opacity-100 md:flex">
                 <span className="text-xs">⌘</span>K
               </kbd>
-            </Button>
-          </PopoverTrigger>
-          
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="md:hidden p-2 rounded-xl border-border/60 bg-background/95"
-            >
-              <Search className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
 
           <PopoverContent
             side="bottom"
-            align="center"
+            align="end"
             sideOffset={8}
             className="w-[calc(100vw-2rem)] md:w-[600px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
           >
