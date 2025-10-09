@@ -515,6 +515,7 @@ export type Database = {
       financial_imports: {
         Row: {
           ai_summary: Json | null
+          column_mapping: Json | null
           completed_at: string | null
           created_at: string
           created_by: string
@@ -530,6 +531,7 @@ export type Database = {
         }
         Insert: {
           ai_summary?: Json | null
+          column_mapping?: Json | null
           completed_at?: string | null
           created_at?: string
           created_by: string
@@ -545,6 +547,7 @@ export type Database = {
         }
         Update: {
           ai_summary?: Json | null
+          column_mapping?: Json | null
           completed_at?: string | null
           created_at?: string
           created_by?: string

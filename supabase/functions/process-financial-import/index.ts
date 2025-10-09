@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { csvContent, importId, orgId, locationId } = await req.json();
+    const { csvContent, importId, orgId, locationId, columnMapping } = await req.json();
+    
+    console.log('📊 Processing import with mapping:', columnMapping);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -20,7 +22,7 @@ serve(async (req) => {
     );
 
     const lines = csvContent.split('\n').filter((l: string) => l.trim());
-    const headers = lines[0].split(',').map((h: string) => h.trim().toLowerCase());
+    const headers = lines[0].split(',').map((h: string) => h.trim());
     
     const dataRows = lines.slice(1);
     let rowsProcessed = 0;
@@ -36,10 +38,16 @@ serve(async (req) => {
       }
 
       const row: any = {};
+      
+      // Use dynamic column mapping
       headers.forEach((header, idx) => {
-        row[header] = values[idx];
+        const targetField = columnMapping[header];
+        if (targetField && targetField !== '_ignore') {
+          row[targetField] = values[idx];
+        }
       });
 
+      // Validate required fields
       if (row.data && row.importo) {
         parsedData.push(row);
         rowsProcessed++;
@@ -47,6 +55,8 @@ serve(async (req) => {
         errors++;
       }
     }
+
+    console.log(`✅ Processed ${rowsProcessed} rows, ${errors} errors`);
 
     // Update import record - NO AI HERE
     await supabaseClient
