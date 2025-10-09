@@ -2395,6 +2395,201 @@ export const en = {
     },
   },
 
+  // Financial Hub
+  finance: {
+    // Sidebar navigation
+    nav: {
+      financialHub: 'Financial Hub',
+      dashboard: 'Dashboard',
+      newClosure: 'New Closure',
+      closureHistory: 'Closure History',
+      importCsv: 'Import CSV',
+      paymentMethods: 'Payment Methods',
+      emailManagement: 'Email Management',
+    },
+    
+    // Dashboard
+    dashboard: {
+      pageTitle: 'Financial Dashboard',
+      pageDescription: 'Financial analysis and statistics',
+      tabs: {
+        imported: 'Imported Data',
+        closures: 'Manual Closures',
+        combined: 'Combined View'
+      },
+      loading: 'Loading...',
+      errorLoading: 'Error loading data',
+      manualClosures: 'Manual Closures',
+      analysisLast30Days: 'Last 30 days analysis',
+      generateAIInsights: 'Generate AI Insights',
+      analyzing: 'Analyzing...',
+      notEnoughData: 'Not enough data',
+      aiAnalysisComplete: 'AI analysis complete',
+      aiAnalysisError: 'AI analysis error',
+      aiInsightsTitle: 'AI Insights',
+      combinedViewTitle: 'Combined View',
+      combinedViewDesc: 'Combined view coming soon',
+      noData: 'No data available',
+      noDataDesc: 'There are no sales records to display',
+      stats: {
+        totalRevenue: 'Total Revenue',
+        dailyAverage: 'Daily Average',
+        weeklyTrend: 'Weekly Trend',
+        orders: 'Orders',
+        covers: 'Covers',
+        averageOrderValue: 'Avg Order Value',
+        vs7DaysAgo: 'vs 7 days ago',
+        totalOrders: 'Total Orders',
+        totalCovers: 'Total Covers',
+        netSales: 'Net Sales',
+        grossSales: 'Gross Sales',
+      },
+      charts: {
+        revenueTitle: 'Revenue Trend (Last 30 Days)',
+        ordersCoversTitle: 'Orders & Covers Trend',
+        financialBreakdown: 'Financial Breakdown',
+        revenue: 'Revenue',
+        orders: 'Orders',
+        covers: 'Covers',
+        date: 'Date',
+        interval: 'Interval',
+        amount: 'Amount',
+      }
+    },
+    
+    // Import
+    import: {
+      pageTitle: 'Financial Import',
+      pageDescription: 'Import financial data from CSV',
+      continue: 'Continue',
+      analyzing: 'Analyzing...',
+      importing: 'Importing...',
+      importingDesc: 'Processing data...',
+      analyzeWithAI: 'Analyze with AI',
+      
+      // Modes
+      modes: {
+        title: 'Select Import Mode',
+        selectMode: 'Select an import mode',
+        ai: {
+          title: 'AI Smart Import',
+          description: 'AI automatically analyzes CSV columns and suggests the best mapping',
+          badge: 'Recommended',
+          features: {
+            speed: 'Fast & Automatic',
+            language: 'Language Detection',
+            suggestions: 'Smart Suggestions',
+          }
+        },
+        manual: {
+          title: 'Manual Mapping',
+          description: 'Full control: manually map each CSV column to system fields',
+          badge: 'Advanced',
+          features: {
+            control: 'Total Control',
+            custom: 'Custom Formats',
+            flexibility: 'Maximum Flexibility',
+          }
+        },
+        tip: 'Tip: Use AI mode to get started quickly, switch to manual for advanced customization',
+        selectAI: 'Use AI Import',
+        selectManual: 'Use Manual Mode',
+      },
+      
+      // Mapping
+      mapping: {
+        title: 'Column Mapping',
+        csvColumn: 'CSV Column',
+        targetField: 'Target Field',
+        selectTarget: 'Select target field',
+        previewTitle: 'Preview',
+        validationError: 'Missing required fields: Date and Total Amount are required',
+        aiSuggestionTitle: 'AI Suggestion',
+        confidence: 'Confidence',
+        manualModeTitle: 'Manual Mode',
+        manualModeDesc: 'Map columns manually',
+        cancel: 'Cancel',
+        confirmImport: 'Confirm Import',
+        aiWarnings: 'AI Warnings',
+        
+        // Field labels
+        fields: {
+          recordDate: '📅 Record Date (YYYY-MM-DD)',
+          datetimeFrom: '🕐 Start Date/Time',
+          datetimeTo: '🕐 End Date/Time',
+          intervalTitle: '📝 Interval Title',
+          netSales: '💰 Net Sales',
+          grossSales: '💰 Gross Sales',
+          totalAmount: '💰 Total Amount',
+          covers: '👥 Covers',
+          orders: '📋 Orders',
+          taxes: '💳 Taxes',
+          refunds: '↩️ Refunds',
+          voids: '🚫 Voids',
+          discounts: '🏷️ Discounts',
+          complimentary: '🎁 Complimentary',
+          losses: '📉 Losses',
+          tips: '💵 Tips',
+          serviceCharges: '⚙️ Service Charges',
+          ignore: '🚫 Ignore Column',
+        }
+      },
+      
+      // Messages
+      messages: {
+        selectFile: 'Select a file to get started',
+        onlyCsvSupported: 'Only CSV files are supported',
+        errorLoadingCsv: 'Error loading CSV',
+        errorAnalyzing: 'Error analyzing columns',
+        errorImporting: 'Error importing data',
+        importComplete: '{count} rows imported successfully',
+        aiAnalysisComplete: 'AI analysis completed successfully',
+        errorAIAnalysis: 'Error during AI analysis',
+      },
+      
+      // Progress
+      progress: {
+        analyzingAI: 'AI is analyzing CSV columns...',
+        uploadingFile: 'Uploading file...',
+        processingData: 'Processing data...',
+      },
+      
+      // Results
+      results: {
+        importComplete: 'Import Complete',
+        rowsProcessed: 'Rows processed',
+        errors: 'Errors',
+        aiAnalysis: 'AI Analysis',
+        summary: 'Import Summary',
+        details: 'Details',
+        viewDashboard: 'View Dashboard',
+        importAnother: 'Import Another File',
+      },
+      
+      // Smart System
+      smartSystem: {
+        title: 'Smart Import System',
+        description: 'Our AI analyzes your CSV and automatically maps columns',
+        feature1: 'Automatic column detection',
+        feature2: 'Multi-language support',
+        feature3: 'Intelligent data validation',
+        howItWorks: 'How it works?',
+        step1: 'Upload CSV',
+        step2: 'AI analyzes',
+        step3: 'Confirm and import',
+      },
+      
+      // Dropzone
+      dropzone: {
+        dragHere: 'Drag CSV file here',
+        orClick: 'or click to browse',
+        supportedFiles: 'Supported: CSV files',
+        replaceFile: 'Click to replace file',
+        onlyCsv: 'Only CSV files are supported',
+      }
+    }
+  },
+
   // Toast Messages
   toast: {
     // Generic success

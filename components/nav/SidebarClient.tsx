@@ -87,16 +87,16 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
       ]
     },
     {
-      name: 'Financial Hub',
+      name: t('finance.nav.financialHub'),
       icon: DollarSign,
       permission: 'finance:view',
       children: [
-        { name: 'Dashboard', href: '/admin/finance/dashboard', icon: TrendingUp, permission: 'finance:view' },
-        { name: 'Nuova Chiusura', href: '/admin/finance/closures/new', icon: Plus, permission: 'finance:create' },
-        { name: 'Storico Chiusure', href: '/admin/finance/closures/history', icon: History, permission: 'finance:view' },
-        { name: 'Import CSV', href: '/admin/finance/import', icon: Upload, permission: 'finance:create' },
-        { name: 'Metodi di Pagamento', href: '/admin/finance/settings/payment-methods', icon: CreditCard, permission: 'finance:manage', adminOnly: true },
-        { name: 'Gestione Email', href: '/admin/finance/settings/recipients', icon: Mail, permission: 'finance:manage', adminOnly: true },
+        { name: t('finance.nav.dashboard'), href: '/admin/finance/dashboard', icon: TrendingUp, permission: 'finance:view' },
+        { name: t('finance.nav.newClosure'), href: '/admin/finance/closures/new', icon: Plus, permission: 'finance:create' },
+        { name: t('finance.nav.closureHistory'), href: '/admin/finance/closures/history', icon: History, permission: 'finance:view' },
+        { name: t('finance.nav.importCsv'), href: '/admin/finance/import', icon: Upload, permission: 'finance:create' },
+        { name: t('finance.nav.paymentMethods'), href: '/admin/finance/settings/payment-methods', icon: CreditCard, permission: 'finance:manage', adminOnly: true },
+        { name: t('finance.nav.emailManagement'), href: '/admin/finance/settings/recipients', icon: Mail, permission: 'finance:manage', adminOnly: true },
       ]
     },
     { name: t('nav.admin'), href: '/admin/users', icon: Users, permission: 'manage_users' },

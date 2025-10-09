@@ -2519,6 +2519,201 @@ export const it = {
     },
   },
 
+  // Financial Hub
+  finance: {
+    // Sidebar navigation
+    nav: {
+      financialHub: 'Hub Finanziario',
+      dashboard: 'Dashboard',
+      newClosure: 'Nuova Chiusura',
+      closureHistory: 'Storico Chiusure',
+      importCsv: 'Import CSV',
+      paymentMethods: 'Metodi di Pagamento',
+      emailManagement: 'Gestione Email',
+    },
+    
+    // Dashboard
+    dashboard: {
+      pageTitle: 'Dashboard Finanziario',
+      pageDescription: 'Analisi e statistiche finanziarie',
+      tabs: {
+        imported: 'Dati Importati',
+        closures: 'Chiusure Manuali',
+        combined: 'Vista Combinata'
+      },
+      loading: 'Caricamento...',
+      errorLoading: 'Errore nel caricamento',
+      manualClosures: 'Chiusure Manuali',
+      analysisLast30Days: 'Analisi ultimi 30 giorni',
+      generateAIInsights: 'Genera Analisi AI',
+      analyzing: 'Analizzando...',
+      notEnoughData: 'Dati insufficienti',
+      aiAnalysisComplete: 'Analisi AI completata',
+      aiAnalysisError: 'Errore analisi AI',
+      aiInsightsTitle: 'Analisi AI',
+      combinedViewTitle: 'Vista Combinata',
+      combinedViewDesc: 'Vista combinata in arrivo',
+      noData: 'Nessun dato disponibile',
+      noDataDesc: 'Non ci sono dati di vendita da mostrare',
+      stats: {
+        totalRevenue: 'Fatturato Totale',
+        dailyAverage: 'Media Giornaliera',
+        weeklyTrend: 'Trend Settimanale',
+        orders: 'Ordini',
+        covers: 'Coperti',
+        averageOrderValue: 'Valore Medio Ordine',
+        vs7DaysAgo: 'vs 7 giorni fa',
+        totalOrders: 'Ordini Totali',
+        totalCovers: 'Coperti Totali',
+        netSales: 'Vendite Nette',
+        grossSales: 'Vendite Lorde',
+      },
+      charts: {
+        revenueTitle: 'Andamento Fatturato (Ultimi 30 Giorni)',
+        ordersCoversTitle: 'Andamento Ordini e Coperti',
+        financialBreakdown: 'Dettaglio Finanziario',
+        revenue: 'Fatturato',
+        orders: 'Ordini',
+        covers: 'Coperti',
+        date: 'Data',
+        interval: 'Intervallo',
+        amount: 'Importo',
+      }
+    },
+    
+    // Import
+    import: {
+      pageTitle: 'Import Finanziario',
+      pageDescription: 'Importa dati finanziari da CSV',
+      continue: 'Continua',
+      analyzing: 'Analizzando...',
+      importing: 'Importando...',
+      importingDesc: 'Elaborazione dati...',
+      analyzeWithAI: 'Analizza con AI',
+      
+      // Modes
+      modes: {
+        title: 'Seleziona Modalità Import',
+        selectMode: 'Seleziona una modalità di importazione',
+        ai: {
+          title: 'Import Intelligente AI',
+          description: 'L\'AI analizza automaticamente le colonne del CSV e suggerisce la mappatura migliore',
+          badge: 'Consigliato',
+          features: {
+            speed: 'Veloce e Automatico',
+            language: 'Rileva Lingua',
+            suggestions: 'Suggerimenti Intelligenti',
+          }
+        },
+        manual: {
+          title: 'Mappatura Manuale',
+          description: 'Controllo totale: mappa manualmente ogni colonna del CSV ai campi del sistema',
+          badge: 'Avanzato',
+          features: {
+            control: 'Controllo Totale',
+            custom: 'Formati Personalizzati',
+            flexibility: 'Massima Flessibilità',
+          }
+        },
+        tip: 'Consiglio: Usa la modalità AI per iniziare velocemente, passa a manuale se necessario per personalizzazioni avanzate',
+        selectAI: 'Usa AI Import',
+        selectManual: 'Usa Modalità Manuale',
+      },
+      
+      // Mapping
+      mapping: {
+        title: 'Mappatura Colonne',
+        csvColumn: 'Colonna CSV',
+        targetField: 'Campo Target',
+        selectTarget: 'Seleziona campo target',
+        previewTitle: 'Anteprima',
+        validationError: 'Campi obbligatori mancanti: Data e Importo Totale sono necessari',
+        aiSuggestionTitle: 'Suggerimento AI',
+        confidence: 'Confidenza',
+        manualModeTitle: 'Modalità Manuale',
+        manualModeDesc: 'Mappa manualmente le colonne',
+        cancel: 'Annulla',
+        confirmImport: 'Conferma Import',
+        aiWarnings: 'Avvertenze AI',
+        
+        // Field labels
+        fields: {
+          recordDate: '📅 Data Record (YYYY-MM-DD)',
+          datetimeFrom: '🕐 Data/Ora Inizio',
+          datetimeTo: '🕐 Data/Ora Fine',
+          intervalTitle: '📝 Titolo Intervallo',
+          netSales: '💰 Vendite Nette',
+          grossSales: '💰 Vendite Lorde',
+          totalAmount: '💰 Importo Totale',
+          covers: '👥 Coperti',
+          orders: '📋 Ordini',
+          taxes: '💳 Tasse',
+          refunds: '↩️ Rimborsi',
+          voids: '🚫 Annullamenti',
+          discounts: '🏷️ Sconti',
+          complimentary: '🎁 Omaggi',
+          losses: '📉 Perdite',
+          tips: '💵 Mance',
+          serviceCharges: '⚙️ Costi Servizio',
+          ignore: '🚫 Ignora Colonna',
+        }
+      },
+      
+      // Messages
+      messages: {
+        selectFile: 'Seleziona un file per iniziare',
+        onlyCsvSupported: 'Sono supportati solo file CSV',
+        errorLoadingCsv: 'Errore nel caricamento del CSV',
+        errorAnalyzing: 'Errore durante l\'analisi delle colonne',
+        errorImporting: 'Errore durante l\'importazione',
+        importComplete: '{count} righe importate con successo',
+        aiAnalysisComplete: 'Analisi AI completata con successo',
+        errorAIAnalysis: 'Errore durante l\'analisi AI',
+      },
+      
+      // Progress
+      progress: {
+        analyzingAI: 'L\'AI sta analizzando le colonne del CSV...',
+        uploadingFile: 'Caricamento file...',
+        processingData: 'Elaborazione dati...',
+      },
+      
+      // Results
+      results: {
+        importComplete: 'Import Completato',
+        rowsProcessed: 'Righe elaborate',
+        errors: 'Errori',
+        aiAnalysis: 'Analisi AI',
+        summary: 'Riepilogo Import',
+        details: 'Dettagli',
+        viewDashboard: 'Vai alla Dashboard',
+        importAnother: 'Importa un altro file',
+      },
+      
+      // Smart System
+      smartSystem: {
+        title: 'Sistema Import Intelligente',
+        description: 'La nostra AI analizza il tuo CSV e mappa automaticamente le colonne',
+        feature1: 'Rilevamento automatico colonne',
+        feature2: 'Supporto multi-lingua',
+        feature3: 'Validazione intelligente dati',
+        howItWorks: 'Come funziona?',
+        step1: 'Carica il CSV',
+        step2: 'L\'AI analizza',
+        step3: 'Conferma e importa',
+      },
+      
+      // Dropzone
+      dropzone: {
+        dragHere: 'Trascina qui il file CSV',
+        orClick: 'oppure clicca per selezionare',
+        supportedFiles: 'Supportati: file CSV',
+        replaceFile: 'Clicca per sostituire il file',
+        onlyCsv: 'Sono supportati solo file CSV',
+      }
+    }
+  },
+
   // Toast Messages
   toast: {
     // Generic success
