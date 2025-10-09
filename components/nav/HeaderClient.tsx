@@ -149,9 +149,10 @@ export default function HeaderClient({
           </PopoverTrigger>
 
           <PopoverContent
-            className="w-[calc(100vw-2rem)] md:w-[700px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
-            align="start"
-            sideOffset={12}
+            side="bottom"
+            align="center"
+            sideOffset={8}
+            className="w-[calc(100vw-2rem)] md:w-[600px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
           >
             <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
           </PopoverContent>
