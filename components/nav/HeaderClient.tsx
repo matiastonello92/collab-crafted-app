@@ -12,7 +12,7 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
 import { GlobalSearchCommand } from '@/components/search/GlobalSearchCommand';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 export default function HeaderClient({
   locations,
@@ -137,10 +137,7 @@ export default function HeaderClient({
               </kbd>
             </Button>
           </PopoverTrigger>
-          <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
-        </Popover>
-        
-        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+          
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -150,7 +147,14 @@ export default function HeaderClient({
               <Search className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+
+          <PopoverContent
+            className="w-[calc(100vw-2rem)] md:w-[700px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
+            align="start"
+            sideOffset={12}
+          >
+            <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+          </PopoverContent>
         </Popover>
 
         {locations?.length ? (

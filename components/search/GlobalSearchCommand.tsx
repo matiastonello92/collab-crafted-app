@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
-import { PopoverContent } from '@/components/ui/popover'
 import { useTranslation } from '@/lib/i18n'
 import { useHydratedContext } from '@/lib/store/useHydratedStore'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -320,15 +319,10 @@ export function GlobalSearchCommand({ open, onOpenChange }: GlobalSearchCommandP
   const showCommandMode = isCommand
 
   return (
-    <PopoverContent
-      className="w-[700px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
-      align="start"
-      sideOffset={12}
-    >
-      <Command className="rounded-2xl border-none">
-        <div className={showPreview ? 'flex' : ''}>
-          <div className={showPreview ? 'flex-1 border-r border-border/40' : ''}>
-            <CommandInput 
+    <Command className="rounded-2xl border-none" shouldFilter={false}>
+      <div className={showPreview ? 'flex' : ''}>
+        <div className={showPreview ? 'flex-1 border-r border-border/40' : ''}>
+          <CommandInput
               placeholder={t('search.placeholder')}
               value={query}
               onValueChange={setQuery}
@@ -513,6 +507,5 @@ export function GlobalSearchCommand({ open, onOpenChange }: GlobalSearchCommandP
         )}
       </div>
     </Command>
-  </PopoverContent>
   )
 }
