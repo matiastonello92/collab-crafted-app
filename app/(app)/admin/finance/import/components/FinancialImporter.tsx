@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Upload, FileText, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 import { CSVMappingWizard } from "./CSVMappingWizard";
+import { ImportModeSelector } from "./ImportModeSelector";
 
 interface FinancialImporterProps {
   orgId: string;
@@ -19,7 +20,8 @@ interface FinancialImporterProps {
 export function FinancialImporter({ orgId, locationId, userId }: FinancialImporterProps) {
   const supabase = useSupabase();
   const [file, setFile] = useState<File | null>(null);
-  const [step, setStep] = useState<'upload' | 'analyzing' | 'mapping' | 'importing'>('upload');
+  const [step, setStep] = useState<'upload' | 'mode-selection' | 'analyzing' | 'mapping' | 'importing'>('upload');
+  const [importMode, setImportMode] = useState<'ai' | 'manual' | null>(null);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
   const [uploadedImportId, setUploadedImportId] = useState<string | null>(null);
@@ -41,6 +43,52 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
       }
       setFile(selectedFile);
       setResult(null);
+    }
+  };
+
+  const handleModeSelection = async (mode: 'ai' | 'manual') => {
+    setImportMode(mode);
+
+    if (mode === 'manual') {
+      // Manual mode: skip AI and go directly to mapping with empty suggestion
+      await loadCSVForManualMapping();
+    } else {
+      // AI mode: analyze with AI
+      await analyzeCSVColumns();
+    }
+  };
+
+  const loadCSVForManualMapping = async () => {
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      setCsvContent(text);
+      
+      const lines = text.split('\n').filter(l => l.trim());
+      const headers = lines[0].split(',').map(h => h.trim());
+      const allRows = lines.slice(1).map(l => l.split(',').map(v => v.trim()));
+
+      setCsvHeaders(headers);
+      setCsvRows(allRows);
+
+      // Create empty mapping for manual mode
+      const emptyMapping: Record<string, string> = {};
+      headers.forEach(header => {
+        emptyMapping[header] = '_ignore';
+      });
+
+      setAiMapping({
+        mapping: emptyMapping,
+        confidence: 0,
+        warnings: []
+      });
+
+      setStep('mapping');
+    } catch (error) {
+      console.error('❌ Error loading CSV:', error);
+      toast.error("Errore durante il caricamento del CSV");
+      setStep('mode-selection');
     }
   };
 
@@ -137,11 +185,19 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
   };
 
   const cancelMapping = () => {
-    setStep('upload');
+    setStep('mode-selection');
     setAiMapping(null);
     setCsvHeaders([]);
     setCsvRows([]);
     setProgress(0);
+  };
+
+  const proceedToModeSelection = () => {
+    if (!file) {
+      toast.error("Seleziona un file");
+      return;
+    }
+    setStep('mode-selection');
   };
 
   const analyzeWithAI = async () => {
@@ -188,16 +244,23 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
             </div>
 
             <Button 
-              onClick={analyzeCSVColumns} 
+              onClick={proceedToModeSelection} 
               disabled={!file}
               className="w-full"
               size="lg"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Analizza CSV con AI
+              <Upload className="w-4 h-4 mr-2" />
+              Continua
             </Button>
           </div>
         </Card>
+      )}
+
+      {step === 'mode-selection' && (
+        <ImportModeSelector 
+          onSelectMode={handleModeSelection}
+          aiEnabled={true}
+        />
       )}
 
       {step === 'analyzing' && (
@@ -222,6 +285,7 @@ export function FinancialImporter({ orgId, locationId, userId }: FinancialImport
           aiSuggestion={aiMapping}
           onConfirm={processImportWithMapping}
           onCancel={cancelMapping}
+          isManualMode={importMode === 'manual'}
         />
       )}
 

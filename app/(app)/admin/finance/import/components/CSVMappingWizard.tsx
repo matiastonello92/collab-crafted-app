@@ -19,6 +19,7 @@ interface CSVMappingWizardProps {
   };
   onConfirm: (finalMapping: Record<string, string>) => void;
   onCancel: () => void;
+  isManualMode?: boolean;
 }
 
 const targetFields = [
@@ -34,7 +35,8 @@ export function CSVMappingWizard({
   sampleData, 
   aiSuggestion,
   onConfirm,
-  onCancel
+  onCancel,
+  isManualMode = false
 }: CSVMappingWizardProps) {
   const [mapping, setMapping] = useState<Record<string, string>>(aiSuggestion.mapping);
 
@@ -78,24 +80,39 @@ export function CSVMappingWizard({
 
   return (
     <div className="space-y-6">
-      {/* AI Confidence Header */}
-      <Card className="p-4 bg-primary/5 border-primary/20">
-        <div className="flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold">Analisi AI Completata</h3>
-              <Badge variant={aiSuggestion.confidence > 0.8 ? "default" : "secondary"}>
-                {(aiSuggestion.confidence * 100).toFixed(0)}% di confidenza
-              </Badge>
+      {/* Header - AI or Manual */}
+      {!isManualMode ? (
+        <Card className="p-4 bg-primary/5 border-primary/20">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-semibold">Analisi AI Completata</h3>
+                <Badge variant={aiSuggestion.confidence > 0.8 ? "default" : "secondary"}>
+                  {(aiSuggestion.confidence * 100).toFixed(0)}% di confidenza
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                L'AI ha analizzato {headers.length} colonne e suggerito un mapping automatico. 
+                Puoi rivederlo e modificarlo prima di procedere.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              L'AI ha analizzato {headers.length} colonne e suggerito un mapping automatico. 
-              Puoi rivederlo e modificarlo prima di procedere.
-            </p>
           </div>
-        </div>
-      </Card>
+        </Card>
+      ) : (
+        <Card className="p-4 bg-muted/50">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-foreground mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold mb-1">Modalità Import Manuale</h3>
+              <p className="text-sm text-muted-foreground">
+                Configura manualmente il mapping tra le {headers.length} colonne del CSV e i campi del sistema.
+                Seleziona per ogni colonna il campo di destinazione appropriato.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Warnings */}
       {aiSuggestion.warnings && aiSuggestion.warnings.length > 0 && (
