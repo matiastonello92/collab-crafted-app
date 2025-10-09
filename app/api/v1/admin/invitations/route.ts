@@ -330,6 +330,27 @@ export async function POST(request: Request) {
         .eq('id', invitation.id)
     }
 
+    // Log email attempt in email_logs
+    try {
+      await supabase
+        .from('email_logs')
+        .insert({
+          org_id: orgId,
+          recipient_email: validatedData.email,
+          email_type: 'invitation',
+          subject: 'Klyra • Invito alla piattaforma',
+          status: emailStatus === 'sent' ? 'sent' : 'failed',
+          provider_id: emailMessageId,
+          error_message: 
+            emailStatus === 'error' ? 'Resend API error' : 
+            emailStatus === 'not_configured' ? 'RESEND_API_KEY not configured' : null,
+          sent_at: emailStatus === 'sent' ? new Date().toISOString() : null,
+        })
+    } catch (logError) {
+      console.error('Failed to log email attempt:', logError)
+      // Don't fail the invitation if logging fails
+    }
+
     // Log audit event
     try {
       await supabase
@@ -361,6 +382,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       invitation,
       message: 'Invito creato con successo',
+      emailStatus,
+      warning: emailStatus !== 'sent' 
+        ? 'Invito creato ma email non inviata. Verificare configurazione RESEND_API_KEY.' 
+        : undefined
     }, { status: 201 })
 
   } catch (error) {
