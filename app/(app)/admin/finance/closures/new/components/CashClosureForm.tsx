@@ -245,17 +245,44 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
 
       // Send email if requested
       if (sendEmail) {
-        setIsSending(true);
-        const { error: emailError } = await supabase.functions.invoke("send-closure-report", {
-          body: { closure_id: closureId },
-        });
+        // Check if there are recipients configured
+        const { data: recipients, error: recipientsError } = await supabase
+          .from("closure_email_recipients")
+          .select("email")
+          .eq("location_id", locationId)
+          .eq("is_active", true);
 
-        if (emailError) {
-          toast.error("Errore nell'invio email, ma la chiusura è stata salvata correttamente");
+        if (!recipients || recipients.length === 0) {
+          toast.warning(
+            "Nessun destinatario configurato per le email. La chiusura è stata salvata. Configura i destinatari nelle impostazioni.",
+            { duration: 6000 }
+          );
         } else {
-          toast.success("Report inviato con successo via email");
+          setIsSending(true);
+          toast.info("Invio email in corso...", { duration: 2000 });
+          console.log('📧 Invio email report per closure:', closureId);
+          
+          const { data: emailResponse, error: emailError } = await supabase.functions.invoke(
+            "send-closure-report", 
+            { body: { closure_id: closureId } }
+          );
+
+          if (emailError) {
+            console.error('❌ Errore invio email:', emailError);
+            toast.error(
+              `Errore nell'invio email: ${emailError.message || 'Errore sconosciuto'}. La chiusura è stata salvata.`,
+              { duration: 6000 }
+            );
+          } else {
+            console.log('✅ Email inviata con successo:', emailResponse);
+            const recipientCount = emailResponse?.recipients?.length || recipients.length;
+            toast.success(
+              `Report inviato con successo a ${recipientCount} destinatario${recipientCount !== 1 ? 'i' : ''}`,
+              { duration: 5000 }
+            );
+          }
+          setIsSending(false);
         }
-        setIsSending(false);
       } else {
         toast.success("Bozza salvata correttamente");
       }

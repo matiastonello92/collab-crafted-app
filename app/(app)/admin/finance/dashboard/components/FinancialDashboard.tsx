@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, DollarSign, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -171,13 +171,13 @@ export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProp
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Andamento Incassi</h2>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
             <Tooltip formatter={(value) => `€${Number(value).toFixed(2)}`} />
-            <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} />
-          </LineChart>
+            <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
       </Card>
 
