@@ -31,6 +31,7 @@ import {
   TrendingUp,
   Plus,
   Upload,
+  CreditCard,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -94,6 +95,7 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
         { name: 'Nuova Chiusura', href: '/admin/finance/closures/new', icon: Plus, permission: 'finance:create' },
         { name: 'Storico Chiusure', href: '/admin/finance/closures/history', icon: History, permission: 'finance:view' },
         { name: 'Import CSV', href: '/admin/finance/import', icon: Upload, permission: 'finance:create' },
+        { name: 'Metodi di Pagamento', href: '/admin/finance/settings/payment-methods', icon: CreditCard, permission: 'finance:manage', adminOnly: true },
         { name: 'Gestione Email', href: '/admin/finance/settings/recipients', icon: Mail, permission: 'finance:manage', adminOnly: true },
       ]
     },

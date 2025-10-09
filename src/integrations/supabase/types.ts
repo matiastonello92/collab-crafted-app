@@ -1717,6 +1717,7 @@ export type Database = {
           name: string
           org_id: string
           sort_order: number
+          type: string | null
           updated_at: string
         }
         Insert: {
@@ -1729,6 +1730,7 @@ export type Database = {
           name: string
           org_id: string
           sort_order?: number
+          type?: string | null
           updated_at?: string
         }
         Update: {
@@ -1741,6 +1743,7 @@ export type Database = {
           name?: string
           org_id?: string
           sort_order?: number
+          type?: string | null
           updated_at?: string
         }
         Relationships: [

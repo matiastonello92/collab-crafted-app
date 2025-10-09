@@ -11,8 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Loader2, Save, Send, Euro } from "lucide-react";
+import { Loader2, Save, Send, Banknote, CreditCard, Smartphone, Building2, User, HelpCircle, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const supabase = createClient(
   "https://jwchmdivuwgfjrwvgtia.supabase.co",
@@ -37,7 +38,21 @@ interface PaymentMethod {
   id: string;
   name: string;
   key: string;
+  type: string;
   sort_order: number;
+}
+
+const PAYMENT_ICONS = {
+  cash: Banknote,
+  card: CreditCard,
+  digital: Smartphone,
+  bank_transfer: Building2,
+  customer_credit: User,
+  other: HelpCircle,
+};
+
+function getPaymentIcon(type: string) {
+  return PAYMENT_ICONS[type as keyof typeof PAYMENT_ICONS] || HelpCircle;
 }
 
 export function CashClosureForm({ locationId, orgId }: { locationId: string; orgId: string }) {
@@ -60,8 +75,9 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
     const loadPaymentMethods = async () => {
       const { data, error } = await supabase
         .from("payment_methods")
-        .select("id, name, key, sort_order")
+        .select("id, name, key, type, sort_order")
         .eq("org_id", orgId)
+        .eq("location_id", locationId)
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
 
@@ -84,7 +100,7 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
     };
 
     loadPaymentMethods();
-  }, [orgId, form, toast]);
+  }, [orgId, locationId, form]);
 
   // Calculate total
   const items = form.watch("items");
@@ -196,129 +212,199 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values, false))} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Nuova Chiusura di Cassa</CardTitle>
-            <CardDescription>
-              Registra gli incassi per metodo di pagamento
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Date Field */}
-            <FormField
-              control={form.control}
-              name="closure_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data Chiusura</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Payment Methods */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Euro className="h-5 w-5" />
-                Incassi per Metodo di Pagamento
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                {paymentMethods.map((pm, index) => (
+      <form onSubmit={form.handleSubmit((values) => onSubmit(values, false))}>
+        {paymentMethods.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-muted p-6 mb-4">
+                <Settings className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Nessun Metodo di Pagamento Configurato</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Prima di creare una chiusura di cassa, è necessario configurare almeno un metodo di pagamento.
+              </p>
+              <Link href="/admin/finance/settings/payment-methods">
+                <Button>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configura Metodi di Pagamento
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Payment Methods */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dettagli Chiusura</CardTitle>
+                  <CardDescription>
+                    Registra gli incassi per ogni metodo di pagamento
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Date Field */}
                   <FormField
-                    key={pm.id}
                     control={form.control}
-                    name={`items.${index}.amount`}
+                    name="closure_date"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{pm.name}</FormLabel>
+                        <FormLabel>Data Chiusura</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0.00"
-                              className="pl-8"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                              €
-                            </span>
-                          </div>
+                          <Input type="date" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                ))}
-              </div>
+
+                  {/* Payment Methods Grid */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-muted-foreground">Metodi di Pagamento</h3>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {paymentMethods.map((pm, index) => {
+                        const Icon = getPaymentIcon(pm.type);
+                        return (
+                          <FormField
+                            key={pm.id}
+                            control={form.control}
+                            name={`items.${index}.amount`}
+                            render={({ field }) => (
+                              <Card className="border-2">
+                                <CardContent className="p-4 space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                                      <Icon className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <FormLabel className="font-semibold">{pm.name}</FormLabel>
+                                  </div>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00"
+                                        className="text-lg font-semibold pl-8 h-12"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
+                                        €
+                                      </span>
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </CardContent>
+                              </Card>
+                            )}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Note (opzionale)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Aggiungi note o osservazioni sulla chiusura..."
+                            className="resize-none"
+                            rows={4}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Le note verranno incluse nel report email
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Total */}
-            <div className="rounded-lg bg-primary/10 p-6 border-2 border-primary">
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-semibold">TOTALE</span>
-                <span className="text-3xl font-bold text-primary">
-                  € {total.toFixed(2)}
-                </span>
+            {/* Right Column - Summary */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6 space-y-4">
+                <Card className="border-2 border-primary">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-center">Riepilogo Totale</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center space-y-2">
+                      <div className="text-5xl font-bold text-primary">
+                        €{total.toFixed(2)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Totale Incassato
+                      </p>
+                    </div>
+                    
+                    <div className="pt-4 border-t space-y-2">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-3">Dettaglio per Metodo</h4>
+                      {items.map((item, index) => {
+                        const pm = paymentMethods[index];
+                        const amount = Number(item.amount) || 0;
+                        if (amount === 0) return null;
+                        const Icon = getPaymentIcon(pm.type);
+                        return (
+                          <div key={pm.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{pm.name}</span>
+                            </div>
+                            <span className="font-semibold">€{amount.toFixed(2)}</span>
+                          </div>
+                        );
+                      })}
+                      {items.every(item => Number(item.amount) === 0) && (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          Nessun importo inserito
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2 pt-4">
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        disabled={isLoading || isSending}
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="mr-2 h-4 w-4" />
+                        )}
+                        Salva Bozza
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={form.handleSubmit((values) => onSubmit(values, true))}
+                        disabled={isLoading || isSending}
+                        className="w-full"
+                      >
+                        {isSending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-4 w-4" />
+                        )}
+                        Conferma e Invia Email
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-
-            {/* Notes */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note (opzionale)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Aggiungi note o osservazioni..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Le note verranno incluse nel report email
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter className="flex gap-3 justify-end">
-            <Button
-              type="submit"
-              variant="outline"
-              disabled={isLoading || isSending}
-            >
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Salva Bozza
-            </Button>
-            <Button
-              type="button"
-              onClick={form.handleSubmit((values) => onSubmit(values, true))}
-              disabled={isLoading || isSending}
-            >
-              {isSending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Conferma e Invia Email
-            </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        )}
       </form>
     </Form>
   );
