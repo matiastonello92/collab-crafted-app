@@ -2776,6 +2776,48 @@ export type Database = {
           },
         ]
       }
+      search_analytics: {
+        Row: {
+          command_mode: boolean | null
+          created_at: string
+          filters_applied: Json | null
+          id: string
+          location_id: string | null
+          org_id: string
+          query: string
+          results_count: number
+          selected_result_id: string | null
+          selected_result_type: string | null
+          user_id: string
+        }
+        Insert: {
+          command_mode?: boolean | null
+          created_at?: string
+          filters_applied?: Json | null
+          id?: string
+          location_id?: string | null
+          org_id: string
+          query: string
+          results_count?: number
+          selected_result_id?: string | null
+          selected_result_type?: string | null
+          user_id: string
+        }
+        Update: {
+          command_mode?: boolean | null
+          created_at?: string
+          filters_applied?: Json | null
+          id?: string
+          location_id?: string | null
+          org_id?: string
+          query?: string
+          results_count?: number
+          selected_result_id?: string | null
+          selected_result_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       shift_assignments: {
         Row: {
           acknowledged_at: string | null

@@ -177,10 +177,15 @@ async function searchFinancial(
     .map((closure: any) => ({
       id: closure.id,
       type: 'financial' as const,
-      title: `Chiusura ${new Date(closure.closure_date).toLocaleDateString()}`,
+      title: `search.entities.closure ${new Date(closure.closure_date).toLocaleDateString()}`,
       subtitle: `${closure.status} - €${closure.total_amount}`,
       url: `/finance/closures/${closure.id}`,
       score: calculateScore(new Date(closure.closure_date).toLocaleDateString(), query),
+      metadata: { 
+        date: closure.closure_date,
+        status: closure.status,
+        amount: closure.total_amount 
+      },
     }))
 }
 
@@ -210,23 +215,27 @@ async function searchLocations(
 }
 
 function searchNavigation(query: string): SearchResult[] {
+  // Return i18n keys instead of hardcoded text
   const navigationItems = [
-    { id: 'dashboard', title: 'Dashboard', url: '/dashboard' },
-    { id: 'shifts', title: 'Turni', url: '/shifts' },
-    { id: 'users', title: 'Utenti', url: '/users' },
-    { id: 'recipes', title: 'Ricette', url: '/recipes' },
-    { id: 'inventory', title: 'Inventario', url: '/inventory' },
-    { id: 'finance', title: 'Gestione Finanziaria', url: '/finance' },
-    { id: 'reports', title: 'Report', url: '/reports' },
-    { id: 'settings', title: 'Impostazioni', url: '/settings' },
+    { id: 'dashboard', titleKey: 'search.entities.dashboard', url: '/dashboard' },
+    { id: 'shifts', titleKey: 'search.entities.shifts', url: '/shifts' },
+    { id: 'users', titleKey: 'search.entities.users', url: '/users' },
+    { id: 'recipes', titleKey: 'search.entities.recipes', url: '/recipes' },
+    { id: 'inventory', titleKey: 'search.entities.inventory', url: '/inventory' },
+    { id: 'finance', titleKey: 'search.entities.finance', url: '/finance' },
+    { id: 'reports', titleKey: 'search.entities.reports', url: '/reports' },
+    { id: 'settings', titleKey: 'search.entities.settings', url: '/settings' },
   ]
 
   return navigationItems
-    .filter(item => item.title.toLowerCase().includes(query.toLowerCase()))
+    .filter(item => item.id.toLowerCase().includes(query.toLowerCase()) || 
+                    item.titleKey.toLowerCase().includes(query.toLowerCase()))
     .map(item => ({
-      ...item,
+      id: item.id,
+      title: item.titleKey, // Return i18n key
+      url: item.url,
       type: 'navigation' as const,
-      score: calculateScore(item.title, query),
+      score: calculateScore(item.id, query),
     }))
 }
 
@@ -241,8 +250,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Rate limiting check (simple IP-based for now)
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { data: rateLimitCheck } = await supabase.rpc('rate_limit_hit', {
+      p_key: `search:${user.id}:${ip}`,
+      p_limit: 60, // 60 requests
+      p_window_seconds: 60, // per minute
+    })
+
+    if (rateLimitCheck === false) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      )
+    }
+
     const searchParams = request.nextUrl.searchParams
     const query = searchParams.get('q')?.trim()
+    const allLocations = searchParams.get('location') === 'all'
 
     if (!query || query.length < 2) {
       return NextResponse.json({ 
@@ -263,27 +288,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No organization' }, { status: 403 })
     }
 
-    // Parallel search across all entities
-    const [users, shifts, recipes, inventory, financial, locations, navigation] = await Promise.all([
-      searchUsers(supabase, query, profile.org_id, profile.default_location_id),
-      searchShifts(supabase, query, profile.org_id, profile.default_location_id),
-      searchRecipes(supabase, query, profile.org_id, profile.default_location_id),
-      searchInventory(supabase, query, profile.org_id, profile.default_location_id),
-      searchFinancial(supabase, query, profile.org_id, profile.default_location_id),
+    // Multi-location search for org admins
+    let locationIds = [profile.default_location_id]
+    if (allLocations) {
+      // Check if user is org admin
+      const { data: membership } = await supabase
+        .from('memberships')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('org_id', profile.org_id)
+        .single()
+
+      if (membership?.role === 'admin') {
+        const { data: allLocs } = await supabase
+          .from('locations')
+          .select('id')
+          .eq('org_id', profile.org_id)
+          .eq('status', 'active')
+
+        if (allLocs) {
+          locationIds = allLocs.map((l: any) => l.id)
+        }
+      }
+    }
+
+    // Parallel search across all entities for each location
+    const searchPromises = locationIds.flatMap(locId => [
+      searchUsers(supabase, query, profile.org_id, locId),
+      searchShifts(supabase, query, profile.org_id, locId),
+      searchRecipes(supabase, query, profile.org_id, locId),
+      searchInventory(supabase, query, profile.org_id, locId),
+      searchFinancial(supabase, query, profile.org_id, locId),
+    ])
+
+    const [
+      ...entityResults
+    ] = await Promise.all([
+      ...searchPromises,
       searchLocations(supabase, query, profile.org_id),
       Promise.resolve(searchNavigation(query)),
     ])
 
     // Combine and sort by score
-    const allResults = [
-      ...users,
-      ...shifts,
-      ...recipes,
-      ...inventory,
-      ...financial,
-      ...locations,
-      ...navigation,
-    ].sort((a, b) => b.score - a.score)
+    const allResults = entityResults
+      .flat()
+      .sort((a, b) => b.score - a.score)
 
     return NextResponse.json({
       results: allResults.slice(0, 20), // Limit to top 20 results
