@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { createClient } from "@supabase/supabase-js";
+import { useSupabase } from "@/hooks/useSupabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,11 +14,6 @@ import { toast } from "sonner";
 import { Loader2, Save, Send, Banknote, CreditCard, Smartphone, Building2, User, HelpCircle, Settings, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-const supabase = createClient(
-  "https://jwchmdivuwgfjrwvgtia.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Y2htZGl2dXdnZmpyd3ZndGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTA4NjMsImV4cCI6MjA3MjA4Njg2M30.e_pN2KPqn9ZtNC32vwYNhjK7xzmIgpqOweqEmUIoPbA"
-);
 
 const closureFormSchema = z.object({
   closure_date: z.string().min(1, "Data richiesta"),
@@ -58,6 +53,7 @@ function getPaymentIcon(type: string) {
 }
 
 export function CashClosureForm({ locationId, orgId }: { locationId: string; orgId: string }) {
+  const supabase = useSupabase();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);

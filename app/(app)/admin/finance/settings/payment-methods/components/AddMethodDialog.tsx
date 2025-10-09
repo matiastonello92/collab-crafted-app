@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useSupabase } from "@/hooks/useSupabase";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-const supabase = createClient(
-  "https://jwchmdivuwgfjrwvgtia.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Y2htZGl2dXdnZmpyd3ZndGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTA4NjMsImV4cCI6MjA3MjA4Njg2M30.e_pN2KPqn9ZtNC32vwYNhjK7xzmIgpqOweqEmUIoPbA"
-);
 
 const PAYMENT_TYPES = [
   { value: "cash", label: "Contanti" },
@@ -33,6 +28,7 @@ interface AddMethodDialogProps {
 }
 
 export function AddMethodDialog({ open, onOpenChange, orgId, locationId, onSuccess }: AddMethodDialogProps) {
+  const supabase = useSupabase();
   const [name, setName] = useState("");
   const [type, setType] = useState("other");
   const [isLoading, setIsLoading] = useState(false);

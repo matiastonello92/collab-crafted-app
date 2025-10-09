@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useSupabase } from "@/hooks/useSupabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Calendar, Download, Eye, Filter } from "lucide-react";
-
-const supabase = createClient(
-  "https://jwchmdivuwgfjrwvgtia.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Y2htZGl2dXdnZmpyd3ZndGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTA4NjMsImV4cCI6MjA3MjA4Njg2M30.e_pN2KPqn9ZtNC32vwYNhjK7xzmIgpqOweqEmUIoPbA"
-);
 
 interface Location {
   id: string;
@@ -37,6 +32,7 @@ interface ClosuresHistoryProps {
 }
 
 export function ClosuresHistory({ orgId, defaultLocationId, locations }: ClosuresHistoryProps) {
+  const supabase = useSupabase();
   const [closures, setClosures] = useState<Closure[]>([]);
   const [filteredClosures, setFilteredClosures] = useState<Closure[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>(defaultLocationId || "all");

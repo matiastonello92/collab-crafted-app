@@ -1,17 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useSupabase } from "@/hooks/useSupabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, DollarSign, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-
-const supabase = createClient(
-  "https://jwchmdivuwgfjrwvgtia.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Y2htZGl2dXdnZmpyd3ZndGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MTA4NjMsImV4cCI6MjA3MjA4Njg2M30.e_pN2KPqn9ZtNC32vwYNhjK7xzmIgpqOweqEmUIoPbA"
-);
 
 interface FinancialDashboardProps {
   orgId: string;
@@ -19,6 +14,7 @@ interface FinancialDashboardProps {
 }
 
 export function FinancialDashboard({ orgId, locationId }: FinancialDashboardProps) {
+  const supabase = useSupabase();
   const [stats, setStats] = useState<any>(null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [aiInsights, setAiInsights] = useState<string>("");
