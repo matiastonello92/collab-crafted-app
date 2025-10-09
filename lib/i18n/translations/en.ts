@@ -130,6 +130,65 @@ export const en = {
     other: 'Other',
   },
 
+  // Global Search
+  search: {
+    title: 'Global Search',
+    description: 'Search users, shifts, recipes and more...',
+    placeholder: 'Search anything... (Cmd+K)',
+    placeholderWindows: 'Search anything... (Ctrl+K)',
+    noResults: 'No results found',
+    recentSearches: 'Recent searches',
+    suggestions: 'Suggestions',
+    quickActions: 'Quick actions',
+    clearRecent: 'Clear history',
+    searchIn: 'Search in',
+    types: {
+      all: 'All',
+      users: 'Users',
+      shifts: 'Shifts',
+      recipes: 'Recipes',
+      inventory: 'Inventory',
+      financial: 'Financial Data',
+      locations: 'Locations',
+      navigation: 'Navigation',
+    },
+    actions: {
+      createShift: 'Create new shift',
+      createRecipe: 'Create new recipe',
+      addUser: 'Add user',
+      viewDashboard: 'Go to Dashboard',
+      viewReports: 'View Reports',
+    },
+    resultCount: '{{count}} results',
+    showing: 'Showing {{shown}} of {{total}}',
+    loadMore: 'Load more results',
+    contextual: {
+      morning: 'Morning suggestions',
+      afternoon: 'Afternoon suggestions',
+      evening: 'Evening suggestions',
+      monday: 'Monday activities',
+      friday: 'Friday activities',
+      weekend: 'Weekend activities',
+    },
+    filters: {
+      dateRange: 'Date range',
+      status: 'Status',
+      location: 'Location',
+      category: 'Category',
+    },
+    preview: {
+      details: 'Details',
+      actions: 'Available actions',
+      quickView: 'Quick view',
+    },
+    keyboard: {
+      navigate: '↑↓ to navigate',
+      select: '↵ to select',
+      close: 'Esc to close',
+      filter: 'Tab to filter',
+    },
+  },
+
   // Header
   header: {
     noLocation: 'No location',

@@ -130,6 +130,65 @@ export const it = {
     other: 'Altro',
   },
 
+  // Global Search
+  search: {
+    title: 'Ricerca Globale',
+    description: 'Cerca utenti, turni, ricette e altro ancora...',
+    placeholder: 'Cerca qualcosa... (Cmd+K)',
+    placeholderWindows: 'Cerca qualcosa... (Ctrl+K)',
+    noResults: 'Nessun risultato trovato',
+    recentSearches: 'Ricerche recenti',
+    suggestions: 'Suggerimenti',
+    quickActions: 'Azioni rapide',
+    clearRecent: 'Cancella cronologia',
+    searchIn: 'Cerca in',
+    types: {
+      all: 'Tutto',
+      users: 'Utenti',
+      shifts: 'Turni',
+      recipes: 'Ricette',
+      inventory: 'Inventario',
+      financial: 'Dati Finanziari',
+      locations: 'Location',
+      navigation: 'Navigazione',
+    },
+    actions: {
+      createShift: 'Crea nuovo turno',
+      createRecipe: 'Crea nuova ricetta',
+      addUser: 'Aggiungi utente',
+      viewDashboard: 'Vai alla Dashboard',
+      viewReports: 'Visualizza Report',
+    },
+    resultCount: '{{count}} risultati',
+    showing: 'Mostrando {{shown}} di {{total}}',
+    loadMore: 'Carica altri risultati',
+    contextual: {
+      morning: 'Suggerimenti per la mattina',
+      afternoon: 'Suggerimenti per il pomeriggio',
+      evening: 'Suggerimenti per la sera',
+      monday: 'Attività del lunedì',
+      friday: 'Attività del venerdì',
+      weekend: 'Attività del weekend',
+    },
+    filters: {
+      dateRange: 'Intervallo date',
+      status: 'Stato',
+      location: 'Location',
+      category: 'Categoria',
+    },
+    preview: {
+      details: 'Dettagli',
+      actions: 'Azioni disponibili',
+      quickView: 'Anteprima rapida',
+    },
+    keyboard: {
+      navigate: '↑↓ per navigare',
+      select: '↵ per selezionare',
+      close: 'Esc per chiudere',
+      filter: 'Tab per filtrare',
+    },
+  },
+
   // Header
   header: {
     noLocation: 'Nessuna sede',

@@ -1,14 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useTransition } from 'react';
+import { useEffect, useRef, useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
+import { GlobalSearchCommand } from '@/components/search/GlobalSearchCommand';
+import { Button } from '@/components/ui/button';
 
 export default function HeaderClient({
   locations,
@@ -29,6 +32,7 @@ export default function HeaderClient({
   const didPersistRef = useRef(false);
   const context = useHydratedContext();
   const { setContext } = useHydratedStore();
+  const [searchOpen, setSearchOpen] = useState(false);
   useEffectivePermissions();
 
   // Initialize user_id and org_id from active location
@@ -76,6 +80,19 @@ export default function HeaderClient({
     }
   }, [activeLocationId, persisted, setActiveLocation]);
 
+  // Keyboard shortcut for search (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, []);
+
   const onSelect = (id: string) => {
     startTransition(async () => {
       await setActiveLocation(id);
@@ -103,8 +120,30 @@ export default function HeaderClient({
         ) : null}
       </div>
 
-      {/* Row 2: Location + Theme + User */}
+      {/* Row 2: Search + Location + Theme + User */}
       <div className="flex flex-shrink-0 items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSearchOpen(true)}
+          className="relative justify-start text-sm text-muted-foreground w-48 hidden md:flex"
+        >
+          <Search className="mr-2 h-4 w-4" />
+          <span>{t('common.search')}</span>
+          <kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSearchOpen(true)}
+          className="md:hidden p-2"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
         {locations?.length ? (
           <div className="relative flex-1 sm:flex-none">
             <select
@@ -130,6 +169,8 @@ export default function HeaderClient({
           <UserDropdown />
         </div>
       </div>
+      
+      <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
