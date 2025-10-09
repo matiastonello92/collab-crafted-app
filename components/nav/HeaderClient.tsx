@@ -12,6 +12,7 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
 import { GlobalSearchCommand } from '@/components/search/GlobalSearchCommand';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
 
 export default function HeaderClient({
   locations,
@@ -122,27 +123,35 @@ export default function HeaderClient({
 
       {/* Row 2: Search + Location + Theme + User */}
       <div className="flex flex-shrink-0 items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSearchOpen(true)}
-          className="relative justify-start text-sm text-muted-foreground w-48 hidden md:flex"
-        >
-          <Search className="mr-2 h-4 w-4" />
-          <span>{t('common.search')}</span>
-          <kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </Button>
+        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="relative justify-start text-sm text-muted-foreground w-48 hidden md:flex h-10 rounded-xl border-border/60 bg-background/95 backdrop-blur-sm hover:bg-accent/50 transition-all duration-200"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              <span>{t('common.search')}</span>
+              <kbd className="pointer-events-none absolute right-2 hidden h-5 select-none items-center gap-1 rounded-md border border-border/60 bg-muted/80 px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </Button>
+          </PopoverTrigger>
+          <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+        </Popover>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSearchOpen(true)}
-          className="md:hidden p-2"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
+        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="md:hidden p-2 rounded-xl border-border/60 bg-background/95"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+        </Popover>
 
         {locations?.length ? (
           <div className="relative flex-1 sm:flex-none">
@@ -169,8 +178,6 @@ export default function HeaderClient({
           <UserDropdown />
         </div>
       </div>
-      
-      <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }

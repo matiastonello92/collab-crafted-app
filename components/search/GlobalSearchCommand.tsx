@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
+import { PopoverContent } from '@/components/ui/popover'
 import { useTranslation } from '@/lib/i18n'
 import { useHydratedContext } from '@/lib/store/useHydratedStore'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -319,106 +320,125 @@ export function GlobalSearchCommand({ open, onOpenChange }: GlobalSearchCommandP
   const showCommandMode = isCommand
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <div className={showPreview ? 'grid grid-cols-[1fr,400px]' : ''}>
-        <div>
-          <CommandInput 
-            placeholder={t('search.placeholder')}
-            value={query}
-            onValueChange={setQuery}
-          />
-          <CommandList>
-            {showCommandMode && (
-              <div className="p-4 text-sm">
-                <p className="font-medium mb-2">{t('search.commands.help')}</p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>&gt;create shift - {t('search.commands.createShift')}</li>
-                  <li>&gt;create recipe - {t('search.commands.createRecipe')}</li>
-                  <li>&gt;close cash - {t('search.commands.closeCash')}</li>
-                  <li>&gt;report today - {t('search.commands.reportToday')}</li>
-                </ul>
-              </div>
-            )}
-
-            {showEmpty && (
-              <CommandEmpty>
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <Search className="h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">{t('search.noResults')}</p>
+    <PopoverContent
+      className="w-[700px] max-h-[600px] p-0 overflow-hidden rounded-2xl shadow-2xl border border-border/40 bg-background/95 backdrop-blur-xl"
+      align="start"
+      sideOffset={12}
+    >
+      <Command className="rounded-2xl border-none">
+        <div className={showPreview ? 'flex' : ''}>
+          <div className={showPreview ? 'flex-1 border-r border-border/40' : ''}>
+            <CommandInput 
+              placeholder={t('search.placeholder')}
+              value={query}
+              onValueChange={setQuery}
+              className="h-14 px-6 text-base border-none rounded-t-2xl bg-background/95 backdrop-blur-xl focus:ring-0 focus:outline-none placeholder:text-muted-foreground/60"
+            />
+            <CommandList className="max-h-[450px] overflow-y-auto px-2 py-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+              {showCommandMode && (
+                <div className="px-4 py-3 text-sm">
+                  <p className="font-medium mb-2">{t('search.commands.help')}</p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>&gt;create shift - {t('search.commands.createShift')}</li>
+                    <li>&gt;create recipe - {t('search.commands.createRecipe')}</li>
+                    <li>&gt;close cash - {t('search.commands.closeCash')}</li>
+                    <li>&gt;report today - {t('search.commands.reportToday')}</li>
+                  </ul>
                 </div>
-              </CommandEmpty>
-            )}
+              )}
 
-            {showRecent && (
-              <>
-                <CommandGroup heading={t('search.recentSearches')}>
-                  {recentSearches.map((item) => {
-                    const Icon = typeIcons[item.type]
-                    return (
-                      <CommandItem
-                        key={`recent-${item.id}-${item.type}`}
-                        value={`${item.title} ${item.subtitle || ''}`}
-                        onSelect={() => handleSelect(item)}
-                        onMouseEnter={() => setSelectedResult(item as SearchResult)}
-                      >
-                        <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <Icon className="mr-2 h-4 w-4" />
-                        <div className="flex flex-col flex-1">
-                          <span>{item.title}</span>
-                          {item.subtitle && (
-                            <span className="text-xs text-muted-foreground">{item.subtitle}</span>
-                          )}
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRemoveRecent(item.id, item.type)
-                          }}
-                          className="ml-2 p-1 hover:bg-muted rounded"
+              {showEmpty && (
+                <CommandEmpty>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                      <Search className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium">{t('search.noResults')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('search.tryDifferentQuery')}</p>
+                  </div>
+                </CommandEmpty>
+              )}
+
+              {showRecent && (
+                <>
+                  <CommandGroup 
+                    heading={t('search.recentSearches')}
+                    className="px-2 py-2 [&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:uppercase"
+                  >
+                    {recentSearches.map((item) => {
+                      const Icon = typeIcons[item.type]
+                      return (
+                        <CommandItem
+                          key={`recent-${item.id}-${item.type}`}
+                          value={`${item.title} ${item.subtitle || ''}`}
+                          onSelect={() => handleSelect(item)}
+                          onMouseEnter={() => setSelectedResult(item as SearchResult)}
+                          className="px-4 py-3 rounded-xl cursor-pointer data-[selected=true]:bg-accent/50 data-[selected=true]:text-accent-foreground hover:bg-accent/30 transition-colors duration-150"
                         >
-                          <X className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-                <CommandSeparator />
-              </>
-            )}
+                          <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                          <Icon className="mr-2 h-4 w-4" />
+                          <div className="flex flex-col flex-1">
+                            <span>{item.title}</span>
+                            {item.subtitle && (
+                              <span className="text-xs text-muted-foreground">{item.subtitle}</span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRemoveRecent(item.id, item.type)
+                            }}
+                            className="ml-2 p-1 hover:bg-muted rounded-md transition-colors"
+                          >
+                            <X className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                  <CommandSeparator className="mx-2" />
+                </>
+              )}
 
-            {showContextual && (
-              <>
-                <CommandGroup heading={t('search.suggestions')}>
-                  {contextualSuggestions.map((item) => {
-                    const Icon = typeIcons[item.type]
-                    return (
-                      <CommandItem
-                        key={`contextual-${item.id}`}
-                        value={`${item.title} ${item.subtitle || ''}`}
-                        onSelect={() => handleSelect(item)}
-                        onMouseEnter={() => setSelectedResult(item)}
-                      >
-                        <Sparkles className="mr-2 h-4 w-4 text-primary" />
-                        <Icon className="mr-2 h-4 w-4" />
-                        <div className="flex flex-col flex-1">
-                          <span>{item.title}</span>
-                          {item.subtitle && (
-                            <span className="text-xs text-muted-foreground">{item.subtitle}</span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-                <CommandSeparator />
-              </>
-            )}
+              {showContextual && (
+                <>
+                  <CommandGroup 
+                    heading={t('search.suggestions')}
+                    className="px-2 py-2 [&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:uppercase"
+                  >
+                    {contextualSuggestions.map((item) => {
+                      const Icon = typeIcons[item.type]
+                      return (
+                        <CommandItem
+                          key={`contextual-${item.id}`}
+                          value={`${item.title} ${item.subtitle || ''}`}
+                          onSelect={() => handleSelect(item)}
+                          onMouseEnter={() => setSelectedResult(item)}
+                          className="px-4 py-3 rounded-xl cursor-pointer data-[selected=true]:bg-accent/50 data-[selected=true]:text-accent-foreground hover:bg-accent/30 transition-colors duration-150"
+                        >
+                          <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                          <Icon className="mr-2 h-4 w-4" />
+                          <div className="flex flex-col flex-1">
+                            <span>{item.title}</span>
+                            {item.subtitle && (
+                              <span className="text-xs text-muted-foreground">{item.subtitle}</span>
+                            )}
+                          </div>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                  <CommandSeparator className="mx-2" />
+                </>
+              )}
 
             {showResults && (
-              <CommandGroup heading={`${filteredResults.length} ${t('search.resultCount')}`}>
+              <CommandGroup 
+                heading={`${filteredResults.length} ${t('search.resultCount')}`}
+                className="px-2 py-2 [&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:uppercase"
+              >
                 {filteredResults.map((result) => {
                   const Icon = typeIcons[result.type]
-                  // Simple popularity indicator (score-based)
                   const isPopular = result.score && result.score >= 90
                   
                   return (
@@ -427,6 +447,7 @@ export function GlobalSearchCommand({ open, onOpenChange }: GlobalSearchCommandP
                       value={`${result.title} ${result.subtitle || ''} ${result.description || ''}`}
                       onSelect={() => handleSelect(result)}
                       onMouseEnter={() => setSelectedResult(result)}
+                      className="px-4 py-3 rounded-xl cursor-pointer data-[selected=true]:bg-accent/50 data-[selected=true]:text-accent-foreground hover:bg-accent/30 transition-colors duration-150"
                     >
                       <Icon className="mr-2 h-4 w-4" />
                       <div className="flex flex-col flex-1">
@@ -453,37 +474,45 @@ export function GlobalSearchCommand({ open, onOpenChange }: GlobalSearchCommandP
             )}
 
             {isLoading && cleanQuery.length >= 2 && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                {t('common.loading')}
+              <div className="px-4 py-6 space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center gap-3 animate-pulse">
+                    <div className="h-4 w-4 bg-muted rounded" />
+                    <div className="h-4 flex-1 bg-muted rounded" />
+                  </div>
+                ))}
               </div>
             )}
           </CommandList>
 
           {showRecent && (
-            <div className="border-t p-2">
+            <div className="border-t border-border/40 p-2">
               <button
                 onClick={handleClearRecent}
-                className="w-full text-xs text-muted-foreground hover:text-foreground text-center py-1"
+                className="w-full text-xs text-muted-foreground hover:text-foreground text-center py-1 transition-colors rounded-lg hover:bg-muted/50"
               >
                 {t('search.clearRecent')}
               </button>
             </div>
           )}
 
-          <div className="border-t p-2 text-xs text-muted-foreground">
-            <div className="flex items-center justify-between flex-wrap gap-1">
+          <div className="border-t border-border/40 p-3 text-xs text-muted-foreground bg-muted/20">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span>{t('search.keyboard.navigate')}</span>
               <span>{t('search.keyboard.select')}</span>
-              {selectedResult && <span>{t('search.keyboard.preview')}</span>}
+              <span>{t('search.keyboard.preview')}</span>
               <span>{t('search.keyboard.close')}</span>
             </div>
           </div>
         </div>
 
-        {showPreview && (
-          <SearchPreviewPanel result={selectedResult} />
+        {showPreview && selectedResult && (
+          <div className="w-[350px] p-4 bg-muted/20 overflow-y-auto">
+            <SearchPreviewPanel result={selectedResult} />
+          </div>
         )}
       </div>
-    </CommandDialog>
+    </Command>
+  </PopoverContent>
   )
 }
