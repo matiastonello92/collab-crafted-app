@@ -74,19 +74,23 @@ serve(async (req) => {
 
     const typedClosure = closure as unknown as Closure;
 
-    // Fetch email recipients for this location
-    const { data: recipients, error: recipientsError } = await supabase
+    // Sprint 2: Fetch email recipients with improved query
+    const { data: recipientsData, error: recipientsError } = await supabase
       .from("closure_email_recipients")
-      .select("email")
+      .select("email, location_id")
       .eq("org_id", closure.org_id)
-      .or(`location_id.eq.${closure.location_id},location_id.is.null`)
       .eq("is_active", true);
 
     if (recipientsError) {
       throw new Error(`Failed to fetch recipients: ${recipientsError.message}`);
     }
 
-    if (!recipients || recipients.length === 0) {
+    // Filter for location-specific and global recipients
+    const recipients = recipientsData?.filter(r => 
+      r.location_id === closure.location_id || r.location_id === null
+    ) || [];
+
+    if (recipients.length === 0) {
       throw new Error("No active email recipients configured");
     }
 
@@ -113,6 +117,32 @@ serve(async (req) => {
 
     console.log("✅ Closure report sent successfully:", emailData?.id);
 
+    // Sprint 3: Log email in database
+    try {
+      const recipients_list = recipients.map(r => r.email).join(', ');
+      
+      await supabase.from('email_logs').insert({
+        org_id: closure.org_id,
+        user_id: closure.created_by,
+        recipient_email: recipients[0].email,
+        email_type: 'closure_report',
+        subject: `Chiusura di Cassa - ${typedClosure.locations.name} - ${new Date(typedClosure.closure_date).toLocaleDateString("it-IT")}`,
+        status: 'sent',
+        provider_id: emailData?.id,
+        sent_at: new Date().toISOString(),
+        metadata: {
+          closure_id: closure_id,
+          location_id: closure.location_id,
+          recipients_count: recipients.length,
+          recipients_list,
+          total_amount: closure.total_amount,
+          closure_date: closure.closure_date
+        }
+      });
+    } catch (logError) {
+      console.error('Failed to log email in database:', logError);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -126,6 +156,37 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("❌ Error in send-closure-report:", error);
+    
+    // Sprint 3: Log failed email attempt
+    try {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      const { closure_id } = await req.json() as ClosureReportRequest;
+      const { data: closure } = await supabase
+        .from("cash_closures")
+        .select("org_id, created_by")
+        .eq("id", closure_id)
+        .single();
+      
+      if (closure) {
+        await supabase.from('email_logs').insert({
+          org_id: closure.org_id,
+          user_id: closure.created_by,
+          recipient_email: 'unknown',
+          email_type: 'closure_report',
+          subject: `Chiusura di Cassa - Failed`,
+          status: 'failed',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          metadata: { closure_id }
+        });
+      }
+    } catch (logErr) {
+      console.error('Failed to log error:', logErr);
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : "Unknown error" 

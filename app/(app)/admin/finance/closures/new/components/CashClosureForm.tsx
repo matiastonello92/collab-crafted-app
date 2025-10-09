@@ -166,10 +166,50 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
     toast.success(`${name} aggiunto`);
   };
 
+  // Sprint 4: Retry email send function
+  const retryEmailSend = async (closureId: string) => {
+    try {
+      toast.info("Nuovo tentativo invio email...");
+      const { error } = await supabase.functions.invoke(
+        "send-closure-report", 
+        { body: { closure_id: closureId } }
+      );
+      
+      if (error) {
+        toast.error(`Errore: ${error.message}`);
+      } else {
+        toast.success("Email inviata con successo!");
+      }
+    } catch (err) {
+      toast.error("Errore nel retry");
+    }
+  };
+
   const onSubmit = async (values: ClosureFormValues, sendEmail: boolean = false) => {
     setIsLoading(true);
 
     try {
+      // Sprint 5: Pre-submit validation for email recipients
+      if (sendEmail) {
+        const { data: preCheckRecipients } = await supabase
+          .from("closure_email_recipients")
+          .select("email")
+          .eq("org_id", orgId)
+          .or(`location_id.eq.${locationId},location_id.is.null`)
+          .eq("is_active", true);
+        
+        if (!preCheckRecipients || preCheckRecipients.length === 0) {
+          const confirmed = window.confirm(
+            "Nessun destinatario email configurato. Vuoi salvare la chiusura senza inviare email?"
+          );
+          
+          if (!confirmed) {
+            setIsLoading(false);
+            return;
+          }
+          sendEmail = false;
+        }
+      }
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Utente non autenticato");
 
@@ -245,11 +285,12 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
 
       // Send email if requested
       if (sendEmail) {
-        // Check if there are recipients configured
+        // Sprint 1: Fix query to include global recipients
         const { data: recipients, error: recipientsError } = await supabase
           .from("closure_email_recipients")
           .select("email")
-          .eq("location_id", locationId)
+          .eq("org_id", orgId)
+          .or(`location_id.eq.${locationId},location_id.is.null`)
           .eq("is_active", true);
 
         if (!recipients || recipients.length === 0) {
@@ -269,9 +310,24 @@ export function CashClosureForm({ locationId, orgId }: { locationId: string; org
 
           if (emailError) {
             console.error('❌ Errore invio email:', emailError);
+            
+            // Sprint 4: Save error to closure notes
+            await supabase
+              .from('cash_closures')
+              .update({ 
+                notes: (values.notes || '') + `\n\n[Sistema] Email non inviata: ${emailError.message || 'Errore sconosciuto'}`
+              })
+              .eq('id', closureId);
+            
             toast.error(
-              `Errore nell'invio email: ${emailError.message || 'Errore sconosciuto'}. La chiusura è stata salvata.`,
-              { duration: 6000 }
+              `Chiusura salvata ma email non inviata: ${emailError.message || 'Errore sconosciuto'}`,
+              { 
+                duration: 8000,
+                action: {
+                  label: 'Riprova',
+                  onClick: () => retryEmailSend(closureId)
+                }
+              }
             );
           } else {
             console.log('✅ Email inviata con successo:', emailResponse);
