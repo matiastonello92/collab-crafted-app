@@ -1977,6 +1977,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean | null
+          is_schedulable: boolean
           last_name: string | null
           locale: string | null
           marketing_opt_in: boolean | null
@@ -1998,6 +1999,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_active?: boolean | null
+          is_schedulable?: boolean
           last_name?: string | null
           locale?: string | null
           marketing_opt_in?: boolean | null
@@ -2019,6 +2021,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          is_schedulable?: boolean
           last_name?: string | null
           locale?: string | null
           marketing_opt_in?: boolean | null
@@ -3335,6 +3338,105 @@ export type Database = {
           },
         ]
       }
+      user_contracts: {
+        Row: {
+          contract_type: string
+          created_at: string
+          created_by: string | null
+          daily_hours_max: number | null
+          daily_hours_min: number | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          location_id: string
+          max_consecutive_days: number | null
+          max_weekly_hours: number | null
+          min_rest_hours: number | null
+          notes: string | null
+          org_id: string
+          start_date: string
+          updated_at: string
+          user_id: string
+          weekly_hours: number
+        }
+        Insert: {
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          daily_hours_max?: number | null
+          daily_hours_min?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          location_id: string
+          max_consecutive_days?: number | null
+          max_weekly_hours?: number | null
+          min_rest_hours?: number | null
+          notes?: string | null
+          org_id: string
+          start_date: string
+          updated_at?: string
+          user_id: string
+          weekly_hours?: number
+        }
+        Update: {
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          daily_hours_max?: number | null
+          daily_hours_min?: number | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          max_consecutive_days?: number | null
+          max_weekly_hours?: number | null
+          min_rest_hours?: number | null
+          notes?: string | null
+          org_id?: string
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+          weekly_hours?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_contracts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_contracts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_contracts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "user_contracts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_dashboard_widgets: {
         Row: {
           config: Json | null
@@ -3888,6 +3990,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean | null
+          is_schedulable: boolean
           last_name: string | null
           locale: string | null
           marketing_opt_in: boolean | null
