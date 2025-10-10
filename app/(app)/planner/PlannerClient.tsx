@@ -71,8 +71,8 @@ export function PlannerClient() {
       try {
         console.log('🔍 [Planner] Loading users for location:', selectedLocation)
 
-        // Fetch users with email from API endpoint
-        const url = `/api/v1/admin/users?location_id=${selectedLocation}`
+        // Fetch users with email from API endpoint - only schedulable users
+        const url = `/api/v1/admin/users?location_id=${selectedLocation}&schedulable_only=true`
         console.log('🔍 [Planner] Fetching from:', url)
         
         const response = await fetch(url)

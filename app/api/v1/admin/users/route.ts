@@ -20,9 +20,10 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ [USERS] User authenticated:', user.id)
     
-    // Get location_id filter if provided
+    // Get location_id and schedulable_only filters
     const locationId = request.nextUrl.searchParams.get('location_id')
-    console.log('🔍 [USERS] Query params:', { locationId })
+    const schedulableOnly = request.nextUrl.searchParams.get('schedulable_only') === 'true'
+    console.log('🔍 [USERS] Query params:', { locationId, schedulableOnly })
 
     // Derive org_id from user's membership (Inventari pattern)
     console.log('🔍 [USERS] Querying memberships for user:', user.id)
@@ -97,15 +98,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Query profiles directly (RLS handles org filtering automatically)
-    console.log('🔍 [USERS] Querying profiles with org_id:', orgId, 'and userIds:', userIds?.length || 'all')
+    console.log('🔍 [USERS] Querying profiles with org_id:', orgId, 'and userIds:', userIds?.length || 'all', 'schedulable_only:', schedulableOnly)
     let query = supabase
       .from('profiles')
-      .select('id, full_name, org_id')
+      .select('id, full_name, org_id, is_schedulable')
       .eq('org_id', orgId)
       .order('full_name')
 
     if (userIds) {
       query = query.in('id', userIds)
+    }
+    
+    // Filter by schedulable status if requested (for planner)
+    if (schedulableOnly) {
+      query = query.eq('is_schedulable', true)
     }
 
     const { data: profiles, error: profilesError } = await query

@@ -6,6 +6,7 @@ export interface UserWithDetails {
   first_name: string | null
   last_name: string | null
   is_active: boolean | null
+  is_schedulable?: boolean | null
   created_at: string | null
   user_type: 'registered' | 'invited'
   invitation_status?: 'pending' | 'expired' | null
@@ -123,7 +124,7 @@ export async function getUsersWithDetails(
     // 1. Fetch registered users from profiles
     let profilesQuery = supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, is_active, created_at, org_id')
+      .select('id, first_name, last_name, email, is_active, is_schedulable, created_at, org_id')
       .eq('org_id', orgId)
 
     if (search.trim()) {
@@ -152,6 +153,7 @@ export async function getUsersWithDetails(
       first_name: u.first_name,
       last_name: u.last_name,
       is_active: u.is_active,
+      is_schedulable: u.is_schedulable,
       created_at: u.created_at,
       user_type: 'registered' as const,
       invitation_status: null,
@@ -257,6 +259,7 @@ export async function getUserById(userId: string): Promise<UserWithDetails | nul
         email,
         phone,
         is_active,
+        is_schedulable,
         created_at,
         org_id
       `)

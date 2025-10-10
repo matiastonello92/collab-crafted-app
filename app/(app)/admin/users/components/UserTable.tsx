@@ -151,19 +151,26 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                           {getFullName(user)}
                         </p>
                       </div>
-                      <Badge 
-                        variant={
-                          user.user_type === 'registered' 
-                            ? (user.is_active ? 'default' : 'secondary')
-                            : 'outline'
-                        } 
-                        className="shrink-0"
-                      >
-                        {user.user_type === 'registered' 
-                          ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
-                          : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
-                        }
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge 
+                          variant={
+                            user.user_type === 'registered' 
+                              ? (user.is_active ? 'default' : 'secondary')
+                              : 'outline'
+                          } 
+                          className="shrink-0 w-fit"
+                        >
+                          {user.user_type === 'registered' 
+                            ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
+                            : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
+                          }
+                        </Badge>
+                        {user.user_type === 'registered' && user.is_schedulable && (
+                          <Badge variant="outline" className="text-xs w-fit">
+                            Pianificabile
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs text-muted-foreground">
@@ -229,18 +236,25 @@ export default function UserTable({ users, total, currentPage, hasMore }: UserTa
                       {getFullName(user)}
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={
-                          user.user_type === 'registered' 
-                            ? (user.is_active ? 'default' : 'secondary')
-                            : 'outline'
-                        }
-                      >
-                        {user.user_type === 'registered' 
-                          ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
-                          : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
-                        }
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={
+                            user.user_type === 'registered' 
+                              ? (user.is_active ? 'default' : 'secondary')
+                              : 'outline'
+                          }
+                        >
+                          {user.user_type === 'registered' 
+                            ? (user.is_active ? t('admin.users.active') : t('admin.users.inactive'))
+                            : (user.invitation_status === 'expired' ? 'Scaduto' : 'Pending')
+                          }
+                        </Badge>
+                        {user.user_type === 'registered' && user.is_schedulable && (
+                          <Badge variant="outline" className="text-xs">
+                            Pianificabile
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.created_at 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, User, Shield, Activity, Settings, Mail, Tag, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, User, Shield, Activity, Settings, Mail, Tag, AlertTriangle, Calendar } from 'lucide-react'
 import RolesByLocationPanel from './components/RolesByLocationPanel'
 import PermissionOverridesPanel from './components/PermissionOverridesPanel'
 import ActivityPanel from './components/ActivityPanel'
@@ -14,6 +14,7 @@ import { CompliancePanel } from './components/CompliancePanel'
 import { UserOverview } from './components/UserOverview'
 import { EffectivePermissions } from './components/EffectivePermissions'
 import { DeleteUserDialog } from './components/DeleteUserDialog'
+import { ContractsSchedulingPanel } from './components/ContractsSchedulingPanel'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
@@ -59,12 +60,12 @@ export default async function UserDetailPage({ params }: Props) {
     id: user.id,
     name: getFullName(),
     email: user.email || '',
-    phone: undefined, // Not available in UserWithDetails
-    avatar_url: undefined, // Not available in UserWithDetails  
+    phone: undefined,
+    avatar_url: undefined,
     created_at: user.created_at || new Date().toISOString(),
     is_active: user.is_active ?? true,
-    last_activity: undefined, // Not available in UserWithDetails
-    email_confirmed: true // We don't have this field in our schema, defaulting to true
+    last_activity: undefined,
+    email_confirmed: true
   }
 
   return (
@@ -107,10 +108,14 @@ export default async function UserDetailPage({ params }: Props) {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="overview">{t('admin.tabOverview')}</TabsTrigger>
           <TabsTrigger value="roles">{t('admin.tabRolesLocation')}</TabsTrigger>
           <TabsTrigger value="job-tags">{t('admin.tabJobTags')}</TabsTrigger>
+          <TabsTrigger value="contracts">
+            <Calendar className="h-4 w-4 mr-2" />
+            Contratti
+          </TabsTrigger>
           <TabsTrigger value="permissions">{t('admin.tabPermissions')}</TabsTrigger>
           <TabsTrigger value="compliance">{t('admin.tabCompliance')}</TabsTrigger>
           <TabsTrigger value="activity">{t('admin.tabActivity')}</TabsTrigger>
@@ -153,6 +158,14 @@ export default async function UserDetailPage({ params }: Props) {
               </Card>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="contracts" className="mt-6">
+          <ContractsSchedulingPanel 
+            userId={user.id}
+            isSchedulable={user.is_schedulable || false}
+            userFullName={getFullName()}
+          />
         </TabsContent>
 
         <TabsContent value="permissions" className="mt-6">
