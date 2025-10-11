@@ -28,7 +28,6 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
       const stored = localStorage.getItem('klyra-locale') as Locale;
       if (stored && (stored === 'it' || stored === 'en')) {
         setLocaleState(stored);
-        setCurrentLocale(stored);
       }
     }
   }, []);
