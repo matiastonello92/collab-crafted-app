@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import RecipeDetailClient from './RecipeDetailClient';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function RecipeDetailPage({ params }: { params: { id: string } }) {
+export default async function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   return (
     <Suspense fallback={
       <div className="container mx-auto p-6 space-y-4">
@@ -10,7 +11,7 @@ export default function RecipeDetailPage({ params }: { params: { id: string } })
         <Skeleton className="h-64 w-full" />
       </div>
     }>
-      <RecipeDetailClient recipeId={params.id} />
+      <RecipeDetailClient recipeId={id} />
     </Suspense>
   );
 }

@@ -149,14 +149,17 @@ async function PlatformAdminInfo() {
 export default async function PermissionTagsPage({
   searchParams
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  // ✅ Await searchParams in Next.js 15
+  const params = await searchParams
+  
   // Ensure platform admin access
   await requirePlatformAdmin()
   
   // Convert searchParams to URLSearchParams
   const urlSearchParams = new URLSearchParams()
-  Object.entries(searchParams).forEach(([key, value]) => {
+  Object.entries(params).forEach(([key, value]) => {
     if (typeof value === 'string') {
       urlSearchParams.set(key, value)
     } else if (Array.isArray(value)) {

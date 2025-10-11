@@ -2,7 +2,8 @@ import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import RecipeEditPage from './RecipeEditPage';
 
-export default async function EditRecipePage({ params }: { params: { id: string } }) {
+export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -10,5 +11,5 @@ export default async function EditRecipePage({ params }: { params: { id: string 
     redirect('/login');
   }
 
-  return <RecipeEditPage recipeId={params.id} />;
+  return <RecipeEditPage recipeId={id} />;
 }

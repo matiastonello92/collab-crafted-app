@@ -10,6 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function TimesheetDetailPage({ params }: { params: { id: string } }) {
-  return <TimesheetDetailClient timesheetId={params.id} />
+export default async function TimesheetDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  return <TimesheetDetailClient timesheetId={id} />
 }
