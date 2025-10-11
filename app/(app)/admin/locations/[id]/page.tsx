@@ -12,11 +12,15 @@ import { LocationScheduleTab } from './components/LocationScheduleTab'
 import { LocationManagersTab } from './components/LocationManagersTab'
 
 interface Props {
-  params: { id: string }
-  searchParams: { tab?: string }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ tab?: string }>
 }
 
 export default async function LocationDetailPage({ params, searchParams }: Props) {
+  // ✅ CRITICAL: Await params and searchParams in Next.js 15
+  const { id } = await params
+  const { tab } = await searchParams
+  
   await requireOrgAdmin()
 
   const supabase = await createSupabaseServerClient()
@@ -25,7 +29,7 @@ export default async function LocationDetailPage({ params, searchParams }: Props
   const { data: location, error } = await supabase
     .from('locations')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !location) {
@@ -33,7 +37,7 @@ export default async function LocationDetailPage({ params, searchParams }: Props
     redirect('/admin/locations')
   }
 
-  const activeTab = searchParams.tab || 'info'
+  const activeTab = tab || 'info'
 
   return (
     <div className="container mx-auto p-6 space-y-6">
