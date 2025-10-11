@@ -21,27 +21,30 @@ import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
 import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function UserDetailPage({ params }: Props) {
+  // ✅ CRITICAL: Await params in Next.js 15
+  const { id } = await params
+  
   // Guard: require admin permissions
   await requireOrgAdmin()
   
   // Get server-safe translation function with locale from cookies
   const t = await getTranslation()
   
-  const user = await getUserById(params.id)
+  const user = await getUserById(id)
   
   if (!user) {
     notFound()
   }
 
   const [rolesByLocation, permissionOverrides] = await Promise.all([
-    getUserRolesByLocation(params.id),
-    getUserPermissionOverrides(params.id)
+    getUserRolesByLocation(id),
+    getUserPermissionOverrides(id)
   ])
 
   const getFullName = () => {
@@ -137,7 +140,7 @@ export default async function UserDetailPage({ params }: Props) {
           <Suspense fallback={<div>{t('admin.loadingRoles')}</div>}>
             <RolesByLocationPanel 
               roles={rolesByLocation} 
-              userId={params.id}
+              userId={id}
             />
           </Suspense>
         </TabsContent>
@@ -147,7 +150,7 @@ export default async function UserDetailPage({ params }: Props) {
             {userLocations.map(location => (
               <JobTagsPanel
                 key={location.id}
-                userId={params.id}
+                userId={id}
                 locationId={rolesByLocation.find(r => r.location_name === location.name)?.location_id || ''}
                 locationName={location.name}
               />
@@ -171,16 +174,16 @@ export default async function UserDetailPage({ params }: Props) {
         </TabsContent>
 
         <TabsContent value="permissions" className="mt-6">
-          <EffectivePermissions userId={params.id} />
+          <EffectivePermissions userId={id} />
         </TabsContent>
 
         <TabsContent value="compliance" className="mt-6">
-          <CompliancePanel userId={params.id} />
+          <CompliancePanel userId={id} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
           <Suspense fallback={<div>{t('admin.loadingActivity')}</div>}>
-            <ActivityPanel userId={params.id} />
+            <ActivityPanel userId={id} />
           </Suspense>
         </TabsContent>
 
