@@ -151,7 +151,7 @@ export default async function UserDetailPage({ params }: Props) {
               <JobTagsPanel
                 key={location.id}
                 userId={id}
-                locationId={rolesByLocation.find(r => r.location_name === location.name)?.location_id || ''}
+                locationId={rolesByLocation.find(r => r.location_name === location.name)?.location_id ?? null}
                 locationName={location.name}
               />
             ))}

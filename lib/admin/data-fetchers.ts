@@ -30,6 +30,51 @@ export interface JobTag {
   is_active: boolean
 }
 
+export interface UserJobTagAssignment extends JobTag {
+  assignmentId: string
+  location_id: string | null
+  is_primary?: boolean | null
+  note?: string | null
+}
+
+interface RawJobTagAssignment {
+  id: string
+  job_tag_id: string | null
+  location_id: string | null
+  is_primary: boolean | null
+  note: string | null
+  job_tag?: {
+    id: string
+    key: string
+    label_it: string
+    color?: string | null
+    categoria?: string | null
+    is_active: boolean | null
+  } | null
+}
+
+function normalizeJobTagAssignment(raw: RawJobTagAssignment): UserJobTagAssignment | null {
+  const tag = raw.job_tag
+  const jobTagId = raw.job_tag_id ?? tag?.id
+
+  if (!tag || !jobTagId) {
+    return null
+  }
+
+  return {
+    assignmentId: raw.id,
+    id: jobTagId,
+    key: tag.key ?? jobTagId,
+    label_it: tag.label_it ?? jobTagId,
+    color: tag.color ?? null,
+    categoria: tag.categoria ?? null,
+    is_active: (tag.is_active ?? true) as boolean,
+    location_id: raw.location_id,
+    is_primary: raw.is_primary,
+    note: raw.note,
+  }
+}
+
 /**
  * Fetch available roles for role assignment
  */
@@ -118,12 +163,13 @@ export async function fetchAvailableJobTags(): Promise<JobTag[]> {
 /**
  * Fetch user job tags for a specific user and location
  */
-export async function fetchUserJobTags(userId: string, locationId?: string): Promise<JobTag[]> {
+export async function fetchUserJobTags(userId: string, locationId?: string | null): Promise<UserJobTagAssignment[]> {
   try {
-    const params = new URLSearchParams({ userId })
-    if (locationId) params.append('locationId', locationId)
-    
-    const response = await fetch(`/api/v1/admin/user-job-tags?${params}`, {
+    const params = new URLSearchParams({ user_id: userId })
+    if (locationId) params.append('location_id', locationId)
+
+    const query = params.toString()
+    const response = await fetch(`/api/v1/admin/user-job-tags${query ? `?${query}` : ''}`, {
       method: 'GET',
     })
 
@@ -132,7 +178,11 @@ export async function fetchUserJobTags(userId: string, locationId?: string): Pro
     }
 
     const data = await response.json()
-    return data.jobTags || []
+    const assignments: RawJobTagAssignment[] = data.assignments || []
+
+    return assignments
+      .map(normalizeJobTagAssignment)
+      .filter((assignment): assignment is UserJobTagAssignment => assignment !== null)
   } catch (error) {
     console.error('Error fetching user job tags:', error)
     return []
@@ -142,19 +192,38 @@ export async function fetchUserJobTags(userId: string, locationId?: string): Pro
 /**
  * Assign job tag to user for a specific location
  */
-export async function assignJobTagToUser(userId: string, tagId: string, locationId: string): Promise<void> {
+export async function assignJobTagToUser(
+  userId: string,
+  tagId: string,
+  locationId: string | null
+): Promise<UserJobTagAssignment> {
   try {
     const response = await fetch('/api/v1/admin/user-job-tags', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, tagId, locationId }),
+      body: JSON.stringify({
+        user_id: userId,
+        job_tag_id: tagId,
+        location_id: locationId,
+      }),
     })
 
     if (!response.ok) {
-      throw new Error('Failed to assign job tag')
+      const errorBody = await response.json().catch(() => null)
+      const message = errorBody?.error || 'Failed to assign job tag'
+      throw new Error(message)
     }
+
+    const data = await response.json()
+    const assignment = normalizeJobTagAssignment(data.assignment)
+
+    if (!assignment) {
+      throw new Error('Invalid assignment payload returned by server')
+    }
+
+    return assignment
   } catch (error) {
     console.error('Error assigning job tag:', error)
     throw error
@@ -164,18 +233,16 @@ export async function assignJobTagToUser(userId: string, tagId: string, location
 /**
  * Remove job tag from user for a specific location
  */
-export async function removeJobTagFromUser(userId: string, tagId: string, locationId: string): Promise<void> {
+export async function removeJobTagFromUser(assignmentId: string): Promise<void> {
   try {
-    const response = await fetch('/api/v1/admin/user-job-tags', {
+    const response = await fetch(`/api/v1/admin/user-job-tags/${assignmentId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, tagId, locationId }),
     })
 
     if (!response.ok) {
-      throw new Error('Failed to remove job tag')
+      const errorBody = await response.json().catch(() => null)
+      const message = errorBody?.error || 'Failed to remove job tag'
+      throw new Error(message)
     }
   } catch (error) {
     console.error('Error removing job tag:', error)
