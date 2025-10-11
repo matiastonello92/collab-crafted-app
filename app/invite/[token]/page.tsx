@@ -8,11 +8,11 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
 export default async function InviteTokenPage({ params }: Props) {
-  const { token } = params
+  const { token } = await params
   const t = await getTranslation();
 
   // SSR validation

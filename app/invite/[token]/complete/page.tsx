@@ -10,11 +10,11 @@ import { redirect } from 'next/navigation'
 import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
 export default async function CompleteProfilePage({ params }: Props) {
-  const { token } = params
+  const { token } = await params
   const t = await getTranslation()
 
   // Check if user is authenticated
