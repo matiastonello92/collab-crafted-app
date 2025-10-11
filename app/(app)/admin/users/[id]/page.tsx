@@ -138,7 +138,6 @@ export default async function UserDetailPage({ params }: Props) {
             <RolesByLocationPanel 
               roles={rolesByLocation} 
               userId={params.id}
-              onUpdate={() => window.location.reload()} 
             />
           </Suspense>
         </TabsContent>
