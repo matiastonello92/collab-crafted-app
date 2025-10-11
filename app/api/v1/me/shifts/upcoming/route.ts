@@ -22,8 +22,14 @@ export async function GET(request: Request) {
           id,
           name
         ),
+        job_tag:job_tags (
+          id,
+          key,
+          label_it
+        ),
         assignments:shift_assignments!inner (
-          role_name
+          id,
+          status
         )
       `)
       .eq('assignments.user_id', user.id)
@@ -42,7 +48,7 @@ export async function GET(request: Request) {
       end_at: shift.end_at,
       location_name: (shift.location as any)?.name,
       location_id: (shift.location as any)?.id,
-      role_name: shift.assignments?.[0]?.role_name,
+      role_name: (shift.job_tag as any)?.label_it,
     })) || [];
 
     return NextResponse.json({ shifts: formattedShifts });
