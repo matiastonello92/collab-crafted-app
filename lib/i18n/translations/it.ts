@@ -1,12 +1,4 @@
 export const it = {
-  // Error Boundary
-  errorBoundary: {
-    title: 'Si è verificato un errore',
-    description: 'Ci scusiamo per l\'inconveniente. Prova a ricaricare la pagina.',
-    technicalDetails: 'Dettagli Tecnici',
-    reloadButton: 'Ricarica Pagina',
-  },
-
   // Common
   common: {
     viewAll: 'Vedi tutto',
