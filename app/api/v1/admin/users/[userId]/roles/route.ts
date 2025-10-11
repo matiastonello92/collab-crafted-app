@@ -17,8 +17,9 @@ interface RevokeRoleRequest {
 
 export async function POST(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
+  const { userId } = await params
   try {
     console.log('🔍 [API DEBUG] POST /api/v1/admin/users/[userId]/roles called')
     
@@ -31,8 +32,6 @@ export async function POST(
     }
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
-
-    const { userId } = params
     const body: AssignRoleRequest = await req.json()
 
     if (!body.role_id) {
@@ -142,8 +141,9 @@ export async function POST(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
+  const { userId } = await params
   try {
     console.log('🔍 [API DEBUG] DELETE /api/v1/admin/users/[userId]/roles called')
     
@@ -156,8 +156,6 @@ export async function DELETE(
     }
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
-
-    const { userId } = params
     const body: RevokeRoleRequest = await req.json()
 
     if (!body.role_id) {

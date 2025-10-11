@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
+  const { userId: targetUserId } = await params
   try {
     console.log('🔍 [API DEBUG] DELETE /api/v1/admin/users/[userId] called')
     
@@ -19,8 +20,6 @@ export async function DELETE(
     }
 
     console.log('✅ [API DEBUG] User authenticated:', user.id)
-
-    const { userId: targetUserId } = params
 
     // Use admin client only for auth.admin operations
     const supabaseAdmin = createSupabaseAdminClient()

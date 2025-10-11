@@ -7,9 +7,10 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export async function GET(request: Request, { params }: { params: { userId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    console.log('🔍 [API DEBUG] GET /api/v1/admin/users/[userId]/permissions called', { userId: params.userId })
+    const { userId } = await params
+    console.log('🔍 [API DEBUG] GET /api/v1/admin/users/[userId]/permissions called', { userId })
     
     const supabase = await createSupabaseServerClient()
     const { data: { user }, error: authErr } = await supabase.auth.getUser()
@@ -35,7 +36,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
     const currentOrgId = currentMembership.org_id
     console.log('✅ [API DEBUG] Current user org_id:', currentOrgId)
 
-    const targetUserId = params.userId
+    const targetUserId = userId
 
     // Verify target user belongs to same org (RLS will enforce this)
     const { data: targetProfile } = await supabase
