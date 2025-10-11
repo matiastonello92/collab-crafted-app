@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Info, Construction } from 'lucide-react'
 import { toast } from 'sonner'
-import { useSupabase } from '@/hooks/useSupabase'
+import { updateUserSchedulable } from '../actions'
 
 interface ContractsSchedulingPanelProps {
   userId: string
@@ -17,31 +17,30 @@ interface ContractsSchedulingPanelProps {
 }
 
 export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedulable, userFullName }: ContractsSchedulingPanelProps) {
-  const supabase = useSupabase()
   const [isSchedulable, setIsSchedulable] = useState(initialSchedulable)
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleSchedulableToggle = async (checked: boolean) => {
     setIsUpdating(true)
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_schedulable: checked })
-        .eq('id', userId)
 
-      if (error) throw error
+    try {
+      const result = await updateUserSchedulable({ userId, isSchedulable: checked })
+
+      if (!result.success) {
+        toast.error(result.message ?? "Errore durante l'aggiornamento dello stato pianificabile")
+        return
+      }
 
       setIsSchedulable(checked)
-      
+
       toast.success(
-        checked 
+        checked
           ? `${userFullName} è ora pianificabile nei turni`
           : `${userFullName} non è più pianificabile nei turni`
       )
     } catch (error) {
       console.error('Error updating schedulable status:', error)
-      toast.error('Errore durante l\'aggiornamento dello stato pianificabile')
+      toast.error("Errore durante l'aggiornamento dello stato pianificabile")
     } finally {
       setIsUpdating(false)
     }
