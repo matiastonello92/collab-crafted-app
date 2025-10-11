@@ -1,4 +1,12 @@
 export const en = {
+  // Error Boundary
+  errorBoundary: {
+    title: 'An Error Occurred',
+    description: 'We apologize for the inconvenience. Please try reloading the page.',
+    technicalDetails: 'Technical Details',
+    reloadButton: 'Reload Page',
+  },
+
   // Common
   common: {
     viewAll: 'View all',

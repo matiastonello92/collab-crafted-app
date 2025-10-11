@@ -1,4 +1,12 @@
 export const it = {
+  // Error Boundary
+  errorBoundary: {
+    title: 'Si è verificato un errore',
+    description: 'Ci scusiamo per l\'inconveniente. Prova a ricaricare la pagina.',
+    technicalDetails: 'Dettagli Tecnici',
+    reloadButton: 'Ricarica Pagina',
+  },
+
   // Common
   common: {
     viewAll: 'Vedi tutto',
@@ -930,7 +938,6 @@ export const it = {
     tabSecurity: 'Sicurezza',
   },
   
-  // QA & Debug
   // QA & Debug
   qa: {
     whoami: {
@@ -2987,7 +2994,7 @@ export const it = {
       errorUpdating: 'Errore nell\'aggiornamento del turno',
       errorDeleting: 'Errore nell\'eliminazione del turno',
       errorAssigning: 'Errore nell\'assegnazione',
-      errorPublishing: 'Errore nella pubblicazione',
+      errorPublishing: 'Errore durante la pubblicazione',
       errorLoading: 'Errore nel caricamento dei turni',
   },
 
