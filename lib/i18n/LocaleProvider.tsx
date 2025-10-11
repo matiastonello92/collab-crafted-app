@@ -22,19 +22,23 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
 
   // Sync with localStorage after mount (client-side only)
   useEffect(() => {
+    setIsMounted(true);
+    
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('klyra-locale') as Locale;
-      if (stored && (stored === 'it' || stored === 'en') && stored !== locale) {
+      if (stored && (stored === 'it' || stored === 'en')) {
         setLocaleState(stored);
+        setCurrentLocale(stored);
       }
     }
-    setIsMounted(true);
   }, []);
 
-  // Sync global locale when locale changes
+  // Sync global locale when locale changes (only after mount)
   useEffect(() => {
-    setCurrentLocale(locale);
-  }, [locale]);
+    if (isMounted) {
+      setCurrentLocale(locale);
+    }
+  }, [locale, isMounted]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
