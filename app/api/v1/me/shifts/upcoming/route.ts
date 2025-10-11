@@ -13,22 +13,22 @@ export async function GET(request: Request) {
     }
 
     const { data: shifts, error } = await supabase
-      .from('shift_assignments')
+      .from('shifts')
       .select(`
-        *,
-        shift:shifts (
+        id,
+        start_at,
+        end_at,
+        location:locations (
           id,
-          start_at,
-          end_at,
-          location:locations (
-            id,
-            name
-          )
+          name
+        ),
+        assignments:shift_assignments!inner (
+          role_name
         )
       `)
-      .eq('user_id', user.id)
-      .gte('shift.start_at', new Date().toISOString())
-      .order('shift.start_at', { ascending: true })
+      .eq('assignments.user_id', user.id)
+      .gte('start_at', new Date().toISOString())
+      .order('start_at', { ascending: true })
       .limit(limit);
 
     if (error) {
@@ -36,13 +36,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const formattedShifts = shifts?.map(assignment => ({
-      id: assignment.shift.id,
-      start_at: assignment.shift.start_at,
-      end_at: assignment.shift.end_at,
-      location_name: assignment.shift.location?.name,
-      location_id: assignment.shift.location?.id,
-      role_name: assignment.role_name,
+    const formattedShifts = shifts?.map(shift => ({
+      id: shift.id,
+      start_at: shift.start_at,
+      end_at: shift.end_at,
+      location_name: (shift.location as any)?.name,
+      location_id: (shift.location as any)?.id,
+      role_name: shift.assignments?.[0]?.role_name,
     })) || [];
 
     return NextResponse.json({ shifts: formattedShifts });
