@@ -18,7 +18,7 @@ import { ContractsSchedulingPanel } from './components/ContractsSchedulingPanel'
 import { getUserById, getUserRolesByLocation, getUserPermissionOverrides } from '@/lib/data/admin'
 import { requireOrgAdmin } from '@/lib/admin/guards'
 import { UserDetailSkeleton } from '@/components/ui/loading-skeleton'
-import { t } from '@/lib/i18n'
+import { getTranslation } from '@/lib/i18n/server'
 
 interface Props {
   params: {
@@ -29,6 +29,9 @@ interface Props {
 export default async function UserDetailPage({ params }: Props) {
   // Guard: require admin permissions
   await requireOrgAdmin()
+  
+  // Get server-safe translation function with locale from cookies
+  const t = await getTranslation()
   
   const user = await getUserById(params.id)
   
@@ -163,7 +166,7 @@ export default async function UserDetailPage({ params }: Props) {
         <TabsContent value="contracts" className="mt-6">
           <ContractsSchedulingPanel 
             userId={user.id}
-            isSchedulable={user.is_schedulable || false}
+            isSchedulable={user.is_schedulable ?? false}
             userFullName={getFullName()}
           />
         </TabsContent>
