@@ -50,14 +50,21 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           
-          // Wait for video to be ready before hiding loader
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().then(() => {
+          // Wait for video to have enough data before playing
+          videoRef.current.oncanplay = () => {
+            if (!videoRef.current) return
+            
+            videoRef.current.play().then(() => {
               setIsLoading(false)
             }).catch((err) => {
               console.error('Error playing video:', err)
               setIsLoading(false)
             })
+            
+            // Clean up after first use
+            if (videoRef.current) {
+              videoRef.current.oncanplay = null
+            }
           }
         } else {
           setIsLoading(false)
@@ -85,7 +92,8 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
         streamRef.current = null
       }
       if (videoRef.current) {
-        videoRef.current.onloadedmetadata = null
+        videoRef.current.oncanplay = null
+        videoRef.current.pause()
       }
     }
   }, [open, t])
@@ -154,13 +162,12 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
           {/* Webcam Preview */}
           {!error && (
             <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full h-full object-cover ${hasPhoto ? 'hidden' : ''}`}
-              />
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              className={`w-full h-full object-cover ${hasPhoto ? 'hidden' : ''}`}
+            />
               <canvas
                 ref={canvasRef}
                 className={`w-full h-full object-cover ${!hasPhoto ? 'hidden' : ''}`}
