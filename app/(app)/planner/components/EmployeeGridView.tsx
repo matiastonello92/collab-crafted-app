@@ -728,7 +728,7 @@ function DroppableCell({
       {/* Zona sinistra - DUPLICA */}
       <div 
         ref={leftZone.setNodeRef}
-        className={`absolute left-0 top-0 bottom-0 w-1/2 z-30 transition-all duration-200 ${
+        className={`absolute left-0 top-0 bottom-0 w-1/2 z-30 pointer-events-none transition-all duration-200 ${
           leftZone.isOver 
             ? 'bg-blue-500/40 backdrop-blur-sm border-r-2 border-blue-500' 
             : ''
@@ -745,7 +745,7 @@ function DroppableCell({
       {/* Zona destra - SPOSTA */}
       <div 
         ref={rightZone.setNodeRef}
-        className={`absolute right-0 top-0 bottom-0 w-1/2 z-30 transition-all duration-200 ${
+        className={`absolute right-0 top-0 bottom-0 w-1/2 z-30 pointer-events-none transition-all duration-200 ${
           rightZone.isOver 
             ? 'bg-green-500/40 backdrop-blur-sm border-l-2 border-green-500' 
             : ''
