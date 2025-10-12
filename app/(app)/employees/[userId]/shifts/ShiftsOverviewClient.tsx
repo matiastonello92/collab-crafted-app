@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslation } from '@/lib/i18n'
-import { format } from 'date-fns'
+import { format, startOfWeek } from 'date-fns'
 import { useState } from 'react'
 
 // Phase 1 Components
@@ -18,9 +18,13 @@ import { useEmployeeMonthlyStats } from './hooks/useEmployeeMonthlyStats'
 
 // Phase 2 Components
 import { ShiftsCalendar } from './components/ShiftsCalendar'
+import { DayDetailModal } from './components/DayDetailModal'
+import { WeeklyBreakdownTable } from './components/WeeklyBreakdownTable'
 
 // Phase 3 Components
 import { HoursChart } from './components/HoursChart'
+import { ShiftDistributionChart } from './components/ShiftDistributionChart'
+import { TrendAnalysisCard } from './components/TrendAnalysisCard'
 
 interface ShiftsOverviewClientProps {
   employee: {
@@ -38,20 +42,15 @@ export function ShiftsOverviewClient({ employee, currentUserId }: ShiftsOverview
   const isOwnProfile = employee.id === currentUserId
   
   const [currentMonth] = useState(format(new Date(), 'yyyy-MM'))
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+  const currentMonthDate = new Date()
+  const weekStart = startOfWeek(currentMonthDate, { weekStartsOn: 1 })
 
   // Fetch monthly stats (Phase 1)
   const { monthlyStats, upcomingShifts, complianceAlerts, loading } = useEmployeeMonthlyStats(
     employee.id,
     currentMonth
   )
-
-  // Mock data for Phase 3 - Hours Chart
-  const mockWeeklyData = [
-    { week: 'Sett 1', planned: 40, actual: 38 },
-    { week: 'Sett 2', planned: 40, actual: 42 },
-    { week: 'Sett 3', planned: 35, actual: 35 },
-    { week: 'Sett 4', planned: 40, actual: 41 },
-  ]
 
   return (
     <div className="container max-w-7xl py-8 space-y-6">
@@ -113,28 +112,38 @@ export function ShiftsOverviewClient({ employee, currentUserId }: ShiftsOverview
         <TabsContent value="calendar" className="space-y-6">
           <ShiftsCalendar 
             userId={employee.id}
-            onDayClick={(date) => {
-              console.log('Day clicked:', date)
-              // TODO: Open day detail modal
-            }}
+            onDayClick={setSelectedDay}
+          />
+          
+          <WeeklyBreakdownTable 
+            userId={employee.id}
+            weekStart={weekStart}
           />
         </TabsContent>
 
         {/* PHASE 3: Analytics */}
         <TabsContent value="analytics" className="space-y-6">
-          <HoursChart data={mockWeeklyData} />
+          <TrendAnalysisCard 
+            userId={employee.id}
+            month={currentMonthDate}
+          />
           
-          {/* Placeholder for future analytics */}
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="h-64 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
-              Shift Distribution (Coming Soon)
-            </div>
-            <div className="h-64 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
-              Trend Analysis (Coming Soon)
-            </div>
+            <ShiftDistributionChart 
+              userId={employee.id}
+              month={currentMonthDate}
+            />
+            <ComplianceAlertsPanel alerts={complianceAlerts} loading={loading} />
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Day Detail Modal */}
+      <DayDetailModal 
+        userId={employee.id}
+        date={selectedDay}
+        onClose={() => setSelectedDay(null)}
+      />
     </div>
   )
 }
