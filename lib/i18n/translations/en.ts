@@ -1836,6 +1836,15 @@ export const en = {
     orderUpdated: 'Widget order updated',
     dashboardCustomization: 'Dashboard Customization',
     dashboardCustomizationDesc: 'Show, hide, or reorder widgets on your dashboard',
+  },
+
+  // Profile (User Settings)
+  profile: {
+    title: 'My Profile',
+    manageProfile: 'Manage your profile and preferences',
+    saveChanges: 'Save changes',
+    saving: 'Saving...',
+    backToDashboard: 'Back to Dashboard',
     
     // Organization setup
     setupOrg: 'Setup your organization',
@@ -1847,12 +1856,16 @@ export const en = {
     profile: 'Profile',
     preferences: 'Preferences',
     notifications: 'Notifications',
+    rolesAccess: 'Roles & Access',
+    contractsPlanning: 'Contracts & Planning',
     
     // Profile
     profileInfo: 'Profile Information',
     updatePersonalInfo: 'Update your personal information',
-    fullName: 'Full name',
-    fullNamePlaceholder: 'John Doe',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    firstNamePlaceholder: 'John',
+    lastNamePlaceholder: 'Doe',
     phone: 'Phone',
     phonePlaceholder: '+1 234 567 890',
     email: 'Email',
@@ -1899,6 +1912,32 @@ export const en = {
     // Success/error
     profileUpdated: 'Profile updated successfully!',
     saveError: 'Error saving',
+  },
+
+  // Contracts
+  contracts: {
+    fullTime: 'Full Time',
+    partTime: 'Part Time',
+    seasonal: 'Seasonal',
+    temporary: 'Temporary',
+    internship: 'Internship',
+    active: 'Active',
+    inactive: 'Inactive',
+    notSchedulable: 'Not Schedulable',
+    notSchedulableDescription: 'Your account is not configured to be schedulable for shifts.',
+    noContracts: 'No Contracts',
+    noContractsDescription: 'You have no active contracts at the moment. Contact your manager if you think this is an error.',
+    readOnlyTitle: 'Read-Only View',
+    readOnlyDescription: 'You can view your contract details, but only managers and administrators can modify them.',
+    validFrom: 'Valid from',
+    to: 'to',
+    weeklyHours: 'Weekly Hours',
+    dailyHours: 'Daily Hours',
+    schedulingConstraints: 'Scheduling Constraints',
+    minRestHours: 'Minimum Rest',
+    maxConsecutiveDays: 'Max Consecutive Days',
+    maxWeeklyHours: 'Max Weekly Hours',
+    notes: 'Notes',
   },
 
   // Languages

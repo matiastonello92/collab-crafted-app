@@ -3971,15 +3971,26 @@ export type Database = {
         Returns: Json
       }
       profile_update_self: {
-        Args: {
-          p_avatar_url?: string
-          p_full_name?: string
-          p_locale?: string
-          p_marketing_opt_in?: boolean
-          p_notif_prefs?: Json
-          p_phone?: string
-          p_timezone?: string
-        }
+        Args:
+          | {
+              p_avatar_url?: string
+              p_first_name?: string
+              p_last_name?: string
+              p_locale?: string
+              p_marketing_opt_in?: boolean
+              p_notif_prefs?: Json
+              p_phone?: string
+              p_timezone?: string
+            }
+          | {
+              p_avatar_url?: string
+              p_full_name?: string
+              p_locale?: string
+              p_marketing_opt_in?: boolean
+              p_notif_prefs?: Json
+              p_phone?: string
+              p_timezone?: string
+            }
         Returns: {
           avatar_url: string | null
           created_at: string | null

@@ -1900,6 +1900,15 @@ export const it = {
     orderUpdated: 'Ordine widget aggiornato',
     dashboardCustomization: 'Personalizzazione Dashboard',
     dashboardCustomizationDesc: 'Mostra, nascondi o riordina i widget nella tua dashboard',
+  },
+
+  // Profile (User Settings)
+  profile: {
+    title: 'Il Mio Profilo',
+    manageProfile: 'Gestisci il tuo profilo e le tue preferenze',
+    saveChanges: 'Salva modifiche',
+    saving: 'Salvataggio...',
+    backToDashboard: 'Torna alla Dashboard',
     
     // Organization setup
     setupOrg: 'Configura la tua organizzazione',
@@ -1911,12 +1920,16 @@ export const it = {
     profile: 'Profilo',
     preferences: 'Preferenze',
     notifications: 'Notifiche',
+    rolesAccess: 'Ruoli e Accessi',
+    contractsPlanning: 'Contratti e Pianificazione',
     
     // Profile
     profileInfo: 'Informazioni Profilo',
     updatePersonalInfo: 'Aggiorna le tue informazioni personali',
-    fullName: 'Nome completo',
-    fullNamePlaceholder: 'Mario Rossi',
+    firstName: 'Nome',
+    lastName: 'Cognome',
+    firstNamePlaceholder: 'Mario',
+    lastNamePlaceholder: 'Rossi',
     phone: 'Telefono',
     phonePlaceholder: '+39 123 456 7890',
     email: 'Email',
@@ -1963,6 +1976,32 @@ export const it = {
     // Success/error
     profileUpdated: 'Profilo aggiornato con successo!',
     saveError: 'Errore nel salvataggio',
+  },
+
+  // Contracts
+  contracts: {
+    fullTime: 'Tempo Pieno',
+    partTime: 'Part-Time',
+    seasonal: 'Stagionale',
+    temporary: 'Temporaneo',
+    internship: 'Stage',
+    active: 'Attivo',
+    inactive: 'Inattivo',
+    notSchedulable: 'Non Pianificabile',
+    notSchedulableDescription: 'Il tuo account non è configurato per essere pianificabile nei turni.',
+    noContracts: 'Nessun Contratto',
+    noContractsDescription: 'Non hai contratti attivi al momento. Contatta il tuo manager se pensi che sia un errore.',
+    readOnlyTitle: 'Visualizzazione Sola Lettura',
+    readOnlyDescription: 'Puoi visualizzare i dettagli del tuo contratto, ma solo i manager e amministratori possono modificarli.',
+    validFrom: 'Valido dal',
+    to: 'al',
+    weeklyHours: 'Ore Settimanali',
+    dailyHours: 'Ore Giornaliere',
+    schedulingConstraints: 'Vincoli di Pianificazione',
+    minRestHours: 'Riposo Minimo',
+    maxConsecutiveDays: 'Giorni Consecutivi Max',
+    maxWeeklyHours: 'Ore Settimanali Max',
+    notes: 'Note',
   },
 
   // Languages
