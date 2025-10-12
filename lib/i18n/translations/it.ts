@@ -57,6 +57,15 @@ export const it = {
     messages: {
       errorSaving: 'Errore durante il salvataggio',
       savedSuccessfully: 'Salvato con successo',
+    },
+    placeholders: {
+      email: 'utente@example.com',
+      firstName: 'Mario',
+      lastName: 'Rossi',
+      selectGlobalRole: 'Seleziona ruolo globale (opzionale)',
+      noGlobalRole: 'Nessun ruolo globale',
+      selectLocation: 'Seleziona location',
+      selectRole: 'Seleziona ruolo',
     }
   },
   
@@ -357,6 +366,17 @@ export const it = {
       description: 'Impossibile determinare il contesto della tua organizzazione. L\'accesso amministratore richiede un\'organizzazione valida.',
       reason: 'Questo può accadere se non appartieni a nessuna organizzazione o se c\'è un problema di configurazione.',
       backToHome: 'Torna alla Home',
+    },
+    
+    // Invitations Page
+    invitationsPage: {
+      usersLink: 'Utenti',
+      title: 'Gestione Inviti',
+      description: 'Crea e gestisci inviti multi-location con permessi personalizzati',
+      createTitle: 'Crea Nuovo Invito',
+      createDescription: 'Invita un utente con ruoli e permessi specifici per le location',
+      listTitle: 'Inviti Attivi',
+      listDescription: 'Lista degli inviti inviati e il loro stato',
     },
     userManagement: 'Gestione Utenti',
     userManagementDesc: 'Gestisci utenti, ruoli e permessi',

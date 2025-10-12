@@ -57,6 +57,15 @@ export const en = {
     messages: {
       errorSaving: 'Error saving',
       savedSuccessfully: 'Saved successfully',
+    },
+    placeholders: {
+      email: 'user@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      selectGlobalRole: 'Select global role (optional)',
+      noGlobalRole: 'No global role',
+      selectLocation: 'Select location',
+      selectRole: 'Select role',
     }
   },
   

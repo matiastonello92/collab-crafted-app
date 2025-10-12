@@ -19,9 +19,9 @@ import { PermissionGrid } from './PermissionGrid'
 import { useTranslation } from '@/lib/i18n'
 
 const inviteSchema = z.object({
-  email: z.string().email('Email non valida'),
-  firstName: z.string().min(1, 'Nome richiesto'),
-  lastName: z.string().min(1, 'Cognome richiesto'),
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   notes: z.string().optional(),
 })
 
@@ -54,6 +54,7 @@ export function InviteUserForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
   } = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
   })
@@ -101,6 +102,20 @@ export function InviteUserForm() {
   }
 
   const onSubmit = async (data: InviteForm) => {
+    // Validate with translation
+    if (!z.string().email().safeParse(data.email).success) {
+      setError('email', { message: t('userManagement.inviteForm.emailInvalid') })
+      return
+    }
+    if (!data.firstName.trim()) {
+      setError('firstName', { message: t('userManagement.inviteForm.firstNameRequired') })
+      return
+    }
+    if (!data.lastName.trim()) {
+      setError('lastName', { message: t('userManagement.inviteForm.lastNameRequired') })
+      return
+    }
+
     try {
       const payload = {
         email: data.email,
@@ -123,7 +138,7 @@ export function InviteUserForm() {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Errore durante l\'invito')
+        throw new Error(error.message || t('userManagement.inviteForm.error'))
       }
 
       const result = await response.json()
@@ -143,11 +158,11 @@ export function InviteUserForm() {
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">{t('userManagement.inviteForm.email')} *</Label>
           <Input
             id="email"
             type="email"
-            placeholder={t('common.placeholders.email')}
+            placeholder={t('userManagement.inviteForm.emailPlaceholder')}
             {...register('email')}
           />
           {errors.email && (
@@ -156,10 +171,10 @@ export function InviteUserForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="firstName">Nome *</Label>
+          <Label htmlFor="firstName">{t('userManagement.inviteForm.firstName')} *</Label>
           <Input
             id="firstName"
-            placeholder={t('common.placeholders.firstName')}
+            placeholder={t('userManagement.inviteForm.firstNamePlaceholder')}
             {...register('firstName')}
           />
           {errors.firstName && (
@@ -168,10 +183,10 @@ export function InviteUserForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="lastName">Cognome *</Label>
+          <Label htmlFor="lastName">{t('userManagement.inviteForm.lastName')} *</Label>
           <Input
             id="lastName"
-            placeholder={t('common.placeholders.lastName')}
+            placeholder={t('userManagement.inviteForm.lastNamePlaceholder')}
             {...register('lastName')}
           />
           {errors.lastName && (
@@ -182,13 +197,13 @@ export function InviteUserForm() {
 
       {/* Global Role */}
       <div className="space-y-2">
-        <Label>Ruolo Globale (opzionale)</Label>
+        <Label>{t('userManagement.inviteForm.globalRole')}</Label>
         <Select value={globalRoleId} onValueChange={setGlobalRoleId}>
           <SelectTrigger>
-            <SelectValue placeholder={t('common.placeholders.selectGlobalRole')} />
+            <SelectValue placeholder={t('userManagement.inviteForm.selectGlobalRole')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">{t('common.placeholders.noGlobalRole')}</SelectItem>
+            <SelectItem value="">{t('userManagement.inviteForm.noGlobalRole')}</SelectItem>
             {roles.map(role => (
               <SelectItem key={role.id} value={role.id}>
                 {role.display_name}
@@ -200,12 +215,12 @@ export function InviteUserForm() {
 
       {/* Location Roles */}
       <div className="space-y-4">
-        <Label>Ruoli per Location</Label>
+        <Label>{t('userManagement.inviteForm.locationRoles')}</Label>
         
         <div className="flex gap-2">
           <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder={t('common.placeholders.selectLocation')} />
+              <SelectValue placeholder={t('userManagement.inviteForm.selectLocation')} />
             </SelectTrigger>
             <SelectContent>
               {locations.map(location => (
@@ -218,7 +233,7 @@ export function InviteUserForm() {
 
           <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder={t('common.placeholders.selectRole')} />
+              <SelectValue placeholder={t('userManagement.inviteForm.selectRole')} />
             </SelectTrigger>
             <SelectContent>
               {roles.map(role => (
@@ -242,7 +257,7 @@ export function InviteUserForm() {
 
         {locationRoles.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Ruoli assegnati:</p>
+            <p className="text-sm text-muted-foreground">{t('userManagement.inviteForm.assignedRoles')}</p>
             <div className="flex flex-wrap gap-2">
               {locationRoles.map((lr, index) => (
                 <Badge key={index} variant="secondary" className="pr-1">
