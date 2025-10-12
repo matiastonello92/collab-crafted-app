@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, User, Settings, Bell, Save, Mail, Loader2 } from 'lucide-react'
+import { ArrowLeft, User, Settings, Bell, Save, Mail, Loader2, Shield, MapPin, Building } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,11 +12,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import ClientOnly from '@/components/ClientOnly'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { AvatarUploader } from '@/components/AvatarUploader'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useTranslation } from '@/lib/i18n'
+
+interface UserRole {
+  role_name: string
+  role_display_name: string
+  location_name?: string
+  location_id?: string
+  assigned_at: string
+}
 
 interface UserSettingsClientProps {
   user: any
@@ -25,9 +35,11 @@ interface UserSettingsClientProps {
   orgId: string | null
   avatarUrl: string | null
   canBranding: boolean
+  roles: UserRole[]
+  locations: Array<{ id: string; name: string }>
 }
 
-export function UserSettingsClient({ user, profile: initialProfile, userId, orgId, avatarUrl, canBranding }: UserSettingsClientProps) {
+export function UserSettingsClient({ user, profile: initialProfile, userId, orgId, avatarUrl, canBranding, roles, locations }: UserSettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile || {})
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
@@ -171,7 +183,7 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
       {/* Settings Tabs */}
       <div className="space-y-6">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               {t('settings.profile')}
@@ -183,6 +195,10 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
               {t('settings.notifications')}
+            </TabsTrigger>
+            <TabsTrigger value="roles" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              {t('settings.rolesAccess')}
             </TabsTrigger>
           </TabsList>
 
@@ -452,6 +468,97 @@ export function UserSettingsClient({ user, profile: initialProfile, userId, orgI
                     {t('settings.advancedConfigDescription')}
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* NEW TAB: Roles & Access */}
+          <TabsContent value="roles" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  {t('me.rolesAssigned')}
+                </CardTitle>
+                <CardDescription>
+                  {t('me.rolesAssignedDesc')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {roles.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      {t('common.messages.noRolesAtMoment')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {roles.map((role, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 rounded-lg border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{role.role_display_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {role.location_name ? `${t('me.locationLabel')}: ${role.location_name}` : t('me.global')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="secondary">{t('common.active')}</Badge>
+                          <ClientOnly fallback={<p className="text-xs text-muted-foreground mt-1">{t('me.since')} {role.assigned_at}</p>}>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {t('me.since')} {new Date(role.assigned_at).toLocaleDateString('it-IT')}
+                            </p>
+                          </ClientOnly>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  {t('me.locationsAssigned')}
+                </CardTitle>
+                <CardDescription>
+                  {t('me.locationsAssignedDesc')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {locations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      {t('common.messages.noLocationsAssigned')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {locations.map((location) => (
+                      <div
+                        key={location.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border"
+                      >
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{location.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {roles.filter(r => r.location_id === location.id).length} {roles.filter(r => r.location_id === location.id).length === 1 ? t('me.rolesCount') : t('me.rolesCountPlural')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
