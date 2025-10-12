@@ -2245,6 +2245,41 @@ export const en = {
         monthlyStats: 'Monthly Statistics',
         calendar: 'Shifts Calendar',
       },
+      monthlyStats: {
+        title: 'Monthly Overview',
+        planned: 'Planned Hours',
+        actual: 'Actual Hours',
+        variance: 'Variance',
+        overtime: 'Overtime',
+        shifts: 'Shifts',
+        leaveDays: 'Leave Days'
+      },
+      upcomingShifts: {
+        title: 'Upcoming Shifts (7 days)',
+        noShifts: 'No shifts scheduled in the next 7 days'
+      },
+      status: {
+        pending: 'Pending',
+        accepted: 'Accepted',
+        declined: 'Declined'
+      },
+      compliance: {
+        title: 'Compliance Alerts',
+        allGood: 'All Good!',
+        noViolations: 'No violations detected this month',
+        severity: {
+          warning: 'Warning',
+          critical: 'Critical'
+        }
+      },
+      calendar: {
+        today: 'Today'
+      },
+      analytics: {
+        hoursChart: 'Weekly Hours',
+        plannedHours: 'Planned',
+        actualHours: 'Actual'
+      }
     },
     duplicateSuccess: 'Shift duplicated successfully',
     moveSuccess: 'Shift moved successfully',

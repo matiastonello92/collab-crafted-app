@@ -1,12 +1,26 @@
 'use client'
 
-import { ArrowLeft, Clock, Calendar, Coffee, TrendingUp, BarChart3 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslation } from '@/lib/i18n'
+import { format } from 'date-fns'
+import { useState } from 'react'
+
+// Phase 1 Components
+import { MonthlyStatsCard } from './components/MonthlyStatsCard'
+import { UpcomingShiftsCard } from './components/UpcomingShiftsCard'
+import { ComplianceAlertsPanel } from './components/ComplianceAlertsPanel'
+import { useEmployeeMonthlyStats } from './hooks/useEmployeeMonthlyStats'
+
+// Phase 2 Components
+import { ShiftsCalendar } from './components/ShiftsCalendar'
+
+// Phase 3 Components
+import { HoursChart } from './components/HoursChart'
 
 interface ShiftsOverviewClientProps {
   employee: {
@@ -22,17 +36,25 @@ export function ShiftsOverviewClient({ employee, currentUserId }: ShiftsOverview
   const router = useRouter()
   const { t } = useTranslation()
   const isOwnProfile = employee.id === currentUserId
+  
+  const [currentMonth] = useState(format(new Date(), 'yyyy-MM'))
 
-  const upcomingFeatures = [
-    { icon: Clock, label: t('employees.shifts.comingSoon.features.monthlyRecap') },
-    { icon: Calendar, label: t('employees.shifts.comingSoon.features.scheduledHours') },
-    { icon: Coffee, label: t('employees.shifts.comingSoon.features.leaveTaken') },
-    { icon: TrendingUp, label: t('employees.shifts.comingSoon.features.overtime') },
-    { icon: BarChart3, label: t('employees.shifts.comingSoon.features.stats') },
+  // Fetch monthly stats (Phase 1)
+  const { monthlyStats, upcomingShifts, complianceAlerts, loading } = useEmployeeMonthlyStats(
+    employee.id,
+    currentMonth
+  )
+
+  // Mock data for Phase 3 - Hours Chart
+  const mockWeeklyData = [
+    { week: 'Sett 1', planned: 40, actual: 38 },
+    { week: 'Sett 2', planned: 40, actual: 42 },
+    { week: 'Sett 3', planned: 35, actual: 35 },
+    { week: 'Sett 4', planned: 40, actual: 41 },
   ]
 
   return (
-    <div className="container max-w-5xl py-8 space-y-6">
+    <div className="container max-w-7xl py-8 space-y-6">
       {/* Back button */}
       <Button
         variant="ghost"
@@ -66,71 +88,53 @@ export function ShiftsOverviewClient({ employee, currentUserId }: ShiftsOverview
         )}
       </div>
 
-      {/* Coming Soon Card */}
-      <Card className="border-2 border-dashed">
-        <CardHeader className="text-center pb-4">
-          <div className="flex justify-center mb-4">
-            <div className="relative">
-              <Calendar className="h-16 w-16 text-muted-foreground/40" />
-              <div className="absolute -top-1 -right-1">
-                <Badge variant="secondary" className="text-xs">
-                  🚧
-                </Badge>
-              </div>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Panoramica</TabsTrigger>
+          <TabsTrigger value="calendar">Calendario</TabsTrigger>
+          <TabsTrigger value="analytics">Analisi</TabsTrigger>
+        </TabsList>
+
+        {/* PHASE 1: Monthly Overview */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Monthly Stats */}
+          <MonthlyStatsCard stats={monthlyStats} loading={loading} />
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Upcoming Shifts */}
+            <UpcomingShiftsCard shifts={upcomingShifts} loading={loading} />
+
+            {/* Compliance Alerts */}
+            <ComplianceAlertsPanel alerts={complianceAlerts} loading={loading} />
+          </div>
+        </TabsContent>
+
+        {/* PHASE 2: Calendar & Timeline */}
+        <TabsContent value="calendar" className="space-y-6">
+          <ShiftsCalendar 
+            userId={employee.id}
+            onDayClick={(date) => {
+              console.log('Day clicked:', date)
+              // TODO: Open day detail modal
+            }}
+          />
+        </TabsContent>
+
+        {/* PHASE 3: Analytics */}
+        <TabsContent value="analytics" className="space-y-6">
+          <HoursChart data={mockWeeklyData} />
+          
+          {/* Placeholder for future analytics */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="h-64 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
+              Shift Distribution (Coming Soon)
+            </div>
+            <div className="h-64 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
+              Trend Analysis (Coming Soon)
             </div>
           </div>
-          <CardTitle className="text-2xl">
-            {t('employees.shifts.comingSoon.title')}
-          </CardTitle>
-          <CardDescription className="text-base">
-            {t('employees.shifts.comingSoon.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {upcomingFeatures.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background border">
-                  <feature.icon className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <span className="text-sm font-medium">{feature.label}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Placeholder for future content */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Card className="opacity-50">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {t('employees.shifts.sections.monthlyStats')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 flex items-center justify-center text-muted-foreground">
-              {t('common.comingSoon')}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="opacity-50">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {t('employees.shifts.sections.calendar')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 flex items-center justify-center text-muted-foreground">
-              {t('common.comingSoon')}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

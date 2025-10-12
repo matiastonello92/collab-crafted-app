@@ -1340,6 +1340,41 @@ export const it = {
         monthlyStats: 'Statistiche Mensili',
         calendar: 'Calendario Turni',
       },
+      monthlyStats: {
+        title: 'Riepilogo Mensile',
+        planned: 'Ore Programmate',
+        actual: 'Ore Effettive',
+        variance: 'Scostamento',
+        overtime: 'Straordinari',
+        shifts: 'Turni',
+        leaveDays: 'Giorni Permesso'
+      },
+      upcomingShifts: {
+        title: 'Prossimi Turni (7 giorni)',
+        noShifts: 'Nessun turno programmato nei prossimi 7 giorni'
+      },
+      status: {
+        pending: 'In attesa',
+        accepted: 'Accettato',
+        declined: 'Rifiutato'
+      },
+      compliance: {
+        title: 'Avvisi Conformità',
+        allGood: 'Tutto a posto!',
+        noViolations: 'Nessuna violazione rilevata questo mese',
+        severity: {
+          warning: 'Avviso',
+          critical: 'Critico'
+        }
+      },
+      calendar: {
+        today: 'Oggi'
+      },
+      analytics: {
+        hoursChart: 'Ore Settimanali',
+        plannedHours: 'Programmate',
+        actualHours: 'Effettive'
+      }
     },
   },
 
