@@ -67,6 +67,16 @@ export const en = {
       noGlobalRole: 'No global role',
       selectLocation: 'Select location',
       selectRole: 'Select role',
+    },
+    avatarUploader: {
+      profilePhoto: 'Profile Photo',
+      changePhoto: 'Take or Upload Photo',
+      uploading: 'Uploading...',
+      formatInfo: 'JPG, PNG or GIF (max 5MB)',
+      invalidFile: 'Please select a valid image file',
+      fileTooLarge: 'File is too large (max 5MB)',
+      uploadSuccess: 'Photo updated successfully',
+      uploadError: 'Upload error: {error}',
     }
   },
   

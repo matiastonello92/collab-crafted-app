@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, Loader2 } from 'lucide-react'
+import { Camera, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
@@ -122,6 +122,7 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          capture="environment"
           onChange={handleUpload}
           className="hidden"
           disabled={isUploading}
@@ -135,7 +136,7 @@ export function AvatarUploader({ orgId, userId, currentUrl, onAvatarUpdate }: Av
           {isUploading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
-            <Upload className="h-4 w-4 mr-2" />
+            <Camera className="h-4 w-4 mr-2" />
           )}
           {isUploading ? t('common.avatarUploader.uploading') : t('common.avatarUploader.changePhoto')}
         </Button>
