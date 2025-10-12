@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Camera, X, RotateCw, Check } from 'lucide-react'
+import { Camera, X, RotateCw, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -49,9 +49,19 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream
+          
+          // Wait for video to be ready before hiding loader
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().then(() => {
+              setIsLoading(false)
+            }).catch((err) => {
+              console.error('Error playing video:', err)
+              setIsLoading(false)
+            })
+          }
+        } else {
+          setIsLoading(false)
         }
-        
-        setIsLoading(false)
       } catch (err: any) {
         console.error('Webcam error:', err)
         setIsLoading(false)
@@ -73,6 +83,9 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop())
         streamRef.current = null
+      }
+      if (videoRef.current) {
+        videoRef.current.onloadedmetadata = null
       }
     }
   }, [open, t])
@@ -154,8 +167,9 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
               />
               
               {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <div className="text-white">{t('common.webcam.loading')}</div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
+                  <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
+                  <div className="text-white text-sm">{t('common.webcam.loading')}</div>
                 </div>
               )}
             </div>
