@@ -27,16 +27,23 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
   const [hasPhoto, setHasPhoto] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const hasStartedPlayingRef = useRef(false)
 
   // Start webcam stream
   useEffect(() => {
     if (!open) return
 
+    let timeoutId: NodeJS.Timeout
+
     const startWebcam = async () => {
       try {
         setIsLoading(true)
         setError(null)
+        
+        // Safety timeout: if still loading after 5s, show error
+        timeoutId = setTimeout(() => {
+          setError(t('common.webcam.genericError'))
+          setIsLoading(false)
+        }, 5000)
         
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
@@ -50,32 +57,20 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          hasStartedPlayingRef.current = false
           
-          // Wait for video to have enough data before playing
-          videoRef.current.oncanplay = () => {
-            if (!videoRef.current || hasStartedPlayingRef.current) return
-            
-            hasStartedPlayingRef.current = true
-            
-            videoRef.current.play().then(() => {
-              setIsLoading(false)
-            }).catch((err) => {
-              console.error('Error playing video:', err)
-              setIsLoading(false)
-              hasStartedPlayingRef.current = false
-            })
-            
-            // Clean up after first use
-            if (videoRef.current) {
-              videoRef.current.oncanplay = null
-            }
+          // With autoPlay, video starts automatically
+          // Use onloadeddata to know when it's ready
+          videoRef.current.onloadeddata = () => {
+            clearTimeout(timeoutId)
+            setIsLoading(false)
           }
         } else {
+          clearTimeout(timeoutId)
           setIsLoading(false)
         }
       } catch (err: any) {
         console.error('Webcam error:', err)
+        clearTimeout(timeoutId)
         setIsLoading(false)
         
         if (err.name === 'NotAllowedError') {
@@ -90,24 +85,22 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
 
     startWebcam()
 
-    // Cleanup
+    // Cleanup when component unmounts or open changes
     return () => {
+      clearTimeout(timeoutId)
+      
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => {
           track.stop()
-          console.log('Track stopped:', track.kind)
+          console.log('useEffect cleanup - Track stopped:', track.kind)
         })
         streamRef.current = null
       }
       
       if (videoRef.current) {
-        videoRef.current.oncanplay = null
-        videoRef.current.pause()
+        videoRef.current.onloadeddata = null
         videoRef.current.srcObject = null
-        videoRef.current.load()
       }
-      
-      hasStartedPlayingRef.current = false
     }
   }, [open, t])
 
@@ -145,25 +138,21 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
   }
 
   const handleClose = () => {
+    // Stop webcam tracks immediately
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop()
-        console.log('Track stopped on close:', track.kind)
+        console.log('handleClose - Track stopped:', track.kind)
       })
       streamRef.current = null
     }
     
-    if (videoRef.current) {
-      videoRef.current.pause()
-      videoRef.current.srcObject = null
-      videoRef.current.load()
-    }
-    
+    // Reset state
     setHasPhoto(false)
     setError(null)
     setIsLoading(true)
-    hasStartedPlayingRef.current = false
     
+    // Close dialog (this triggers re-render with open=false)
     onClose()
   }
 
@@ -190,6 +179,7 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
             <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
             <video
               ref={videoRef}
+              autoPlay
               playsInline
               muted
               className={`w-full h-full object-cover ${hasPhoto ? 'hidden' : ''}`}
