@@ -20,9 +20,9 @@ import { PermissionCategoryAccordion } from '@/components/admin/invitations/Perm
 import { getAllCategorizedPermissions } from '@/lib/permissions/categories'
 
 const inviteSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  firstName: z.string().min(1, 'First name required'),
-  lastName: z.string().min(1, 'Last name required'),
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   notes: z.string().optional(),
 })
 
@@ -132,21 +132,36 @@ export function InviteUserForm() {
     try {
       await navigator.clipboard.writeText(invitationLink)
       setCopied(true)
-      toast.success('Link copied to clipboard')
+      toast.success(t('admin.inviteForm.linkCopied'))
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error('Failed to copy link')
+      toast.error(t('admin.inviteForm.errorCopyingLink'))
     }
   }
 
   const onSubmit = async (data: InviteForm) => {
+    // Client-side validation with translated messages
+    const emailValidation = z.string().email().safeParse(data.email)
+    if (!emailValidation.success) {
+      toast.error(t('admin.inviteForm.invalidEmail'))
+      return
+    }
+    if (!data.firstName.trim()) {
+      toast.error(t('admin.inviteForm.firstNameRequired'))
+      return
+    }
+    if (!data.lastName.trim()) {
+      toast.error(t('admin.inviteForm.lastNameRequired'))
+      return
+    }
+
     if (!selectedRoleId || selectedLocationIds.length === 0) {
-      toast.error('Please select a role and at least one location')
+      toast.error(t('admin.inviteForm.selectRoleLocation'))
       return
     }
 
     if (!selectedPreset) {
-      toast.error('Please select a role preset')
+      toast.error(t('admin.inviteForm.selectPreset'))
       return
     }
 
@@ -173,14 +188,14 @@ export function InviteUserForm() {
 
         if (!response.ok) {
           const error = await response.json()
-          throw new Error(error.error || 'Failed to create invitation')
+          throw new Error(error.error || t('admin.inviteForm.errorCreating'))
         }
 
         const result = await response.json()
         const link = `${window.location.origin}/invite/${result.invitation.token}`
         setInvitationLink(link)
         
-        toast.success('Invitation created and email sent!')
+        toast.success(t('admin.inviteForm.invitationSent'))
         
         // Dispatch event for list refresh
         window.dispatchEvent(new CustomEvent('invitation:created'))
@@ -193,7 +208,7 @@ export function InviteUserForm() {
         setSelectedPermissions(new Set())
       } catch (error: any) {
         console.error('Error creating invitation:', error)
-        toast.error(error.message || 'Failed to create invitation')
+        toast.error(error.message || t('admin.inviteForm.errorCreating'))
       }
     })
   }
@@ -203,10 +218,10 @@ export function InviteUserForm() {
       <div className="space-y-4">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-green-600 mb-2">
-            Invitation Created Successfully!
+            {t('admin.inviteForm.successTitle')}
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            An email has been sent with the invitation link. You can also share it manually:
+            {t('admin.inviteForm.successMessage')}
           </p>
         </div>
         
@@ -228,7 +243,7 @@ export function InviteUserForm() {
           }}
           className="w-full"
         >
-          Create Another Invitation
+          {t('admin.inviteForm.createAnother')}
         </Button>
       </div>
     )
@@ -238,49 +253,49 @@ export function InviteUserForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="email">Email *</Label>
+        <Label htmlFor="email">{t('admin.inviteForm.email')} {t('admin.inviteForm.required')}</Label>
         <Input
           id="email"
           type="email"
-          placeholder="user@example.com"
+          placeholder={t('admin.inviteForm.emailPlaceholder')}
           {...register('email')}
         />
         {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{t('admin.inviteForm.invalidEmail')}</p>
         )}
       </div>
 
       {/* First & Last Name - Required */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName">First Name *</Label>
+          <Label htmlFor="firstName">{t('admin.inviteForm.firstName')} {t('admin.inviteForm.required')}</Label>
           <Input
             id="firstName"
-            placeholder="John"
+            placeholder={t('admin.inviteForm.firstNamePlaceholder')}
             {...register('firstName')}
           />
           {errors.firstName && (
-            <p className="text-sm text-destructive">{errors.firstName.message}</p>
+            <p className="text-sm text-destructive">{t('admin.inviteForm.firstNameRequired')}</p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name *</Label>
+          <Label htmlFor="lastName">{t('admin.inviteForm.lastName')} {t('admin.inviteForm.required')}</Label>
           <Input
             id="lastName"
-            placeholder="Doe"
+            placeholder={t('admin.inviteForm.lastNamePlaceholder')}
             {...register('lastName')}
           />
           {errors.lastName && (
-            <p className="text-sm text-destructive">{errors.lastName.message}</p>
+            <p className="text-sm text-destructive">{t('admin.inviteForm.lastNameRequired')}</p>
           )}
         </div>
       </div>
 
       {/* Role Preset Selection */}
       <div className="space-y-3">
-        <Label>Role Template *</Label>
+        <Label>{t('admin.inviteForm.roleTemplate')} {t('admin.inviteForm.required')}</Label>
         <p className="text-sm text-muted-foreground">
-          Choose a template to quickly set up permissions
+          {t('admin.inviteForm.roleTemplateDescription')}
         </p>
         <RolePresetSelector
           selected={selectedPreset}
@@ -291,10 +306,10 @@ export function InviteUserForm() {
       {/* Role Selection (actual DB role) */}
       {selectedPreset && (
         <div className="space-y-2">
-          <Label>Assign Database Role *</Label>
+          <Label>{t('admin.inviteForm.assignRole')} {t('admin.inviteForm.required')}</Label>
           <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
             <SelectTrigger>
-              <SelectValue placeholder="Select role" />
+              <SelectValue placeholder={t('admin.inviteForm.selectRole')} />
             </SelectTrigger>
             <SelectContent>
               {roles.map(role => (
@@ -310,7 +325,7 @@ export function InviteUserForm() {
       {/* Location Selection */}
       {selectedRoleId && (
         <div className="space-y-3">
-          <Label>Locations * (At least one)</Label>
+          <Label>{t('admin.inviteForm.locations')} {t('admin.inviteForm.required')} ({t('admin.inviteForm.locationsDescription')})</Label>
           <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border rounded-md p-3">
             {locations.map(location => (
               <div key={location.id} className="flex items-center space-x-2">
@@ -333,9 +348,9 @@ export function InviteUserForm() {
       {/* Permission Management (only for Custom preset) */}
       {selectedPreset === 'custom' && selectedLocationIds.length > 0 && (
         <div className="space-y-3">
-          <Label>Customize Permissions</Label>
+          <Label>{t('admin.inviteForm.customizePermissions')}</Label>
           <p className="text-sm text-muted-foreground">
-            Select which permissions this user should have
+            {t('admin.inviteForm.permissionsDescription')}
           </p>
           <PermissionCategoryAccordion
             selectedPermissions={selectedPermissions}
@@ -358,19 +373,19 @@ export function InviteUserForm() {
             {showAdvanced ? (
               <>
                 <ChevronUp className="h-4 w-4 mr-2" />
-                Hide Advanced Options
+                {t('admin.inviteForm.hideAdvanced')}
               </>
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-2" />
-                Show Advanced Options
+                {t('admin.inviteForm.advancedOptions')}
               </>
             )}
           </Button>
           
           {showAdvanced && (
             <div className="border rounded-lg p-4 bg-muted/30">
-              <Label className="mb-3 block">Fine-tune Permissions</Label>
+              <Label className="mb-3 block">{t('admin.inviteForm.fineTune')}</Label>
               <PermissionCategoryAccordion
                 selectedPermissions={selectedPermissions}
                 onPermissionToggle={handlePermissionToggle}
@@ -383,10 +398,10 @@ export function InviteUserForm() {
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label htmlFor="notes">Internal Notes (optional)</Label>
+        <Label htmlFor="notes">{t('admin.inviteForm.notes')}</Label>
         <Input
           id="notes"
-          placeholder="Add any internal notes..."
+          placeholder={t('admin.inviteForm.notesPlaceholder')}
           {...register('notes')}
         />
       </div>
@@ -398,7 +413,7 @@ export function InviteUserForm() {
         className="w-full"
       >
         <Send className="h-4 w-4 mr-2" />
-        {isPending ? 'Creating Invitation...' : 'Create & Send Invitation'}
+        {isPending ? t('admin.inviteForm.creating') : t('admin.inviteForm.createAndSend')}
       </Button>
     </form>
   )
