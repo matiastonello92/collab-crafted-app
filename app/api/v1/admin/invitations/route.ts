@@ -4,8 +4,6 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { randomBytes } from 'crypto'
-import { Resend } from 'resend'
-import { withRetry } from '@/lib/utils/retry'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -207,116 +205,92 @@ export async function POST(request: Request) {
       }
     }
 
-    // Send invitation email with Resend
+    // Send invitation email via Supabase Edge Function
     let emailStatus = 'pending'
     let emailMessageId = null
+    let emailErrorMessage: string | null = null
     
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY)
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-        const inviteUrl = `${appUrl}/invite/${token}`
-        
-        // Get role and location names for the email
-        let roleNames: string[] = []
-        let locationNames: string[] = []
-        
-        if (validatedData.locationRoles && validatedData.locationRoles.length > 0) {
-          for (const lr of validatedData.locationRoles) {
-            const { data: role } = await supabase
-              .from('roles')
-              .select('display_name')
-              .eq('id', lr.roleId)
-              .single()
-            
-            const { data: location } = await supabase
-              .from('locations')
-              .select('name')
-              .eq('id', lr.locationId)
-              .single()
-            
-            if (role) roleNames.push(role.display_name)
-            if (location) locationNames.push(location.name)
-          }
-        }
-
-        if (validatedData.globalRoleId) {
-          const { data: globalRole } = await supabase
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+      const inviteUrl = `${appUrl}/invite/${token}`
+      
+      // Get role and location names for the email
+      let roleNames: string[] = []
+      let locationNames: string[] = []
+      
+      if (validatedData.locationRoles && validatedData.locationRoles.length > 0) {
+        for (const lr of validatedData.locationRoles) {
+          const { data: role } = await supabase
             .from('roles')
             .select('display_name')
-            .eq('id', validatedData.globalRoleId)
+            .eq('id', lr.roleId)
             .single()
           
-          if (globalRole) roleNames.push(`${globalRole.display_name} (Globale)`)
-        }
-
-        // Send email with retry logic
-        const result = await withRetry(async () => {
-          const { data, error } = await resend.emails.send({
-            from: process.env.RESEND_FROM || 'Klyra Shifts <noreply@managementpn.services>',
-            to: [validatedData.email],
-            subject: 'Klyra • Invito alla piattaforma',
-            html: `
-              <html>
-                <body style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
-                  <div style="max-width: 600px; margin: 0 auto;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                      <h1 style="color: #2563eb; margin-bottom: 10px;">Benvenuto in Klyra!</h1>
-                      <p style="color: #6b7280; margin: 0;">Sei stato invitato a far parte della piattaforma</p>
-                    </div>
-                    
-                    <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                      <h2 style="color: #374151; margin-top: 0;">Dettagli dell'invito</h2>
-                      <p><strong>Nome:</strong> ${validatedData.firstName} ${validatedData.lastName}</p>
-                      <p><strong>Email:</strong> ${validatedData.email}</p>
-                      ${roleNames.length > 0 ? `<p><strong>Ruoli assegnati:</strong><br/>${roleNames.join('<br/>')}</p>` : ''}
-                      ${locationNames.length > 0 ? `<p><strong>Sedi:</strong><br/>${locationNames.join('<br/>')}</p>` : ''}
-                      ${validatedData.notes ? `<p><strong>Note:</strong> ${validatedData.notes}</p>` : ''}
-                    </div>
-                    
-                    <div style="text-align: center; margin: 30px 0;">
-                      <a href="${inviteUrl}" 
-                         style="background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">
-                        Accetta l'invito
-                      </a>
-                    </div>
-                    
-                    <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
-                      <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                        Questo invito scadrà il ${expiresAt.toLocaleDateString('it-IT')}.<br/>
-                        Se non riesci a cliccare il pulsante, copia e incolla questo link: <a href="${inviteUrl}">${inviteUrl}</a>
-                      </p>
-                    </div>
-                  </div>
-                </body>
-              </html>
-            `,
-            replyTo: process.env.RESEND_REPLY_TO || undefined,
-          })
-
-          if (error) {
-            throw new Error(error.message || String(error))
-          }
+          const { data: location } = await supabase
+            .from('locations')
+            .select('name')
+            .eq('id', lr.locationId)
+            .single()
           
-          return data
-        }, 3, 500) // 3 attempts with 500ms base delay
+          if (role) roleNames.push(role.display_name)
+          if (location) locationNames.push(location.name)
+        }
+      }
 
+      if (validatedData.globalRoleId) {
+        const { data: globalRole } = await supabase
+          .from('roles')
+          .select('display_name')
+          .eq('id', validatedData.globalRoleId)
+          .single()
+        
+        if (globalRole) roleNames.push(`${globalRole.display_name} (Globale)`)
+      }
+
+      // Get inviter name
+      const inviterName = user.user_metadata?.full_name || user.email
+
+      // Send via Edge Function
+      const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+        'send-invitation',
+        {
+          body: {
+            to: validatedData.email,
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
+            inviteUrl,
+            roleNames,
+            locationNames,
+            notes: validatedData.notes,
+            expiresAt: expiresAt.toISOString(),
+            inviterName,
+            orgId,
+          },
+        }
+      )
+
+      if (emailError || !emailResult?.success) {
+        emailStatus = 'error'
+        emailErrorMessage = emailError?.message || emailResult?.error || 'Edge Function error'
+        console.error('Failed to send invitation email:', emailErrorMessage)
+      } else {
         emailStatus = 'sent'
-        emailMessageId = result?.id || null
-
+        emailMessageId = emailResult.messageId
         console.log('Invitation email sent successfully:', {
           invitationId: invitation.id,
           email: validatedData.email,
           messageId: emailMessageId
         })
-
-      } catch (emailError: any) {
-        console.error('Failed to send invitation email:', emailError)
-        emailStatus = 'error'
       }
-    } else {
-      console.warn('RESEND_API_KEY not configured, skipping email send')
-      emailStatus = 'not_configured'
+    } catch (emailError: any) {
+      console.error('Failed to send invitation email:', emailError)
+      console.error('Error details:', {
+        message: emailError.message,
+        name: emailError.name,
+        stack: emailError.stack,
+      })
+      emailStatus = 'error'
+      emailErrorMessage = emailError.message || String(emailError)
     }
 
     // Update invitation status based on email result
@@ -342,8 +316,7 @@ export async function POST(request: Request) {
           status: emailStatus === 'sent' ? 'sent' : 'failed',
           provider_id: emailMessageId,
           error_message: 
-            emailStatus === 'error' ? 'Resend API error' : 
-            emailStatus === 'not_configured' ? 'RESEND_API_KEY not configured' : null,
+            emailStatus === 'error' ? (emailErrorMessage || 'Edge Function error') : null,
           sent_at: emailStatus === 'sent' ? new Date().toISOString() : null,
         })
     } catch (logError) {
@@ -384,7 +357,7 @@ export async function POST(request: Request) {
       message: 'Invito creato con successo',
       emailStatus,
       warning: emailStatus !== 'sent' 
-        ? 'Invito creato ma email non inviata. Verificare configurazione RESEND_API_KEY.' 
+        ? `Invito creato ma email non inviata. ${emailErrorMessage || 'Verificare configurazione email.'}` 
         : undefined
     }, { status: 201 })
 

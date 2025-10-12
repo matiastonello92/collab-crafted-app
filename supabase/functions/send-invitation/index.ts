@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -11,92 +12,138 @@ const corsHeaders = {
 
 interface InvitationEmailRequest {
   to: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   inviteUrl: string;
+  roleNames?: string[];
+  locationNames?: string[];
+  notes?: string;
+  expiresAt: string;
   inviterName?: string;
+  orgId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("send-invitation function called");
 
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { to, name, inviteUrl, inviterName }: InvitationEmailRequest = await req.json();
+    const {
+      to,
+      firstName,
+      lastName,
+      inviteUrl,
+      roleNames = [],
+      locationNames = [],
+      notes,
+      expiresAt,
+      inviterName,
+      orgId,
+    }: InvitationEmailRequest = await req.json();
 
     console.log("Sending invitation email to:", to);
 
     const emailResponse = await resend.emails.send({
-      from: "Pecora App <invites@resend.dev>",
+      from: Deno.env.get("RESEND_FROM") || "Klyra Shifts <noreply@managementpn.services>",
       to: [to],
-      subject: "Invito a Pecora App",
+      subject: "Klyra • Invito alla piattaforma",
       html: `
-        <!DOCTYPE html>
         <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>Invito a Pecora App</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f8f9fa; padding: 30px 20px; border-radius: 0 0 8px 8px; }
-            .cta-button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
-            .footer { text-align: center; padding: 20px; font-size: 14px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🐑 Pecora App</h1>
-            <p>Sei stato invitato a far parte del team!</p>
-          </div>
-          
-          <div class="content">
-            <h2>Ciao ${name}!</h2>
-            
-            <p>${inviterName ? `<strong>${inviterName}</strong> ti ha invitato` : 'Sei stato invitato'} a unirti a <strong>Pecora App</strong>, la piattaforma di gestione per il nostro team.</p>
-            
-            <p>Per completare la registrazione e accedere alla piattaforma, clicca sul pulsante qui sotto:</p>
-            
-            <div style="text-align: center;">
-              <a href="${inviteUrl}" class="cta-button">Accetta Invito</a>
+          <body style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto;">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #2563eb; margin-bottom: 10px;">Benvenuto in Klyra!</h1>
+                <p style="color: #6b7280; margin: 0;">
+                  ${inviterName ? `<strong>${inviterName}</strong> ti ha invitato` : 'Sei stato invitato'} a far parte della piattaforma
+                </p>
+              </div>
+              
+              <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="color: #374151; margin-top: 0;">Dettagli dell'invito</h2>
+                <p><strong>Nome:</strong> ${firstName} ${lastName}</p>
+                <p><strong>Email:</strong> ${to}</p>
+                ${roleNames.length > 0 ? `<p><strong>Ruoli assegnati:</strong><br/>${roleNames.join('<br/>')}</p>` : ''}
+                ${locationNames.length > 0 ? `<p><strong>Sedi:</strong><br/>${locationNames.join('<br/>')}</p>` : ''}
+                ${notes ? `<p><strong>Note:</strong> ${notes}</p>` : ''}
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${inviteUrl}" 
+                   style="background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">
+                  Accetta l'invito
+                </a>
+              </div>
+              
+              <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">
+                  Questo invito scadrà il ${new Date(expiresAt).toLocaleDateString('it-IT')}.<br/>
+                  Se non riesci a cliccare il pulsante, copia e incolla questo link: <a href="${inviteUrl}">${inviteUrl}</a>
+                </p>
+              </div>
             </div>
-            
-            <p><strong>Nota:</strong> Questo invito scadrà tra 7 giorni. Se hai bisogno di assistenza, contatta il tuo amministratore.</p>
-            
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-            
-            <p style="font-size: 14px; color: #666;">
-              Se il pulsante non funziona, copia e incolla questo link nel tuo browser:<br>
-              <a href="${inviteUrl}" style="color: #667eea; word-break: break-all;">${inviteUrl}</a>
-            </p>
-          </div>
-          
-          <div class="footer">
-            <p>Pecora App - Gestione Semplificata</p>
-            <p style="font-size: 12px;">Se non hai richiesto questo invito, puoi ignorare questa email.</p>
-          </div>
-        </body>
+          </body>
         </html>
       `,
+      replyTo: Deno.env.get("RESEND_REPLY_TO") || undefined,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Invitation email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+    // Log to email_logs table
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    await supabase.from("email_logs").insert({
+      org_id: orgId,
+      recipient_email: to,
+      email_type: "invitation",
+      subject: "Klyra • Invito alla piattaforma",
+      status: "sent",
+      provider_id: emailResponse.id,
+      sent_at: new Date().toISOString(),
+      metadata: {
+        firstName,
+        lastName,
+        roleNames,
+        locationNames,
       },
     });
+
+    return new Response(
+      JSON.stringify({ success: true, messageId: emailResponse.id }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
   } catch (error: any) {
     console.error("Error in send-invitation function:", error);
+
+    // Try to log error
+    try {
+      const { to, orgId } = await req.json();
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      await supabase.from("email_logs").insert({
+        org_id: orgId,
+        recipient_email: to,
+        email_type: "invitation",
+        subject: "Klyra • Invito alla piattaforma",
+        status: "failed",
+        error_message: error.message,
+      });
+    } catch (logError) {
+      console.error("Failed to log error:", logError);
+    }
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: false, error: error.message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
