@@ -43,7 +43,14 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
     setLocaleState(newLocale);
     setCurrentLocale(newLocale);
     if (typeof window !== 'undefined') {
+      // Update localStorage
       localStorage.setItem('klyra-locale', newLocale);
+      
+      // Update cookie for Server Components
+      document.cookie = `klyra-locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      
+      // Refresh page to re-render Server Components
+      window.location.reload();
     }
   };
 
