@@ -1932,6 +1932,8 @@ export const it = {
     lastNamePlaceholder: 'Rossi',
     phone: 'Telefono',
     phonePlaceholder: '+39 123 456 7890',
+    phoneInvalid: 'Numero di telefono non valido',
+    phoneInvalidError: 'Inserisci un numero di telefono valido prima di salvare',
     email: 'Email',
     emailCannotChange: 'L\'email non può essere modificata da qui',
     

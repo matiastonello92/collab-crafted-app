@@ -20,6 +20,7 @@ import { AvatarUploader } from '@/components/AvatarUploader'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useTranslation } from '@/lib/i18n'
 import { UserContractsView } from './UserContractsView'
+import { PhoneInput, isValidPhoneNumber } from '@/components/ui/phone-input'
 
 interface UserRole {
   role_name: string
@@ -51,6 +52,12 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
 
 
   const handleSave = async () => {
+    // Validate phone number if provided
+    if (profile.phone && !isValidPhoneNumber(profile.phone)) {
+      toast.error(t('profile.phoneInvalidError'))
+      return
+    }
+    
     setIsSaving(true)
     try {
       // Save email preferences separately
@@ -249,12 +256,16 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                   </div>
                   <div>
                     <Label htmlFor="phone">{t('profile.phone')}</Label>
-                    <Input
-                      id="phone"
+                    <PhoneInput
                       value={profile.phone || ''}
-                      onChange={(e) => updateProfile('phone', e.target.value)}
+                      onChange={(value) => updateProfile('phone', value || '')}
                       placeholder={t('profile.phonePlaceholder')}
                     />
+                    {profile.phone && !isValidPhoneNumber(profile.phone) && (
+                      <p className="text-sm text-destructive mt-1">
+                        {t('profile.phoneInvalid')}
+                      </p>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="email">{t('profile.email')}</Label>

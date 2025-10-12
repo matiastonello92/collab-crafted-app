@@ -1868,6 +1868,8 @@ export const en = {
     lastNamePlaceholder: 'Doe',
     phone: 'Phone',
     phonePlaceholder: '+1 234 567 890',
+    phoneInvalid: 'Invalid phone number',
+    phoneInvalidError: 'Please enter a valid phone number before saving',
     email: 'Email',
     emailCannotChange: 'Email cannot be changed here',
     
