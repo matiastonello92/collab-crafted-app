@@ -229,7 +229,7 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
+      {/* Header with Avatar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
@@ -238,10 +238,24 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
               {t('profile.backToDashboard')}
             </Link>
           </Button>
+          
+          {orgId && (
+            <AvatarUploader
+              orgId={orgId}
+              userId={userId}
+              currentUrl={avatarUrl || undefined}
+              userName={profile.first_name || 'User'}
+              onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
+              mode="header"
+            />
+          )}
+          
           <div>
-            <h1 className="text-3xl font-bold">{t('profile.title')}</h1>
+            <h1 className="text-3xl font-bold">
+              {t('profile.greeting').replace('{name}', profile.first_name || 'Utente')}
+            </h1>
             <p className="text-muted-foreground">
-              {t('profile.manageProfile')}
+              {t('profile.welcomeMessage')}
             </p>
           </div>
         </div>
@@ -286,18 +300,6 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Avatar Section */}
-                {orgId && (
-                  <div className="pb-6 border-b">
-                    <AvatarUploader
-                      orgId={orgId}
-                      userId={userId}
-                      currentUrl={avatarUrl || undefined}
-                      onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
-                    />
-                  </div>
-                )}
-
                 {/* Profile Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

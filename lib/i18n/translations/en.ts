@@ -2019,6 +2019,19 @@ export const en = {
     // Success/error
     profileUpdated: 'Profile updated successfully!',
     saveError: 'Error saving',
+    
+    // Avatar and greeting
+    greeting: 'Hello, {name}',
+    welcomeMessage: 'Welcome to your profile page! Here you can manage your personal information, preferences and settings.',
+    manageAvatar: 'Manage Profile Photo',
+    addAvatar: 'Add Profile Photo',
+    viewPhoto: 'View Photo',
+    changePhoto: 'Change Photo',
+    uploadPhoto: 'Upload Photo',
+    noAvatarMessage: 'You don\'t have a profile photo yet. Upload one to personalize your account.',
+    cropImage: 'Crop Image',
+    applyCrop: 'Apply Crop',
+    dragToReposition: 'Drag to reposition the image',
   },
 
   // Contracts

@@ -2154,6 +2154,19 @@ export const it = {
     // Success/error
     profileUpdated: 'Profilo aggiornato con successo!',
     saveError: 'Errore nel salvataggio',
+    
+    // Avatar and greeting
+    greeting: 'Ciao, {name}',
+    welcomeMessage: 'Benvenuto nella tua pagina profilo! Da qui puoi gestire le tue informazioni personali, preferenze e impostazioni.',
+    manageAvatar: 'Gestisci Foto Profilo',
+    addAvatar: 'Aggiungi Foto Profilo',
+    viewPhoto: 'Visualizza Foto',
+    changePhoto: 'Cambia Foto',
+    uploadPhoto: 'Carica Foto',
+    noAvatarMessage: 'Non hai ancora una foto profilo. Caricane una per personalizzare il tuo account.',
+    cropImage: 'Ritaglia Immagine',
+    applyCrop: 'Applica Ritaglio',
+    dragToReposition: 'Trascina per riposizionare l\'immagine',
   },
 
   // Contracts

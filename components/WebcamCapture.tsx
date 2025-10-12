@@ -205,7 +205,7 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
             size="sm"
             className="w-full"
           >
-            {t('common.cancel')}
+            {t('common.actions.cancel')}
           </Button>
         </div>
       </DialogContent>
