@@ -728,15 +728,16 @@ function DroppableCell({
       {/* Zona sinistra - DUPLICA */}
       <div 
         ref={leftZone.setNodeRef}
-        className={`absolute left-0 top-0 bottom-0 w-1/2 transition-all duration-200 ${
+        className={`absolute left-0 top-0 bottom-0 w-1/2 z-30 transition-all duration-200 ${
           leftZone.isOver 
-            ? 'bg-blue-500/30 backdrop-blur-[2px]' 
+            ? 'bg-blue-500/40 backdrop-blur-sm border-r-2 border-blue-500' 
             : ''
         }`}
       >
         {leftZone.isOver && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
             <span className="text-3xl">📋</span>
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-background/80 px-2 py-1 rounded">DUPLICA</span>
           </div>
         )}
       </div>
@@ -744,15 +745,16 @@ function DroppableCell({
       {/* Zona destra - SPOSTA */}
       <div 
         ref={rightZone.setNodeRef}
-        className={`absolute right-0 top-0 bottom-0 w-1/2 transition-all duration-200 ${
+        className={`absolute right-0 top-0 bottom-0 w-1/2 z-30 transition-all duration-200 ${
           rightZone.isOver 
-            ? 'bg-green-500/30 backdrop-blur-[2px]' 
+            ? 'bg-green-500/40 backdrop-blur-sm border-l-2 border-green-500' 
             : ''
         }`}
       >
         {rightZone.isOver && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
             <span className="text-3xl">➡️</span>
+            <span className="text-xs font-semibold text-green-600 dark:text-green-400 bg-background/80 px-2 py-1 rounded">SPOSTA</span>
           </div>
         )}
       </div>
