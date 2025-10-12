@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { WebcamCapture } from './WebcamCapture'
 import { ImageCropper } from './ImageCropper'
 import { AvatarDialog } from './AvatarDialog'
+import { UploadOptionsDialog } from './UploadOptionsDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { toast } from 'sonner'
@@ -193,17 +194,18 @@ export function AvatarUploader({
         />
 
         {/* Upload Options Dialog */}
-        {showUploadOptions && (
-          <AvatarDialog
-            open={showUploadOptions}
-            onClose={() => setShowUploadOptions(false)}
-            hasAvatar={false}
-            avatarUrl={null}
-            userName={userName}
-            onViewPhoto={() => {}}
-            onChangePhoto={() => {}}
-          />
-        )}
+        <UploadOptionsDialog
+          open={showUploadOptions}
+          onClose={() => setShowUploadOptions(false)}
+          onUploadFile={() => {
+            setShowUploadOptions(false)
+            fileInputRef.current?.click()
+          }}
+          onUseWebcam={() => {
+            setShowUploadOptions(false)
+            setShowWebcam(true)
+          }}
+        />
 
         {/* File Input */}
         <input
@@ -213,23 +215,6 @@ export function AvatarUploader({
           onChange={handleFileSelect}
           className="hidden"
         />
-
-        {/* Upload Buttons in Dialog Context */}
-        {showUploadOptions && (
-          <div className="hidden">
-            <Button onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />
-              {t('common.avatarUploader.uploadFile')}
-            </Button>
-            <Button onClick={() => {
-              setShowUploadOptions(false)
-              setShowWebcam(true)
-            }}>
-              <Camera className="h-4 w-4 mr-2" />
-              {t('common.avatarUploader.useWebcam')}
-            </Button>
-          </div>
-        )}
 
         <WebcamCapture
           open={showWebcam}

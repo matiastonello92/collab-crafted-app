@@ -1978,6 +1978,23 @@ export const en = {
     checkSpam: 'Can\'t find the email? Check your spam folder.',
     emailChangedSuccess: 'Email changed successfully!',
     
+    // Avatar management
+    greeting: 'Hello, {name}',
+    welcomeMessage: 'Welcome to your profile page! From here you can manage your personal information, preferences, and settings.',
+    manageAvatar: 'Manage Profile Photo',
+    addAvatar: 'Add Profile Photo',
+    viewPhoto: 'View Photo',
+    changePhoto: 'Change Profile Photo',
+    uploadPhoto: 'Upload Photo',
+    noAvatarMessage: 'You don\'t have a profile photo yet. Upload one to personalize your account.',
+    uploadPhotoTitle: 'How do you want to upload your photo?',
+    uploadPhotoDescription: 'Choose whether to upload a file from your device or take a photo with your webcam',
+    cropImage: 'Crop Image',
+    applyCrop: 'Apply Crop',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    dragToReposition: 'Drag to reposition',
+    
     // Preferences
     customizeExperience: 'Customize your app experience',
     language: 'Language',
@@ -2019,19 +2036,6 @@ export const en = {
     // Success/error
     profileUpdated: 'Profile updated successfully!',
     saveError: 'Error saving',
-    
-    // Avatar and greeting
-    greeting: 'Hello, {name}',
-    welcomeMessage: 'Welcome to your profile page! Here you can manage your personal information, preferences and settings.',
-    manageAvatar: 'Manage Profile Photo',
-    addAvatar: 'Add Profile Photo',
-    viewPhoto: 'View Photo',
-    changePhoto: 'Change Photo',
-    uploadPhoto: 'Upload Photo',
-    noAvatarMessage: 'You don\'t have a profile photo yet. Upload one to personalize your account.',
-    cropImage: 'Crop Image',
-    applyCrop: 'Apply Crop',
-    dragToReposition: 'Drag to reposition the image',
   },
 
   // Contracts
