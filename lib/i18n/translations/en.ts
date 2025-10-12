@@ -71,12 +71,29 @@ export const en = {
     avatarUploader: {
       profilePhoto: 'Profile Photo',
       changePhoto: 'Take or Upload Photo',
+      uploadFile: 'Upload File',
+      useWebcam: 'Use Webcam',
       uploading: 'Uploading...',
       formatInfo: 'JPG, PNG or GIF (max 5MB)',
       invalidFile: 'Please select a valid image file',
       fileTooLarge: 'File is too large (max 5MB)',
       uploadSuccess: 'Photo updated successfully',
       uploadError: 'Upload error: {error}',
+    },
+    webcam: {
+      title: 'Take a Photo',
+      description: 'Position yourself in front of the webcam and capture when ready',
+      loading: 'Loading webcam...',
+      capture: 'Take Photo',
+      retake: 'Retake',
+      confirm: 'Use This Photo',
+      permissionDenied: 'Webcam permission denied. Enable access in browser settings.',
+      notFound: 'No webcam found. Check that it\'s properly connected.',
+      genericError: 'Error accessing webcam. Please try again.',
+      captureError: 'Error capturing photo. Please try again.',
+    },
+    actions: {
+      cancel: 'Cancel',
     }
   },
   

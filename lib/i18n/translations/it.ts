@@ -71,12 +71,29 @@ export const it = {
     avatarUploader: {
       profilePhoto: 'Foto Profilo',
       changePhoto: 'Scatta o Carica Foto',
+      uploadFile: 'Carica File',
+      useWebcam: 'Usa Webcam',
       uploading: 'Caricamento...',
       formatInfo: 'JPG, PNG o GIF (max 5MB)',
       invalidFile: 'Seleziona un file immagine valido',
       fileTooLarge: 'Il file è troppo grande (max 5MB)',
       uploadSuccess: 'Foto aggiornata con successo',
       uploadError: 'Errore durante l\'upload: {error}',
+    },
+    webcam: {
+      title: 'Scatta una Foto',
+      description: 'Posizionati di fronte alla webcam e scatta quando sei pronto',
+      loading: 'Caricamento webcam...',
+      capture: 'Scatta Foto',
+      retake: 'Riprova',
+      confirm: 'Usa Questa Foto',
+      permissionDenied: 'Permesso webcam negato. Abilita l\'accesso nelle impostazioni del browser.',
+      notFound: 'Nessuna webcam trovata. Verifica che sia collegata correttamente.',
+      genericError: 'Errore durante l\'accesso alla webcam. Riprova.',
+      captureError: 'Errore durante la cattura della foto. Riprova.',
+    },
+    actions: {
+      cancel: 'Annulla',
     }
   },
   
