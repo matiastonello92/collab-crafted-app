@@ -575,9 +575,9 @@ export function EmployeeGridView({
       >
         {activeShift && (
           <Card 
-            className="p-2 opacity-90 cursor-grabbing shadow-2xl overflow-hidden"
+            className="p-2 opacity-40 cursor-grabbing shadow-2xl overflow-hidden"
             style={{
-              backgroundColor: hexToRgba(activeShift.job_tag?.color, 0.9),
+              backgroundColor: hexToRgba(activeShift.job_tag?.color, 0.5),
               borderColor: hexToRgba(activeShift.job_tag?.color, 1),
               borderWidth: '3px'
             }}
