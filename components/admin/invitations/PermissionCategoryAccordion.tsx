@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { PERMISSION_CATEGORIES } from '@/lib/permissions/categories'
 import { Badge } from '@/components/ui/badge'
+import { useTranslation } from '@/lib/i18n'
 
 interface PermissionCategoryAccordionProps {
   selectedPermissions: Set<string>
@@ -24,6 +25,7 @@ export function PermissionCategoryAccordion({
   onPermissionToggle,
   disabled = false
 }: PermissionCategoryAccordionProps) {
+  const { t } = useTranslation()
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const handleSelectAll = (categoryKey: string, permissions: string[]) => {
@@ -77,7 +79,7 @@ export function PermissionCategoryAccordion({
                     disabled={disabled}
                     className="text-xs"
                   >
-                    {allSelected ? 'Deselect All' : 'Select All'}
+                    {allSelected ? t('admin.permissionActions.deselectAll') : t('admin.permissionActions.selectAll')}
                   </Button>
                 </div>
                 

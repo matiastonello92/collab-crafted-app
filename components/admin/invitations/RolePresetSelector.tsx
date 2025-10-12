@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/i18n'
 
 export type RolePresetType = 'admin' | 'manager' | 'staff' | 'custom'
 
@@ -13,39 +14,41 @@ interface RolePreset {
   icon: string
 }
 
-const PRESETS: RolePreset[] = [
-  {
-    id: 'admin',
-    title: 'Administrator',
-    description: 'Full access to all locations and settings',
-    icon: '👑'
-  },
-  {
-    id: 'manager',
-    title: 'Manager',
-    description: 'Manage team, shifts, inventory for assigned locations',
-    icon: '📊'
-  },
-  {
-    id: 'staff',
-    title: 'Staff Base',
-    description: 'View own shifts, clock in/out, basic permissions',
-    icon: '👤'
-  },
-  {
-    id: 'custom',
-    title: 'Custom',
-    description: 'Define permissions manually',
-    icon: '⚙️'
-  }
-]
-
 interface RolePresetSelectorProps {
   selected: RolePresetType | null
   onSelect: (preset: RolePresetType) => void
 }
 
 export function RolePresetSelector({ selected, onSelect }: RolePresetSelectorProps) {
+  const { t } = useTranslation()
+  
+  const PRESETS: RolePreset[] = [
+    {
+      id: 'admin',
+      title: t('admin.rolePresets.admin.title'),
+      description: t('admin.rolePresets.admin.description'),
+      icon: '👑'
+    },
+    {
+      id: 'manager',
+      title: t('admin.rolePresets.manager.title'),
+      description: t('admin.rolePresets.manager.description'),
+      icon: '📊'
+    },
+    {
+      id: 'staff',
+      title: t('admin.rolePresets.staff.title'),
+      description: t('admin.rolePresets.staff.description'),
+      icon: '👤'
+    },
+    {
+      id: 'custom',
+      title: t('admin.rolePresets.custom.title'),
+      description: t('admin.rolePresets.custom.description'),
+      icon: '⚙️'
+    }
+  ]
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {PRESETS.map(preset => (

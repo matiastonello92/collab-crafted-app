@@ -414,6 +414,28 @@ export const it = {
       invitationSent: 'Invito creato ed email inviata!',
       required: '*',
     },
+    rolePresets: {
+      admin: {
+        title: 'Amministratore',
+        description: 'Accesso completo a tutte le location e impostazioni',
+      },
+      manager: {
+        title: 'Manager',
+        description: 'Gestisci team, turni, inventario per le location assegnate',
+      },
+      staff: {
+        title: 'Staff Base',
+        description: 'Visualizza i propri turni, timbrature, permessi base',
+      },
+      custom: {
+        title: 'Personalizzato',
+        description: 'Definisci i permessi manualmente',
+      },
+    },
+    permissionActions: {
+      selectAll: 'Seleziona Tutto',
+      deselectAll: 'Deseleziona Tutto',
+    },
     userManagement: 'Gestione Utenti',
     userManagementDesc: 'Gestisci utenti, ruoli e permessi',
     inviteUser: 'Invita Utente',

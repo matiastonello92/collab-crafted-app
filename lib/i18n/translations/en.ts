@@ -405,6 +405,28 @@ export const en = {
       invitationSent: 'Invitation created and email sent!',
       required: '*',
     },
+    rolePresets: {
+      admin: {
+        title: 'Administrator',
+        description: 'Full access to all locations and settings',
+      },
+      manager: {
+        title: 'Manager',
+        description: 'Manage team, shifts, inventory for assigned locations',
+      },
+      staff: {
+        title: 'Staff Base',
+        description: 'View own shifts, clock in/out, basic permissions',
+      },
+      custom: {
+        title: 'Custom',
+        description: 'Define permissions manually',
+      },
+    },
+    permissionActions: {
+      selectAll: 'Select All',
+      deselectAll: 'Deselect All',
+    },
     userManagement: 'User Management',
     userManagementDesc: 'Manage users, roles, and permissions',
     inviteUser: 'Invite User',
