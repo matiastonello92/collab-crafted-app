@@ -36,12 +36,11 @@ interface UserSettingsClientProps {
   userId: string
   orgId: string | null
   avatarUrl: string | null
-  canBranding: boolean
   roles: UserRole[]
   locations: Array<{ id: string; name: string }>
 }
 
-export function UserProfileClient({ user, profile: initialProfile, userId, orgId, avatarUrl, canBranding, roles, locations }: UserSettingsClientProps) {
+export function UserProfileClient({ user, profile: initialProfile, userId, orgId, avatarUrl, roles, locations }: UserSettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile || {})
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
@@ -287,14 +286,16 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Avatar Section - only if branding feature enabled */}
-                {canBranding && orgId && (
-                  <AvatarUploader
-                    orgId={orgId}
-                    userId={userId}
-                    currentUrl={avatarUrl || undefined}
-                    onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
-                  />
+                {/* Avatar Section */}
+                {orgId && (
+                  <div className="pb-6 border-b">
+                    <AvatarUploader
+                      orgId={orgId}
+                      userId={userId}
+                      currentUrl={avatarUrl || undefined}
+                      onAvatarUpdate={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
+                    />
+                  </div>
                 )}
 
                 {/* Profile Fields */}

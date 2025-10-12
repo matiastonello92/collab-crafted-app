@@ -28,9 +28,6 @@ export default async function ProfilePage() {
     console.warn('[PROFILE] no org_id for user', user.id)
   }
 
-  // Check branding feature for avatar uploads
-  const canBranding = orgId ? await orgHasFeature(orgId, 'branding') : false
-
   // Fetch user roles and locations for the "Roles & Access" tab
   const { data: rolesData } = await supabase
     .from('user_roles_locations')
@@ -76,7 +73,6 @@ export default async function ProfilePage() {
     userId={user.id}
     orgId={orgId}
     avatarUrl={profile?.avatar_url}
-    canBranding={canBranding}
     roles={roles}
     locations={locations}
   />
