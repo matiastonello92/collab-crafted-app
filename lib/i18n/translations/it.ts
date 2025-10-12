@@ -1935,7 +1935,17 @@ export const it = {
     phoneInvalid: 'Numero di telefono non valido',
     phoneInvalidError: 'Inserisci un numero di telefono valido prima di salvare',
     email: 'Email',
-    emailCannotChange: 'L\'email non può essere modificata da qui',
+    emailPlaceholder: 'tuo@email.com',
+    emailInvalid: 'Formato email non valido',
+    emailUnchanged: 'La nuova email è uguale a quella attuale',
+    emailVerificationSent: 'Email di verifica inviata a',
+    emailAlreadyExists: 'Questa email è già registrata',
+    emailChangeError: 'Errore durante il cambio email',
+    emailChangeWarning: 'Quando salvi, riceverai una email di verifica al nuovo indirizzo. L\'email verrà aggiornata solo dopo aver cliccato sul link di conferma.',
+    emailPendingVerification: 'Email in attesa di verifica',
+    emailPendingMessage: 'Abbiamo inviato una mail di verifica a',
+    checkSpam: 'Non trovi la mail? Controlla la cartella spam.',
+    emailChangedSuccess: 'Email cambiata con successo!',
     
     // Preferences
     customizeExperience: 'Personalizza la tua esperienza nell\'app',

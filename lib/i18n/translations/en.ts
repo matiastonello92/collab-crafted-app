@@ -1871,7 +1871,17 @@ export const en = {
     phoneInvalid: 'Invalid phone number',
     phoneInvalidError: 'Please enter a valid phone number before saving',
     email: 'Email',
-    emailCannotChange: 'Email cannot be changed here',
+    emailPlaceholder: 'your@email.com',
+    emailInvalid: 'Invalid email format',
+    emailUnchanged: 'The new email is the same as the current one',
+    emailVerificationSent: 'Verification email sent to',
+    emailAlreadyExists: 'This email is already registered',
+    emailChangeError: 'Error changing email',
+    emailChangeWarning: 'When you save, you will receive a verification email at the new address. Your email will only be updated after clicking the confirmation link.',
+    emailPendingVerification: 'Email pending verification',
+    emailPendingMessage: 'We sent a verification email to',
+    checkSpam: 'Can\'t find the email? Check your spam folder.',
+    emailChangedSuccess: 'Email changed successfully!',
     
     // Preferences
     customizeExperience: 'Customize your app experience',

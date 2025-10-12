@@ -46,10 +46,53 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [lastEmailTest, setLastEmailTest] = useState<string | null>(null)
+  const [newEmail, setNewEmail] = useState<string>(user.email || '')
+  const [isChangingEmail, setIsChangingEmail] = useState(false)
+  const [emailPendingVerification, setEmailPendingVerification] = useState<string | null>(null)
   const supabase = createSupabaseBrowserClient()
   const { locale, setLocale } = useLocale()
   const { t } = useTranslation()
 
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const handleEmailChange = async () => {
+    if (newEmail === user.email) {
+      toast.error(t('profile.emailUnchanged'))
+      return false
+    }
+    
+    if (!isValidEmail(newEmail)) {
+      toast.error(t('profile.emailInvalid'))
+      return false
+    }
+
+    setIsChangingEmail(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        email: newEmail 
+      })
+      
+      if (error) throw error
+      
+      setEmailPendingVerification(newEmail)
+      toast.success(`${t('profile.emailVerificationSent')} ${newEmail}`)
+      return true
+    } catch (error: any) {
+      console.error('Email change error:', error)
+      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+        toast.error(t('profile.emailAlreadyExists'))
+      } else {
+        toast.error(t('profile.emailChangeError'))
+      }
+      return false
+    } finally {
+      setIsChangingEmail(false)
+    }
+  }
 
   const handleSave = async () => {
     // Validate phone number if provided
@@ -60,6 +103,15 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
     
     setIsSaving(true)
     try {
+      // Handle email change separately
+      if (newEmail !== user.email) {
+        const emailChanged = await handleEmailChange()
+        if (!emailChanged) {
+          setIsSaving(false)
+          return
+        }
+      }
+
       // Save email preferences separately
       if (profile.email_preferences) {
         const { error: emailPrefError } = await supabase
@@ -130,6 +182,17 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
       setIsTestingEmail(false)
     }
   }
+
+  // Handle email verification redirect
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('email-confirmed') === 'true') {
+        toast.success(t('profile.emailChangedSuccess'))
+        window.history.replaceState({}, '', '/profile')
+      }
+    }
+  })
 
   // Show organization join CTA if no orgId
   if (!orgId) {
@@ -267,17 +330,40 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                       </p>
                     )}
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 space-y-2">
                     <Label htmlFor="email">{t('profile.email')}</Label>
                     <Input
                       id="email"
-                      value={user.email}
-                      disabled
-                      className="bg-muted"
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder={t('profile.emailPlaceholder')}
+                      disabled={isChangingEmail}
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t('profile.emailCannotChange')}
-                    </p>
+                    {newEmail !== user.email && (
+                      <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                        <Mail className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-amber-700">
+                          {t('profile.emailChangeWarning')}
+                        </p>
+                      </div>
+                    )}
+                    {emailPendingVerification && (
+                      <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                        <Mail className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-blue-700">
+                            {t('profile.emailPendingVerification')}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            {t('profile.emailPendingMessage')}: {emailPendingVerification}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            {t('profile.checkSpam')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
