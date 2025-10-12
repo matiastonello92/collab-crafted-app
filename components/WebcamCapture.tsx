@@ -27,6 +27,7 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
   const [hasPhoto, setHasPhoto] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const hasStartedPlayingRef = useRef(false)
 
   // Start webcam stream
   useEffect(() => {
@@ -49,16 +50,20 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream
+          hasStartedPlayingRef.current = false
           
           // Wait for video to have enough data before playing
           videoRef.current.oncanplay = () => {
-            if (!videoRef.current) return
+            if (!videoRef.current || hasStartedPlayingRef.current) return
+            
+            hasStartedPlayingRef.current = true
             
             videoRef.current.play().then(() => {
               setIsLoading(false)
             }).catch((err) => {
               console.error('Error playing video:', err)
               setIsLoading(false)
+              hasStartedPlayingRef.current = false
             })
             
             // Clean up after first use
@@ -88,13 +93,21 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
     // Cleanup
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current.getTracks().forEach(track => {
+          track.stop()
+          console.log('Track stopped:', track.kind)
+        })
         streamRef.current = null
       }
+      
       if (videoRef.current) {
         videoRef.current.oncanplay = null
         videoRef.current.pause()
+        videoRef.current.srcObject = null
+        videoRef.current.load()
       }
+      
+      hasStartedPlayingRef.current = false
     }
   }, [open, t])
 
@@ -133,11 +146,24 @@ export function WebcamCapture({ open, onCapture, onClose }: WebcamCaptureProps) 
 
   const handleClose = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current.getTracks().forEach(track => {
+        track.stop()
+        console.log('Track stopped on close:', track.kind)
+      })
       streamRef.current = null
     }
+    
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.srcObject = null
+      videoRef.current.load()
+    }
+    
     setHasPhoto(false)
     setError(null)
+    setIsLoading(true)
+    hasStartedPlayingRef.current = false
+    
     onClose()
   }
 
