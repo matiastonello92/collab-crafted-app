@@ -54,6 +54,7 @@ export const en = {
     today: 'Today',
     tomorrow: 'Tomorrow',
     more: 'more',
+    comingSoon: 'Coming Soon',
     messages: {
       errorSaving: 'Error saving',
       savedSuccessfully: 'Saved successfully',
@@ -2220,6 +2221,31 @@ export const en = {
     releaseToDelete: 'Release to delete',
     deleteSuccess: 'Shift deleted',
     deleteError: 'Error deleting shift',
+    viewEmployeeShifts: 'View employee shifts details',
+  },
+
+  // Employee Shifts Overview
+  employees: {
+    shifts: {
+      pageTitle: 'Shifts and Attendance',
+      backToPlanner: 'Back to Planner',
+      yourProfile: 'Your Profile',
+      comingSoon: {
+        title: '🚧 Coming Soon',
+        description: 'This section is under development',
+        features: {
+          monthlyRecap: 'Monthly hours recap',
+          scheduledHours: 'Scheduled hours',
+          leaveTaken: 'Leave/rest taken',
+          overtime: 'Overtime hours',
+          stats: 'Detailed statistics',
+        },
+      },
+      sections: {
+        monthlyStats: 'Monthly Statistics',
+        calendar: 'Shifts Calendar',
+      },
+    },
     duplicateSuccess: 'Shift duplicated successfully',
     moveSuccess: 'Shift moved successfully',
     moveError: 'Error moving shift',

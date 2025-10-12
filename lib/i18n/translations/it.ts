@@ -54,6 +54,7 @@ export const it = {
     today: 'Oggi',
     tomorrow: 'Domani',
     more: 'altro',
+    comingSoon: 'Coming Soon',
     messages: {
       errorSaving: 'Errore durante il salvataggio',
       savedSuccessfully: 'Salvato con successo',
@@ -1317,6 +1318,31 @@ export const it = {
     },
   },
 
+  // Employee Shifts Overview
+  employees: {
+    shifts: {
+      pageTitle: 'Turni e Presenze',
+      backToPlanner: 'Torna al Planner',
+      yourProfile: 'Il Tuo Profilo',
+      comingSoon: {
+        title: '🚧 Coming Soon',
+        description: 'Questa sezione è in sviluppo',
+        features: {
+          monthlyRecap: 'Recap ore mensili',
+          scheduledHours: 'Ore programmate',
+          leaveTaken: 'Permessi/riposi presi',
+          overtime: 'Ore straordinarie',
+          stats: 'Statistiche dettagliate',
+          timeline: 'Timeline turni',
+        },
+      },
+      sections: {
+        monthlyStats: 'Statistiche Mensili',
+        calendar: 'Calendario Turni',
+      },
+    },
+  },
+
 
   // Metadata (page titles/descriptions)
   metadata: {
@@ -2298,6 +2324,7 @@ export const it = {
     duplicateSuccess: 'Turno duplicato con successo',
     moveSuccess: 'Turno spostato con successo',
     moveError: 'Errore nello spostamento del turno',
+    viewEmployeeShifts: 'Visualizza dettagli turni dipendente',
   },
 
   // Recipe Photo Uploader

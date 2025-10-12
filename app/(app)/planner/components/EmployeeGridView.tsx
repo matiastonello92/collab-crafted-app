@@ -3,7 +3,8 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { format, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { User, Plus, Calendar, Trash2 } from 'lucide-react'
+import { User, Plus, Calendar, Trash2, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -99,6 +100,7 @@ export function EmployeeGridView({
   onSave
 }: Props) {
   const { t } = useTranslation()
+  const router = useRouter()
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
   // ✅ Local state for optimistic updates
   const [localShifts, setLocalShifts] = useState<ShiftWithAssignments[]>(shifts)
@@ -484,7 +486,11 @@ export function EmployeeGridView({
           
           return (
             <div key={userId} className="grid grid-cols-[200px_repeat(7,1fr)] gap-2">
-              <div className="flex items-center gap-2">
+              <div 
+                className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors group"
+                onClick={() => router.push(`/employees/${userId}/shifts`)}
+                title={t('planner.grid.viewEmployeeShifts')}
+              >
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={user?.avatar_url || undefined} />
                   <AvatarFallback>
@@ -492,8 +498,9 @@ export function EmployeeGridView({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate">
+                  <div className="font-medium text-sm truncate flex items-center gap-1">
                     {user?.full_name || user?.email}
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   {stats && (
                     <div className="text-xs text-muted-foreground">
