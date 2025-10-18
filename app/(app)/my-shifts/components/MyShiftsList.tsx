@@ -19,49 +19,6 @@ interface Props {
 
 export function MyShiftsList({ shifts, onUpdate }: Props) {
   const { t } = useTranslation()
-  const [loading, setLoading] = useState<string | null>(null)
-
-  const handleAccept = async (assignmentId: string) => {
-    setLoading(assignmentId)
-    try {
-      const res = await fetch(`/api/v1/assignments/${assignmentId}/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accept: true })
-      })
-
-      if (!res.ok) throw new Error(await res.text())
-
-      toast.success(t('myShifts.toast.shiftAccepted'))
-      onUpdate()
-    } catch (error) {
-      toast.error(t('myShifts.toast.errorAccept'))
-      console.error(error)
-    } finally {
-      setLoading(null)
-    }
-  }
-
-  const handleDecline = async (assignmentId: string) => {
-    setLoading(assignmentId)
-    try {
-      const res = await fetch(`/api/v1/assignments/${assignmentId}/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accept: false })
-      })
-
-      if (!res.ok) throw new Error(await res.text())
-
-      toast.success(t('myShifts.toast.shiftDeclined'))
-      onUpdate()
-    } catch (error) {
-      toast.error(t('myShifts.toast.errorDecline'))
-      console.error(error)
-    } finally {
-      setLoading(null)
-    }
-  }
 
   if (shifts.length === 0) {
     return (
@@ -91,7 +48,6 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
           <div className="space-y-3">
             {weekShifts.map((shift) => {
               const assignment = shift.assignments?.[0]
-              const isPending = assignment?.status === 'proposed' || assignment?.status === 'assigned'
               
               return (
                 <Card key={shift.id}>
@@ -114,18 +70,9 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                         </CardDescription>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <Badge 
-                          variant={
-                            assignment?.status === 'accepted' ? 'default' : 
-                            assignment?.status === 'declined' ? 'destructive' : 
-                            'secondary'
-                          }
-                        >
-                          {assignment?.status === 'accepted' && t('myShifts.shifts.status.accepted')}
-                          {assignment?.status === 'declined' && t('myShifts.shifts.status.declined')}
-                          {assignment?.status === 'assigned' && t('myShifts.shifts.status.assigned')}
-                          {assignment?.status === 'proposed' && t('myShifts.shifts.status.proposed')}
-                        </Badge>
+              <Badge variant="default">
+                {t('myShifts.shifts.status.assigned')}
+              </Badge>
                         {shift.job_tag && (
                           <Badge variant="outline">{shift.job_tag.label_it}</Badge>
                         )}
@@ -136,38 +83,6 @@ export function MyShiftsList({ shifts, onUpdate }: Props) {
                   {shift.notes && (
                     <CardContent className="pb-3 pt-0">
                       <p className="text-sm text-muted-foreground">{shift.notes}</p>
-                    </CardContent>
-                  )}
-
-                  {isPending && assignment && (
-                    <CardContent className="pt-0">
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleAccept(assignment.id)}
-                          disabled={loading === assignment.id}
-                          className="flex-1"
-                        >
-                          {loading === assignment.id ? (
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Check className="h-4 w-4 mr-1" />
-                              {t('myShifts.shifts.accept')}
-                            </>
-                          )}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleDecline(assignment.id)}
-                          disabled={loading === assignment.id}
-                          className="flex-1"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          {t('myShifts.shifts.decline')}
-                        </Button>
-                      </div>
                     </CardContent>
                   )}
                 </Card>

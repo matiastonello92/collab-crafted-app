@@ -34,10 +34,10 @@ export interface ShiftAssignment {
   id: string
   shift_id: string
   user_id: string
-  status: 'proposed' | 'assigned' | 'accepted' | 'declined'
-  proposed_at?: string | null
-  assigned_at?: string | null
-  responded_at?: string | null
+  org_id: string
+  status: 'assigned' // Only assigned - no proposal workflow
+  assigned_at: string
+  assigned_by: string
   created_at: string
 }
 
@@ -163,11 +163,7 @@ export interface UpdateShiftRequest {
 
 export interface AssignShiftRequest {
   user_id: string
-  status?: 'proposed' | 'assigned'
-}
-
-export interface AcceptAssignmentRequest {
-  accept: boolean // true=accept, false=decline
+  // status removed - always 'assigned'
 }
 
 export interface CreateAvailabilityRequest {

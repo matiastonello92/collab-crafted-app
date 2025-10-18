@@ -25,8 +25,8 @@ export async function GET() {
         id,
         status,
         user_id,
-        published_at,
-        acknowledged_at,
+        assigned_at,
+        assigned_by,
         created_at
       ),
       job_tag:job_tags(

@@ -83,7 +83,7 @@ export function PunchButtons({
         )
       `)
       .eq('user_id', userId)
-      .in('status', ['assigned', 'confirmed'])
+      .eq('status', 'assigned')
       .gte('shifts.start_at', startOfDay.toISOString())
       .lte('shifts.start_at', endOfDay.toISOString())
       .order('shifts.start_at', { ascending: true })

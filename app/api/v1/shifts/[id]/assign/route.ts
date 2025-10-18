@@ -50,41 +50,39 @@ export async function POST(
     
     shift = shiftData
 
-    // Check collision (only for assigned/accepted status)
-    if (validated.status === 'assigned') {
-      const hasCollision = await checkShiftCollision(
-        validated.user_id,
-        shift.start_at,
-        shift.end_at
-      )
+    // Always check collision since status is always 'assigned'
+    const hasCollision = await checkShiftCollision(
+      validated.user_id,
+      shift.start_at,
+      shift.end_at
+    )
 
-      if (hasCollision) {
-        return NextResponse.json(
-          { 
-            error: 'SHIFT_COLLISION',
-            message: 'User already has an overlapping shift'
-          },
-          { status: 409 }
-        )
-      }
+    if (hasCollision) {
+      return NextResponse.json(
+        { 
+          error: 'SHIFT_COLLISION',
+          message: 'User already has an overlapping shift'
+        },
+        { status: 409 }
+      )
     }
 
     // Check if assignment already exists
     const { data: existingAssignment } = await supabase
       .from('shift_assignments')
-      .select('id, status')
+      .select('id')
       .eq('shift_id', params.id)
       .eq('user_id', validated.user_id)
-      .single()
+      .maybeSingle()
 
     if (existingAssignment) {
       // Update existing assignment
       const { data, error } = await supabase
         .from('shift_assignments')
         .update({
-          status: validated.status,
-          assigned_at: validated.status === 'assigned' ? new Date().toISOString() : null,
-          proposed_at: validated.status === 'proposed' ? new Date().toISOString() : null,
+          status: 'assigned',
+          assigned_at: new Date().toISOString(),
+          assigned_by: user.id
         })
         .eq('id', existingAssignment.id)
         .select()
@@ -99,9 +97,10 @@ export async function POST(
         .insert({
           shift_id: params.id,
           user_id: validated.user_id,
-          status: validated.status,
-          assigned_at: validated.status === 'assigned' ? new Date().toISOString() : null,
-          proposed_at: validated.status === 'proposed' ? new Date().toISOString() : null,
+          org_id: shift.org_id,
+          status: 'assigned',
+          assigned_at: new Date().toISOString(),
+          assigned_by: user.id
         })
         .select()
         .single()

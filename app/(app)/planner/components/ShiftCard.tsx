@@ -142,8 +142,6 @@ export const ShiftCard = memo(function ShiftCard({
         showConflicts && hasError && 'border-red-500 border-2',
         showConflicts && hasWarning && !hasError && 'border-yellow-500',
         isUnassigned && 'border-dashed border-muted-foreground/30',
-        assignmentStatus === 'accepted' && 'border-green-500/30',
-        assignmentStatus === 'declined' && 'border-red-500/30',
         isLocked && 'cursor-not-allowed opacity-60'
       )}
     >
@@ -203,12 +201,9 @@ export const ShiftCard = memo(function ShiftCard({
           <span className="text-sm font-medium truncate flex-1">
             {assignment.user?.full_name || 'Utente sconosciuto'}
           </span>
-          <Badge 
-            variant={assignment.status === 'accepted' ? 'default' : 'secondary'} 
-            className="text-xs"
-          >
-            {assignment.status === 'accepted' ? 'OK' : assignment.status}
-          </Badge>
+            <Badge variant="default" className="text-xs">
+              Assegnato
+            </Badge>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-muted-foreground">

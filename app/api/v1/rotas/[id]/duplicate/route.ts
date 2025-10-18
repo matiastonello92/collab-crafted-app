@@ -149,7 +149,8 @@ export async function POST(
                 shift_id: newShift.id,
                 user_id: assignment.user_id,
                 org_id: assignment.org_id,
-                status: 'proposed', // Reset to proposed
+                status: 'assigned', // Directly assigned on duplicate
+                assigned_at: new Date().toISOString(),
                 assigned_by: user.id
               })
             }

@@ -242,7 +242,10 @@ export function EmployeeGridView({
           id: `temp-assign-${Date.now()}`,
           shift_id: tempId,
           user_id: userId,
+          org_id: shift.org_id,
           status: 'assigned' as const,
+          assigned_at: new Date().toISOString(),
+          assigned_by: '', // Will be set by server
           created_at: new Date().toISOString()
         }] : []
       }
@@ -264,7 +267,10 @@ export function EmployeeGridView({
               id: shift.assignments?.[0]?.id || `temp-assign-${Date.now()}`,
               shift_id: shift.id,
               user_id: userId,
+              org_id: s.org_id,
               status: 'assigned' as const,
+              assigned_at: shift.assignments?.[0]?.assigned_at || new Date().toISOString(),
+              assigned_by: shift.assignments?.[0]?.assigned_by || '',
               created_at: shift.assignments?.[0]?.created_at || new Date().toISOString()
             }] : []
           }

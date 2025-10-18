@@ -50,11 +50,7 @@ export const updateShiftSchema = z.object({
 
 export const assignShiftSchema = z.object({
   user_id: z.string().uuid('Invalid user_id'),
-  status: z.enum(['proposed', 'assigned']).default('assigned'),
-})
-
-export const acceptAssignmentSchema = z.object({
-  accept: z.boolean(),
+  // status removed - always 'assigned'
 })
 
 // Availability

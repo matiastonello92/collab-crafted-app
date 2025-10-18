@@ -2823,36 +2823,30 @@ export type Database = {
       }
       shift_assignments: {
         Row: {
-          acknowledged_at: string | null
-          assigned_at: string | null
+          assigned_at: string
+          assigned_by: string | null
           created_at: string
           id: string
-          proposed_at: string | null
-          published_at: string | null
           shift_id: string
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          acknowledged_at?: string | null
-          assigned_at?: string | null
+          assigned_at: string
+          assigned_by?: string | null
           created_at?: string
           id?: string
-          proposed_at?: string | null
-          published_at?: string | null
           shift_id: string
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          acknowledged_at?: string | null
-          assigned_at?: string | null
+          assigned_at?: string
+          assigned_by?: string | null
           created_at?: string
           id?: string
-          proposed_at?: string | null
-          published_at?: string | null
           shift_id?: string
           status?: string
           updated_at?: string

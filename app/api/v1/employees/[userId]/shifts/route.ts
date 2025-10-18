@@ -48,8 +48,8 @@ export async function GET(
         id,
         user_id,
         status,
-        accepted_at,
-        declined_at
+        assigned_at,
+        assigned_by
       )
     `)
     .eq('shift_assignments.user_id', userId)
@@ -77,9 +77,10 @@ export async function GET(
       breakMinutes: s.break_minutes,
       locationId: s.location_id,
       locationName: s.locations?.name,
+      assignmentId: s.shift_assignments[0]?.id,
       status: s.shift_assignments[0]?.status,
-      acceptedAt: s.shift_assignments[0]?.accepted_at,
-      declinedAt: s.shift_assignments[0]?.declined_at
+      assignedAt: s.shift_assignments[0]?.assigned_at,
+      assignedBy: s.shift_assignments[0]?.assigned_by
     })) || [],
     leaves: leaves?.map((l: any) => ({
       id: l.id,
