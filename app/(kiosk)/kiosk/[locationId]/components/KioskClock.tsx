@@ -26,14 +26,14 @@ export function KioskClock() {
   })
 
   return (
-    <div className="text-center space-y-4">
-      <div className="flex items-center justify-center gap-4">
-        <Clock className="w-12 h-12 text-primary" />
-        <div className="text-6xl font-mono font-bold text-foreground tracking-wider">
-          {hours}:{minutes}:{seconds}
+    <div className="text-center space-y-6">
+      <div className="flex items-center justify-center gap-6">
+        <Clock className="w-14 h-14 text-white/90 drop-shadow-lg" />
+        <div className="text-7xl font-mono font-bold text-white tracking-wider drop-shadow-2xl">
+          {hours}:{minutes}:<span className="text-white/70">{seconds}</span>
         </div>
       </div>
-      <p className="text-lg text-muted-foreground capitalize">{dateStr}</p>
+      <p className="text-xl text-white/70 capitalize font-medium">{dateStr}</p>
     </div>
   )
 }

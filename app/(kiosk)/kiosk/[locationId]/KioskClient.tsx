@@ -26,18 +26,20 @@ export function KioskClient({ locationId, locationName, kioskToken }: KioskClien
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="w-full max-w-2xl space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-foreground">{locationName}</h1>
-          <p className="text-xl text-muted-foreground">Timbratura Presenze</p>
+      <div className="w-full max-w-3xl space-y-8">
+        {/* Header with Glass Effect */}
+        <div className="text-center space-y-3 backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl">
+          <h1 className="text-5xl font-bold text-white drop-shadow-lg">{locationName}</h1>
+          <p className="text-2xl text-white/80">Timbratura Presenze</p>
         </div>
 
-        {/* Clock */}
-        <KioskClock />
+        {/* Clock with Glass Effect */}
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl">
+          <KioskClock />
+        </div>
 
-        {/* Main Content */}
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
+        {/* Main Content with Enhanced Glass Effect */}
+        <div className="backdrop-blur-2xl bg-white/10 border border-white/20 rounded-3xl p-10 shadow-2xl">
           {!currentUser ? (
             <PinInput
               locationId={locationId}
@@ -56,9 +58,9 @@ export function KioskClient({ locationId, locationName, kioskToken }: KioskClien
           )}
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Klyra Shifts © 2025</p>
+        {/* Footer with Glass Effect */}
+        <div className="text-center text-sm backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl py-4 px-6">
+          <p className="text-white/60">Klyra Shifts © 2025</p>
         </div>
       </div>
     </div>

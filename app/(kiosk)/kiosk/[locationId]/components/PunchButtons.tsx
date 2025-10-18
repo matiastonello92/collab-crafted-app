@@ -85,25 +85,25 @@ export function PunchButtons({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* User Header */}
-      <div className="text-center space-y-2">
-        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-          <User className="w-10 h-10 text-primary" />
+      <div className="text-center space-y-4">
+        <div className="w-24 h-24 rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/30 to-white/10 border border-white/30 flex items-center justify-center mx-auto shadow-2xl">
+          <User className="w-12 h-12 text-white" />
         </div>
-        <h2 className="text-3xl font-bold text-foreground">{userName}</h2>
-        <p className="text-muted-foreground">{t('kiosk.chooseAction')}</p>
+        <h2 className="text-4xl font-bold text-white drop-shadow-lg">{userName}</h2>
+        <p className="text-white/70 text-lg">{t('kiosk.chooseAction')}</p>
       </div>
 
       {/* Session Summary */}
       {sessionSummary && sessionSummary.status !== 'not_started' && (
-        <div className="bg-muted/50 rounded-lg p-4 text-center space-y-1">
-          <p className="text-sm text-muted-foreground">{t('kiosk.hoursToday')}</p>
-          <p className="text-2xl font-bold text-foreground">
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 text-center space-y-2 shadow-xl">
+          <p className="text-sm text-white/70">{t('kiosk.hoursToday')}</p>
+          <p className="text-3xl font-bold text-white">
             {Math.floor(sessionSummary.totalMinutes / 60)}h {sessionSummary.totalMinutes % 60}m
           </p>
           {sessionSummary.breakMinutes > 0 && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-white/60">
               {t('kiosk.breaks')}: {sessionSummary.breakMinutes}m
             </p>
           )}
@@ -111,15 +111,15 @@ export function PunchButtons({
       )}
 
       {/* Punch Buttons */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         <Button
           size="lg"
           variant="default"
           onClick={() => handlePunch('clock_in')}
           disabled={isLoading}
-          className="h-28 text-xl flex-col gap-3 bg-primary hover:bg-primary/90"
+          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
         >
-          <LogIn className="w-10 h-10" />
+          <LogIn className="w-12 h-12" />
           {t('kiosk.clockIn')}
         </Button>
 
@@ -128,9 +128,9 @@ export function PunchButtons({
           variant="default"
           onClick={() => handlePunch('clock_out')}
           disabled={isLoading}
-          className="h-28 text-xl flex-col gap-3 bg-destructive hover:bg-destructive/90"
+          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
         >
-          <LogOut className="w-10 h-10" />
+          <LogOut className="w-12 h-12" />
           {t('kiosk.clockOut')}
         </Button>
 
@@ -139,9 +139,9 @@ export function PunchButtons({
           variant="outline"
           onClick={() => handlePunch('break_start')}
           disabled={isLoading}
-          className="h-28 text-xl flex-col gap-3 border-2"
+          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
         >
-          <Coffee className="w-10 h-10" />
+          <Coffee className="w-12 h-12" />
           {t('kiosk.breakStart')}
         </Button>
 
@@ -150,9 +150,9 @@ export function PunchButtons({
           variant="outline"
           onClick={() => handlePunch('break_end')}
           disabled={isLoading}
-          className="h-28 text-xl flex-col gap-3 border-2"
+          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
         >
-          <Play className="w-10 h-10" />
+          <Play className="w-12 h-12" />
           {t('kiosk.breakEnd')}
         </Button>
       </div>
@@ -163,7 +163,7 @@ export function PunchButtons({
           variant="ghost"
           onClick={onLogout}
           disabled={isLoading}
-          className="text-muted-foreground"
+          className="text-white/60 hover:text-white hover:bg-white/10 text-lg px-6 py-3"
         >
           {t('kiosk.changeUser').replace('{name}', userName)}
         </Button>
