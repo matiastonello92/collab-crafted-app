@@ -660,8 +660,12 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
     data: { shift }
   })
   
-  const startTime = formatTimeCombo(new Date(shift.start_at))
-  const endTime = formatTimeCombo(new Date(shift.end_at))
+  // ✅ Usa actual se esiste (clocked in), altrimenti planned
+  const displayStart = shift.actual_start_at || shift.start_at
+  const displayEnd = shift.actual_end_at || shift.end_at
+  const startTime = formatTimeCombo(new Date(displayStart))
+  const endTime = formatTimeCombo(new Date(displayEnd))
+  const isClocked = !!shift.actual_start_at
   const bgColor = hexToRgba(shift.job_tag?.color, 0.35) // ✅ 35% opacità per colori visibili
   const borderColor = hexToRgba(shift.job_tag?.color, 1)
   
@@ -671,9 +675,9 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   }
   
   const style = {
-    backgroundColor: bgColor,
-    borderColor: borderColor,
-    borderWidth: '1px',
+    backgroundColor: isClocked ? 'rgba(251, 146, 60, 0.25)' : bgColor, // ✅ Arancione se clockato
+    borderColor: isClocked ? 'rgb(251, 146, 60)' : borderColor,
+    borderWidth: '2px',
     opacity: isDragging ? 0 : 1,
     cursor: isDragging ? 'grabbing' : 'grab'
   }
@@ -703,13 +707,19 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
         </div>
       )}
       
-      <div className="flex items-center justify-between gap-2 text-xs text-white">
+      <div className="flex items-center justify-between gap-2 text-xs">
         <span 
-          className="font-semibold truncate"
-          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          className={`font-semibold truncate ${isClocked ? 'text-orange-600' : 'text-white'}`}
+          style={{ textShadow: isClocked ? '0 1px 2px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {startTime} - {endTime}
         </span>
+        
+        {isClocked && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500 text-white font-medium whitespace-nowrap">
+            🟠 Clockato
+          </span>
+        )}
       </div>
     </Card>
   )
