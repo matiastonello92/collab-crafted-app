@@ -73,8 +73,16 @@ export const ShiftCard = memo(function ShiftCard({
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
   } : undefined
   
-  const startTime = format(parseISO(shift.start_at), 'HH:mm')
-  const endTime = format(parseISO(shift.end_at), 'HH:mm')
+  // Check if shift is in progress and use actual times
+  const isInProgress = shift.status === 'in_progress'
+  const startTime = format(
+    parseISO(isInProgress && shift.actual_start_at ? shift.actual_start_at : shift.start_at), 
+    'HH:mm'
+  )
+  const endTime = format(
+    parseISO(isInProgress && shift.actual_end_at ? shift.actual_end_at : shift.end_at), 
+    'HH:mm'
+  )
   const assignment = shift.assignments?.[0]
   
   // Calculate shift duration
@@ -155,6 +163,16 @@ export const ShiftCard = memo(function ShiftCard({
         </Badge>
       )}
       
+      {/* In Progress badge */}
+      {isInProgress && (
+        <Badge 
+          className="absolute top-2 right-16 bg-orange-500/90 text-white font-bold border-none px-2 py-0.5"
+          aria-label="Turno in corso"
+        >
+          🟢 In corso
+        </Badge>
+      )}
+      
       {/* Conflict indicator badge */}
       {showConflicts && (hasError || hasWarning) && (
         <div className="absolute -top-2 -left-2 z-10">
@@ -170,9 +188,20 @@ export const ShiftCard = memo(function ShiftCard({
       
       {/* Header: orario + durata */}
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <Clock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+        <div className={cn(
+          "flex items-center gap-1.5 text-xs font-semibold",
+          isInProgress && "text-orange-600 dark:text-orange-400"
+        )}>
+          <Clock className={cn(
+            "h-3.5 w-3.5",
+            isInProgress ? "text-orange-500" : "text-muted-foreground"
+          )} aria-hidden="true" />
           <span>{startTime} - {endTime}</span>
+          {isInProgress && (
+            <span className="text-xs px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded font-medium">
+              In corso
+            </span>
+          )}
           <span className="text-muted-foreground font-normal">({duration}h)</span>
         </div>
         <div className="flex items-center gap-2">
