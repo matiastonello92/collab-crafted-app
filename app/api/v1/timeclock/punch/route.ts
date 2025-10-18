@@ -341,14 +341,13 @@ async function handleClockOut(
     const shift = activeAssignments[0].shifts as any
     console.log(`✅ [Kiosk] Clock-out: Updating shift ${shift.id}`)
     
-    await supabase
-      .from('shifts')
-      .update({ 
-        actual_end_at: occurredAt,
-        end_at: occurredAt,
-        status: 'completed'
-      })
-      .eq('id', shift.id)
+  await supabase
+    .from('shifts')
+    .update({
+      actual_end_at: occurredAt,
+      status: 'completed'
+    })
+    .eq('id', shift.id)
   } else {
     console.log('❌ No active shift found for clock-out')
   }
