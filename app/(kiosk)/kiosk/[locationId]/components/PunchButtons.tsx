@@ -224,6 +224,39 @@ export function PunchButtons({
     })
   }
 
+  // Calculate timing status for shift card styling
+  const getShiftTimingStatus = (shift: typeof nextShift) => {
+    if (!shift || shift.actual_start_at) return null // Already clocked in
+    
+    const now = new Date()
+    const startTime = new Date(shift.start_at)
+    const diffMs = now.getTime() - startTime.getTime()
+    const diffMinutes = Math.round(diffMs / (1000 * 60))
+    
+    // Late: 1 minute or more after start
+    if (diffMinutes >= 1) {
+      return {
+        type: 'late' as const,
+        minutes: diffMinutes,
+        bgClasses: 'from-red-500/30 to-rose-600/30',
+        message: `IN RITARDO DI ${diffMinutes} MIN`
+      }
+    }
+    
+    // Early: More than 5 minutes before start
+    if (diffMinutes <= -6) {
+      return {
+        type: 'early' as const,
+        minutes: Math.abs(diffMinutes),
+        bgClasses: 'from-amber-500/30 to-yellow-500/30',
+        message: `IN ANTICIPO DI ${Math.abs(diffMinutes)} MIN`
+      }
+    }
+    
+    // On time (within 5 minutes before start)
+    return null
+  }
+
   return (
     <div className="space-y-6">
       {/* User Header - No Icon */}
@@ -253,11 +286,23 @@ export function PunchButtons({
           {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') ? (
             <button
               onClick={handleStartPlannedShift}
-              className="w-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2 hover:from-blue-500/35 hover:to-cyan-500/35 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className={`w-full bg-gradient-to-br ${
+                getShiftTimingStatus(nextShift)?.bgClasses || 'from-blue-500/25 to-cyan-500/25'
+              } rounded-3xl p-5 text-center space-y-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer transition-all`}
             >
               <p className="text-sm text-white/70 uppercase tracking-wide">
                 {nextShift.actual_start_at ? 'TURNO IN CORSO' : t('kiosk.nextShift')}
               </p>
+              {/* Timing Status Warning */}
+              {(() => {
+                const status = getShiftTimingStatus(nextShift)
+                if (!status) return null
+                return (
+                  <p className="text-base text-white font-bold tracking-wide">
+                    {status.message}
+                  </p>
+                )
+              })()}
               <p className="text-3xl font-bold text-white">
                 {getDisplayStartTime(nextShift)}
                 {' - '}
@@ -280,10 +325,22 @@ export function PunchButtons({
               </p>
             </button>
           ) : (
-            <div className="bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2">
+            <div className={`bg-gradient-to-br ${
+              getShiftTimingStatus(nextShift)?.bgClasses || 'from-blue-500/25 to-cyan-500/25'
+            } rounded-3xl p-5 text-center space-y-2`}>
               <p className="text-sm text-white/70 uppercase tracking-wide">
                 {nextShift.actual_start_at ? 'TURNO IN CORSO' : t('kiosk.nextShift')}
               </p>
+              {/* Timing Status Warning */}
+              {(() => {
+                const status = getShiftTimingStatus(nextShift)
+                if (!status) return null
+                return (
+                  <p className="text-base text-white font-bold tracking-wide">
+                    {status.message}
+                  </p>
+                )
+              })()}
               <p className="text-3xl font-bold text-white">
                 {getDisplayStartTime(nextShift)}
                 {' - '}
