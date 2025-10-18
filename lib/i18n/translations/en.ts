@@ -3260,6 +3260,8 @@ export const en = {
     breakStart: 'Start Break',
     breakEnd: 'End Break',
     changeUser: 'Not {name}? Change user',
+    nextShift: 'Next Shift',
+    noShiftsScheduled: 'No shifts scheduled for today',
     punchSuccess: {
       clockIn: 'Clock in recorded',
       clockOut: 'Clock out recorded',
