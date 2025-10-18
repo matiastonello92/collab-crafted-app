@@ -3,7 +3,6 @@
 
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
-import { getNowInParis } from '@/lib/shifts/timezone-utils'
 
 export async function GET(request: Request) {
   try {
@@ -20,8 +19,8 @@ export async function GET(request: Request) {
 
     const supabase = createSupabaseAdminClient()
     
-    // Search for shifts in the next 2 hours (use Paris timezone)
-    const now = getNowInParis()
+    // Search for shifts in the next 2 hours
+    const now = new Date()
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000)
 
     console.log(`[Kiosk API] Query params:`, {
