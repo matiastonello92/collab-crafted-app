@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -28,7 +28,7 @@ interface Props {
   showConflicts?: boolean
 }
 
-export const ShiftCard = memo(function ShiftCard({ 
+export function ShiftCard({ 
   shift, 
   isDragging, 
   isLocked, 
@@ -308,4 +308,4 @@ export const ShiftCard = memo(function ShiftCard({
       )}
     </div>
   )
-})
+}

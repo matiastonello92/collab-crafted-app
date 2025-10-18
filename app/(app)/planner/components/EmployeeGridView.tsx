@@ -449,7 +449,7 @@ export function EmployeeGridView({
                   >
                     {dayShifts.map(shift => (
                       <DraggableShiftCard
-                        key={shift.id}
+                        key={`${shift.id}-${shift.status}-${shift.actual_start_at || 'no-actual'}`}
                         shift={shift}
                         onClick={() => onShiftClick?.(shift)}
                       />
@@ -543,7 +543,7 @@ export function EmployeeGridView({
                     >
                       {dayShifts.map(shift => (
                         <DraggableShiftCard
-                          key={shift.id}
+                          key={`${shift.id}-${shift.status}-${shift.actual_start_at || 'no-actual'}`}
                           shift={shift}
                           onClick={() => onShiftClick?.(shift)}
                         />
