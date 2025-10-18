@@ -2989,6 +2989,9 @@ export type Database = {
       }
       shifts: {
         Row: {
+          actual_break_minutes: number | null
+          actual_end_at: string | null
+          actual_start_at: string | null
           break_minutes: number
           created_at: string
           created_by: string | null
@@ -2998,13 +3001,20 @@ export type Database = {
           location_id: string
           notes: string | null
           org_id: string
+          planned_break_minutes: number | null
+          planned_end_at: string | null
+          planned_start_at: string | null
           rota_id: string
           source: string
           start_at: string
+          status: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          actual_break_minutes?: number | null
+          actual_end_at?: string | null
+          actual_start_at?: string | null
           break_minutes?: number
           created_at?: string
           created_by?: string | null
@@ -3014,13 +3024,20 @@ export type Database = {
           location_id: string
           notes?: string | null
           org_id: string
+          planned_break_minutes?: number | null
+          planned_end_at?: string | null
+          planned_start_at?: string | null
           rota_id: string
           source?: string
           start_at: string
+          status?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          actual_break_minutes?: number | null
+          actual_end_at?: string | null
+          actual_start_at?: string | null
           break_minutes?: number
           created_at?: string
           created_by?: string | null
@@ -3030,9 +3047,13 @@ export type Database = {
           location_id?: string
           notes?: string | null
           org_id?: string
+          planned_break_minutes?: number | null
+          planned_end_at?: string | null
+          planned_start_at?: string | null
           rota_id?: string
           source?: string
           start_at?: string
+          status?: string | null
           updated_at?: string
           updated_by?: string | null
         }

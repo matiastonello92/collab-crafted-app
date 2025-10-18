@@ -20,11 +20,20 @@ export interface Shift {
   location_id: string
   rota_id: string
   job_tag_id?: string | null
+  // Legacy fields (mantieni per compatibilità)
   start_at: string // ISO datetime (timestamptz)
   end_at: string
   break_minutes: number
+  // Nuovi campi unificati (planner vs kiosk)
+  planned_start_at?: string | null
+  planned_end_at?: string | null
+  planned_break_minutes?: number | null
+  actual_start_at?: string | null
+  actual_end_at?: string | null
+  actual_break_minutes?: number | null
+  status?: 'draft' | 'assigned' | 'in_progress' | 'completed' | 'cancelled'
   notes?: string | null
-  source: 'planned' | 'actual' // planned: manager-created, actual: kiosk-generated
+  source: 'planned' | 'actual' | 'kiosk' // planned: manager-created, actual/kiosk: kiosk-generated
   created_by?: string | null
   updated_by?: string | null
   created_at: string

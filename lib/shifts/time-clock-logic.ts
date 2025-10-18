@@ -130,76 +130,90 @@ export async function getTodaySessionSummary(
 
   const startOfDay = new Date()
   startOfDay.setHours(0, 0, 0, 0)
+  const endOfDay = new Date()
+  endOfDay.setHours(23, 59, 59, 999)
 
-  const { data: events, error } = await supabase
+  // ✅ Leggi turni effettivi da shifts (single source of truth)
+  const { data: todayShifts } = await supabase
+    .from('shifts')
+    .select('id, actual_start_at, actual_end_at, actual_break_minutes, status')
+    .eq('location_id', locationId)
+    .eq('org_id', orgId)
+    .not('actual_start_at', 'is', null)
+    .gte('actual_start_at', startOfDay.toISOString())
+    .lte('actual_start_at', endOfDay.toISOString())
+    .neq('status', 'cancelled')
+    .in('id', (await supabase
+      .from('shift_assignments')
+      .select('shift_id')
+      .eq('user_id', userId)
+      .then(res => res.data?.map(a => a.shift_id) || [])
+    ))
+    .order('actual_start_at', { ascending: true })
+
+  // Calcola ore totali dai turni
+  let totalMinutes = 0
+  let breakMinutes = 0
+  let status: 'not_started' | 'clocked_in' | 'on_break' | 'clocked_out' = 'not_started'
+
+  if (todayShifts && todayShifts.length > 0) {
+    for (const shift of todayShifts) {
+      if (shift.actual_end_at) {
+        // Turno completato
+        const duration = (new Date(shift.actual_end_at).getTime() - new Date(shift.actual_start_at).getTime()) / 60000
+        totalMinutes += duration
+        breakMinutes += shift.actual_break_minutes || 0
+      } else if (shift.status === 'in_progress') {
+        // Turno in corso
+        const duration = (Date.now() - new Date(shift.actual_start_at).getTime()) / 60000
+        totalMinutes += duration
+        breakMinutes += shift.actual_break_minutes || 0
+      }
+    }
+
+    const lastShift = todayShifts[todayShifts.length - 1]
+    if (lastShift.status === 'in_progress') {
+      // Verificare se in pausa controllando ultimo evento
+      const { data: lastEvent } = await supabase
+        .from('time_clock_events')
+        .select('kind, occurred_at')
+        .eq('user_id', userId)
+        .eq('location_id', locationId)
+        .eq('org_id', orgId)
+        .gte('occurred_at', startOfDay.toISOString())
+        .order('occurred_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (lastEvent?.kind === 'break_start') {
+        status = 'on_break'
+        // Aggiungi tempo pausa corrente
+        const breakDuration = (Date.now() - new Date(lastEvent.occurred_at).getTime()) / 60000
+        breakMinutes += breakDuration
+      } else {
+        status = 'clocked_in'
+      }
+    } else {
+      status = 'clocked_out'
+    }
+  }
+
+  // Dettaglio ultimo evento per UI
+  const { data: lastEventData } = await supabase
     .from('time_clock_events')
     .select('*')
     .eq('user_id', userId)
     .eq('location_id', locationId)
     .eq('org_id', orgId)
     .gte('occurred_at', startOfDay.toISOString())
-    .order('occurred_at', { ascending: true })
-
-  if (error || !events || events.length === 0) {
-    return {
-      totalMinutes: 0,
-      breakMinutes: 0,
-      status: 'not_started'
-    }
-  }
-
-  let totalMinutes = 0
-  let breakMinutes = 0
-  let currentClockIn: Date | null = null
-  let currentBreakStart: Date | null = null
-  let status: 'not_started' | 'clocked_in' | 'on_break' | 'clocked_out' = 'not_started'
-
-  for (const event of events) {
-    const eventTime = new Date(event.occurred_at)
-
-    switch (event.kind) {
-      case 'clock_in':
-        currentClockIn = eventTime
-        status = 'clocked_in'
-        break
-
-      case 'clock_out':
-        if (currentClockIn) {
-          totalMinutes += (eventTime.getTime() - currentClockIn.getTime()) / 60000
-          currentClockIn = null
-        }
-        status = 'clocked_out'
-        break
-
-      case 'break_start':
-        currentBreakStart = eventTime
-        status = 'on_break'
-        break
-
-      case 'break_end':
-        if (currentBreakStart) {
-          breakMinutes += (eventTime.getTime() - currentBreakStart.getTime()) / 60000
-          currentBreakStart = null
-        }
-        status = 'clocked_in'
-        break
-    }
-  }
-
-  // If still clocked in, add time until now
-  if (currentClockIn) {
-    totalMinutes += (Date.now() - currentClockIn.getTime()) / 60000
-  }
-
-  // If still on break, add break time until now
-  if (currentBreakStart) {
-    breakMinutes += (Date.now() - currentBreakStart.getTime()) / 60000
-  }
+    .order('occurred_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   return {
     totalMinutes: Math.round(totalMinutes),
     breakMinutes: Math.round(breakMinutes),
     status,
-    lastEvent: events[events.length - 1]
+    lastEvent: lastEventData || undefined
   }
 }
