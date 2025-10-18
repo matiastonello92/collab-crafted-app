@@ -259,24 +259,29 @@ async function handleClockIn(
     rota = newRota
   }
   
-  const estimatedEnd = new Date(clockInTime.getTime() + 8 * 60 * 60 * 1000)
-  const { data: newShift } = await supabase
+  // ❌ NON impostare end_at - il turno rimane aperto fino al clock-out
+  const { data: newShift, error: shiftError } = await supabase
     .from('shifts')
     .insert({
       org_id: orgId,
       location_id: locationId,
       rota_id: rota.id,
       start_at: occurredAt,
-      end_at: estimatedEnd.toISOString(),
       break_minutes: 0,
       source: 'actual',
       notes: `Turno non pianificato - Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}`
     })
-    .select('id')
+    .select('id, org_id, location_id')
     .single()
+
+  if (shiftError) {
+    console.error('❌ [Kiosk] Failed to create shift:', shiftError)
+  } else {
+    console.log('✅ [Kiosk] Shift created:', newShift?.id)
+  }
   
   if (newShift) {
-    await supabase
+    const { error: assignError } = await supabase
       .from('shift_assignments')
       .insert({
         shift_id: newShift.id,
@@ -286,6 +291,20 @@ async function handleClockIn(
         assigned_at: occurredAt,
         assigned_by: userId
       })
+
+    if (assignError) {
+      console.error('❌ [Kiosk] Failed to assign shift:', {
+        code: assignError.code,
+        message: assignError.message,
+        details: assignError.details,
+        hint: assignError.hint,
+        shift_id: newShift.id,
+        user_id: userId,
+        org_id: orgId
+      })
+    } else {
+      console.log('✅ [Kiosk] Shift assigned successfully to user:', userId)
+    }
   }
 }
 
