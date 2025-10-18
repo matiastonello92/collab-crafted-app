@@ -665,7 +665,9 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   const displayEnd = shift.actual_end_at || shift.end_at
   const startTime = formatTimeCombo(new Date(displayStart))
   const endTime = formatTimeCombo(new Date(displayEnd))
-  const isClocked = !!shift.actual_start_at
+  // Distinguere tra "in corso" e "completato"
+  const isInProgress = shift.actual_start_at && !shift.actual_end_at
+  const isCompleted = shift.actual_start_at && shift.actual_end_at
   const bgColor = hexToRgba(shift.job_tag?.color, 0.35) // ✅ 35% opacità per colori visibili
   const borderColor = hexToRgba(shift.job_tag?.color, 1)
   
@@ -675,9 +677,8 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   }
   
   const style = {
-    backgroundColor: bgColor, // ✅ Mantiene sempre colore job_tag
-    borderColor: isClocked ? 'rgb(251, 146, 60)' : borderColor,
-    borderWidth: isClocked ? '3px' : '2px', // ✅ Bordo più spesso quando clockato
+    backgroundColor: bgColor,
+    border: 'none',
     opacity: isDragging ? 0 : 1,
     cursor: isDragging ? 'grabbing' : 'grab'
   }
@@ -699,25 +700,29 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       className="shift-card p-2 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
       {shift.job_tag && (
-        <div 
-          className="text-sm font-bold text-white mb-1 truncate"
-          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-        >
-          {shift.job_tag.label_it}
+        <div className="flex items-center gap-1.5 mb-1">
+          {/* Indicatore stato a sinistra */}
+          {isInProgress && <span className="text-base leading-none">🟠</span>}
+          {isCompleted && <span className="text-base leading-none text-green-400">✓</span>}
+          
+          {/* Job tag centrato */}
+          <div 
+            className="text-sm font-bold text-white truncate flex-1 text-center"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+          >
+            {shift.job_tag.label_it}
+          </div>
         </div>
       )}
       
-      <div className="flex items-center justify-between gap-2 text-xs">
+      {/* Orario completo centrato */}
+      <div className="text-center">
         <span 
-          className={`font-semibold truncate ${isClocked ? 'text-orange-500' : 'text-white'}`}
-          style={{ textShadow: isClocked ? 'none' : '0 1px 2px rgba(0,0,0,0.5)' }}
+          className={`font-semibold text-xs ${isInProgress ? 'text-orange-500' : 'text-white'}`}
+          style={{ textShadow: isInProgress ? 'none' : '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {startTime} - {endTime}
         </span>
-        
-        {isClocked && (
-          <span className="text-base">🟠</span>
-        )}
       </div>
     </Card>
   )
