@@ -77,8 +77,8 @@ export function PunchButtons({
       if (shifts && shifts.length > 0) {
         const shift = shifts[0]
         setNextShift({
-          start_at: shift.planned_start_at,
-          end_at: shift.planned_end_at,
+          start_at: shift.start_at,
+          end_at: shift.end_at,
           job_tag: shift.job_tags?.label_it
         })
       } else {

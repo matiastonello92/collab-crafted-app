@@ -186,21 +186,29 @@ async function handleClockIn(
   console.log(`[Kiosk] Searching shifts between ${now.toISOString()} and ${twoHoursLater.toISOString()}`)
 
   // 1. Cercare turno pianificato nelle prossime 2 ore con status 'draft' o 'assigned'
-  const { data: assignments, error: assignError } = await supabase
-    .from('shift_assignments')
-    .select('shift_id, shifts!inner(id, planned_start_at, planned_end_at, status)')
-    .eq('user_id', userId)
-    .eq('shifts.location_id', locationId)
-    .in('shifts.status', ['draft', 'assigned'])
-    .gte('shifts.planned_start_at', now.toISOString())
-    .lte('shifts.planned_start_at', twoHoursLater.toISOString())
+  const { data: plannedShifts, error: assignError } = await supabase
+    .from('shifts')
+    .select(`
+      id,
+      start_at,
+      end_at,
+      status,
+      shift_assignments!inner (user_id, status)
+    `)
+    .eq('location_id', locationId)
+    .eq('shift_assignments.user_id', userId)
+    .eq('shift_assignments.status', 'assigned')
+    .in('status', ['draft', 'assigned'])
+    .gte('start_at', now.toISOString())
+    .lte('start_at', twoHoursLater.toISOString())
+    .order('start_at', { ascending: true })
     .limit(1)
 
   if (assignError) {
     console.error('❌ [Kiosk] Error fetching assignments:', assignError)
   }
 
-  const plannedShift = assignments?.[0]?.shifts as any
+  const plannedShift = plannedShifts?.[0]
 
   if (plannedShift) {
     // Aggiorna turno pianificato esistente

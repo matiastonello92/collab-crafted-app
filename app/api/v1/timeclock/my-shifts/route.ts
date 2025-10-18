@@ -34,8 +34,8 @@ export async function GET(request: Request) {
       .from('shifts')
       .select(`
         id,
-        planned_start_at,
-        planned_end_at,
+        start_at,
+        end_at,
         status,
         job_tag_id,
         job_tags (
@@ -49,9 +49,9 @@ export async function GET(request: Request) {
       .eq('location_id', locationId)
       .eq('shift_assignments.user_id', userId)
       .eq('shift_assignments.status', 'assigned')
-      .gte('planned_start_at', now.toISOString())
-      .lte('planned_start_at', twoHoursLater.toISOString())
-      .order('planned_start_at', { ascending: true })
+      .gte('start_at', now.toISOString())
+      .lte('start_at', twoHoursLater.toISOString())
+      .order('start_at', { ascending: true })
       .limit(1)
 
     if (error) {
