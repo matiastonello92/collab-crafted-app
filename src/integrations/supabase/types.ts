@@ -2999,6 +2999,7 @@ export type Database = {
           notes: string | null
           org_id: string
           rota_id: string
+          source: string
           start_at: string
           updated_at: string
           updated_by: string | null
@@ -3014,6 +3015,7 @@ export type Database = {
           notes?: string | null
           org_id: string
           rota_id: string
+          source?: string
           start_at: string
           updated_at?: string
           updated_by?: string | null
@@ -3029,6 +3031,7 @@ export type Database = {
           notes?: string | null
           org_id?: string
           rota_id?: string
+          source?: string
           start_at?: string
           updated_at?: string
           updated_by?: string | null

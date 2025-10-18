@@ -24,6 +24,7 @@ export interface Shift {
   end_at: string
   break_minutes: number
   notes?: string | null
+  source: 'planned' | 'actual' // planned: manager-created, actual: kiosk-generated
   created_by?: string | null
   updated_by?: string | null
   created_at: string

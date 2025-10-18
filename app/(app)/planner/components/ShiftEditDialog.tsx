@@ -229,6 +229,21 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
             <DialogTitle>
               {isNew ? t('planner.edit.newShiftOrAbsence') : t('planner.edit.editShift')}
             </DialogTitle>
+            
+            {!isNew && shift.source === 'actual' && (
+              <div className="mt-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
+                <strong className="text-green-700 dark:text-green-300">Turno effettivo</strong>
+                <p className="text-muted-foreground mt-1">
+                  Creato automaticamente da timbratura kiosk
+                </p>
+              </div>
+            )}
+            
+            {!isNew && shift.source === 'planned' && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Turno pianificato manualmente
+              </div>
+            )}
           </DialogHeader>
           
           {isNew ? (

@@ -124,6 +124,22 @@ export async function POST(request: Request) {
       throw error
     }
 
+    // ========================================
+    // SMART SHIFT MANAGEMENT
+    // ========================================
+
+    if (validated.kind === 'clock_in') {
+      await handleClockIn(supabase, user.id, validated.location_id, profile.org_id, occurredAt)
+    }
+
+    if (validated.kind === 'clock_out') {
+      await handleClockOut(supabase, user.id, validated.location_id, occurredAt)
+    }
+
+    if (validated.kind === 'break_end') {
+      await handleBreakEnd(supabase, user.id, validated.location_id, occurredAt)
+    }
+
     return NextResponse.json({ clock_event: clockEvent }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/v1/timeclock/punch:', error)
@@ -139,5 +155,218 @@ export async function POST(request: Request) {
       { error: 'Internal server error' },
       { status: 500 }
     )
+  }
+}
+
+// ========================================
+// HELPER FUNCTIONS
+// ========================================
+
+function getWeekStart(date: Date): string {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Monday
+  const monday = new Date(d.setDate(diff))
+  monday.setHours(0, 0, 0, 0)
+  return monday.toISOString().split('T')[0]
+}
+
+async function handleClockIn(
+  supabase: any,
+  userId: string,
+  locationId: string,
+  orgId: string,
+  occurredAt: string
+) {
+  const clockInTime = new Date(occurredAt)
+  const twoHoursFromNow = new Date(clockInTime.getTime() + 2 * 60 * 60 * 1000)
+  
+  const startOfDay = new Date(clockInTime)
+  startOfDay.setHours(0, 0, 0, 0)
+  const endOfDay = new Date(clockInTime)
+  endOfDay.setHours(23, 59, 59, 999)
+  
+  // 1. SEARCH FOR PLANNED SHIFT WITHIN 2 HOURS
+  const { data: plannedAssignments } = await supabase
+    .from('shift_assignments')
+    .select(`
+      shift_id,
+      shifts!inner(
+        id, 
+        start_at, 
+        end_at, 
+        source,
+        rota_id,
+        break_minutes,
+        job_tag_id,
+        notes
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('shifts.location_id', locationId)
+    .eq('shifts.source', 'planned')
+    .gte('shifts.start_at', startOfDay.toISOString())
+    .lte('shifts.start_at', endOfDay.toISOString())
+    .order('shifts(start_at)', { ascending: true })
+  
+  const nearbyShift = plannedAssignments?.find((a: any) => {
+    const shift = a.shifts as any
+    const shiftStart = new Date(shift.start_at)
+    return shiftStart >= clockInTime && shiftStart <= twoHoursFromNow
+  })
+  
+  if (nearbyShift) {
+    // USE EXISTING PLANNED SHIFT
+    const shift = nearbyShift.shifts as any
+    console.log(`🟢 Clock-in: Using planned shift ${shift.id}`)
+    
+    await supabase
+      .from('shifts')
+      .update({
+        start_at: occurredAt,
+        source: 'actual',
+        notes: shift.notes 
+          ? `${shift.notes}\n[Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}]`
+          : `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}`
+      })
+      .eq('id', shift.id)
+    
+    return
+  }
+  
+  // 2. NO NEARBY SHIFT - CREATE NEW ACTUAL SHIFT
+  console.log(`🔵 Clock-in: Creating new actual shift`)
+  
+  const weekStart = getWeekStart(clockInTime)
+  let { data: rota } = await supabase
+    .from('rotas')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('week_start_date', weekStart)
+    .single()
+  
+  if (!rota) {
+    const { data: newRota } = await supabase
+      .from('rotas')
+      .insert({
+        org_id: orgId,
+        location_id: locationId,
+        week_start_date: weekStart,
+        status: 'draft'
+      })
+      .select('id')
+      .single()
+    rota = newRota
+  }
+  
+  const estimatedEnd = new Date(clockInTime.getTime() + 8 * 60 * 60 * 1000)
+  const { data: newShift } = await supabase
+    .from('shifts')
+    .insert({
+      org_id: orgId,
+      location_id: locationId,
+      rota_id: rota.id,
+      start_at: occurredAt,
+      end_at: estimatedEnd.toISOString(),
+      break_minutes: 0,
+      source: 'actual',
+      notes: `Turno non pianificato - Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}`
+    })
+    .select('id')
+    .single()
+  
+  if (newShift) {
+    await supabase
+      .from('shift_assignments')
+      .insert({
+        shift_id: newShift.id,
+        user_id: userId,
+        org_id: orgId,
+        status: 'assigned',
+        assigned_at: occurredAt,
+        assigned_by: userId
+      })
+  }
+}
+
+async function handleClockOut(
+  supabase: any,
+  userId: string,
+  locationId: string,
+  occurredAt: string
+) {
+  const clockOutTime = new Date(occurredAt)
+  const startOfDay = new Date(clockOutTime)
+  startOfDay.setHours(0, 0, 0, 0)
+  
+  const { data: activeAssignments } = await supabase
+    .from('shift_assignments')
+    .select(`
+      shift_id,
+      shifts!inner(id, start_at, end_at, source)
+    `)
+    .eq('user_id', userId)
+    .eq('shifts.location_id', locationId)
+    .eq('shifts.source', 'actual')
+    .gte('shifts.start_at', startOfDay.toISOString())
+    .order('shifts(start_at)', { ascending: false })
+    .limit(1)
+  
+  if (activeAssignments && activeAssignments.length > 0) {
+    const shift = activeAssignments[0].shifts as any
+    console.log(`🔴 Clock-out: Updating shift ${shift.id}`)
+    
+    await supabase
+      .from('shifts')
+      .update({ end_at: occurredAt })
+      .eq('id', shift.id)
+  }
+}
+
+async function handleBreakEnd(
+  supabase: any,
+  userId: string,
+  locationId: string,
+  occurredAt: string
+) {
+  const { data: breakStart } = await supabase
+    .from('time_clock_events')
+    .select('occurred_at')
+    .eq('user_id', userId)
+    .eq('location_id', locationId)
+    .eq('kind', 'break_start')
+    .order('occurred_at', { ascending: false })
+    .limit(1)
+    .single()
+  
+  if (!breakStart) return
+  
+  const breakDuration = Math.floor(
+    (new Date(occurredAt).getTime() - new Date(breakStart.occurred_at).getTime()) / 60000
+  )
+  
+  const startOfDay = new Date(occurredAt)
+  startOfDay.setHours(0, 0, 0, 0)
+  
+  const { data: activeAssignments } = await supabase
+    .from('shift_assignments')
+    .select(`
+      shift_id,
+      shifts!inner(id, break_minutes)
+    `)
+    .eq('user_id', userId)
+    .eq('shifts.source', 'actual')
+    .gte('shifts.start_at', startOfDay.toISOString())
+    .order('shifts(start_at)', { ascending: false })
+    .limit(1)
+  
+  if (activeAssignments && activeAssignments.length > 0) {
+    const shift = activeAssignments[0].shifts as any
+    await supabase
+      .from('shifts')
+      .update({
+        break_minutes: (shift.break_minutes || 0) + breakDuration
+      })
+      .eq('id', shift.id)
   }
 }
