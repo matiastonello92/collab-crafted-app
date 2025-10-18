@@ -26,21 +26,21 @@ export function KioskClient({ locationId, locationName, kioskToken, orgId }: Kio
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden p-4 md:p-6">
-      <div className="w-full max-w-3xl mx-auto flex flex-col h-full gap-4">
-        {/* Header with Glass Effect */}
-        <div className="flex-shrink-0 text-center space-y-1 backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-4 md:p-5 shadow-2xl">
-          <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">{locationName}</h1>
-          <p className="text-xl md:text-2xl text-white/80">Timbratura Presenze</p>
+    <div className="flex flex-col h-screen overflow-hidden p-6 md:p-8 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900">
+      <div className="w-full max-w-4xl mx-auto flex flex-col h-full gap-6">
+        {/* Header - Clean */}
+        <div className="flex-shrink-0 text-center space-y-1">
+          <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl">{locationName}</h1>
+          <p className="text-xl md:text-2xl text-white/70">Timbratura Presenze</p>
         </div>
 
-        {/* Clock with Glass Effect */}
-        <div className="flex-shrink-0 backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-4 md:p-5 shadow-2xl">
+        {/* Clock - Clean */}
+        <div className="flex-shrink-0">
           <KioskClock />
         </div>
 
-        {/* Main Content with Enhanced Glass Effect */}
-        <div className="flex-1 min-h-0 flex items-center justify-center backdrop-blur-2xl bg-white/10 border border-white/20 rounded-3xl p-4 md:p-6 shadow-2xl">
+        {/* Main Content - Clean */}
+        <div className="flex-1 min-h-0 flex items-center justify-center">
           <div className="w-full max-w-2xl">
             {!currentUser ? (
               <PinInput
@@ -62,9 +62,9 @@ export function KioskClient({ locationId, locationName, kioskToken, orgId }: Kio
           </div>
         </div>
 
-        {/* Footer with Glass Effect */}
-        <div className="flex-shrink-0 text-center text-xs backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl py-2 px-3">
-          <p className="text-white/60">Klyra Shifts © 2025</p>
+        {/* Footer - Clean */}
+        <div className="flex-shrink-0 text-center">
+          <p className="text-white/40 text-sm">Klyra Shifts © 2025</p>
         </div>
       </div>
     </div>

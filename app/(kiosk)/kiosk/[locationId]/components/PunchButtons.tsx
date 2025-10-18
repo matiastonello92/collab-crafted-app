@@ -143,120 +143,109 @@ export function PunchButtons({
   }
 
   return (
-    <div className="space-y-3 md:space-y-4">
-      {/* User Header */}
-      <div className="text-center space-y-2">
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/30 to-white/10 border border-white/30 flex items-center justify-center mx-auto shadow-2xl">
-          <User className="w-8 h-8 md:w-10 md:h-10 text-white" />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{userName}</h2>
-        <p className="text-white/70 text-base md:text-lg">{t('kiosk.chooseAction')}</p>
+    <div className="space-y-6">
+      {/* User Header - No Icon */}
+      <div className="text-center space-y-3">
+        <h2 className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl">{userName}</h2>
+        <p className="text-xl text-white/60">{t('kiosk.chooseAction')}</p>
       </div>
 
-      {/* Session Summary */}
+      {/* Session Summary - Clean */}
       {sessionSummary && sessionSummary.status !== 'not_started' && (
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-3 md:p-4 text-center space-y-1 shadow-xl">
-          <p className="text-xs md:text-sm text-white/70">{t('kiosk.hoursToday')}</p>
-          <p className="text-2xl md:text-3xl font-bold text-white">
+        <div className="bg-white/15 rounded-3xl p-5 text-center space-y-2">
+          <p className="text-sm text-white/60 uppercase tracking-wide">{t('kiosk.hoursToday')}</p>
+          <p className="text-5xl font-bold text-white">
             {Math.floor(sessionSummary.totalMinutes / 60)}h {sessionSummary.totalMinutes % 60}m
           </p>
           {sessionSummary.breakMinutes > 0 && (
-            <p className="text-xs md:text-sm text-white/60">
+            <p className="text-sm text-white/70">
               {t('kiosk.breaks')}: {sessionSummary.breakMinutes}m
             </p>
           )}
         </div>
       )}
 
-      {/* Next Shift */}
+      {/* Next Shift - Clean */}
       {nextShift ? (
-        <div className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/30 rounded-2xl p-3 md:p-4 text-center space-y-1 shadow-xl">
-          <p className="text-xs md:text-sm text-white/70">{t('kiosk.nextShift')}</p>
-          <p className="text-xl md:text-2xl font-bold text-white">
+        <div className="bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2">
+          <p className="text-sm text-white/70 uppercase tracking-wide">{t('kiosk.nextShift')}</p>
+          <p className="text-3xl font-bold text-white">
             {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
             {' - '}
             {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
           </p>
           {nextShift.job_tag && (
-            <p className="text-xs md:text-sm text-white/80">
+            <p className="text-base text-white/90 font-medium">
               {nextShift.job_tag}
             </p>
           )}
         </div>
       ) : (
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-3 text-center shadow-xl">
-          <p className="text-xs md:text-sm text-white/50">{t('kiosk.noShiftsScheduled')}</p>
+        <div className="bg-white/10 rounded-3xl p-5 text-center">
+          <p className="text-base text-white/50">{t('kiosk.noShiftsScheduled')}</p>
         </div>
       )}
 
-      {/* Punch Buttons */}
-      <div className="grid grid-cols-2 gap-3 md:gap-4">
-        {/* Clock In - solo se not_started o clocked_out */}
+      {/* Punch Buttons - Glassmorphism */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Clock In */}
         {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') && (
           <Button
             size="lg"
-            variant="default"
             onClick={() => handlePunch('clock_in')}
             disabled={isLoading}
-            className="h-20 md:h-24 text-base md:text-lg flex-col gap-2 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+            className="col-span-2 h-28 text-xl flex-col gap-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 border-0 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <LogIn className="w-8 h-8 md:w-10 md:h-10" />
+            <LogIn className="w-12 h-12" />
             {t('kiosk.clockIn')}
           </Button>
         )}
 
-        {/* Clock Out - solo se clocked_in */}
+        {/* Clock Out + Break */}
         {sessionSummary?.status === 'clocked_in' && (
-          <Button
-            size="lg"
-            variant="default"
-            onClick={() => handlePunch('clock_out')}
-            disabled={isLoading}
-            className="h-20 md:h-24 text-base md:text-lg flex-col gap-2 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
-          >
-            <LogOut className="w-8 h-8 md:w-10 md:h-10" />
-            {t('kiosk.clockOut')}
-          </Button>
-        )}
-
-        {/* Pausa - solo se clocked_in */}
-        {sessionSummary?.status === 'clocked_in' && (
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => handlePunch('break_start')}
-            disabled={isLoading}
-            className="h-20 md:h-24 text-base md:text-lg flex-col gap-2 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
-          >
-            <Coffee className="w-8 h-8 md:w-10 md:h-10" />
-            {t('kiosk.breakStart')}
-          </Button>
-        )}
-
-        {/* Termina Pausa - solo se on_break */}
-        {sessionSummary?.status === 'on_break' && (
           <>
             <Button
               size="lg"
-              variant="outline"
-              onClick={() => handlePunch('break_end')}
+              onClick={() => handlePunch('clock_out')}
               disabled={isLoading}
-              className="h-20 md:h-24 text-base md:text-lg flex-col gap-2 backdrop-blur-xl bg-gradient-to-br from-amber-500/80 to-orange-600/80 hover:from-amber-400/90 hover:to-orange-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+              className="h-28 text-xl flex-col gap-3 bg-gradient-to-br from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 border-0 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              <Play className="w-8 h-8 md:w-10 md:h-10" />
-              {t('kiosk.breakEnd')}
+              <LogOut className="w-10 h-10" />
+              {t('kiosk.clockOut')}
+            </Button>
+            <Button
+              size="lg"
+              onClick={() => handlePunch('break_start')}
+              disabled={isLoading}
+              className="h-28 text-xl flex-col gap-3 bg-white/20 hover:bg-white/30 border-2 border-white/40 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Coffee className="w-10 h-10" />
+              {t('kiosk.breakStart')}
             </Button>
           </>
+        )}
+
+        {/* Break End */}
+        {sessionSummary?.status === 'on_break' && (
+          <Button
+            size="lg"
+            onClick={() => handlePunch('break_end')}
+            disabled={isLoading}
+            className="col-span-2 h-28 text-xl flex-col gap-3 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 border-0 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Play className="w-12 h-12" />
+            {t('kiosk.breakEnd')}
+          </Button>
         )}
       </div>
 
       {/* Logout Button */}
-      <div className="text-center pt-2">
+      <div className="text-center pt-4">
         <Button
           variant="ghost"
           onClick={onLogout}
           disabled={isLoading}
-          className="text-white/60 hover:text-white hover:bg-white/10 text-base md:text-lg px-6 py-3"
+          className="text-white/50 hover:text-white hover:bg-white/10 text-lg px-8 py-4 rounded-2xl"
         >
           {t('kiosk.changeUser').replace('{name}', userName)}
         </Button>
