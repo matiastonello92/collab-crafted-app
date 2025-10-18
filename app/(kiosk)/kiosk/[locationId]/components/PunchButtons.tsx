@@ -143,25 +143,25 @@ export function PunchButtons({
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-4 md:space-y-6">
       {/* User Header */}
-      <div className="text-center space-y-4">
-        <div className="w-24 h-24 rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/30 to-white/10 border border-white/30 flex items-center justify-center mx-auto shadow-2xl">
-          <User className="w-12 h-12 text-white" />
+      <div className="text-center space-y-3">
+        <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/30 to-white/10 border border-white/30 flex items-center justify-center mx-auto shadow-2xl">
+          <User className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </div>
-        <h2 className="text-4xl font-bold text-white drop-shadow-lg">{userName}</h2>
-        <p className="text-white/70 text-lg">{t('kiosk.chooseAction')}</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{userName}</h2>
+        <p className="text-white/70 text-base md:text-lg">{t('kiosk.chooseAction')}</p>
       </div>
 
       {/* Session Summary */}
       {sessionSummary && sessionSummary.status !== 'not_started' && (
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 text-center space-y-2 shadow-xl">
-          <p className="text-sm text-white/70">{t('kiosk.hoursToday')}</p>
-          <p className="text-3xl font-bold text-white">
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4 md:p-5 text-center space-y-1 shadow-xl">
+          <p className="text-xs md:text-sm text-white/70">{t('kiosk.hoursToday')}</p>
+          <p className="text-2xl md:text-3xl font-bold text-white">
             {Math.floor(sessionSummary.totalMinutes / 60)}h {sessionSummary.totalMinutes % 60}m
           </p>
           {sessionSummary.breakMinutes > 0 && (
-            <p className="text-sm text-white/60">
+            <p className="text-xs md:text-sm text-white/60">
               {t('kiosk.breaks')}: {sessionSummary.breakMinutes}m
             </p>
           )}
@@ -170,27 +170,27 @@ export function PunchButtons({
 
       {/* Next Shift */}
       {nextShift ? (
-        <div className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/30 rounded-2xl p-6 text-center space-y-2 shadow-xl">
-          <p className="text-sm text-white/70">{t('kiosk.nextShift')}</p>
-          <p className="text-2xl font-bold text-white">
+        <div className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/30 rounded-2xl p-4 md:p-5 text-center space-y-1 shadow-xl">
+          <p className="text-xs md:text-sm text-white/70">{t('kiosk.nextShift')}</p>
+          <p className="text-xl md:text-2xl font-bold text-white">
             {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
             {' - '}
             {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
           </p>
           {nextShift.job_tag && (
-            <p className="text-sm text-white/80">
+            <p className="text-xs md:text-sm text-white/80">
               {nextShift.job_tag}
             </p>
           )}
         </div>
       ) : (
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 text-center shadow-xl">
-          <p className="text-sm text-white/50">{t('kiosk.noShiftsScheduled')}</p>
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 text-center shadow-xl">
+          <p className="text-xs md:text-sm text-white/50">{t('kiosk.noShiftsScheduled')}</p>
         </div>
       )}
 
       {/* Punch Buttons */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         {/* Clock In - solo se not_started o clocked_out */}
         {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') && (
           <Button
@@ -198,9 +198,9 @@ export function PunchButtons({
             variant="default"
             onClick={() => handlePunch('clock_in')}
             disabled={isLoading}
-            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+            className="h-24 md:h-28 text-lg md:text-xl flex-col gap-3 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
           >
-            <LogIn className="w-12 h-12" />
+            <LogIn className="w-10 h-10 md:w-12 md:h-12" />
             {t('kiosk.clockIn')}
           </Button>
         )}
@@ -212,9 +212,9 @@ export function PunchButtons({
             variant="default"
             onClick={() => handlePunch('clock_out')}
             disabled={isLoading}
-            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
+            className="h-24 md:h-28 text-lg md:text-xl flex-col gap-3 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
           >
-            <LogOut className="w-12 h-12" />
+            <LogOut className="w-10 h-10 md:w-12 md:h-12" />
             {t('kiosk.clockOut')}
           </Button>
         )}
@@ -226,9 +226,9 @@ export function PunchButtons({
             variant="outline"
             onClick={() => handlePunch('break_start')}
             disabled={isLoading}
-            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
+            className="h-24 md:h-28 text-lg md:text-xl flex-col gap-3 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
           >
-            <Coffee className="w-12 h-12" />
+            <Coffee className="w-10 h-10 md:w-12 md:h-12" />
             {t('kiosk.breakStart')}
           </Button>
         )}
@@ -241,9 +241,9 @@ export function PunchButtons({
               variant="outline"
               onClick={() => handlePunch('break_end')}
               disabled={isLoading}
-              className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-amber-500/80 to-orange-600/80 hover:from-amber-400/90 hover:to-orange-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+              className="h-24 md:h-28 text-lg md:text-xl flex-col gap-3 backdrop-blur-xl bg-gradient-to-br from-amber-500/80 to-orange-600/80 hover:from-amber-400/90 hover:to-orange-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
             >
-              <Play className="w-12 h-12" />
+              <Play className="w-10 h-10 md:w-12 md:h-12" />
               {t('kiosk.breakEnd')}
             </Button>
           </>
@@ -251,12 +251,12 @@ export function PunchButtons({
       </div>
 
       {/* Logout Button */}
-      <div className="text-center pt-4">
+      <div className="text-center pt-2">
         <Button
           variant="ghost"
           onClick={onLogout}
           disabled={isLoading}
-          className="text-white/60 hover:text-white hover:bg-white/10 text-lg px-6 py-3"
+          className="text-white/60 hover:text-white hover:bg-white/10 text-base md:text-lg px-6 py-3"
         >
           {t('kiosk.changeUser').replace('{name}', userName)}
         </Button>

@@ -102,17 +102,17 @@ export function PinInput({
   }
 
   return (
-    <div className="space-y-10">
-      <div className="text-center space-y-4">
-        <div className="w-20 h-20 mx-auto rounded-2xl backdrop-blur-xl bg-white/20 border border-white/30 flex items-center justify-center shadow-xl">
-          <User className="w-10 h-10 text-white" />
+    <div className="space-y-6 md:space-y-8">
+      <div className="text-center space-y-3">
+        <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl backdrop-blur-xl bg-white/20 border border-white/30 flex items-center justify-center shadow-xl">
+          <User className="w-8 h-8 md:w-10 md:h-10 text-white" />
         </div>
-        <h2 className="text-3xl font-bold text-white drop-shadow-lg">{t('kiosk.enterPin')}</h2>
-        <p className="text-white/70 text-lg">{t('kiosk.pinDescription')}</p>
+        <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{t('kiosk.enterPin')}</h2>
+        <p className="text-white/70 text-base md:text-lg">{t('kiosk.pinDescription')}</p>
       </div>
 
       {/* PIN Input Fields */}
-      <div className="flex justify-center gap-5">
+      <div className="flex justify-center gap-3 md:gap-5">
         {pin.map((digit, index) => (
           <input
             key={index}
@@ -124,7 +124,7 @@ export function PinInput({
             onChange={(e) => handleDigitChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             disabled={isLoading}
-            className="w-20 h-24 text-center text-4xl font-bold backdrop-blur-xl bg-white/20 border-2 border-white/30 rounded-2xl text-white placeholder-white/30 focus:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all shadow-xl"
+            className="w-16 h-20 md:w-20 md:h-24 text-center text-3xl md:text-4xl font-bold backdrop-blur-xl bg-white/20 border-2 border-white/30 rounded-2xl text-white placeholder-white/30 focus:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all shadow-xl"
           />
         ))}
       </div>
@@ -136,7 +136,7 @@ export function PinInput({
           size="lg"
           onClick={handleClear}
           disabled={isLoading}
-          className="text-lg px-10 py-6 backdrop-blur-xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/40 transition-all shadow-xl"
+          className="text-base md:text-lg px-8 md:px-10 py-5 md:py-6 backdrop-blur-xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/40 transition-all shadow-xl"
         >
           {isLoading ? (
             <>
