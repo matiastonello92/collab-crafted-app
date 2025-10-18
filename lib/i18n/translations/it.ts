@@ -3395,11 +3395,13 @@ export const it = {
     breakStart: 'Inizio Pausa',
     breakEnd: 'Fine Pausa',
     changeUser: 'Non sei {name}? Cambia utente',
+    nextShift: 'Prossimo Turno',
+    noShiftsScheduled: 'Nessun turno programmato per oggi',
     punchSuccess: {
-      clockIn: 'Ingresso registrato',
-      clockOut: 'Uscita registrata',
-      breakStart: 'Inizio pausa registrato',
-      breakEnd: 'Fine pausa registrata',
+      clock_in: 'Ingresso registrato con successo! ✅',
+      clock_out: 'Uscita registrata con successo! ✅',
+      break_start: 'Pausa iniziata ☕',
+      break_end: 'Pausa terminata ✅',
     },
     errors: {
       invalidPin: 'Inserisci un PIN di 4 cifre',

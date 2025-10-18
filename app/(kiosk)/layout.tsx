@@ -2,6 +2,8 @@
 
 import type { Metadata } from 'next'
 import '@/app/globals.css'
+import { Toaster } from '@/components/ui/sonner'
+import { LocaleProvider } from '@/lib/i18n/LocaleProvider'
 
 export const metadata: Metadata = {
   title: 'Klyra Kiosk',
@@ -16,6 +18,7 @@ export default function KioskLayout({
   return (
     <html lang="it" suppressHydrationWarning>
       <body className="antialiased overflow-hidden">
+        <LocaleProvider initialLocale="it">
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
           {/* Animated Background Blur Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -29,6 +32,8 @@ export default function KioskLayout({
             {children}
           </div>
         </div>
+        <Toaster position="top-center" expand={false} richColors />
+        </LocaleProvider>
       </body>
     </html>
   )

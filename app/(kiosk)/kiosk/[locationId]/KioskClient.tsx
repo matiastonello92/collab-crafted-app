@@ -10,9 +10,10 @@ interface KioskClientProps {
   locationId: string
   locationName: string
   kioskToken: string
+  orgId: string
 }
 
-export function KioskClient({ locationId, locationName, kioskToken }: KioskClientProps) {
+export function KioskClient({ locationId, locationName, kioskToken, orgId }: KioskClientProps) {
   const [currentUser, setCurrentUser] = useState<UserLookupResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -54,6 +55,7 @@ export function KioskClient({ locationId, locationName, kioskToken }: KioskClien
               userName={currentUser.full_name}
               kioskToken={kioskToken}
               onLogout={handleLogout}
+              orgId={orgId}
             />
           )}
         </div>

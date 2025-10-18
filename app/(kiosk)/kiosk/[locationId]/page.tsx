@@ -32,6 +32,7 @@ export default async function KioskPage({
       locationId={locationId}
       locationName={location.name}
       kioskToken={kioskToken}
+      orgId={location.org_id}
     />
   )
 }

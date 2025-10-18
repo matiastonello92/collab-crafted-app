@@ -14,6 +14,7 @@ interface PunchButtonsProps {
   userName: string
   kioskToken: string
   onLogout: () => void
+  orgId: string
 }
 
 type PunchKind = 'clock_in' | 'clock_out' | 'break_start' | 'break_end'
@@ -23,7 +24,8 @@ export function PunchButtons({
   userId,
   userName,
   kioskToken,
-  onLogout
+  onLogout,
+  orgId
 }: PunchButtonsProps) {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
@@ -32,19 +34,72 @@ export function PunchButtons({
     breakMinutes: number
     status: 'not_started' | 'clocked_in' | 'on_break' | 'clocked_out'
   } | null>(null)
+  
+  const [nextShift, setNextShift] = useState<{
+    start_at: string
+    end_at: string
+    job_tag?: string
+  } | null>(null)
 
   useEffect(() => {
     loadSessionSummary()
+    loadNextShift()
   }, [])
 
   const loadSessionSummary = async () => {
-    // Note: This would need to be called via API in production
-    // For MVP, we'll just show current state based on last punch
-    setSessionSummary({
-      totalMinutes: 0,
-      breakMinutes: 0,
-      status: 'not_started'
-    })
+    try {
+      const res = await fetch(
+        `/api/v1/timeclock/session-summary?userId=${userId}&locationId=${locationId}&orgId=${orgId}`
+      )
+      if (res.ok) {
+        const data = await res.json()
+        setSessionSummary(data)
+      }
+    } catch (error) {
+      console.error('Error loading session summary:', error)
+    }
+  }
+
+  const loadNextShift = async () => {
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const now = new Date()
+      const startOfDay = new Date(now)
+      startOfDay.setHours(0, 0, 0, 0)
+      const endOfDay = new Date(now)
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const { data: assignments } = await supabase
+        .from('shift_assignments')
+        .select(`
+          shift_id,
+          shifts!inner (
+            start_at,
+            end_at,
+            job_tag_id,
+            job_tags (
+              label_it
+            )
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'confirmed')
+        .gte('shifts.start_at', startOfDay.toISOString())
+        .lte('shifts.start_at', endOfDay.toISOString())
+        .order('shifts.start_at', { ascending: true })
+        .limit(1)
+
+      if (assignments && assignments.length > 0 && assignments[0].shifts) {
+        const shift = assignments[0].shifts as any
+        setNextShift({
+          start_at: shift.start_at,
+          end_at: shift.end_at,
+          job_tag: shift.job_tags?.label_it
+        })
+      }
+    } catch (error) {
+      console.error('Error loading next shift:', error)
+    }
   }
 
   const handlePunch = async (kind: PunchKind) => {
@@ -71,6 +126,9 @@ export function PunchButtons({
       }
 
       toast.success(t(`kiosk.punchSuccess.${kind}`))
+
+      // Reload status after punch
+      await loadSessionSummary()
 
       // Auto-logout after 3 seconds
       setTimeout(() => {
@@ -110,51 +168,86 @@ export function PunchButtons({
         </div>
       )}
 
+      {/* Next Shift */}
+      {nextShift ? (
+        <div className="backdrop-blur-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-white/30 rounded-2xl p-6 text-center space-y-2 shadow-xl">
+          <p className="text-sm text-white/70">{t('kiosk.nextShift')}</p>
+          <p className="text-2xl font-bold text-white">
+            {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+            {' - '}
+            {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+          {nextShift.job_tag && (
+            <p className="text-sm text-white/80">
+              {nextShift.job_tag}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 text-center shadow-xl">
+          <p className="text-sm text-white/50">{t('kiosk.noShiftsScheduled')}</p>
+        </div>
+      )}
+
       {/* Punch Buttons */}
       <div className="grid grid-cols-2 gap-5">
-        <Button
-          size="lg"
-          variant="default"
-          onClick={() => handlePunch('clock_in')}
-          disabled={isLoading}
-          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
-        >
-          <LogIn className="w-12 h-12" />
-          {t('kiosk.clockIn')}
-        </Button>
+        {/* Clock In - solo se not_started o clocked_out */}
+        {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') && (
+          <Button
+            size="lg"
+            variant="default"
+            onClick={() => handlePunch('clock_in')}
+            disabled={isLoading}
+            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-green-500/80 to-emerald-600/80 hover:from-green-400/90 hover:to-emerald-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+          >
+            <LogIn className="w-12 h-12" />
+            {t('kiosk.clockIn')}
+          </Button>
+        )}
 
-        <Button
-          size="lg"
-          variant="default"
-          onClick={() => handlePunch('clock_out')}
-          disabled={isLoading}
-          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
-        >
-          <LogOut className="w-12 h-12" />
-          {t('kiosk.clockOut')}
-        </Button>
+        {/* Clock Out - solo se clocked_in */}
+        {sessionSummary?.status === 'clocked_in' && (
+          <Button
+            size="lg"
+            variant="default"
+            onClick={() => handlePunch('clock_out')}
+            disabled={isLoading}
+            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-red-500/80 to-rose-600/80 hover:from-red-400/90 hover:to-rose-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105"
+          >
+            <LogOut className="w-12 h-12" />
+            {t('kiosk.clockOut')}
+          </Button>
+        )}
 
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={() => handlePunch('break_start')}
-          disabled={isLoading}
-          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
-        >
-          <Coffee className="w-12 h-12" />
-          {t('kiosk.breakStart')}
-        </Button>
+        {/* Pausa - solo se clocked_in */}
+        {sessionSummary?.status === 'clocked_in' && (
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => handlePunch('break_start')}
+            disabled={isLoading}
+            className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
+          >
+            <Coffee className="w-12 h-12" />
+            {t('kiosk.breakStart')}
+          </Button>
+        )}
 
-        <Button
-          size="lg"
-          variant="outline"
-          onClick={() => handlePunch('break_end')}
-          disabled={isLoading}
-          className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-white/10 hover:bg-white/20 border-2 border-white/30 hover:border-white/50 text-white font-bold shadow-2xl transition-all hover:scale-105"
-        >
-          <Play className="w-12 h-12" />
-          {t('kiosk.breakEnd')}
-        </Button>
+        {/* Termina Pausa - solo se on_break */}
+        {sessionSummary?.status === 'on_break' && (
+          <>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => handlePunch('break_end')}
+              disabled={isLoading}
+              className="h-32 text-xl flex-col gap-4 backdrop-blur-xl bg-gradient-to-br from-amber-500/80 to-orange-600/80 hover:from-amber-400/90 hover:to-orange-500/90 border-2 border-white/30 text-white font-bold shadow-2xl transition-all hover:scale-105 col-span-2"
+            >
+              <Play className="w-12 h-12" />
+              {t('kiosk.breakEnd')}
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Logout Button */}
