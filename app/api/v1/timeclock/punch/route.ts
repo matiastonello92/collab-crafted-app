@@ -183,12 +183,13 @@ async function handleClockIn(
 ) {
   const clockInTime = new Date(occurredAt)
   const now = new Date(clockInTime)
+  const twoHoursBefore = new Date(now.getTime() - 2 * 60 * 60 * 1000)
   const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000)
 
   console.log(`[Kiosk] Clock-in for user ${userId} at location ${locationId}`)
-  console.log(`[Kiosk] Searching shifts between ${now.toISOString()} and ${twoHoursLater.toISOString()}`)
+  console.log(`[Kiosk] Searching shifts between ${twoHoursBefore.toISOString()} and ${twoHoursLater.toISOString()}`)
 
-  // 1. Cercare turno pianificato nelle prossime 2 ore con status 'draft' o 'assigned'
+  // 1. Cercare turno pianificato nelle ultime 2 ore o prossime 2 ore con status 'draft' o 'assigned'
   const { data: plannedShifts, error: assignError } = await supabase
     .from('shifts')
     .select(`
@@ -202,7 +203,8 @@ async function handleClockIn(
     .eq('shift_assignments.user_id', userId)
     .eq('shift_assignments.status', 'assigned')
     .in('status', ['draft', 'assigned'])
-    .gte('start_at', now.toISOString())
+    .not('status', 'eq', 'completed')
+    .gte('start_at', twoHoursBefore.toISOString())
     .lte('start_at', twoHoursLater.toISOString())
     .order('start_at', { ascending: true })
     .limit(1)
