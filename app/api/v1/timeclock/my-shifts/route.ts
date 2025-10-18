@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     console.log(`[Kiosk API] Query params:`, {
       userId,
       locationId,
-      timeWindow: `${now.toISOString()} → ${twoHoursLater.toISOString()}`,
+      timeWindow: `Visibili da (start - 2h) fino a end_at | now: ${now.toISOString()}`,
       hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     })
 
@@ -79,8 +79,8 @@ export async function GET(request: Request) {
         .eq('shift_assignments.user_id', userId)
         .eq('shift_assignments.status', 'assigned')
         .in('status', ['planned', 'assigned'])
-        .gte('start_at', now.toISOString())
         .lte('start_at', twoHoursLater.toISOString())
+        .gte('end_at', now.toISOString())
         .order('start_at', { ascending: true })
         .limit(1)
       
