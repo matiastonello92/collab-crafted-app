@@ -21,7 +21,6 @@ All policies leverage these existing security functions:
 |------------|--------------|----------|-------------|
 | `shifts:view` | View Shifts | shifts | View shift schedules and assignments |
 | `shifts:create` | Create Shifts | shifts | Create new shifts in rotas |
-| `shifts:assign` | Assign Shifts | shifts | Assign shifts to staff members |
 | `shifts:manage` | Manage Shifts | shifts | Full shift management (create, edit, delete, assign) |
 | `shifts:approve` | Approve Timesheets | shifts | Approve and validate timesheets |
 | `rotas:publish` | Publish Rotas | shifts | Publish draft rotas to make them visible to staff |
@@ -34,7 +33,7 @@ All policies leverage these existing security functions:
 |------|-------------|
 | **Platform Admin** | All permissions (bypass) |
 | **Org Admin** | All permissions within organization |
-| **Manager** | `shifts:manage`, `shifts:assign`, `rotas:publish`, `leave:manage`, `timeclock:manage` (location-scoped) |
+| **Manager** | `shifts:manage`, `rotas:publish`, `leave:manage`, `timeclock:manage` (location-scoped) |
 | **Base User** | `shifts:view` (self + published), self-service on availability/leave |
 
 ## Table-by-Table Policies
@@ -155,7 +154,7 @@ FOR SELECT USING (
 ```
 
 #### INSERT/UPDATE Policies
-Require `shifts:assign` permission or self-update for status changes (e.g., accepting shifts).
+Require `shifts:manage` permission or self-update for status changes (e.g., accepting shifts).
 
 #### DELETE Policy
 `shifts:manage` permission only.
