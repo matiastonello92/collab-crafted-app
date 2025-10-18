@@ -5,6 +5,7 @@ import { createSupabaseServerActionClient } from '@/utils/supabase/server'
 import { punchClockSchema } from '@/lib/shifts/validations'
 import { validatePunchSequence, checkDoublePunch } from '@/lib/shifts/time-clock-logic'
 import { verifyKioskToken } from '@/lib/kiosk/token'
+import { toParisTime } from '@/lib/shifts/timezone-utils'
 import { ZodError } from 'zod'
 
 export async function POST(request: Request) {
@@ -273,6 +274,10 @@ async function handleClockIn(
 
   const estimatedEnd = new Date(clockInTime.getTime() + 4 * 60 * 60 * 1000)
   
+  // Converti orari in Europe/Paris per visualizzazione
+  const clockInParis = toParisTime(clockInTime)
+  const estimatedEndParis = toParisTime(estimatedEnd)
+  
   const shiftData: any = {
     org_id: orgId,
     location_id: locationId,
@@ -288,7 +293,7 @@ async function handleClockIn(
     actual_break_minutes: 0,
     status: 'in_progress',
     source: 'actual', // Fix: 'kiosk' not allowed by shifts_source_check constraint
-    notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
+    notes: `Clock-in: ${clockInParis.toLocaleTimeString('it-IT', { timeZone: 'Europe/Paris' })} (fine prevista: ${estimatedEndParis.toLocaleTimeString('it-IT', { timeZone: 'Europe/Paris' })})`
   }
   
   // Add late justification if provided

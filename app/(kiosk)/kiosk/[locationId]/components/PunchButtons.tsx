@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { LogIn, LogOut, Coffee, Play } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { useTranslation } from '@/lib/i18n'
+import { toParisTime } from '@/lib/shifts/timezone-utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,6 +93,18 @@ export function PunchButtons({
     loadNextShift()
     loadJobTags()
   }, [])
+
+  // Helper per convertire Date in formato datetime-local (YYYY-MM-DDTHH:mm) in Europe/Paris
+  const getParisTimeForInput = (date: Date | string): string => {
+    const parisDate = toParisTime(date)
+    // Formato YYYY-MM-DDTHH:mm per input datetime-local
+    const year = parisDate.getFullYear()
+    const month = String(parisDate.getMonth() + 1).padStart(2, '0')
+    const day = String(parisDate.getDate()).padStart(2, '0')
+    const hours = String(parisDate.getHours()).padStart(2, '0')
+    const minutes = String(parisDate.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
 
   const loadSessionSummary = async () => {
     try {
@@ -539,8 +552,8 @@ export function PunchButtons({
                   type="datetime-local"
                   value={forgotClockInTime}
                   onChange={(e) => setForgotClockInTime(e.target.value)}
-                  max={new Date().toISOString().slice(0, 16)}
-                  min={nextShift?.start_at ? new Date(nextShift.start_at).toISOString().slice(0, 16) : undefined}
+                  max={getParisTimeForInput(new Date())}
+                  min={nextShift?.start_at ? getParisTimeForInput(nextShift.start_at) : undefined}
                   className="w-full p-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
                 />
                 <p className="text-sm text-muted-foreground mt-2">
