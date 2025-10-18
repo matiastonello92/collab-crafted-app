@@ -186,13 +186,13 @@ async function handleClockIn(
 
   console.log(`[Kiosk] Clock-in for user ${userId} at location ${locationId}`)
 
-  // 1. Cercare turno pianificato per oggi con status 'assigned'
+  // 1. Cercare turno pianificato per oggi con status 'draft' o 'assigned'
   const { data: assignments, error: assignError } = await supabase
     .from('shift_assignments')
     .select('shift_id, shifts!inner(id, planned_start_at, planned_end_at, status)')
     .eq('user_id', userId)
     .eq('shifts.location_id', locationId)
-    .eq('shifts.status', 'assigned')
+    .in('shifts.status', ['draft', 'assigned'])
     .gte('shifts.planned_start_at', todayStart.toISOString())
     .lte('shifts.planned_start_at', todayEnd.toISOString())
     .limit(1)
@@ -289,7 +289,6 @@ async function handleClockIn(
       .insert({
         shift_id: newShift.id,
         user_id: userId,
-        status: 'assigned',
         assigned_at: occurredAt,
         assigned_by: userId
       })
