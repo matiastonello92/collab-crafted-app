@@ -2,6 +2,7 @@
 
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
 import type { TimeClockEvent } from '@/types/shifts'
+import { getStartOfDayParis, getEndOfDayParis } from './timezone-utils'
 
 /**
  * Validate punch sequence to prevent invalid state transitions
@@ -18,8 +19,7 @@ export async function validatePunchSequence(
   orgId: string
 ): Promise<{ valid: boolean; error?: string }> {
   const supabase = createSupabaseAdminClient()
-  const startOfDay = new Date()
-  startOfDay.setHours(0, 0, 0, 0)
+  const startOfDay = getStartOfDayParis()
 
   // Controllare se c'è un turno attivo (status = 'in_progress')
   const { data: activeShifts } = await supabase
@@ -40,7 +40,7 @@ export async function validatePunchSequence(
     .eq('user_id', userId)
     .eq('location_id', locationId)
     .eq('org_id', orgId)
-    .gte('occurred_at', startOfDay.toISOString())
+    .gte('occurred_at', startOfDay)
     .order('occurred_at', { ascending: false })
     .limit(10)
 
@@ -131,10 +131,8 @@ export async function getTodaySessionSummary(
 }> {
   const supabase = createSupabaseAdminClient()
 
-  const startOfDay = new Date()
-  startOfDay.setHours(0, 0, 0, 0)
-  const endOfDay = new Date()
-  endOfDay.setHours(23, 59, 59, 999)
+  const startOfDay = getStartOfDayParis()
+  const endOfDay = getEndOfDayParis()
 
   // ✅ Leggi turni effettivi da shifts (single source of truth)
   const { data: todayShifts } = await supabase
@@ -143,8 +141,8 @@ export async function getTodaySessionSummary(
     .eq('location_id', locationId)
     .eq('org_id', orgId)
     .not('actual_start_at', 'is', null)
-    .gte('actual_start_at', startOfDay.toISOString())
-    .lte('actual_start_at', endOfDay.toISOString())
+    .gte('actual_start_at', startOfDay)
+    .lte('actual_start_at', endOfDay)
     .neq('status', 'cancelled')
     .in('id', (await supabase
       .from('shift_assignments')
@@ -183,7 +181,7 @@ export async function getTodaySessionSummary(
         .eq('user_id', userId)
         .eq('location_id', locationId)
         .eq('org_id', orgId)
-        .gte('occurred_at', startOfDay.toISOString())
+        .gte('occurred_at', startOfDay)
         .order('occurred_at', { ascending: false })
         .limit(1)
         .maybeSingle()
@@ -208,7 +206,7 @@ export async function getTodaySessionSummary(
     .eq('user_id', userId)
     .eq('location_id', locationId)
     .eq('org_id', orgId)
-    .gte('occurred_at', startOfDay.toISOString())
+    .gte('occurred_at', startOfDay)
     .order('occurred_at', { ascending: false })
     .limit(1)
     .maybeSingle()

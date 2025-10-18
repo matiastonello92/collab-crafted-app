@@ -1,6 +1,7 @@
 // Klyra Shifts - Timezone Utilities (Europe/Paris normalization)
 
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
+import { startOfDay, endOfDay } from 'date-fns'
 
 const PARIS_TZ = 'Europe/Paris'
 
@@ -59,4 +60,36 @@ export function isDateInWeek(date: string, weekStartDate: string): boolean {
   weekEnd.setDate(weekEnd.getDate() + 7) // +7 giorni
   
   return checkDate >= weekStart && checkDate < weekEnd
+}
+
+/**
+ * Calcola inizio giornata (00:00:00) in Europe/Paris, restituisce ISO UTC
+ * @param date - Data di riferimento (default: now)
+ * @returns ISO string UTC dell'inizio giornata Paris
+ */
+export function getStartOfDayParis(date: Date = new Date()): string {
+  const parisDate = toParisTime(date)
+  const startOfDayInParis = startOfDay(parisDate)
+  const startOfDayUTC = fromParisTime(startOfDayInParis)
+  return startOfDayUTC.toISOString()
+}
+
+/**
+ * Calcola fine giornata (23:59:59.999) in Europe/Paris, restituisce ISO UTC
+ * @param date - Data di riferimento (default: now)
+ * @returns ISO string UTC della fine giornata Paris
+ */
+export function getEndOfDayParis(date: Date = new Date()): string {
+  const parisDate = toParisTime(date)
+  const endOfDayInParis = endOfDay(parisDate)
+  const endOfDayUTC = fromParisTime(endOfDayInParis)
+  return endOfDayUTC.toISOString()
+}
+
+/**
+ * Restituisce "adesso" in Europe/Paris
+ * @returns Data corrente in Paris timezone
+ */
+export function getNowInParis(): Date {
+  return toParisTime(new Date())
 }
