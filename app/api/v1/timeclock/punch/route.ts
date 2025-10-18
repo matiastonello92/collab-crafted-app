@@ -277,7 +277,7 @@ async function handleClockIn(
       planned_break_minutes: 0,
       actual_break_minutes: 0,
       status: 'in_progress',
-      source: 'kiosk',
+      source: 'actual', // Fix: 'kiosk' not allowed by shifts_source_check constraint
       notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
     })
     .select('id')

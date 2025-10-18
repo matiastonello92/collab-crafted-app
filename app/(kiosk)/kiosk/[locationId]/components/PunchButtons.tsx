@@ -56,6 +56,8 @@ export function PunchButtons({
     id: string
     start_at: string
     end_at: string
+    actual_start_at?: string | null
+    actual_end_at?: string | null
     job_tag?: string
   } | null>(null)
 
@@ -110,6 +112,8 @@ export function PunchButtons({
           id: shift.id,
           start_at: shift.start_at,
           end_at: shift.end_at,
+          actual_start_at: shift.actual_start_at, // ✅ Load actual times
+          actual_end_at: shift.actual_end_at,     // ✅ Load actual times
           job_tag: shift.job_tags?.label_it
         })
       } else {
@@ -203,6 +207,23 @@ export function PunchButtons({
     setSelectedJobTagId(null)
   }
 
+  // Helper: show actual time if clocked, otherwise planned
+  const getDisplayStartTime = (shift: typeof nextShift) => {
+    if (!shift) return ''
+    const time = shift.actual_start_at || shift.start_at
+    return new Date(time).toLocaleTimeString('it-IT', { 
+      hour: '2-digit', minute: '2-digit' 
+    })
+  }
+
+  const getDisplayEndTime = (shift: typeof nextShift) => {
+    if (!shift) return ''
+    const time = shift.actual_end_at || shift.end_at
+    return new Date(time).toLocaleTimeString('it-IT', { 
+      hour: '2-digit', minute: '2-digit' 
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* User Header - No Icon */}
@@ -238,14 +259,17 @@ export function PunchButtons({
                 {t('kiosk.nextShift')}
               </p>
               <p className="text-3xl font-bold text-white">
-                {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
-                  hour: '2-digit', minute: '2-digit' 
-                })}
+                {getDisplayStartTime(nextShift)}
                 {' - '}
-                {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { 
-                  hour: '2-digit', minute: '2-digit' 
-                })}
+                {getDisplayEndTime(nextShift)}
               </p>
+              {nextShift.actual_start_at && (
+                <p className="text-xs text-orange-400 font-medium">
+                  🟠 Clockato alle {new Date(nextShift.actual_start_at).toLocaleTimeString('it-IT', {
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </p>
+              )}
               {nextShift.job_tag && (
                 <p className="text-base text-white/90 font-medium">
                   {nextShift.job_tag}
@@ -261,14 +285,17 @@ export function PunchButtons({
                 {t('kiosk.nextShift')}
               </p>
               <p className="text-3xl font-bold text-white">
-                {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
-                  hour: '2-digit', minute: '2-digit' 
-                })}
+                {getDisplayStartTime(nextShift)}
                 {' - '}
-                {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { 
-                  hour: '2-digit', minute: '2-digit' 
-                })}
+                {getDisplayEndTime(nextShift)}
               </p>
+              {nextShift.actual_start_at && (
+                <p className="text-xs text-orange-400 font-medium">
+                  🟠 Clockato alle {new Date(nextShift.actual_start_at).toLocaleTimeString('it-IT', {
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </p>
+              )}
               {nextShift.job_tag && (
                 <p className="text-base text-white/90 font-medium">
                   {nextShift.job_tag}
@@ -286,9 +313,7 @@ export function PunchButtons({
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-lg">
                   {t('kiosk.startShiftConfirm.description').replace('{time}', 
-                    new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
-                      hour: '2-digit', minute: '2-digit' 
-                    })
+                    getDisplayStartTime(nextShift)
                   )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
