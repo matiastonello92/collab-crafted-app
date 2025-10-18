@@ -154,7 +154,20 @@ export function PunchButtons({
         return
       }
 
+      const data = await res.json()
       toast.success(t(`kiosk.punchSuccess.${kind}`))
+
+      // Notify planner to refresh immediately
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shift-updated', { 
+          detail: { 
+            locationId, 
+            kind,
+            shiftId: data.shift_id,
+            timestamp: new Date().toISOString()
+          } 
+        }))
+      }
 
       // Reload status after punch
       await loadSessionSummary()

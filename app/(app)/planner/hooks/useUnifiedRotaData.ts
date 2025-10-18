@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import useSWR from 'swr'
 import type { Rota, ShiftWithAssignments } from '@/types/shifts'
 
@@ -44,10 +45,26 @@ export function useUnifiedRotaData(locationId: string | null, weekStart: string)
     {
       revalidateOnFocus: true, // Refresh when tab gets focus
       revalidateOnMount: true, // Force refresh on mount
-      refreshInterval: 30000, // Poll every 30s for real-time updates
-      dedupingInterval: 5000, // 5s deduplication
+      refreshInterval: 10000, // Poll every 10s for faster updates
+      dedupingInterval: 2000, // 2s deduplication
     }
   )
+  
+  // Listen for shift updates from kiosk
+  useEffect(() => {
+    const handleShiftUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent
+      if (customEvent.detail?.locationId === locationId) {
+        console.log('[Planner] Force refresh due to kiosk punch:', customEvent.detail)
+        mutate() // Force immediate refresh
+      }
+    }
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('shift-updated', handleShiftUpdate)
+      return () => window.removeEventListener('shift-updated', handleShiftUpdate)
+    }
+  }, [locationId, mutate])
 
   return {
     rota: data?.rota || null,

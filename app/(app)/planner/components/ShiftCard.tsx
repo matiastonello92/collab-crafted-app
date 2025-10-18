@@ -75,30 +75,35 @@ export const ShiftCard = memo(function ShiftCard({
   
   // Check if shift is in progress and use actual times
   const isInProgress = shift.status === 'in_progress'
+  const hasActualStartTime = isInProgress && shift.actual_start_at && shift.actual_start_at !== ''
+  const hasActualEndTime = isInProgress && shift.actual_end_at && shift.actual_end_at !== ''
   
-  // 🔍 DEBUG: Log shift data to verify actual_start_at
+  // Use actual times if available, otherwise fall back to planned times
+  const displayStartAt = hasActualStartTime ? shift.actual_start_at! : shift.start_at
+  const displayEndAt = hasActualEndTime ? shift.actual_end_at! : shift.end_at
+  
+  const startTime = format(parseISO(displayStartAt), 'HH:mm')
+  const endTime = format(parseISO(displayEndAt), 'HH:mm')
+  
+  // 🔍 DEBUG: Extended logging
   useEffect(() => {
-    if (shift.status === 'in_progress') {
-      console.log('[ShiftCard DEBUG]', {
-        id: shift.id,
-        status: shift.status,
-        start_at: shift.start_at,
-        actual_start_at: shift.actual_start_at,
-        end_at: shift.end_at,
-        actual_end_at: shift.actual_end_at,
-        hasActualStart: !!shift.actual_start_at
-      })
-    }
-  }, [shift])
-  
-  const startTime = format(
-    parseISO(isInProgress && shift.actual_start_at ? shift.actual_start_at : shift.start_at), 
-    'HH:mm'
-  )
-  const endTime = format(
-    parseISO(isInProgress && shift.actual_end_at ? shift.actual_end_at : shift.end_at), 
-    'HH:mm'
-  )
+    console.log('[ShiftCard] Render:', {
+      id: shift.id,
+      status: shift.status,
+      start_at: shift.start_at,
+      actual_start_at: shift.actual_start_at,
+      end_at: shift.end_at,
+      actual_end_at: shift.actual_end_at,
+      isInProgress,
+      hasActualStartTime,
+      hasActualEndTime,
+      displayStartAt,
+      displayEndAt,
+      startTime,
+      endTime,
+      updated_at: shift.updated_at
+    })
+  }, [shift.id, shift.status, shift.actual_start_at, shift.start_at, shift.updated_at])
   const assignment = shift.assignments?.[0]
   
   // Calculate shift duration
@@ -210,12 +215,19 @@ export const ShiftCard = memo(function ShiftCard({
         )}>
           <Clock className={cn(
             "h-3.5 w-3.5",
-            isInProgress ? "text-orange-500" : "text-muted-foreground"
+            hasActualStartTime ? "text-orange-500" : "text-muted-foreground"
           )} aria-hidden="true" />
-          <span>{startTime} - {endTime}</span>
+          <span className={cn(hasActualStartTime && "text-orange-500 font-semibold")}>
+            {startTime} - {endTime}
+          </span>
           {isInProgress && (
-            <span className="text-xs px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded font-medium">
-              In corso
+            <span className={cn(
+              "text-xs px-1.5 py-0.5 rounded font-medium",
+              hasActualStartTime 
+                ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300" 
+                : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+            )}>
+              {hasActualStartTime ? '🟠 Clockato' : 'In corso'}
             </span>
           )}
           <span className="text-muted-foreground font-normal">({duration}h)</span>
@@ -296,14 +308,4 @@ export const ShiftCard = memo(function ShiftCard({
       )}
     </div>
   )
-}, (prev, next) => {
-  // Memoization with status and actual_start_at check
-  return prev.shift.id === next.shift.id && 
-         prev.shift.updated_at === next.shift.updated_at &&
-         prev.shift.status === next.shift.status &&
-         prev.shift.actual_start_at === next.shift.actual_start_at &&
-         prev.isDragging === next.isDragging &&
-         prev.isLocked === next.isLocked &&
-         prev.showConflicts === next.showConflicts &&
-         JSON.stringify(prev.conflicts) === JSON.stringify(next.conflicts)
 })
