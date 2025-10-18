@@ -32,11 +32,15 @@ export async function GET(request: Request) {
         .eq('week_start_date', weekStart)
         .maybeSingle(),
       
-      // Shifts with all relations
+      // Shifts with all relations - explicit field selection to ensure actual_* fields
       supabase
         .from('shifts')
         .select(`
-          *,
+          id, org_id, location_id, rota_id, job_tag_id,
+          start_at, end_at, break_minutes,
+          planned_start_at, planned_end_at, planned_break_minutes,
+          actual_start_at, actual_end_at, actual_break_minutes,
+          status, notes, source, created_at, updated_at,
           job_tag:job_tags(id, key, label_it, color, categoria),
           rotas(id, status),
           assignments:shift_assignments(

@@ -75,6 +75,22 @@ export const ShiftCard = memo(function ShiftCard({
   
   // Check if shift is in progress and use actual times
   const isInProgress = shift.status === 'in_progress'
+  
+  // 🔍 DEBUG: Log shift data to verify actual_start_at
+  useEffect(() => {
+    if (shift.status === 'in_progress') {
+      console.log('[ShiftCard DEBUG]', {
+        id: shift.id,
+        status: shift.status,
+        start_at: shift.start_at,
+        actual_start_at: shift.actual_start_at,
+        end_at: shift.end_at,
+        actual_end_at: shift.actual_end_at,
+        hasActualStart: !!shift.actual_start_at
+      })
+    }
+  }, [shift])
+  
   const startTime = format(
     parseISO(isInProgress && shift.actual_start_at ? shift.actual_start_at : shift.start_at), 
     'HH:mm'
@@ -281,9 +297,11 @@ export const ShiftCard = memo(function ShiftCard({
     </div>
   )
 }, (prev, next) => {
-  // Aggressive memoization
+  // Memoization with status and actual_start_at check
   return prev.shift.id === next.shift.id && 
          prev.shift.updated_at === next.shift.updated_at &&
+         prev.shift.status === next.shift.status &&
+         prev.shift.actual_start_at === next.shift.actual_start_at &&
          prev.isDragging === next.isDragging &&
          prev.isLocked === next.isLocked &&
          prev.showConflicts === next.showConflicts &&
