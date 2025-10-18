@@ -30,12 +30,15 @@ export async function GET(request: Request) {
       hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     })
 
-    const { data: shifts, error } = await supabase
+    // Priority 1: Look for in_progress shifts first (already clocked in)
+    let { data: shifts, error } = await supabase
       .from('shifts')
       .select(`
         id,
         start_at,
         end_at,
+        actual_start_at,
+        actual_end_at,
         status,
         job_tag_id,
         job_tags (
@@ -49,10 +52,41 @@ export async function GET(request: Request) {
       .eq('location_id', locationId)
       .eq('shift_assignments.user_id', userId)
       .eq('shift_assignments.status', 'assigned')
-      .gte('start_at', now.toISOString())
-      .lte('start_at', twoHoursLater.toISOString())
-      .order('start_at', { ascending: true })
+      .eq('status', 'in_progress')
       .limit(1)
+
+    // Priority 2: If no in_progress shift, look for upcoming planned shifts
+    if (!shifts || shifts.length === 0) {
+      const result = await supabase
+        .from('shifts')
+        .select(`
+          id,
+          start_at,
+          end_at,
+          actual_start_at,
+          actual_end_at,
+          status,
+          job_tag_id,
+          job_tags (
+            label_it
+          ),
+          shift_assignments!inner (
+            user_id,
+            status
+          )
+        `)
+        .eq('location_id', locationId)
+        .eq('shift_assignments.user_id', userId)
+        .eq('shift_assignments.status', 'assigned')
+        .eq('status', 'planned')
+        .gte('start_at', now.toISOString())
+        .lte('start_at', twoHoursLater.toISOString())
+        .order('start_at', { ascending: true })
+        .limit(1)
+      
+      shifts = result.data
+      error = result.error
+    }
 
     if (error) {
       console.error('[Kiosk API] Error fetching shifts:', error)

@@ -256,7 +256,7 @@ export function PunchButtons({
               className="w-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2 hover:from-blue-500/35 hover:to-cyan-500/35 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <p className="text-sm text-white/70 uppercase tracking-wide">
-                {t('kiosk.nextShift')}
+                {nextShift.actual_start_at ? 'TURNO IN CORSO' : t('kiosk.nextShift')}
               </p>
               <p className="text-3xl font-bold text-white">
                 {getDisplayStartTime(nextShift)}
@@ -282,7 +282,7 @@ export function PunchButtons({
           ) : (
             <div className="bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2">
               <p className="text-sm text-white/70 uppercase tracking-wide">
-                {t('kiosk.nextShift')}
+                {nextShift.actual_start_at ? 'TURNO IN CORSO' : t('kiosk.nextShift')}
               </p>
               <p className="text-3xl font-bold text-white">
                 {getDisplayStartTime(nextShift)}
