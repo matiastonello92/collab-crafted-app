@@ -62,40 +62,26 @@ export function PunchButtons({
 
   const loadNextShift = async () => {
     try {
-      const supabase = createSupabaseBrowserClient()
-      const now = new Date()
-      const startOfDay = new Date(now)
-      startOfDay.setHours(0, 0, 0, 0)
-      const endOfDay = new Date(now)
-      endOfDay.setHours(23, 59, 59, 999)
+      const res = await fetch(
+        `/api/v1/timeclock/my-shifts?userId=${userId}&locationId=${locationId}`
+      )
+      
+      if (!res.ok) {
+        console.error('Failed to load next shift:', res.statusText)
+        return
+      }
 
-    const { data: assignments } = await supabase
-      .from('shift_assignments')
-      .select(`
-        shift_id,
-        shifts!inner (
-          start_at,
-          end_at,
-          job_tag_id,
-          job_tags (
-            label_it
-          )
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'assigned')
-      .gte('shifts.start_at', startOfDay.toISOString())
-      .lte('shifts.start_at', endOfDay.toISOString())
-      .order('shifts.start_at', { ascending: true })
-      .limit(1)
+      const { shifts } = await res.json()
 
-      if (assignments && assignments.length > 0 && assignments[0].shifts) {
-        const shift = assignments[0].shifts as any
+      if (shifts && shifts.length > 0 && shifts[0].shifts) {
+        const shift = shifts[0].shifts
         setNextShift({
           start_at: shift.start_at,
           end_at: shift.end_at,
           job_tag: shift.job_tags?.label_it
         })
+      } else {
+        setNextShift(null)
       }
     } catch (error) {
       console.error('Error loading next shift:', error)
