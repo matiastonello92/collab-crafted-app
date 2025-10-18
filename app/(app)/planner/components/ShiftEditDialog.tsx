@@ -27,6 +27,41 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useTranslation } from '@/lib/i18n'
 
+// Helper per calcolare durata in formato leggibile
+function calculateDuration(startAt: string, endAt: string, breakMinutes: number = 0): string {
+  const start = new Date(startAt)
+  const end = new Date(endAt)
+  const totalMinutes = Math.floor((end.getTime() - start.getTime()) / 60000)
+  const workMinutes = totalMinutes - breakMinutes
+  const hours = Math.floor(workMinutes / 60)
+  const minutes = workMinutes % 60
+  return `${hours}h ${minutes}m`
+}
+
+// Helper per calcolare differenza tra orari (in minuti)
+function calculateTimeDiff(actual: string, planned: string): number {
+  const actualDate = new Date(actual)
+  const plannedDate = new Date(planned)
+  return Math.floor((actualDate.getTime() - plannedDate.getTime()) / 60000)
+}
+
+// Helper per formattare la differenza in modo leggibile
+function formatTimeDiff(minutes: number): { text: string; color: string } {
+  const absMinutes = Math.abs(minutes)
+  const hours = Math.floor(absMinutes / 60)
+  const mins = absMinutes % 60
+  
+  const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+  
+  if (minutes === 0) {
+    return { text: 'Puntuale', color: 'text-green-600 dark:text-green-400' }
+  } else if (minutes > 0) {
+    return { text: `+${timeStr} (ritardo)`, color: 'text-red-600 dark:text-red-400' }
+  } else {
+    return { text: `-${timeStr} (anticipo)`, color: 'text-blue-600 dark:text-blue-400' }
+  }
+}
+
 const NONE_VALUE = '__none__'
 
 interface Props {
@@ -236,22 +271,186 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {!isNew && shift.actual_start_at && !shift.actual_end_at && <span>🟠</span>}
+              {!isNew && shift.actual_start_at && shift.actual_end_at && <span className="text-green-600 dark:text-green-400">✓</span>}
               {isNew ? t('planner.edit.newShiftOrAbsence') : t('planner.edit.editShift')}
             </DialogTitle>
             
-            {!isNew && shift.source === 'actual' && (
-              <div className="mt-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
-                <strong className="text-green-700 dark:text-green-300">Turno effettivo</strong>
-                <p className="text-muted-foreground mt-1">
-                  Creato automaticamente da timbratura kiosk
-                </p>
-              </div>
-            )}
-            
-            {!isNew && shift.source === 'planned' && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                Turno pianificato manualmente
+            {!isNew && (
+              <div className="mt-3 space-y-3">
+                {/* Badge Status: In Corso */}
+                {shift.actual_start_at && !shift.actual_end_at && (
+                  <div className="p-4 rounded-lg bg-orange-500/10 border-2 border-orange-500/30">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl">🟠</span>
+                      <span className="font-bold text-orange-600 dark:text-orange-400">
+                        Turno in corso
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      {/* Colonna Sinistra: Orari Pianificati */}
+                      <div className="space-y-2">
+                        <div className="font-semibold text-muted-foreground uppercase text-xs">
+                          📅 Orario Pianificato
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Inizio:</span>
+                            <span className="font-mono font-medium">
+                              {format(parseISO(shift.start_at), 'HH:mm')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Fine:</span>
+                            <span className="font-mono font-medium">
+                              {format(parseISO(shift.end_at), 'HH:mm')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Colonna Destra: Orari Reali */}
+                      <div className="space-y-2">
+                        <div className="font-semibold text-orange-600 dark:text-orange-400 uppercase text-xs">
+                          ⏰ Orario Reale
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Clock in:</span>
+                            <span className="font-mono font-bold text-orange-600 dark:text-orange-400">
+                              {format(parseISO(shift.actual_start_at), 'HH:mm')}
+                            </span>
+                            {(() => {
+                              const diff = calculateTimeDiff(shift.actual_start_at, shift.start_at)
+                              const formatted = formatTimeDiff(diff)
+                              return diff !== 0 && (
+                                <span className={`text-xs ${formatted.color}`}>
+                                  {formatted.text}
+                                </span>
+                              )
+                            })()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Clock out:</span>
+                            <span className="font-mono text-muted-foreground italic">
+                              In attesa...
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Badge Status: Completato */}
+                {shift.actual_start_at && shift.actual_end_at && (
+                  <div className="p-4 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl text-green-600 dark:text-green-400">✓</span>
+                      <span className="font-bold text-green-600 dark:text-green-400">
+                        Turno completato
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      {/* Colonna Sinistra: Orari Pianificati */}
+                      <div className="space-y-2">
+                        <div className="font-semibold text-muted-foreground uppercase text-xs">
+                          📅 Orario Pianificato
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Inizio:</span>
+                            <span className="font-mono font-medium">
+                              {format(parseISO(shift.start_at), 'HH:mm')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Fine:</span>
+                            <span className="font-mono font-medium">
+                              {format(parseISO(shift.end_at), 'HH:mm')}
+                            </span>
+                          </div>
+                          <div className="pt-1 border-t border-border/50">
+                            <span className="text-muted-foreground">Durata:</span>
+                            <span className="ml-2 font-semibold">
+                              {calculateDuration(shift.start_at, shift.end_at, shift.break_minutes)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Colonna Destra: Orari Reali */}
+                      <div className="space-y-2">
+                        <div className="font-semibold text-green-600 dark:text-green-400 uppercase text-xs">
+                          ⏰ Orario Reale
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Clock in:</span>
+                            <span className="font-mono font-bold text-green-600 dark:text-green-400">
+                              {format(parseISO(shift.actual_start_at), 'HH:mm')}
+                            </span>
+                            {(() => {
+                              const diff = calculateTimeDiff(shift.actual_start_at, shift.start_at)
+                              const formatted = formatTimeDiff(diff)
+                              return diff !== 0 && (
+                                <span className={`text-xs ${formatted.color}`}>
+                                  {formatted.text}
+                                </span>
+                              )
+                            })()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Clock out:</span>
+                            <span className="font-mono font-bold text-green-600 dark:text-green-400">
+                              {format(parseISO(shift.actual_end_at), 'HH:mm')}
+                            </span>
+                            {(() => {
+                              const diff = calculateTimeDiff(shift.actual_end_at, shift.end_at)
+                              const formatted = formatTimeDiff(diff)
+                              return diff !== 0 && (
+                                <span className={`text-xs ${formatted.color}`}>
+                                  {formatted.text}
+                                </span>
+                              )
+                            })()}
+                          </div>
+                          <div className="pt-1 border-t border-border/50">
+                            <span className="text-muted-foreground">Durata:</span>
+                            <span className="ml-2 font-bold text-green-600 dark:text-green-400">
+                              {calculateDuration(shift.actual_start_at, shift.actual_end_at, shift.break_minutes)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Badge Status: Pianificato (non ancora iniziato) */}
+                {!shift.actual_start_at && (
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-lg">⏱️</span>
+                      <span className="font-medium">
+                        Turno pianificato - non ancora iniziato
+                      </span>
+                    </div>
+                    <div className="mt-2 text-sm text-muted-foreground">
+                      Orario previsto: {format(parseISO(shift.start_at), 'HH:mm')} - {format(parseISO(shift.end_at), 'HH:mm')}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Banner per turni da kiosk */}
+                {shift.source === 'actual' && (
+                  <div className="p-2 rounded bg-blue-500/10 border border-blue-500/30 text-xs text-blue-700 dark:text-blue-300">
+                    ℹ️ Turno creato automaticamente da timbratura kiosk
+                  </div>
+                )}
               </div>
             )}
           </DialogHeader>
