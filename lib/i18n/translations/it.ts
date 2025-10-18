@@ -3397,6 +3397,20 @@ export const it = {
     changeUser: 'Non sei {name}? Cambia utente',
     nextShift: 'Prossimo Turno',
     noShiftsScheduled: 'Nessun turno programmato per oggi',
+    tapToStart: 'Tocca per iniziare il turno',
+    startUnplannedShift: 'Inizia turno non programmato',
+    startShift: 'Inizia turno',
+    startShiftConfirm: {
+      title: 'Vuoi iniziare il tuo turno?',
+      description: 'Stai per iniziare il turno programmato per le {time}'
+    },
+    selectRole: {
+      title: 'Seleziona il tuo ruolo',
+      description: 'Scegli il ruolo per questo turno',
+      noRole: 'Non specificare il ruolo',
+      primaryRole: 'Ruolo principale',
+      secondaryRole: 'Ruolo secondario'
+    },
     punchSuccess: {
       clock_in: 'Ingresso registrato con successo! ✅',
       clock_out: 'Uscita registrata con successo! ✅',

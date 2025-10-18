@@ -129,7 +129,7 @@ export async function POST(request: Request) {
     // ========================================
 
     if (validated.kind === 'clock_in') {
-      await handleClockIn(supabase, user.id, validated.location_id, profile.org_id, occurredAt)
+      await handleClockIn(supabase, user.id, validated.location_id, profile.org_id, occurredAt, validated.job_tag_id)
     }
 
     if (validated.kind === 'clock_out') {
@@ -176,7 +176,8 @@ async function handleClockIn(
   userId: string,
   locationId: string,
   orgId: string,
-  occurredAt: string
+  occurredAt: string,
+  jobTagId?: string
 ) {
   const clockInTime = new Date(occurredAt)
   const now = new Date(clockInTime)
@@ -268,6 +269,7 @@ async function handleClockIn(
       rota_id: rota.id,
       start_at: occurredAt,
       end_at: estimatedEnd.toISOString(),
+      job_tag_id: jobTagId || null,
       break_minutes: 0,
       actual_start_at: occurredAt,
       planned_start_at: occurredAt,

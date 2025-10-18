@@ -3,10 +3,27 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { LogIn, LogOut, Coffee, Play, User } from 'lucide-react'
-import { getTodaySessionSummary } from '@/lib/shifts/time-clock-logic'
+import { LogIn, LogOut, Coffee, Play } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { useTranslation } from '@/lib/i18n'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface PunchButtonsProps {
   locationId: string
@@ -36,14 +53,27 @@ export function PunchButtons({
   } | null>(null)
   
   const [nextShift, setNextShift] = useState<{
+    id: string
     start_at: string
     end_at: string
     job_tag?: string
   } | null>(null)
 
+  const [jobTags, setJobTags] = useState<Array<{
+    id: string
+    key: string
+    label_it: string
+    categoria: string
+    color: string
+  }>>([])
+  const [showStartShiftDialog, setShowStartShiftDialog] = useState(false)
+  const [showUnplannedDialog, setShowUnplannedDialog] = useState(false)
+  const [selectedJobTagId, setSelectedJobTagId] = useState<string | null>(null)
+
   useEffect(() => {
     loadSessionSummary()
     loadNextShift()
+    loadJobTags()
   }, [])
 
   const loadSessionSummary = async () => {
@@ -77,6 +107,7 @@ export function PunchButtons({
       if (shifts && shifts.length > 0) {
         const shift = shifts[0]
         setNextShift({
+          id: shift.id,
           start_at: shift.start_at,
           end_at: shift.end_at,
           job_tag: shift.job_tags?.label_it
@@ -89,12 +120,22 @@ export function PunchButtons({
     }
   }
 
-  const handlePunch = async (kind: PunchKind) => {
+  const loadJobTags = async () => {
+    try {
+      const res = await fetch(`/api/v1/job-tags?locationId=${locationId}`)
+      if (res.ok) {
+        const { jobTags } = await res.json()
+        setJobTags(jobTags || [])
+      }
+    } catch (error) {
+      console.error('Error loading job tags:', error)
+    }
+  }
+
+  const handlePunch = async (kind: PunchKind, jobTagId?: string) => {
     setIsLoading(true)
 
     try {
-      const supabase = createSupabaseBrowserClient()
-
       const res = await fetch('/api/v1/timeclock/punch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,7 +143,8 @@ export function PunchButtons({
           location_id: locationId,
           kind,
           source: 'kiosk',
-          kiosk_token: kioskToken
+          kiosk_token: kioskToken,
+          job_tag_id: jobTagId
         })
       })
 
@@ -129,6 +171,25 @@ export function PunchButtons({
     }
   }
 
+  const handleStartPlannedShift = () => {
+    setShowStartShiftDialog(true)
+  }
+
+  const confirmStartShift = () => {
+    setShowStartShiftDialog(false)
+    handlePunch('clock_in')
+  }
+
+  const handleStartUnplannedShift = () => {
+    setShowUnplannedDialog(true)
+  }
+
+  const confirmUnplannedShift = () => {
+    setShowUnplannedDialog(false)
+    handlePunch('clock_in', selectedJobTagId || undefined)
+    setSelectedJobTagId(null)
+  }
+
   return (
     <div className="space-y-6">
       {/* User Header - No Icon */}
@@ -152,21 +213,86 @@ export function PunchButtons({
         </div>
       )}
 
-      {/* Next Shift - Clean */}
+      {/* Next Shift - Clickable */}
       {nextShift ? (
-        <div className="bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2">
-          <p className="text-sm text-white/70 uppercase tracking-wide">{t('kiosk.nextShift')}</p>
-          <p className="text-3xl font-bold text-white">
-            {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-            {' - '}
-            {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-          </p>
-          {nextShift.job_tag && (
-            <p className="text-base text-white/90 font-medium">
-              {nextShift.job_tag}
-            </p>
+        <>
+          {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') ? (
+            <button
+              onClick={handleStartPlannedShift}
+              className="w-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2 hover:from-blue-500/35 hover:to-cyan-500/35 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <p className="text-sm text-white/70 uppercase tracking-wide">
+                {t('kiosk.nextShift')}
+              </p>
+              <p className="text-3xl font-bold text-white">
+                {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
+                  hour: '2-digit', minute: '2-digit' 
+                })}
+                {' - '}
+                {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { 
+                  hour: '2-digit', minute: '2-digit' 
+                })}
+              </p>
+              {nextShift.job_tag && (
+                <p className="text-base text-white/90 font-medium">
+                  {nextShift.job_tag}
+                </p>
+              )}
+              <p className="text-sm text-white/50 mt-2">
+                👆 {t('kiosk.tapToStart')}
+              </p>
+            </button>
+          ) : (
+            <div className="bg-gradient-to-br from-blue-500/25 to-cyan-500/25 rounded-3xl p-5 text-center space-y-2">
+              <p className="text-sm text-white/70 uppercase tracking-wide">
+                {t('kiosk.nextShift')}
+              </p>
+              <p className="text-3xl font-bold text-white">
+                {new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
+                  hour: '2-digit', minute: '2-digit' 
+                })}
+                {' - '}
+                {new Date(nextShift.end_at).toLocaleTimeString('it-IT', { 
+                  hour: '2-digit', minute: '2-digit' 
+                })}
+              </p>
+              {nextShift.job_tag && (
+                <p className="text-base text-white/90 font-medium">
+                  {nextShift.job_tag}
+                </p>
+              )}
+            </div>
           )}
-        </div>
+
+          {/* AlertDialog conferma turno programmato */}
+          <AlertDialog open={showStartShiftDialog} onOpenChange={setShowStartShiftDialog}>
+            <AlertDialogContent className="bg-white/95 backdrop-blur-lg">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl">
+                  {t('kiosk.startShiftConfirm.title')}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-lg">
+                  {t('kiosk.startShiftConfirm.description').replace('{time}', 
+                    new Date(nextShift.start_at).toLocaleTimeString('it-IT', { 
+                      hour: '2-digit', minute: '2-digit' 
+                    })
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-lg px-6 py-3">
+                  {t('common.no')}
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={confirmStartShift}
+                  className="text-lg px-6 py-3 bg-gradient-to-br from-green-500 to-emerald-600"
+                >
+                  {t('common.yes')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       ) : (
         <div className="bg-white/10 rounded-3xl p-5 text-center">
           <p className="text-base text-white/50">{t('kiosk.noShiftsScheduled')}</p>
@@ -175,17 +301,129 @@ export function PunchButtons({
 
       {/* Punch Buttons - Glassmorphism */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Clock In */}
-        {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') && (
-          <Button
-            size="lg"
-            onClick={() => handlePunch('clock_in')}
-            disabled={isLoading}
-            className="col-span-2 h-28 text-xl flex-col gap-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 border-0 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <LogIn className="w-12 h-12" />
-            {t('kiosk.clockIn')}
-          </Button>
+        {/* Clock In - Only show if no planned shift */}
+        {(sessionSummary?.status === 'not_started' || sessionSummary?.status === 'clocked_out') && !nextShift && (
+          <>
+            <Button
+              size="lg"
+              onClick={handleStartUnplannedShift}
+              disabled={isLoading}
+              className="col-span-2 h-28 text-xl flex-col gap-3 bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 border-0 text-white font-bold rounded-3xl shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <LogIn className="w-12 h-12" />
+              {t('kiosk.startUnplannedShift')}
+            </Button>
+
+            {/* Dialog selezione job tag */}
+            <Dialog open={showUnplannedDialog} onOpenChange={setShowUnplannedDialog}>
+              <DialogContent className="bg-white/95 backdrop-blur-lg max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">
+                    {t('kiosk.selectRole.title')}
+                  </DialogTitle>
+                  <DialogDescription className="text-base">
+                    {t('kiosk.selectRole.description')}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-3 py-4 max-h-[400px] overflow-y-auto">
+                  {/* Opzione "Nessun ruolo" */}
+                  <button
+                    onClick={() => setSelectedJobTagId(null)}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                      selectedJobTagId === null
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="font-medium">{t('kiosk.selectRole.noRole')}</p>
+                  </button>
+                  
+                  {/* Job Tags Primary */}
+                  {jobTags.filter(jt => jt.categoria === 'primary').length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2 px-1">
+                        {t('kiosk.selectRole.primaryRole')}
+                      </p>
+                      {jobTags
+                        .filter(jt => jt.categoria === 'primary')
+                        .map(tag => (
+                          <button
+                            key={tag.id}
+                            onClick={() => setSelectedJobTagId(tag.id)}
+                            className={`w-full p-4 rounded-xl border-2 transition-all text-left mb-2 ${
+                              selectedJobTagId === tag.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {tag.color && (
+                                <div 
+                                  className="w-3 h-3 rounded-full" 
+                                  style={{ backgroundColor: tag.color }}
+                                />
+                              )}
+                              <p className="font-medium">{tag.label_it}</p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                  
+                  {/* Job Tags Secondary */}
+                  {jobTags.filter(jt => jt.categoria === 'secondary').length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2 px-1">
+                        {t('kiosk.selectRole.secondaryRole')}
+                      </p>
+                      {jobTags
+                        .filter(jt => jt.categoria === 'secondary')
+                        .map(tag => (
+                          <button
+                            key={tag.id}
+                            onClick={() => setSelectedJobTagId(tag.id)}
+                            className={`w-full p-4 rounded-xl border-2 transition-all text-left mb-2 ${
+                              selectedJobTagId === tag.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {tag.color && (
+                                <div 
+                                  className="w-3 h-3 rounded-full" 
+                                  style={{ backgroundColor: tag.color }}
+                                />
+                              )}
+                              <p className="font-medium">{tag.label_it}</p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowUnplannedDialog(false)
+                      setSelectedJobTagId(null)
+                    }}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+                  <Button
+                    onClick={confirmUnplannedShift}
+                    className="bg-gradient-to-br from-purple-500 to-indigo-600"
+                  >
+                    {t('kiosk.startShift')}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
 
         {/* Clock Out + Break */}

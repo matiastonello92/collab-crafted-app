@@ -88,4 +88,5 @@ export const punchClockSchema = z.object({
   kind: z.enum(['clock_in', 'clock_out', 'break_start', 'break_end']),
   occurred_at: z.string().datetime({ offset: true, message: 'occurred_at must be ISO datetime' }).optional(),
   source: z.enum(['kiosk', 'mobile']).default('kiosk'),
+  job_tag_id: z.string().uuid('Invalid job_tag_id').optional(),
 })

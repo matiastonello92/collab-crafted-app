@@ -3262,6 +3262,20 @@ export const en = {
     changeUser: 'Not {name}? Change user',
     nextShift: 'Next Shift',
     noShiftsScheduled: 'No shifts scheduled for today',
+    tapToStart: 'Tap to start shift',
+    startUnplannedShift: 'Start unplanned shift',
+    startShift: 'Start shift',
+    startShiftConfirm: {
+      title: 'Do you want to start your shift?',
+      description: 'You are about to start the shift scheduled for {time}'
+    },
+    selectRole: {
+      title: 'Select your role',
+      description: 'Choose the role for this shift',
+      noRole: 'No role specified',
+      primaryRole: 'Primary role',
+      secondaryRole: 'Secondary role'
+    },
     punchSuccess: {
       clockIn: 'Clock in recorded',
       clockOut: 'Clock out recorded',
