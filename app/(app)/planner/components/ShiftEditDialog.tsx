@@ -133,11 +133,21 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
         const { shift: newShift } = await createResponse.json()
         
         if (assignedUserId && assignedUserId !== NONE_VALUE) {
-          await fetch(`/api/v1/shifts/${newShift.id}/assign`, {
+          console.log('🔵 [ShiftCreate] Assigning shift to user:', assignedUserId)
+          
+          const assignResponse = await fetch(`/api/v1/shifts/${newShift.id}/assign`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: assignedUserId, status: 'assigned' })
           })
+          
+          if (!assignResponse.ok) {
+            const errorData = await assignResponse.json()
+            console.error('❌ [ShiftCreate] Assignment failed:', errorData)
+            toast.error(t('planner.toast.errorAssigningUser') + ': ' + (errorData.error || 'Unknown error'))
+          } else {
+            console.log('✅ [ShiftCreate] Assignment successful')
+          }
         }
         
         toast.success(t('planner.toast.shiftCreated'))

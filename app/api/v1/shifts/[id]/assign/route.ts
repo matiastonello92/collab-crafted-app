@@ -21,14 +21,21 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check permission: shifts:assign (Manager)
-    const { data: hasPerm } = await supabase.rpc('user_has_permission', {
+    // Check permission: shifts:assign OR shifts:manage
+    const { data: hasAssignPerm } = await supabase.rpc('user_has_permission', {
       p_user: user.id,
       p_permission: 'shifts:assign'
     })
+
+    const { data: hasManagePerm } = await supabase.rpc('user_has_permission', {
+      p_user: user.id,
+      p_permission: 'shifts:manage'
+    })
     
-    if (!hasPerm) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (!hasAssignPerm && !hasManagePerm) {
+      return NextResponse.json({ 
+        error: 'Forbidden - requires shifts:assign or shifts:manage permission' 
+      }, { status: 403 })
     }
 
     const body = await request.json()
