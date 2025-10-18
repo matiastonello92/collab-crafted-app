@@ -675,9 +675,9 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
   }
   
   const style = {
-    backgroundColor: isClocked ? 'rgba(251, 146, 60, 0.25)' : bgColor, // ✅ Arancione se clockato
+    backgroundColor: bgColor, // ✅ Mantiene sempre colore job_tag
     borderColor: isClocked ? 'rgb(251, 146, 60)' : borderColor,
-    borderWidth: '2px',
+    borderWidth: isClocked ? '3px' : '2px', // ✅ Bordo più spesso quando clockato
     opacity: isDragging ? 0 : 1,
     cursor: isDragging ? 'grabbing' : 'grab'
   }
@@ -696,11 +696,11 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       {...attributes}
       {...listeners}
       onClick={handleClick}
-      className="shift-card p-1.5 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
+      className="shift-card p-2 hover:opacity-90 transition-all cursor-grab active:cursor-grabbing overflow-hidden"
     >
       {shift.job_tag && (
         <div 
-          className="text-xs font-bold text-white mb-0 truncate"
+          className="text-sm font-bold text-white mb-1 truncate"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {shift.job_tag.label_it}
@@ -709,16 +709,14 @@ function DraggableShiftCard({ shift, onClick }: { shift: ShiftWithAssignments; o
       
       <div className="flex items-center justify-between gap-2 text-xs">
         <span 
-          className={`font-semibold truncate ${isClocked ? 'text-orange-600' : 'text-white'}`}
-          style={{ textShadow: isClocked ? '0 1px 2px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.5)' }}
+          className={`font-semibold truncate ${isClocked ? 'text-orange-500' : 'text-white'}`}
+          style={{ textShadow: isClocked ? 'none' : '0 1px 2px rgba(0,0,0,0.5)' }}
         >
           {startTime} - {endTime}
         </span>
         
         {isClocked && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500 text-white font-medium whitespace-nowrap">
-            🟠 Clockato
-          </span>
+          <span className="text-base">🟠</span>
         )}
       </div>
     </Card>
