@@ -94,12 +94,12 @@ export async function POST(
       assignment = data
     } else {
       // Create new assignment
+      console.log('🔍 [Assign] Attempting to assign shift:', params.id, 'to user:', validated.user_id)
       const { data, error } = await supabase
         .from('shift_assignments')
         .insert({
           shift_id: params.id,
           user_id: validated.user_id,
-          org_id: shift.org_id,
           status: 'assigned',
           assigned_at: new Date().toISOString(),
           assigned_by: user.id
@@ -107,7 +107,11 @@ export async function POST(
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ [Assign] Failed to create assignment:', error)
+        throw error
+      }
+      console.log('✅ [Assign] Assignment created successfully:', data)
       assignment = data
     }
 
