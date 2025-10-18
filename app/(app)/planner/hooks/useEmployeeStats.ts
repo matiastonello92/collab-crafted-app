@@ -30,10 +30,6 @@ export function useEmployeeStats({ shifts, weekStart }: UseEmployeeStatsProps) {
       const userId = shift.assignments?.[0]?.user_id
       if (!userId) return
       
-      // Calcola ore nette (con pausa)
-      const grossHours = differenceInHours(parseISO(shift.end_at), parseISO(shift.start_at))
-      const netHours = grossHours - (shift.break_minutes / 60)
-      
       if (!statsByUser[userId]) {
         statsByUser[userId] = {
           userId,
@@ -45,9 +41,21 @@ export function useEmployeeStats({ shifts, weekStart }: UseEmployeeStatsProps) {
         }
       }
       
-      statsByUser[userId].plannedHours += netHours
-      // Per ora actual = planned (in futuro integrare con timeclock)
-      statsByUser[userId].actualHours += netHours
+      // Calcola ore pianificate (start_at/end_at con pausa pianificata)
+      const plannedStart = parseISO(shift.start_at)
+      const plannedEnd = parseISO(shift.end_at)
+      const plannedMinutes = differenceInHours(plannedEnd, plannedStart) * 60
+      const plannedNetMinutes = Math.max(0, plannedMinutes - (shift.break_minutes || 0))
+      statsByUser[userId].plannedHours += plannedNetMinutes / 60
+      
+      // Calcola ore effettive (actual_start_at/actual_end_at con pausa effettiva)
+      if (shift.actual_start_at && shift.actual_end_at) {
+        const actualStart = parseISO(shift.actual_start_at)
+        const actualEnd = parseISO(shift.actual_end_at)
+        const actualMinutes = Math.floor((actualEnd.getTime() - actualStart.getTime()) / 60000)
+        const actualNetMinutes = Math.max(0, actualMinutes - (shift.actual_break_minutes || 0))
+        statsByUser[userId].actualHours += actualNetMinutes / 60
+      }
     })
     
     // Calcola variance e overtime
