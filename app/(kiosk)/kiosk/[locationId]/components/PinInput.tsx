@@ -102,10 +102,10 @@ export function PinInput({
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 md:space-y-6">
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl backdrop-blur-xl bg-white/20 border border-white/30 flex items-center justify-center shadow-xl">
-          <User className="w-8 h-8 md:w-10 md:h-10 text-white" />
+        <div className="w-14 h-14 md:w-16 md:h-16 mx-auto rounded-2xl backdrop-blur-xl bg-white/20 border border-white/30 flex items-center justify-center shadow-xl">
+          <User className="w-7 h-7 md:w-8 md:h-8 text-white" />
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{t('kiosk.enterPin')}</h2>
         <p className="text-white/70 text-base md:text-lg">{t('kiosk.pinDescription')}</p>
@@ -124,7 +124,7 @@ export function PinInput({
             onChange={(e) => handleDigitChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             disabled={isLoading}
-            className="w-16 h-20 md:w-20 md:h-24 text-center text-3xl md:text-4xl font-bold backdrop-blur-xl bg-white/20 border-2 border-white/30 rounded-2xl text-white placeholder-white/30 focus:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all shadow-xl"
+            className="w-14 h-18 md:w-16 md:h-20 text-center text-2xl md:text-3xl font-bold backdrop-blur-xl bg-white/20 border-2 border-white/30 rounded-2xl text-white placeholder-white/30 focus:border-white/50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all shadow-xl"
           />
         ))}
       </div>
@@ -136,7 +136,7 @@ export function PinInput({
           size="lg"
           onClick={handleClear}
           disabled={isLoading}
-          className="text-base md:text-lg px-8 md:px-10 py-5 md:py-6 backdrop-blur-xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/40 transition-all shadow-xl"
+          className="text-base md:text-lg px-6 md:px-8 py-4 md:py-5 backdrop-blur-xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/40 transition-all shadow-xl"
         >
           {isLoading ? (
             <>
