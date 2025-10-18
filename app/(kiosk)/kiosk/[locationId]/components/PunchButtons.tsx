@@ -73,16 +73,16 @@ export function PunchButtons({
 
       const { shifts } = await res.json()
 
-      if (shifts && shifts.length > 0 && shifts[0].shifts) {
-        const shift = shifts[0].shifts
-        setNextShift({
-          start_at: shift.start_at,
-          end_at: shift.end_at,
-          job_tag: shift.job_tags?.label_it
-        })
-      } else {
-        setNextShift(null)
-      }
+    if (shifts && shifts.length > 0 && shifts[0].shifts) {
+      const shift = shifts[0].shifts
+      setNextShift({
+        start_at: shift.planned_start_at,
+        end_at: shift.planned_end_at,
+        job_tag: shift.job_tags?.label_it
+      })
+    } else {
+      setNextShift(null)
+    }
     } catch (error) {
       console.error('Error loading next shift:', error)
     }
