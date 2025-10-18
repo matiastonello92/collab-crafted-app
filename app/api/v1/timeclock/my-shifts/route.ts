@@ -23,29 +23,35 @@ export async function GET(request: Request) {
     const now = new Date()
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000)
 
-    console.log(`[Kiosk API] Fetching shifts for user ${userId} between ${now.toISOString()} and ${twoHoursLater.toISOString()}`)
+    console.log(`[Kiosk API] Query params:`, {
+      userId,
+      locationId,
+      timeWindow: `${now.toISOString()} → ${twoHoursLater.toISOString()}`,
+      hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    })
 
-    const { data: assignments, error } = await supabase
-      .from('shift_assignments')
+    const { data: shifts, error } = await supabase
+      .from('shifts')
       .select(`
-        shift_id,
-        shifts!inner (
-          id,
-          planned_start_at,
-          planned_end_at,
-          status,
-          job_tag_id,
-          job_tags (
-            label_it
-          )
+        id,
+        planned_start_at,
+        planned_end_at,
+        status,
+        job_tag_id,
+        job_tags (
+          label_it
+        ),
+        shift_assignments!inner (
+          user_id,
+          status
         )
       `)
-      .eq('user_id', userId)
-      .eq('shifts.location_id', locationId)
-      .eq('status', 'assigned')
-      .gte('shifts.planned_start_at', now.toISOString())
-      .lte('shifts.planned_start_at', twoHoursLater.toISOString())
-      .order('shifts.planned_start_at', { ascending: true })
+      .eq('location_id', locationId)
+      .eq('shift_assignments.user_id', userId)
+      .eq('shift_assignments.status', 'assigned')
+      .gte('planned_start_at', now.toISOString())
+      .lte('planned_start_at', twoHoursLater.toISOString())
+      .order('planned_start_at', { ascending: true })
       .limit(1)
 
     if (error) {
@@ -53,9 +59,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log(`[Kiosk API] Found ${assignments?.length || 0} shifts`)
+    console.log(`[Kiosk API] Query result:`, {
+      found: shifts?.length || 0,
+      shifts: shifts,
+      error: error
+    })
 
-    return NextResponse.json({ shifts: assignments || [] })
+    return NextResponse.json({ shifts: shifts || [] })
   } catch (error: any) {
     console.error('[Kiosk API] Error in my-shifts:', error)
     return NextResponse.json(
