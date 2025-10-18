@@ -45,6 +45,15 @@ export function PunchButtons({
   orgId
 }: PunchButtonsProps) {
   const { t } = useTranslation()
+  
+  const lateJustificationOptions = [
+    { key: 'manager_planning_change', label: t('kiosk.lateJustification.managerPlanningChange') },
+    { key: 'personal_reasons', label: t('kiosk.lateJustification.personalReasons') },
+    { key: 'traffic_delay', label: t('kiosk.lateJustification.trafficDelay') },
+    { key: 'transport_issues', label: t('kiosk.lateJustification.transportIssues') },
+    { key: 'other', label: t('kiosk.lateJustification.other') }
+  ]
+  
   const [isLoading, setIsLoading] = useState(false)
   const [sessionSummary, setSessionSummary] = useState<{
     totalMinutes: number
@@ -71,6 +80,9 @@ export function PunchButtons({
   const [showStartShiftDialog, setShowStartShiftDialog] = useState(false)
   const [showUnplannedDialog, setShowUnplannedDialog] = useState(false)
   const [selectedJobTagId, setSelectedJobTagId] = useState<string | null>(null)
+  const [showLateJustificationDialog, setShowLateJustificationDialog] = useState(false)
+  const [selectedJustification, setSelectedJustification] = useState<string | null>(null)
+  const [lateMinutes, setLateMinutes] = useState<number>(0)
 
   useEffect(() => {
     loadSessionSummary()
@@ -136,7 +148,7 @@ export function PunchButtons({
     }
   }
 
-  const handlePunch = async (kind: PunchKind, jobTagId?: string) => {
+  const handlePunch = async (kind: PunchKind, jobTagId?: string, lateJustification?: string) => {
     setIsLoading(true)
 
     try {
@@ -148,7 +160,8 @@ export function PunchButtons({
           kind,
           source: 'kiosk',
           kiosk_token: kioskToken,
-          job_tag_id: jobTagId
+          job_tag_id: jobTagId,
+          late_justification: lateJustification
         })
       })
 
@@ -194,7 +207,35 @@ export function PunchButtons({
 
   const confirmStartShift = () => {
     setShowStartShiftDialog(false)
+    
+    // Check if user is late
+    if (nextShift && !nextShift.actual_start_at) {
+      const now = new Date()
+      const startTime = new Date(nextShift.start_at)
+      const diffMs = now.getTime() - startTime.getTime()
+      const diffMinutes = Math.round(diffMs / (1000 * 60))
+      
+      // If late (1+ minutes), show justification dialog
+      if (diffMinutes >= 1) {
+        setLateMinutes(diffMinutes)
+        setShowLateJustificationDialog(true)
+        return
+      }
+    }
+    
+    // Not late, proceed with normal clock-in
     handlePunch('clock_in')
+  }
+
+  const confirmLateClockIn = () => {
+    setShowLateJustificationDialog(false)
+    
+    const justificationLabel = lateJustificationOptions.find(
+      (opt) => opt.key === selectedJustification
+    )?.label || selectedJustification || ''
+    
+    handlePunch('clock_in', undefined, justificationLabel || undefined)
+    setSelectedJustification(null)
   }
 
   const handleStartUnplannedShift = () => {
@@ -387,6 +428,56 @@ export function PunchButtons({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          {/* Dialog: Late Justification */}
+          <Dialog open={showLateJustificationDialog} onOpenChange={setShowLateJustificationDialog}>
+            <DialogContent className="bg-white/95 backdrop-blur-lg max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl text-red-600">
+                  {t('kiosk.lateJustification.title')}
+                </DialogTitle>
+                <DialogDescription className="text-lg">
+                  {t('kiosk.lateJustification.description').replace('{minutes}', lateMinutes.toString())}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-3 py-4 max-h-[400px] overflow-y-auto">
+                {lateJustificationOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setSelectedJustification(option.key)}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                      selectedJustification === option.key
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="font-medium">{option.label}</p>
+                  </button>
+                ))}
+              </div>
+              
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowLateJustificationDialog(false)
+                    setSelectedJustification(null)
+                  }}
+                  className="flex-1"
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  onClick={confirmLateClockIn}
+                  disabled={!selectedJustification}
+                  className="flex-1 bg-gradient-to-br from-red-500 to-rose-600 disabled:opacity-50"
+                >
+                  {t('kiosk.confirmClockIn')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </>
       ) : (
         <div className="bg-white/10 rounded-3xl p-5 text-center">

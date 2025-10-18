@@ -1,6 +1,8 @@
 export const en = {
   // Common
   common: {
+    yes: 'Yes',
+    no: 'No',
     viewAll: 'View all',
     request: 'Request',
     manage: 'Manage',
@@ -3288,6 +3290,16 @@ export const en = {
       lookupError: 'Error during lookup. Try again.',
       punchError: 'Error during punch. Try again.',
     },
+    lateJustification: {
+      title: 'You are late!',
+      description: 'You are {minutes} minutes late. What is the reason?',
+      managerPlanningChange: 'Manager Planning Change',
+      personalReasons: 'Personal Reasons',
+      trafficDelay: 'Traffic Delay',
+      transportIssues: 'Public Transport Issues',
+      other: 'Other'
+    },
+    confirmClockIn: 'Confirm Clock-In'
   },
 
   // Service Notes

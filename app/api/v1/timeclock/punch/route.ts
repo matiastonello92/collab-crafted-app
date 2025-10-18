@@ -18,6 +18,7 @@ export async function POST(request: Request) {
 
     const body = await request.json()
     const validated = punchClockSchema.parse(body)
+    const lateJustification = body.late_justification // Extract late justification if provided
 
     // Verify kiosk token (anti-spoofing)
     const kioskToken = body.kiosk_token
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
     // ========================================
 
     if (validated.kind === 'clock_in') {
-      await handleClockIn(supabase, user.id, validated.location_id, profile.org_id, occurredAt, validated.job_tag_id)
+      await handleClockIn(supabase, user.id, validated.location_id, profile.org_id, occurredAt, validated.job_tag_id, lateJustification)
     }
 
     if (validated.kind === 'clock_out') {
@@ -177,7 +178,8 @@ async function handleClockIn(
   locationId: string,
   orgId: string,
   occurredAt: string,
-  jobTagId?: string
+  jobTagId?: string,
+  lateJustification?: string
 ) {
   const clockInTime = new Date(occurredAt)
   const now = new Date(clockInTime)
@@ -213,12 +215,20 @@ async function handleClockIn(
 
   if (plannedShift) {
     // Aggiorna turno pianificato esistente
+    const updateData: any = { 
+      actual_start_at: occurredAt,
+      status: 'in_progress'
+    }
+    
+    // Add late justification if provided
+    if (lateJustification) {
+      updateData.late_justification = lateJustification
+      updateData.late_justification_locked = true
+    }
+    
     const { error: updateError } = await supabase
       .from('shifts')
-      .update({ 
-        actual_start_at: occurredAt,
-        status: 'in_progress'
-      })
+      .update(updateData)
       .eq('id', plannedShift.id)
 
     if (updateError) {
@@ -261,25 +271,33 @@ async function handleClockIn(
 
   const estimatedEnd = new Date(clockInTime.getTime() + 4 * 60 * 60 * 1000)
   
+  const shiftData: any = {
+    org_id: orgId,
+    location_id: locationId,
+    rota_id: rota.id,
+    start_at: occurredAt,
+    end_at: estimatedEnd.toISOString(),
+    job_tag_id: jobTagId || null,
+    break_minutes: 0,
+    actual_start_at: occurredAt,
+    planned_start_at: occurredAt,
+    planned_end_at: estimatedEnd.toISOString(),
+    planned_break_minutes: 0,
+    actual_break_minutes: 0,
+    status: 'in_progress',
+    source: 'actual', // Fix: 'kiosk' not allowed by shifts_source_check constraint
+    notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
+  }
+  
+  // Add late justification if provided
+  if (lateJustification) {
+    shiftData.late_justification = lateJustification
+    shiftData.late_justification_locked = true
+  }
+  
   const { data: newShift, error: shiftError } = await supabase
     .from('shifts')
-    .insert({
-      org_id: orgId,
-      location_id: locationId,
-      rota_id: rota.id,
-      start_at: occurredAt,
-      end_at: estimatedEnd.toISOString(),
-      job_tag_id: jobTagId || null,
-      break_minutes: 0,
-      actual_start_at: occurredAt,
-      planned_start_at: occurredAt,
-      planned_end_at: estimatedEnd.toISOString(),
-      planned_break_minutes: 0,
-      actual_break_minutes: 0,
-      status: 'in_progress',
-      source: 'actual', // Fix: 'kiosk' not allowed by shifts_source_check constraint
-      notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
-    })
+    .insert(shiftData)
     .select('id')
     .single()
 

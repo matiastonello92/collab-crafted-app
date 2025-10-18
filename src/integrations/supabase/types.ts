@@ -2998,6 +2998,8 @@ export type Database = {
           end_at: string
           id: string
           job_tag_id: string | null
+          late_justification: string | null
+          late_justification_locked: boolean | null
           location_id: string
           notes: string | null
           org_id: string
@@ -3021,6 +3023,8 @@ export type Database = {
           end_at: string
           id?: string
           job_tag_id?: string | null
+          late_justification?: string | null
+          late_justification_locked?: boolean | null
           location_id: string
           notes?: string | null
           org_id: string
@@ -3044,6 +3048,8 @@ export type Database = {
           end_at?: string
           id?: string
           job_tag_id?: string | null
+          late_justification?: string | null
+          late_justification_locked?: boolean | null
           location_id?: string
           notes?: string | null
           org_id?: string

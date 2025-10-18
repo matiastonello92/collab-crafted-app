@@ -1,6 +1,8 @@
 export const it = {
   // Common
   common: {
+    yes: 'Sì',
+    no: 'No',
     viewAll: 'Vedi tutto',
     request: 'Richiedi',
     manage: 'Gestisci',
@@ -3423,6 +3425,16 @@ export const it = {
       lookupError: 'Errore durante la ricerca. Riprova.',
       punchError: 'Errore durante la timbratura. Riprova.',
     },
+    lateJustification: {
+      title: 'Sei in ritardo!',
+      description: 'Sei in ritardo di {minutes} minuti. Per quale motivo?',
+      managerPlanningChange: 'Cambio Planning da Manager',
+      personalReasons: 'Motivi Personali',
+      trafficDelay: 'Ritardo Traffico',
+      transportIssues: 'Problemi di Trasporto Pubblico',
+      other: 'Altro'
+    },
+    confirmClockIn: 'Conferma Ingresso'
   },
 
   // Service Notes
