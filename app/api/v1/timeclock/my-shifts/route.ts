@@ -78,7 +78,7 @@ export async function GET(request: Request) {
         .eq('location_id', locationId)
         .eq('shift_assignments.user_id', userId)
         .eq('shift_assignments.status', 'assigned')
-        .eq('status', 'planned')
+        .in('status', ['planned', 'assigned'])
         .gte('start_at', now.toISOString())
         .lte('start_at', twoHoursLater.toISOString())
         .order('start_at', { ascending: true })
