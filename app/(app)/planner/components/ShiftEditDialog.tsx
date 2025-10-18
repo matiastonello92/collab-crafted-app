@@ -33,6 +33,15 @@ function calculateDuration(startAt: string, endAt: string, breakMinutes: number 
   const end = new Date(endAt)
   const totalMinutes = Math.floor((end.getTime() - start.getTime()) / 60000)
   const workMinutes = totalMinutes - breakMinutes
+  
+  // Gestisci valori negativi correttamente
+  if (workMinutes < 0) {
+    const absMinutes = Math.abs(workMinutes)
+    const hours = Math.floor(absMinutes / 60)
+    const minutes = absMinutes % 60
+    return `-${hours}h ${minutes}m`
+  }
+  
   const hours = Math.floor(workMinutes / 60)
   const minutes = workMinutes % 60
   return `${hours}h ${minutes}m`
@@ -341,6 +350,22 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Sezione Pause - Turno in Corso */}
+                    <div className="pt-3 border-t border-border/50">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Pausa pianificata:</span>
+                        <span className="font-mono">
+                          {shift.break_minutes || 0}m
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="text-muted-foreground">Pausa presa finora:</span>
+                        <span className="font-mono font-bold text-orange-600 dark:text-orange-400">
+                          {shift.actual_break_minutes || 0}m
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
@@ -421,8 +446,35 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
                           <div className="pt-1 border-t border-border/50">
                             <span className="text-muted-foreground">Durata:</span>
                             <span className="ml-2 font-bold text-green-600 dark:text-green-400">
-                              {calculateDuration(shift.actual_start_at, shift.actual_end_at, shift.break_minutes)}
+                              {calculateDuration(shift.actual_start_at, shift.actual_end_at, shift.actual_break_minutes || 0)}
                             </span>
+                          </div>
+                          
+                          {/* Sezione Pause */}
+                          <div className="pt-2 border-t border-border/50">
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Pausa pianificata:</span>
+                              <span className="font-mono">
+                                {shift.break_minutes || 0}m
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Pausa effettiva:</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-green-600 dark:text-green-400">
+                                  {shift.actual_break_minutes || 0}m
+                                </span>
+                                {(() => {
+                                  const diff = (shift.actual_break_minutes || 0) - (shift.break_minutes || 0)
+                                  if (diff === 0) return null
+                                  return (
+                                    <span className={`text-xs ${diff > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                      {diff > 0 ? `+${diff}m` : `${diff}m`}
+                                    </span>
+                                  )
+                                })()}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
