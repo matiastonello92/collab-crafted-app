@@ -18,12 +18,23 @@ export async function validatePunchSequence(
   orgId: string
 ): Promise<{ valid: boolean; error?: string }> {
   const supabase = createSupabaseAdminClient()
-
-  // Get last event for user at this location today
   const startOfDay = new Date()
   startOfDay.setHours(0, 0, 0, 0)
 
-  const { data: events, error } = await supabase
+  // Controllare se c'è un turno attivo (status = 'in_progress')
+  const { data: activeShifts } = await supabase
+    .from('shift_assignments')
+    .select('shift_id, shifts!inner(id, status)')
+    .eq('user_id', userId)
+    .eq('shifts.location_id', locationId)
+    .eq('shifts.status', 'in_progress')
+    .not('shifts.actual_start_at', 'is', null)
+    .limit(1)
+
+  const hasActiveShift = activeShifts && activeShifts.length > 0
+
+  // Get last event
+  const { data: events } = await supabase
     .from('time_clock_events')
     .select('kind, occurred_at')
     .eq('user_id', userId)
@@ -33,46 +44,38 @@ export async function validatePunchSequence(
     .order('occurred_at', { ascending: false })
     .limit(10)
 
-  if (error) {
-    console.error('Error fetching clock events:', error)
-    throw error
-  }
-
   const lastEvent = events?.[0]
 
-  // No previous events - only clock_in allowed
-  if (!lastEvent) {
-    if (kind !== 'clock_in') {
-      return { valid: false, error: 'Devi prima timbrare l\'ingresso' }
-    }
-    return { valid: true }
-  }
-
-  // State machine validation
+  // Validazione migliorata basata su shift status
   switch (kind) {
     case 'clock_in':
-      if (lastEvent.kind === 'clock_in' || lastEvent.kind === 'break_start') {
+      // Permetti clock_in se non c'è turno attivo
+      if (hasActiveShift) {
         return { valid: false, error: 'Hai già timbrato l\'ingresso' }
       }
       break
 
     case 'clock_out':
-      if (lastEvent.kind === 'clock_out') {
-        return { valid: false, error: 'Hai già timbrato l\'uscita' }
+      // Permetti clock_out solo se c'è turno attivo
+      if (!hasActiveShift) {
+        return { valid: false, error: 'Non hai un turno attivo' }
       }
-      if (lastEvent.kind === 'break_start') {
+      if (lastEvent?.kind === 'break_start') {
         return { valid: false, error: 'Devi prima terminare la pausa' }
       }
       break
 
     case 'break_start':
-      if (lastEvent.kind !== 'clock_in' && lastEvent.kind !== 'break_end') {
-        return { valid: false, error: 'Devi essere in servizio per iniziare una pausa' }
+      if (!hasActiveShift) {
+        return { valid: false, error: 'Devi prima timbrare l\'ingresso' }
+      }
+      if (lastEvent?.kind === 'break_start') {
+        return { valid: false, error: 'Sei già in pausa' }
       }
       break
 
     case 'break_end':
-      if (lastEvent.kind !== 'break_start') {
+      if (lastEvent?.kind !== 'break_start') {
         return { valid: false, error: 'Non sei in pausa' }
       }
       break

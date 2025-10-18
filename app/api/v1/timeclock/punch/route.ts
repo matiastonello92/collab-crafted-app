@@ -179,94 +179,15 @@ async function handleClockIn(
   occurredAt: string
 ) {
   const clockInTime = new Date(occurredAt)
-  const twoHoursFromNow = new Date(clockInTime.getTime() + 2 * 60 * 60 * 1000)
-  
-  const dayStart = new Date(clockInTime)
-  dayStart.setHours(0, 0, 0, 0)
-  const dayEnd = new Date(clockInTime)
-  dayEnd.setHours(23, 59, 59, 999)
-  
-  // 1. SEARCH FOR PLANNED SHIFT WITHIN 2 HOURS
-  const { data: plannedAssignments } = await supabase
-    .from('shift_assignments')
-    .select(`
-      shift_id,
-      shifts!inner(
-        id, 
-        start_at, 
-        end_at, 
-        source,
-        rota_id,
-        break_minutes,
-        job_tag_id,
-        notes
-      )
-    `)
-    .eq('user_id', userId)
-    .eq('shifts.location_id', locationId)
-    .eq('shifts.source', 'planned')
-    .gte('shifts.start_at', dayStart.toISOString())
-    .lte('shifts.start_at', dayEnd.toISOString())
-    .order('shifts(start_at)', { ascending: true })
-  
-  const nearbyShift = plannedAssignments?.find((a: any) => {
-    const shift = a.shifts as any
-    const shiftStart = new Date(shift.start_at)
-    return shiftStart >= clockInTime && shiftStart <= twoHoursFromNow
-  })
-  
-  if (nearbyShift) {
-    // USE EXISTING PLANNED SHIFT
-    const shift = nearbyShift.shifts as any
-    console.log(`🟢 Clock-in: Using planned shift ${shift.id}`)
-    
-    await supabase
-      .from('shifts')
-      .update({
-        start_at: occurredAt,
-        source: 'actual',
-        notes: shift.notes 
-          ? `${shift.notes}\n[Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}]`
-          : `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')}`
-      })
-      .eq('id', shift.id)
-    
-    return
-  }
-  
-  // 2. NO NEARBY SHIFT - CREATE NEW ACTUAL SHIFT
-  console.log(`🔵 Clock-in: Creating new actual shift`)
-  
-  const weekStart = getWeekStart(clockInTime)
-  let { data: rota } = await supabase
-    .from('rotas')
-    .select('id')
-    .eq('location_id', locationId)
-    .eq('week_start_date', weekStart)
-    .single()
-  
-  if (!rota) {
-    const { data: newRota } = await supabase
-      .from('rotas')
-      .insert({
-        org_id: orgId,
-        location_id: locationId,
-        week_start_date: weekStart,
-        status: 'draft'
-      })
-      .select('id')
-      .single()
-    rota = newRota
-  }
-  
-  // ✅ Clock-in unificato: cercare turno pianificato o crearne uno nuovo
   const todayStart = new Date(clockInTime)
   todayStart.setHours(0, 0, 0, 0)
   const todayEnd = new Date(clockInTime)
   todayEnd.setHours(23, 59, 59, 999)
 
-  // Cercare turno pianificato per oggi
-  const { data: assignments } = await supabase
+  console.log(`[Kiosk] Clock-in for user ${userId} at location ${locationId}`)
+
+  // 1. Cercare turno pianificato per oggi con status 'assigned'
+  const { data: assignments, error: assignError } = await supabase
     .from('shift_assignments')
     .select('shift_id, shifts!inner(id, planned_start_at, planned_end_at, status)')
     .eq('user_id', userId)
@@ -276,10 +197,14 @@ async function handleClockIn(
     .lte('shifts.planned_start_at', todayEnd.toISOString())
     .limit(1)
 
+  if (assignError) {
+    console.error('❌ [Kiosk] Error fetching assignments:', assignError)
+  }
+
   const plannedShift = assignments?.[0]?.shifts as any
 
   if (plannedShift) {
-    // Aggiorna turno pianificato esistente con orario effettivo
+    // Aggiorna turno pianificato esistente
     const { error: updateError } = await supabase
       .from('shifts')
       .update({ 
@@ -290,59 +215,93 @@ async function handleClockIn(
 
     if (updateError) {
       console.error('❌ [Kiosk] Failed to update planned shift:', updateError)
-    } else {
-      console.log('✅ [Kiosk] Updated planned shift to in_progress:', plannedShift.id)
+      throw updateError
     }
-  } else {
-    // Crea nuovo turno "on the fly" (stima 4 ore)
-    const estimatedEnd = new Date(clockInTime.getTime() + 4 * 60 * 60 * 1000)
-    
-    const { data: newShift, error: shiftError } = await supabase
-      .from('shifts')
+    console.log('✅ [Kiosk] Updated planned shift to in_progress:', plannedShift.id)
+    return
+  }
+
+  // 2. Nessun turno pianificato - crea turno "on the fly"
+  console.log('🔵 [Kiosk] No planned shift found, creating new shift')
+  
+  const weekStart = getWeekStart(clockInTime)
+  let { data: rota, error: rotaError } = await supabase
+    .from('rotas')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('week_start_date', weekStart)
+    .maybeSingle()
+
+  if (!rota) {
+    const { data: newRota, error: newRotaError } = await supabase
+      .from('rotas')
       .insert({
         org_id: orgId,
         location_id: locationId,
-        rota_id: rota.id,
-        start_at: occurredAt,
-        end_at: estimatedEnd.toISOString(),
-        break_minutes: 0,
-        actual_start_at: occurredAt,
-        planned_start_at: occurredAt,
-        planned_end_at: estimatedEnd.toISOString(),
-        planned_break_minutes: 0,
-        actual_break_minutes: 0,
-        status: 'in_progress',
-        source: 'kiosk',
-        notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
+        week_start_date: weekStart,
+        status: 'draft'
       })
       .select('id')
       .single()
-
-    if (shiftError) {
-      console.error('❌ [Kiosk] Failed to create shift:', shiftError)
-      throw shiftError
-    }
     
-    // Assegna turno all'utente
-    if (newShift) {
-      const { error: assignError } = await supabase
-        .from('shift_assignments')
-        .insert({
-          shift_id: newShift.id,
-          user_id: userId,
-          org_id: orgId,
-          location_id: locationId,
-          status: 'assigned',
-          assigned_at: occurredAt,
-          assigned_by: userId
-        })
-
-      if (assignError) {
-        console.error('❌ [Kiosk] Failed to assign shift:', assignError)
-      } else {
-        console.log('✅ [Kiosk] Created and assigned new shift:', newShift.id)
-      }
+    if (newRotaError) {
+      console.error('❌ [Kiosk] Failed to create rota:', newRotaError)
+      throw newRotaError
     }
+    rota = newRota
+  }
+
+  const estimatedEnd = new Date(clockInTime.getTime() + 4 * 60 * 60 * 1000)
+  
+  const { data: newShift, error: shiftError } = await supabase
+    .from('shifts')
+    .insert({
+      org_id: orgId,
+      location_id: locationId,
+      rota_id: rota.id,
+      start_at: occurredAt,
+      end_at: estimatedEnd.toISOString(),
+      break_minutes: 0,
+      actual_start_at: occurredAt,
+      planned_start_at: occurredAt,
+      planned_end_at: estimatedEnd.toISOString(),
+      planned_break_minutes: 0,
+      actual_break_minutes: 0,
+      status: 'in_progress',
+      source: 'kiosk',
+      notes: `Clock-in: ${clockInTime.toLocaleTimeString('it-IT')} (fine prevista: ${estimatedEnd.toLocaleTimeString('it-IT')})`
+    })
+    .select('id')
+    .single()
+
+  if (shiftError) {
+    console.error('❌ [Kiosk] Failed to create shift:', shiftError)
+    console.error('❌ [Kiosk] Error code:', shiftError.code)
+    console.error('❌ [Kiosk] Error details:', shiftError.details)
+    console.error('❌ [Kiosk] Error hint:', shiftError.hint)
+    throw shiftError
+  }
+  
+  // Assegna turno all'utente
+  if (newShift) {
+    const { error: assignError } = await supabase
+      .from('shift_assignments')
+      .insert({
+        shift_id: newShift.id,
+        user_id: userId,
+        status: 'assigned',
+        assigned_at: occurredAt,
+        assigned_by: userId
+      })
+
+    if (assignError) {
+      console.error('❌ [Kiosk] Failed to assign shift:', assignError)
+      console.error('❌ [Kiosk] Assignment error code:', assignError.code)
+      console.error('❌ [Kiosk] Assignment error details:', assignError.details)
+      console.error('❌ [Kiosk] Assignment error hint:', assignError.hint)
+      throw assignError
+    }
+    console.log('✅ [Kiosk] Created and assigned new shift:', newShift.id)
   }
 }
 
