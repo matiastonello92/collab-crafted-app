@@ -3432,7 +3432,18 @@ export const it = {
       personalReasons: 'Motivi Personali',
       trafficDelay: 'Ritardo Traffico',
       transportIssues: 'Problemi di Trasporto Pubblico',
+      forgotToClockIn: 'Ho dimenticato di firmare',
       other: 'Altro'
+    },
+    forgotClockIn: {
+      title: 'Indica l\'orario reale',
+      description: 'A che ora sei entrato in servizio?',
+      selectTime: 'Seleziona orario di inizio',
+      hint: 'Il manager dovrà approvare la correzione',
+      confirm: 'Conferma e Firma Ora',
+      success: 'Richiesta inviata al manager',
+      error: 'Errore nell\'invio della richiesta',
+      errorNoTime: 'Seleziona un orario valido'
     },
     confirmClockIn: 'Conferma Ingresso'
   },

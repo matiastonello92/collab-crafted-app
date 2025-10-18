@@ -51,6 +51,7 @@ export function PunchButtons({
     { key: 'personal_reasons', label: t('kiosk.lateJustification.personalReasons') },
     { key: 'traffic_delay', label: t('kiosk.lateJustification.trafficDelay') },
     { key: 'transport_issues', label: t('kiosk.lateJustification.transportIssues') },
+    { key: 'forgot_to_clock_in', label: t('kiosk.lateJustification.forgotToClockIn'), special: true },
     { key: 'other', label: t('kiosk.lateJustification.other') }
   ]
   
@@ -83,6 +84,8 @@ export function PunchButtons({
   const [showLateJustificationDialog, setShowLateJustificationDialog] = useState(false)
   const [selectedJustification, setSelectedJustification] = useState<string | null>(null)
   const [lateMinutes, setLateMinutes] = useState<number>(0)
+  const [showForgotClockInDialog, setShowForgotClockInDialog] = useState(false)
+  const [forgotClockInTime, setForgotClockInTime] = useState<string>('')
 
   useEffect(() => {
     loadSessionSummary()
@@ -230,12 +233,49 @@ export function PunchButtons({
   const confirmLateClockIn = () => {
     setShowLateJustificationDialog(false)
     
+    if (selectedJustification === 'forgot_to_clock_in') {
+      setShowForgotClockInDialog(true)
+      return
+    }
+    
     const justificationLabel = lateJustificationOptions.find(
       (opt) => opt.key === selectedJustification
     )?.label || selectedJustification || ''
     
     handlePunch('clock_in', undefined, justificationLabel || undefined)
     setSelectedJustification(null)
+  }
+
+  const confirmForgotClockIn = async () => {
+    if (!forgotClockInTime || !nextShift) {
+      toast.error(t('kiosk.forgotClockIn.errorNoTime'))
+      return
+    }
+    
+    setShowForgotClockInDialog(false)
+    
+    try {
+      await handlePunch('clock_in')
+      
+      const res = await fetch('/api/v1/timeclock/corrections/forgot-clock-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shift_id: nextShift.id,
+          requested_time: forgotClockInTime,
+          reason: t('kiosk.lateJustification.forgotToClockIn')
+        })
+      })
+      
+      if (!res.ok) throw new Error('Failed to create correction')
+      
+      toast.success(t('kiosk.forgotClockIn.success'))
+      setForgotClockInTime('')
+      setSelectedJustification(null)
+    } catch (error) {
+      console.error('Error in forgot clock-in flow:', error)
+      toast.error(t('kiosk.forgotClockIn.error'))
+    }
   }
 
   const handleStartUnplannedShift = () => {
@@ -474,6 +514,56 @@ export function PunchButtons({
                   className="flex-1 bg-gradient-to-br from-red-500 to-rose-600 disabled:opacity-50"
                 >
                   {t('kiosk.confirmClockIn')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog "Ho Dimenticato di Firmare" - Time Picker */}
+          <Dialog open={showForgotClockInDialog} onOpenChange={setShowForgotClockInDialog}>
+            <DialogContent className="bg-white/95 backdrop-blur-lg max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl text-blue-600">
+                  {t('kiosk.forgotClockIn.title')}
+                </DialogTitle>
+                <DialogDescription className="text-lg">
+                  {t('kiosk.forgotClockIn.description')}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-6">
+                <label className="block text-sm font-medium mb-2">
+                  {t('kiosk.forgotClockIn.selectTime')}
+                </label>
+                <input
+                  type="datetime-local"
+                  value={forgotClockInTime}
+                  onChange={(e) => setForgotClockInTime(e.target.value)}
+                  max={new Date().toISOString().slice(0, 16)}
+                  min={nextShift?.start_at ? new Date(nextShift.start_at).toISOString().slice(0, 16) : undefined}
+                  className="w-full p-4 text-lg border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t('kiosk.forgotClockIn.hint')}
+                </p>
+              </div>
+              
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowForgotClockInDialog(false)
+                    setForgotClockInTime('')
+                  }}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  onClick={confirmForgotClockIn}
+                  disabled={!forgotClockInTime}
+                  className="bg-gradient-to-br from-blue-500 to-cyan-600"
+                >
+                  {t('kiosk.forgotClockIn.confirm')}
                 </Button>
               </DialogFooter>
             </DialogContent>

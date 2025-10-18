@@ -3234,6 +3234,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           reviewer_notes: string | null
+          shift_id: string | null
           status: string
           updated_at: string
           user_id: string
@@ -3250,6 +3251,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reviewer_notes?: string | null
+          shift_id?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -3266,6 +3268,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reviewer_notes?: string | null
+          shift_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -3298,6 +3301,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "time_correction_requests_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
           },
         ]
       }

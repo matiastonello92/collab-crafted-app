@@ -3297,7 +3297,18 @@ export const en = {
       personalReasons: 'Personal Reasons',
       trafficDelay: 'Traffic Delay',
       transportIssues: 'Public Transport Issues',
+      forgotToClockIn: 'I forgot to clock in',
       other: 'Other'
+    },
+    forgotClockIn: {
+      title: 'Enter the actual time',
+      description: 'When did you actually start working?',
+      selectTime: 'Select start time',
+      hint: 'Manager will need to approve this correction',
+      confirm: 'Confirm and Clock In Now',
+      success: 'Request sent to manager',
+      error: 'Error sending request',
+      errorNoTime: 'Please select a valid time'
     },
     confirmClockIn: 'Confirm Clock-In'
   },

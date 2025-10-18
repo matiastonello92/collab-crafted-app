@@ -72,20 +72,34 @@ export async function POST(
 
     console.log('✅ [API DEBUG] Correction updated:', newStatus)
 
-    // If approved and event_id exists, update the time_clock_event (RLS will enforce access)
-    if (validated.decision === 'approve' && correction.event_id) {
-      const { error: eventUpdateError } = await supabase
-        .from('time_clock_events')
-        .update({
-          occurred_at: correction.requested_time
-        })
-        .eq('id', correction.event_id)
+    // If approved, update the original event or shift
+    if (validated.decision === 'approve') {
+      if (correction.event_id) {
+        const { error: eventUpdateError } = await supabase
+          .from('time_clock_events')
+          .update({
+            occurred_at: correction.requested_time
+          })
+          .eq('id', correction.event_id)
 
-      if (eventUpdateError) {
-        console.error('❌ [API DEBUG] Error updating clock event:', eventUpdateError)
-        // Don't throw - correction is approved even if event update fails
-      } else {
-        console.log('✅ [API DEBUG] Clock event updated')
+        if (eventUpdateError) {
+          console.error('❌ [API DEBUG] Error updating clock event:', eventUpdateError)
+        } else {
+          console.log('✅ [API DEBUG] Clock event updated')
+        }
+      } else if (correction.shift_id) {
+        const { error: shiftUpdateError } = await supabase
+          .from('shifts')
+          .update({
+            actual_start_at: correction.requested_time
+          })
+          .eq('id', correction.shift_id)
+
+        if (shiftUpdateError) {
+          console.error('❌ [API DEBUG] Error updating shift actual_start_at:', shiftUpdateError)
+        } else {
+          console.log('✅ [API DEBUG] Shift actual_start_at updated to:', correction.requested_time)
+        }
       }
     }
 

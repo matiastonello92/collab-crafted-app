@@ -6,6 +6,7 @@ export interface TimeCorrectionRequest {
   location_id: string
   user_id: string
   event_id?: string | null
+  shift_id?: string | null
   original_time?: string | null
   requested_time: string
   reason: string
