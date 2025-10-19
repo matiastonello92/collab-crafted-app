@@ -34,7 +34,7 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
 
   const handleDelete = async () => {
     if (confirmEmail !== userEmail) {
-      toast.error(t('admin.userManagement.deleteDialog.emailMismatch'))
+      toast.error(t('userManagement.deleteDialog.emailMismatch'))
       return
     }
 
@@ -51,16 +51,16 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
         const result = await response.json()
 
         if (!response.ok) {
-          throw new Error(result.error || t('admin.userManagement.deleteDialog.error'))
+          throw new Error(result.error || t('userManagement.deleteDialog.error'))
         }
 
-        toast.success(t('admin.userManagement.deleteDialog.success'))
+        toast.success(t('userManagement.deleteDialog.success'))
         setIsOpen(false)
         router.push('/admin/users')
         router.refresh()
       } catch (error: any) {
         console.error('Error deleting user:', error)
-        toast.error(error.message || t('admin.userManagement.deleteDialog.error'))
+        toast.error(error.message || t('userManagement.deleteDialog.error'))
       }
     })
   }
@@ -70,17 +70,17 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <Trash2 className="h-4 w-4 mr-2" />
-          {t('admin.userManagement.deleteDialog.title')}
+          {t('userManagement.deleteDialog.title')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            {t('admin.userManagement.deleteDialog.title')}
+            {t('userManagement.deleteDialog.title')}
           </DialogTitle>
           <DialogDescription>
-            {t('admin.userManagement.deleteDialog.description')}
+            {t('userManagement.deleteDialog.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,13 +89,13 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-1">
-                <p className="font-medium">{t('admin.userManagement.deleteDialog.willBeDeleted')}</p>
+                <p className="font-medium">{t('userManagement.deleteDialog.willBeDeleted')}</p>
                 <ul className="text-sm list-disc list-inside space-y-0.5">
-                  <li>{t('admin.userManagement.deleteDialog.account')}</li>
-                  <li>{t('admin.userManagement.deleteDialog.rolesAndPermissions')}</li>
-                  <li>{t('admin.userManagement.deleteDialog.jobTags')}</li>
-                  <li>{t('admin.userManagement.deleteDialog.activeSessions')}</li>
-                  <li>{t('admin.userManagement.deleteDialog.activityHistory')}</li>
+                  <li>{t('userManagement.deleteDialog.account')}</li>
+                  <li>{t('userManagement.deleteDialog.rolesAndPermissions')}</li>
+                  <li>{t('userManagement.deleteDialog.jobTags')}</li>
+                  <li>{t('userManagement.deleteDialog.activeSessions')}</li>
+                  <li>{t('userManagement.deleteDialog.activityHistory')}</li>
                 </ul>
               </div>
             </AlertDescription>
@@ -103,13 +103,13 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              {t('admin.userManagement.deleteDialog.confirmLabel')}
+              {t('userManagement.deleteDialog.confirmLabel')}
             </Label>
             <div className="p-2 bg-muted rounded text-sm font-mono">
               {userEmail}
             </div>
             <Input
-              placeholder={t('admin.userManagement.deleteDialog.emailPlaceholder')}
+              placeholder={t('userManagement.deleteDialog.emailPlaceholder')}
               value={confirmEmail}
               onChange={(e) => setConfirmEmail(e.target.value)}
               className="font-mono text-sm"
@@ -123,14 +123,14 @@ export function DeleteUserDialog({ userId, userEmail, userName }: Props) {
             onClick={() => setIsOpen(false)}
             disabled={isPending}
           >
-            {t('admin.userManagement.deleteDialog.cancel')}
+            {t('userManagement.deleteDialog.cancel')}
           </Button>
           <Button 
             variant="destructive" 
             onClick={handleDelete}
             disabled={isPending || confirmEmail !== userEmail}
           >
-            {isPending ? t('admin.userManagement.deleteDialog.deleting') : t('admin.userManagement.deleteDialog.delete')}
+            {isPending ? t('userManagement.deleteDialog.deleting') : t('userManagement.deleteDialog.delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
