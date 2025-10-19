@@ -44,7 +44,7 @@ export function useEmployeeStats({ shifts, weekStart }: UseEmployeeStatsProps) {
       // Calcola ore pianificate (start_at/end_at con pausa pianificata)
       const plannedStart = parseISO(shift.start_at)
       const plannedEnd = parseISO(shift.end_at)
-      const plannedMinutes = differenceInHours(plannedEnd, plannedStart) * 60
+      const plannedMinutes = Math.floor((plannedEnd.getTime() - plannedStart.getTime()) / 60000)
       const plannedNetMinutes = Math.max(0, plannedMinutes - (shift.break_minutes || 0))
       statsByUser[userId].plannedHours += plannedNetMinutes / 60
       
