@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,10 +7,18 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { useSupabase } from '@/hooks/useSupabase'
 import { contractFormSchema, type ContractFormValues } from '@/lib/validations/contracts'
-import { getContractTypesForCountry, requiresFrenchFields, type UserContract } from '@/lib/types/contracts'
+import { 
+  getContractTypesForCountry, 
+  requiresFrenchFields, 
+  type UserContract,
+  FRANCE_NIVEAUX,
+  FRANCE_ECHELONS,
+  getCoefficient 
+} from '@/lib/types/contracts'
 import { Loader2 } from 'lucide-react'
 
 interface ContractFormDialogProps {
@@ -51,15 +57,31 @@ export function ContractFormDialog({
       weekly_hours: contract?.weekly_hours || 35,
       working_days_per_week: contract?.working_days_per_week || 5,
       trial_period_days: contract?.trial_period_days || 0,
+      is_forfait_journalier: contract?.is_forfait_journalier || false,
+      daily_rate: contract?.daily_rate || undefined,
       hourly_rate: contract?.hourly_rate || undefined,
       monthly_salary: contract?.monthly_salary || undefined,
       collective_agreement: contract?.collective_agreement || '',
       coefficient: contract?.coefficient || '',
+      echelon: contract?.echelon || '',
+      niveau: contract?.niveau || '',
       min_rest_hours: contract?.min_rest_hours || 11,
       max_consecutive_days: contract?.max_consecutive_days || 6,
       notes: contract?.notes || '',
     },
   })
+
+  const isForfait = form.watch('is_forfait_journalier')
+  const niveau = form.watch('niveau')
+  const echelon = form.watch('echelon')
+
+  // Auto-calcola coefficient quando niveau o echelon cambiano
+  useEffect(() => {
+    if (isFrench && niveau && echelon) {
+      const coeff = getCoefficient(niveau, echelon)
+      form.setValue('coefficient', coeff)
+    }
+  }, [niveau, echelon, isFrench, form])
 
   useEffect(() => {
     if (open) {
@@ -73,10 +95,14 @@ export function ContractFormDialog({
           weekly_hours: contract.weekly_hours,
           working_days_per_week: contract.working_days_per_week,
           trial_period_days: contract.trial_period_days,
+          is_forfait_journalier: contract.is_forfait_journalier,
+          daily_rate: contract.daily_rate || undefined,
           hourly_rate: contract.hourly_rate || undefined,
           monthly_salary: contract.monthly_salary || undefined,
           collective_agreement: contract.collective_agreement || '',
           coefficient: contract.coefficient || '',
+          echelon: contract.echelon || '',
+          niveau: contract.niveau || '',
           min_rest_hours: contract.min_rest_hours,
           max_consecutive_days: contract.max_consecutive_days,
           notes: contract.notes || '',
@@ -116,13 +142,17 @@ export function ContractFormDialog({
         job_title: values.job_title || null,
         start_date: values.start_date,
         end_date: values.end_date || null,
-        weekly_hours: values.weekly_hours,
+        weekly_hours: values.is_forfait_journalier ? null : values.weekly_hours,
         working_days_per_week: values.working_days_per_week,
         trial_period_days: values.trial_period_days,
+        is_forfait_journalier: values.is_forfait_journalier,
+        daily_rate: values.daily_rate || null,
         hourly_rate: values.hourly_rate || null,
         monthly_salary: values.monthly_salary || null,
         collective_agreement: values.collective_agreement || null,
         coefficient: values.coefficient || null,
+        echelon: values.echelon || null,
+        niveau: values.niveau || null,
         min_rest_hours: values.min_rest_hours,
         max_consecutive_days: values.max_consecutive_days,
         notes: values.notes || null,
@@ -258,27 +288,50 @@ export function ContractFormDialog({
             <div className="space-y-4">
               <h3 className="text-sm font-semibold">Orari di Lavoro</h3>
               
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="weekly_hours"
-                  render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ore Settimanali *</FormLabel>
+              <FormField
+                control={form.control}
+                name="is_forfait_journalier"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>Forfait Giornaliero</FormLabel>
+                      <FormDescription className="text-xs">
+                        Contratto a giornata (senza ore fisse)
+                      </FormDescription>
+                    </div>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="1" 
-                        max="80" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        value={field.value || ''}
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
-                  )}
-                />
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                {!isForfait && (
+                  <FormField
+                    control={form.control}
+                    name="weekly_hours"
+                    render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ore Settimanali *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          max="80" 
+                          {...field} 
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -327,13 +380,13 @@ export function ContractFormDialog({
             <div className="space-y-4">
               <h3 className="text-sm font-semibold">Retribuzione</h3>
               
-              <div className="grid grid-cols-2 gap-4">
+              {isForfait ? (
                 <FormField
                   control={form.control}
-                  name="hourly_rate"
+                  name="daily_rate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tariffa Oraria (€)</FormLabel>
+                      <FormLabel>Tariffa Giornaliera (€) *</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -348,30 +401,53 @@ export function ContractFormDialog({
                     </FormItem>
                   )}
                 />
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="hourly_rate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tariffa Oraria (€)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.01" 
+                            min="0" 
+                            {...field} 
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="monthly_salary"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Salario Mensile (€)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          min="0" 
-                          {...field} 
-                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                          value={field.value ?? ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="monthly_salary"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Salario Mensile (€)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.01" 
+                            min="0" 
+                            {...field} 
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
-                * Specificare almeno una tra tariffa oraria o salario mensile
+                * Specificare {isForfait ? 'tariffa giornaliera' : 'almeno una tra tariffa oraria o salario mensile'}
               </p>
             </div>
 
@@ -394,15 +470,70 @@ export function ContractFormDialog({
                   )}
                 />
 
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="niveau"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Niveau</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleziona niveau" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {FRANCE_NIVEAUX.map((n) => (
+                              <SelectItem key={n.value} value={n.value}>
+                                {n.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="echelon"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Échelon</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleziona échelon" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {FRANCE_ECHELONS.map((e) => (
+                              <SelectItem key={e.value} value={e.value}>
+                                {e.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="coefficient"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Coefficiente/Livello</FormLabel>
+                      <FormLabel>Coefficiente</FormLabel>
                       <FormControl>
-                        <Input placeholder="es. Niveau II, échelon 1" {...field} />
+                        <Input placeholder="Calcolato automaticamente" {...field} readOnly />
                       </FormControl>
+                      <FormDescription className="text-xs">
+                        Auto-calcolato da Niveau + Échelon
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

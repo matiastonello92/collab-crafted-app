@@ -275,74 +275,96 @@ interface ContractCardProps {
 }
 
 function ContractCard({ contract, status, onEdit, onTerminate, statusBadge, isHistorical }: ContractCardProps) {
-  return (
-    <div className="border rounded-lg p-4 space-y-3">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1 flex-1">
-          <div className="flex items-center gap-2">
-            <h4 className="font-medium">{contract.job_title || 'Posizione non specificata'}</h4>
-            {statusBadge}
+      <div className="border rounded-lg p-4 space-y-3">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium">{contract.job_title || 'Posizione non specificata'}</h4>
+              {statusBadge}
+              {contract.is_forfait_journalier && (
+                <Badge variant="secondary">Forfait</Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {contract.contract_type}
+              {!contract.is_forfait_journalier && ` • ${contract.weekly_hours}h/settimana`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(contract.start_date), 'PPP', { locale: it })}
+              {contract.end_date && ` - ${format(new Date(contract.end_date), 'PPP', { locale: it })}`}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {contract.contract_type} • {contract.weekly_hours}h/settimana
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {format(new Date(contract.start_date), 'PPP', { locale: it })}
-            {contract.end_date && ` - ${format(new Date(contract.end_date), 'PPP', { locale: it })}`}
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onEdit(contract)}
-            disabled={status === 'terminated'}
-          >
-            {status === 'active' ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </Button>
-          {status === 'active' && (
+          
+          <div className="flex items-center gap-2">
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onTerminate(contract)}
+              onClick={() => onEdit(contract)}
+              disabled={status === 'terminated'}
             >
-              <XCircle className="h-4 w-4" />
+              {status === 'active' ? <Edit className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
+            {status === 'active' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onTerminate(contract)}
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Dettagli Contratto */}
+        <div className="grid grid-cols-2 gap-3 text-sm pt-2 border-t">
+          <div>
+            <span className="text-muted-foreground">Retribuzione:</span>
+            <span className="ml-2 font-medium">
+              {contract.is_forfait_journalier && contract.daily_rate
+                ? `€${contract.daily_rate}/giorno`
+                : contract.monthly_salary 
+                ? `€${contract.monthly_salary}/mese`
+                : contract.hourly_rate 
+                ? `€${contract.hourly_rate}/ora`
+                : 'Non specificata'
+              }
+            </span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Giorni/settimana:</span>
+            <span className="ml-2 font-medium">{contract.working_days_per_week}</span>
+          </div>
+          {contract.collective_agreement && (
+            <div className="col-span-2">
+              <span className="text-muted-foreground">CCNL:</span>
+              <span className="ml-2 font-medium">{contract.collective_agreement}</span>
+            </div>
+          )}
+          {contract.niveau && (
+            <div>
+              <span className="text-muted-foreground">Niveau:</span>
+              <span className="ml-2 font-medium">{contract.niveau}</span>
+            </div>
+          )}
+          {contract.echelon && (
+            <div>
+              <span className="text-muted-foreground">Échelon:</span>
+              <span className="ml-2 font-medium">{contract.echelon}</span>
+            </div>
+          )}
+          {contract.coefficient && (
+            <div>
+              <span className="text-muted-foreground">Coefficient:</span>
+              <span className="ml-2 font-medium">{contract.coefficient}</span>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Dettagli Contratto */}
-      <div className="grid grid-cols-2 gap-3 text-sm pt-2 border-t">
-        <div>
-          <span className="text-muted-foreground">Retribuzione:</span>
-          <span className="ml-2 font-medium">
-            {contract.monthly_salary 
-              ? `€${contract.monthly_salary}/mese`
-              : contract.hourly_rate 
-              ? `€${contract.hourly_rate}/ora`
-              : 'Non specificata'
-            }
-          </span>
-        </div>
-        <div>
-          <span className="text-muted-foreground">Giorni/settimana:</span>
-          <span className="ml-2 font-medium">{contract.working_days_per_week}</span>
-        </div>
-        {contract.collective_agreement && (
-          <div className="col-span-2">
-            <span className="text-muted-foreground">CCNL:</span>
-            <span className="ml-2 font-medium">{contract.collective_agreement}</span>
-          </div>
+        {contract.terminated_at && (
+          <p className="text-xs text-destructive pt-2 border-t">
+            Terminato il {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
+          </p>
         )}
       </div>
-
-      {contract.terminated_at && (
-        <p className="text-xs text-destructive pt-2 border-t">
-          Terminato il {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
-        </p>
-      )}
-    </div>
-  )
 }

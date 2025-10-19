@@ -26,6 +26,10 @@ interface UserContract {
   trial_period_days: number
   collective_agreement?: string
   coefficient?: string
+  echelon?: string
+  niveau?: string
+  is_forfait_journalier: boolean
+  daily_rate?: number
   hourly_rate?: number
   monthly_salary?: number
   salary_currency: string
@@ -150,18 +154,26 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Clock className="h-4 w-4" />
-                  {t('contracts.weeklyHours')}
+                  {contract.is_forfait_journalier ? 'Forfait Giornaliero' : t('contracts.weeklyHours')}
                 </div>
-                <p className="text-2xl font-bold">{contract.weekly_hours}h</p>
-                <p className="text-xs text-muted-foreground">
-                  {contract.working_days_per_week} giorni/settimana
-                </p>
+                {contract.is_forfait_journalier ? (
+                  <p className="text-lg font-semibold">Contratto a giornata</p>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold">{contract.weekly_hours}h</p>
+                    <p className="text-xs text-muted-foreground">
+                      {contract.working_days_per_week} giorni/settimana
+                    </p>
+                  </>
+                )}
               </div>
               
               <div className="space-y-1">
                 <div className="text-sm font-medium">Retribuzione</div>
                 <p className="text-lg font-semibold">
-                  {contract.monthly_salary 
+                  {contract.is_forfait_journalier && contract.daily_rate
+                    ? `€${contract.daily_rate.toFixed(2)}/giorno`
+                    : contract.monthly_salary 
                     ? `€${contract.monthly_salary.toFixed(2)}/mese`
                     : contract.hourly_rate
                     ? `€${contract.hourly_rate.toFixed(2)}/ora`
@@ -172,7 +184,7 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             </div>
 
             {/* French-specific fields */}
-            {(contract.collective_agreement || contract.coefficient) && (
+            {(contract.collective_agreement || contract.coefficient || contract.niveau || contract.echelon) && (
               <div className="border-t pt-4">
                 <h4 className="text-sm font-semibold mb-3">Informazioni Legali</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
@@ -180,6 +192,18 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
                     <div>
                       <span className="text-muted-foreground">CCNL:</span>
                       <span className="ml-2 font-medium">{contract.collective_agreement}</span>
+                    </div>
+                  )}
+                  {contract.niveau && (
+                    <div>
+                      <span className="text-muted-foreground">Niveau:</span>
+                      <span className="ml-2 font-medium">{contract.niveau}</span>
+                    </div>
+                  )}
+                  {contract.echelon && (
+                    <div>
+                      <span className="text-muted-foreground">Échelon:</span>
+                      <span className="ml-2 font-medium">{contract.echelon}</span>
                     </div>
                   )}
                   {contract.coefficient && (

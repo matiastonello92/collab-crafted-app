@@ -1469,10 +1469,10 @@ export type Database = {
       locations: {
         Row: {
           address: string | null
-          address_line1: string | null
+          address_line1: string
           address_line2: string | null
           city: string | null
-          country: string | null
+          country: string
           created_at: string | null
           currency: string | null
           description: string | null
@@ -1494,10 +1494,10 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          address_line1?: string | null
+          address_line1: string
           address_line2?: string | null
           city?: string | null
-          country?: string | null
+          country?: string
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -1519,10 +1519,10 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          address_line1?: string | null
+          address_line1?: string
           address_line2?: string | null
           city?: string | null
-          country?: string | null
+          country?: string
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -3374,64 +3374,112 @@ export type Database = {
       }
       user_contracts: {
         Row: {
+          coefficient: string | null
+          collective_agreement: string | null
           contract_type: string
+          country_code: string | null
           created_at: string
           created_by: string | null
           daily_hours_max: number | null
           daily_hours_min: number | null
+          daily_rate: number | null
+          echelon: string | null
           end_date: string | null
+          hourly_rate: number | null
           id: string
           is_active: boolean
+          is_forfait_journalier: boolean | null
+          job_title: string | null
           location_id: string
           max_consecutive_days: number | null
           max_weekly_hours: number | null
+          metadata: Json | null
           min_rest_hours: number | null
+          monthly_salary: number | null
+          niveau: string | null
           notes: string | null
           org_id: string
+          salary_currency: string | null
           start_date: string
+          terminated_at: string | null
+          termination_reason: string | null
+          trial_period_days: number | null
           updated_at: string
           user_id: string
           weekly_hours: number
+          working_days_per_week: number | null
         }
         Insert: {
-          contract_type?: string
+          coefficient?: string | null
+          collective_agreement?: string | null
+          contract_type: string
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           daily_hours_max?: number | null
           daily_hours_min?: number | null
+          daily_rate?: number | null
+          echelon?: string | null
           end_date?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean
+          is_forfait_journalier?: boolean | null
+          job_title?: string | null
           location_id: string
           max_consecutive_days?: number | null
           max_weekly_hours?: number | null
+          metadata?: Json | null
           min_rest_hours?: number | null
+          monthly_salary?: number | null
+          niveau?: string | null
           notes?: string | null
           org_id: string
+          salary_currency?: string | null
           start_date: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          trial_period_days?: number | null
           updated_at?: string
           user_id: string
           weekly_hours?: number
+          working_days_per_week?: number | null
         }
         Update: {
+          coefficient?: string | null
+          collective_agreement?: string | null
           contract_type?: string
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           daily_hours_max?: number | null
           daily_hours_min?: number | null
+          daily_rate?: number | null
+          echelon?: string | null
           end_date?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean
+          is_forfait_journalier?: boolean | null
+          job_title?: string | null
           location_id?: string
           max_consecutive_days?: number | null
           max_weekly_hours?: number | null
+          metadata?: Json | null
           min_rest_hours?: number | null
+          monthly_salary?: number | null
+          niveau?: string | null
           notes?: string | null
           org_id?: string
+          salary_currency?: string | null
           start_date?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
+          trial_period_days?: number | null
           updated_at?: string
           user_id?: string
           weekly_hours?: number
+          working_days_per_week?: number | null
         }
         Relationships: [
           {
@@ -3963,6 +4011,10 @@ export type Database = {
       }
       jwt_has_permission: {
         Args: { perm: string }
+        Returns: boolean
+      }
+      jwt_is_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       org_dashboard_stats: {
