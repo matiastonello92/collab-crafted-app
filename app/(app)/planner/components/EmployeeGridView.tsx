@@ -493,18 +493,24 @@ export function EmployeeGridView({
           return (
             <div key={userId} className="grid grid-cols-[200px_repeat(7,1fr)] gap-2">
               <div 
-                className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors group"
+                className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 p-1.5 rounded-lg transition-colors group"
                 onClick={() => router.push(`/employees/${userId}/shifts`)}
                 title={t('planner.grid.viewEmployeeShifts')}
               >
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-6 w-6">
                   <AvatarImage src={user?.avatar_url || undefined} />
-                  <AvatarFallback>
-                    {user?.full_name?.[0]?.toUpperCase() || '?'}
+                  <AvatarFallback className="text-xs">
+                    {(() => {
+                      const names = user?.full_name?.trim().split(' ').filter(Boolean) || []
+                      if (names.length >= 2) {
+                        return (names[0][0] + names[names.length - 1][0]).toUpperCase()
+                      }
+                      return user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'
+                    })()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate flex items-center gap-1">
+                  <div className="font-semibold text-sm truncate flex items-center gap-1">
                     {user?.full_name || user?.email}
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -518,12 +524,12 @@ export function EmployeeGridView({
                             {formatHoursMinutes(stats.actualHours)}
                           </span>
                           {stats.variance !== 0 && (
-                            <span className={`font-medium ml-1 ${
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ml-1.5 ${
                               stats.variance > 0 
-                                ? 'text-green-600 dark:text-green-400' 
-                                : 'text-orange-600 dark:text-orange-400'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400' 
+                                : 'bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-400'
                             }`}>
-                              ({stats.variance > 0 ? '+' : ''}{formatHoursMinutes(Math.abs(stats.variance))})
+                              {stats.variance > 0 ? '+' : ''}{formatHoursMinutes(Math.abs(stats.variance))}
                             </span>
                           )}
                         </>
