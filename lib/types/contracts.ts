@@ -40,9 +40,9 @@ export interface ContractFormData {
   job_title?: string
   start_date: string
   end_date?: string
-  weekly_hours: number
+  weekly_hours?: number
   working_days_per_week: number
-  trial_period_days: number
+  trial_period_days?: number
   is_forfait_journalier: boolean
   daily_rate?: number
   hourly_rate?: number

@@ -154,30 +154,30 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Clock className="h-4 w-4" />
-                  {contract.is_forfait_journalier ? 'Forfait Giornaliero' : t('contracts.weeklyHours')}
+                  {contract.is_forfait_journalier ? t('contracts.display.dailyForfait') : t('contracts.weeklyHours')}
                 </div>
                 {contract.is_forfait_journalier ? (
-                  <p className="text-lg font-semibold">Contratto a giornata</p>
+                  <p className="text-lg font-semibold">{t('contracts.display.dailyContract')}</p>
                 ) : (
                   <>
                     <p className="text-2xl font-bold">{contract.weekly_hours}h</p>
                     <p className="text-xs text-muted-foreground">
-                      {contract.working_days_per_week} giorni/settimana
+                      {contract.working_days_per_week} {t('contracts.display.daysPerWeek')}
                     </p>
                   </>
                 )}
               </div>
               
               <div className="space-y-1">
-                <div className="text-sm font-medium">Retribuzione</div>
+                <div className="text-sm font-medium">{t('contracts.display.remuneration')}</div>
                 <p className="text-lg font-semibold">
                   {contract.is_forfait_journalier && contract.daily_rate
-                    ? `€${contract.daily_rate.toFixed(2)}/giorno`
+                    ? `€${contract.daily_rate.toFixed(2)}${t('contracts.display.perDay')}`
                     : contract.monthly_salary 
-                    ? `€${contract.monthly_salary.toFixed(2)}/mese`
+                    ? `€${contract.monthly_salary.toFixed(2)}${t('contracts.display.perMonth')}`
                     : contract.hourly_rate
-                    ? `€${contract.hourly_rate.toFixed(2)}/ora`
-                    : 'Non specificata'
+                    ? `€${contract.hourly_rate.toFixed(2)}${t('contracts.display.perHour')}`
+                    : t('contracts.display.notSpecified')
                   }
                 </p>
               </div>
@@ -186,29 +186,29 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             {/* French-specific fields */}
             {(contract.collective_agreement || contract.coefficient || contract.niveau || contract.echelon) && (
               <div className="border-t pt-4">
-                <h4 className="text-sm font-semibold mb-3">Informazioni Legali</h4>
+                <h4 className="text-sm font-semibold mb-3">{t('contracts.display.legalInfo')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                   {contract.collective_agreement && (
                     <div>
-                      <span className="text-muted-foreground">CCNL:</span>
+                      <span className="text-muted-foreground">{t('contracts.display.ccnl')}:</span>
                       <span className="ml-2 font-medium">{contract.collective_agreement}</span>
                     </div>
                   )}
                   {contract.niveau && (
                     <div>
-                      <span className="text-muted-foreground">Niveau:</span>
+                      <span className="text-muted-foreground">{t('contracts.display.niveau')}:</span>
                       <span className="ml-2 font-medium">{contract.niveau}</span>
                     </div>
                   )}
                   {contract.echelon && (
                     <div>
-                      <span className="text-muted-foreground">Échelon:</span>
+                      <span className="text-muted-foreground">{t('contracts.display.echelon')}:</span>
                       <span className="ml-2 font-medium">{contract.echelon}</span>
                     </div>
                   )}
                   {contract.coefficient && (
                     <div>
-                      <span className="text-muted-foreground">Coefficiente:</span>
+                      <span className="text-muted-foreground">{t('contracts.display.coefficient')}:</span>
                       <span className="ml-2 font-medium">{contract.coefficient}</span>
                     </div>
                   )}
@@ -247,8 +247,8 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             {contract.trial_period_days > 0 && (
               <div className="border-t pt-4">
                 <div className="text-sm">
-                  <span className="text-muted-foreground">Periodo di prova:</span>
-                  <span className="ml-2 font-medium">{contract.trial_period_days} giorni</span>
+                  <span className="text-muted-foreground">{t('contracts.display.trialPeriod')}:</span>
+                  <span className="ml-2 font-medium">{contract.trial_period_days} {t('contracts.display.days')}</span>
                 </div>
               </div>
             )}
@@ -265,7 +265,7 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             {contract.terminated_at && (
               <div className="border-t pt-4">
                 <p className="text-xs text-destructive">
-                  Contratto terminato il {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
+                  {t('contracts.display.terminatedOn')} {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
                 </p>
               </div>
             )}

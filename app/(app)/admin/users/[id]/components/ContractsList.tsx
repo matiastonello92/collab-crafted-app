@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ interface ContractsListProps {
 
 export function ContractsList({ userId, userFullName }: ContractsListProps) {
   const supabase = useSupabase()
+  const { t } = useTranslation()
   const [contracts, setContracts] = useState<UserContract[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -75,7 +77,7 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
       setContracts(data || [])
     } catch (error) {
       console.error('Error loading contracts:', error)
-      toast.error('Errore durante il caricamento dei contratti')
+      toast.error(t('contracts.messages.loadError'))
     } finally {
       setLoading(false)
     }
@@ -97,15 +99,15 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default">Attivo</Badge>
+        return <Badge variant="default">{t('contracts.status.active')}</Badge>
       case 'future':
-        return <Badge variant="secondary">Futuro</Badge>
+        return <Badge variant="secondary">{t('contracts.status.future')}</Badge>
       case 'expired':
-        return <Badge variant="outline">Scaduto</Badge>
+        return <Badge variant="outline">{t('contracts.status.expired')}</Badge>
       case 'terminated':
-        return <Badge variant="destructive">Terminato</Badge>
+        return <Badge variant="destructive">{t('contracts.status.terminated')}</Badge>
       default:
-        return <Badge variant="secondary">Inattivo</Badge>
+        return <Badge variant="secondary">{t('contracts.status.inactive')}</Badge>
     }
   }
 
@@ -138,11 +140,11 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
 
       if (error) throw error
 
-      toast.success('Contratto terminato con successo')
+      toast.success(t('contracts.messages.terminateSuccess'))
       loadContracts()
     } catch (error: any) {
       console.error('Error terminating contract:', error)
-      toast.error(error.message || 'Errore durante la terminazione del contratto')
+      toast.error(error.message || t('contracts.messages.terminateError'))
     } finally {
       setTerminateDialogOpen(false)
       setContractToTerminate(null)
@@ -170,15 +172,15 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Contratti di Lavoro
+                {t('contracts.title')}
               </CardTitle>
               <CardDescription>
-                Gestisci i contratti e i vincoli di pianificazione per {userFullName}
+                {t('contracts.subtitle').replace('{userFullName}', userFullName)}
               </CardDescription>
             </div>
             <Button onClick={handleNewContract} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Nuovo Contratto
+              {t('contracts.actions.newContract')}
             </Button>
           </div>
         </CardHeader>
@@ -187,9 +189,9 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
             <div className="text-center py-8 space-y-3">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto" />
               <div>
-                <h3 className="text-sm font-medium">Nessun contratto</h3>
+                <h3 className="text-sm font-medium">{t('contracts.empty.title')}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Inizia creando un nuovo contratto per questo utente
+                  {t('contracts.empty.description')}
                 </p>
               </div>
             </div>
@@ -198,7 +200,7 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
               {/* Contratti Attivi */}
               {activeContracts.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold">Contratti Attivi</h3>
+                  <h3 className="text-sm font-semibold">{t('contracts.sections.activeContracts')}</h3>
                   {activeContracts.map((contract) => (
                     <ContractCard
                       key={contract.id}
@@ -215,7 +217,7 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
               {/* Storico Contratti */}
               {historicalContracts.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Storico</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground">{t('contracts.sections.historical')}</h3>
                   {historicalContracts.map((contract) => (
                     <ContractCard
                       key={contract.id}
@@ -247,16 +249,15 @@ export function ContractsList({ userId, userFullName }: ContractsListProps) {
       <AlertDialog open={terminateDialogOpen} onOpenChange={setTerminateDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Terminare il contratto?</AlertDialogTitle>
+            <AlertDialogTitle>{t('contracts.dialogs.terminateTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Questa azione segnerà il contratto come terminato. Il contratto non potrà più essere modificato
-              ma rimarrà visibile nello storico.
+              {t('contracts.dialogs.terminateDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>{t('contracts.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleTerminateConfirm}>
-              Termina Contratto
+              {t('contracts.actions.terminateContract')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -275,20 +276,22 @@ interface ContractCardProps {
 }
 
 function ContractCard({ contract, status, onEdit, onTerminate, statusBadge, isHistorical }: ContractCardProps) {
+  const { t } = useTranslation()
+  
   return (
       <div className="border rounded-lg p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium">{contract.job_title || 'Posizione non specificata'}</h4>
+              <h4 className="font-medium">{contract.job_title || t('contracts.display.positionNotSpecified')}</h4>
               {statusBadge}
               {contract.is_forfait_journalier && (
-                <Badge variant="secondary">Forfait</Badge>
+                <Badge variant="secondary">{t('contracts.display.forfait')}</Badge>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
               {contract.contract_type}
-              {!contract.is_forfait_journalier && ` • ${contract.weekly_hours}h/settimana`}
+              {!contract.is_forfait_journalier && ` • ${contract.weekly_hours}${t('contracts.display.hoursPerWeek')}`}
             </p>
             <p className="text-xs text-muted-foreground">
               {format(new Date(contract.start_date), 'PPP', { locale: it })}
@@ -320,43 +323,43 @@ function ContractCard({ contract, status, onEdit, onTerminate, statusBadge, isHi
         {/* Dettagli Contratto */}
         <div className="grid grid-cols-2 gap-3 text-sm pt-2 border-t">
           <div>
-            <span className="text-muted-foreground">Retribuzione:</span>
+            <span className="text-muted-foreground">{t('contracts.display.remuneration')}:</span>
             <span className="ml-2 font-medium">
               {contract.is_forfait_journalier && contract.daily_rate
-                ? `€${contract.daily_rate}/giorno`
+                ? `€${contract.daily_rate}${t('contracts.display.perDay')}`
                 : contract.monthly_salary 
-                ? `€${contract.monthly_salary}/mese`
+                ? `€${contract.monthly_salary}${t('contracts.display.perMonth')}`
                 : contract.hourly_rate 
-                ? `€${contract.hourly_rate}/ora`
-                : 'Non specificata'
+                ? `€${contract.hourly_rate}${t('contracts.display.perHour')}`
+                : t('contracts.display.notSpecified')
               }
             </span>
           </div>
           <div>
-            <span className="text-muted-foreground">Giorni/settimana:</span>
+            <span className="text-muted-foreground">{t('contracts.display.daysPerWeek')}:</span>
             <span className="ml-2 font-medium">{contract.working_days_per_week}</span>
           </div>
           {contract.collective_agreement && (
             <div className="col-span-2">
-              <span className="text-muted-foreground">CCNL:</span>
+              <span className="text-muted-foreground">{t('contracts.display.ccnl')}:</span>
               <span className="ml-2 font-medium">{contract.collective_agreement}</span>
             </div>
           )}
           {contract.niveau && (
             <div>
-              <span className="text-muted-foreground">Niveau:</span>
+              <span className="text-muted-foreground">{t('contracts.display.niveau')}:</span>
               <span className="ml-2 font-medium">{contract.niveau}</span>
             </div>
           )}
           {contract.echelon && (
             <div>
-              <span className="text-muted-foreground">Échelon:</span>
+              <span className="text-muted-foreground">{t('contracts.display.echelon')}:</span>
               <span className="ml-2 font-medium">{contract.echelon}</span>
             </div>
           )}
           {contract.coefficient && (
             <div>
-              <span className="text-muted-foreground">Coefficient:</span>
+              <span className="text-muted-foreground">{t('contracts.display.coefficient')}:</span>
               <span className="ml-2 font-medium">{contract.coefficient}</span>
             </div>
           )}
@@ -364,7 +367,7 @@ function ContractCard({ contract, status, onEdit, onTerminate, statusBadge, isHi
 
         {contract.terminated_at && (
           <p className="text-xs text-destructive pt-2 border-t">
-            Terminato il {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
+            {t('contracts.display.terminatedOn')} {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
           </p>
         )}
       </div>

@@ -118,8 +118,24 @@ export const it = {
     notSchedulableDescription: 'Questo utente non può essere assegnato ai turni',
 
     // Status
+    // Empty states
+    empty: {
+      title: 'Nessun contratto',
+      description: 'Inizia creando un nuovo contratto per questo utente',
+    },
+    
+    // Dialogs
+    dialogs: {
+      terminateTitle: 'Terminare il contratto?',
+      terminateDescription: 'Questa azione segnerà il contratto come terminato. Il contratto non potrà più essere modificato ma rimarrà visibile nello storico.',
+    },
+    
     status: {
       active: 'Attivo',
+      future: 'Futuro',
+      expired: 'Scaduto',
+      terminated: 'Terminato',
+      inactive: 'Inattivo',
       inactive: 'Inattivo',
       future: 'Futuro',
       expired: 'Scaduto',
@@ -139,6 +155,9 @@ export const it = {
     // Form Sections
     sections: {
       basicInfo: 'Informazioni di Base',
+      activeContracts: 'Contratti Attivi',
+      historical: 'Storico',
+      legalInfo: 'Informazioni Legali',
       basicInfoDesc: 'Tipo contratto, date e posizione lavorativa',
       workingHours: 'Orario di Lavoro',
       workingHoursDesc: 'Ore settimanali e giorni lavorativi',
@@ -213,8 +232,10 @@ export const it = {
     // Display Labels
     display: {
       position: 'Posizione',
+      positionNotSpecified: 'Posizione non specificata',
       positionUnspecified: 'Posizione non specificata',
       remuneration: 'Retribuzione',
+      notSpecified: 'Non specificata',
       remunerationUnspecified: 'Non specificata',
       perDay: '/giorno',
       perHour: '/ora',
@@ -228,6 +249,9 @@ export const it = {
       echelon: 'Échelon',
       coefficient: 'Coefficient',
       ccnl: 'CCNL',
+      forfait: 'Forfait',
+      dailyForfait: 'Forfait Giornaliero',
+      dailyContract: 'Contratto a giornata',
       forfaitDaily: 'Contratto a giornata',
       minRest: 'Riposo minimo',
       hours: 'ore',
@@ -235,6 +259,7 @@ export const it = {
       days: 'giorni',
       trialPeriod: 'Periodo di prova',
       terminatedOn: 'Terminato il',
+      legalInfo: 'Informazioni Legali',
     },
 
     // Dialogs
@@ -248,6 +273,40 @@ export const it = {
 
     // Messages
     messages: {
+      createSuccess: 'Contratto creato con successo',
+      updateSuccess: 'Contratto aggiornato con successo',
+      createError: 'Errore durante la creazione del contratto',
+      updateError: 'Errore durante l\'aggiornamento del contratto',
+      loadError: 'Errore durante il caricamento dei contratti',
+      terminateSuccess: 'Contratto terminato con successo',
+      terminateError: 'Errore durante la terminazione del contratto',
+    },
+    
+    // Scheduling section
+    scheduling: {
+      title: 'Stato Pianificazione',
+      description: 'Controlla se questo utente può essere assegnato ai turni nel planner',
+      schedulableLabel: 'Utente Pianificabile',
+      schedulableTrue: 'L\'utente appare nel planner e può essere assegnato ai turni',
+      schedulableFalse: 'L\'utente non appare nel planner e non può essere assegnato ai turni',
+      schedulableTitle: 'Utente Pianificabile',
+      schedulableAlert: 'Questo utente è abilitato per la pianificazione dei turni e apparirà nelle viste del planner.',
+      notSchedulableTitle: 'Utente Non Pianificabile',
+      notSchedulableAlert: 'Questo utente non può essere assegnato ai turni. Attiva l\'opzione sopra per renderlo pianificabile.',
+      currentStatus: 'Stato corrente',
+      schedulable: 'Pianificabile',
+      notSchedulable: 'Non Pianificabile',
+      insufficientPermissions: 'Permessi Insufficienti',
+      insufficientPermissionsDescription: 'Non hai i permessi necessari per gestire i contratti. Contatta un amministratore.',
+      messages: {
+        schedulableEnabled: '{userFullName} è ora pianificabile nei turni',
+        schedulableDisabled: '{userFullName} non è più pianificabile nei turni',
+        updateError: 'Errore durante l\'aggiornamento dello stato pianificabile',
+      },
+    },
+    
+    // Validation (continuano le chiavi esistenti)
+    validation: {
       createSuccess: 'Contratto creato con successo',
       createError: 'Errore durante la creazione del contratto',
       updateSuccess: 'Contratto aggiornato con successo',

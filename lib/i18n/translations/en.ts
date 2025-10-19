@@ -118,8 +118,24 @@ export const en = {
     notSchedulableDescription: 'This user cannot be assigned to shifts',
 
     // Status
+    // Empty states
+    empty: {
+      title: 'No contracts',
+      description: 'Start by creating a new contract for this user',
+    },
+    
+    // Dialogs
+    dialogs: {
+      terminateTitle: 'Terminate contract?',
+      terminateDescription: 'This action will mark the contract as terminated. The contract can no longer be modified but will remain visible in history.',
+    },
+    
     status: {
       active: 'Active',
+      future: 'Future',
+      expired: 'Expired',
+      terminated: 'Terminated',
+      inactive: 'Inactive',
       inactive: 'Inactive',
       future: 'Future',
       expired: 'Expired',
@@ -139,6 +155,9 @@ export const en = {
     // Form Sections
     sections: {
       basicInfo: 'Basic Information',
+      activeContracts: 'Active Contracts',
+      historical: 'Historical',
+      legalInfo: 'Legal Information',
       basicInfoDesc: 'Contract type, dates and job position',
       workingHours: 'Working Hours',
       workingHoursDesc: 'Weekly hours and working days',
@@ -213,13 +232,15 @@ export const en = {
     // Display Labels
     display: {
       position: 'Position',
+      positionNotSpecified: 'Position not specified',
       positionUnspecified: 'Position not specified',
       remuneration: 'Remuneration',
+      notSpecified: 'Not specified',
       remunerationUnspecified: 'Not specified',
       perDay: '/day',
       perHour: '/hour',
       perMonth: '/month',
-      hoursPerWeek: 'hrs/week',
+      hoursPerWeek: 'h/week',
       daysPerWeek: 'days/week',
       from: 'From',
       until: 'Until',
@@ -227,7 +248,10 @@ export const en = {
       niveau: 'Niveau',
       echelon: 'Échelon',
       coefficient: 'Coefficient',
-      ccnl: 'Collective Agreement',
+      ccnl: 'CBA',
+      forfait: 'Forfait',
+      dailyForfait: 'Daily Forfait',
+      dailyContract: 'Daily contract',
       forfaitDaily: 'Daily rate contract',
       minRest: 'Minimum rest',
       hours: 'hours',
@@ -235,6 +259,7 @@ export const en = {
       days: 'days',
       trialPeriod: 'Trial period',
       terminatedOn: 'Terminated on',
+      legalInfo: 'Legal Information',
     },
 
     // Dialogs
@@ -248,6 +273,40 @@ export const en = {
 
     // Messages
     messages: {
+      createSuccess: 'Contract created successfully',
+      updateSuccess: 'Contract updated successfully',
+      createError: 'Error creating contract',
+      updateError: 'Error updating contract',
+      loadError: 'Error loading contracts',
+      terminateSuccess: 'Contract terminated successfully',
+      terminateError: 'Error terminating contract',
+    },
+    
+    // Scheduling section
+    scheduling: {
+      title: 'Scheduling Status',
+      description: 'Check if this user can be assigned to shifts in the planner',
+      schedulableLabel: 'Schedulable User',
+      schedulableTrue: 'The user appears in the planner and can be assigned to shifts',
+      schedulableFalse: 'The user does not appear in the planner and cannot be assigned to shifts',
+      schedulableTitle: 'Schedulable User',
+      schedulableAlert: 'This user is enabled for shift scheduling and will appear in planner views.',
+      notSchedulableTitle: 'User Not Schedulable',
+      notSchedulableAlert: 'This user cannot be assigned to shifts. Enable the option above to make them schedulable.',
+      currentStatus: 'Current status',
+      schedulable: 'Schedulable',
+      notSchedulable: 'Not Schedulable',
+      insufficientPermissions: 'Insufficient Permissions',
+      insufficientPermissionsDescription: 'You do not have the necessary permissions to manage contracts. Contact an administrator.',
+      messages: {
+        schedulableEnabled: '{userFullName} is now schedulable for shifts',
+        schedulableDisabled: '{userFullName} is no longer schedulable for shifts',
+        updateError: 'Error updating schedulable status',
+      },
+    },
+    
+    // Validation (existing keys continue)
+    validation: {
       createSuccess: 'Contract created successfully',
       createError: 'Error creating contract',
       updateSuccess: 'Contract updated successfully',

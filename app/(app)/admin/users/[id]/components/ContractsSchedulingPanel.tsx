@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -20,6 +21,7 @@ interface ContractsSchedulingPanelProps {
 
 export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedulable, userFullName }: ContractsSchedulingPanelProps) {
   const supabase = useSupabase()
+  const { t } = useTranslation()
   const { hasPermission } = usePermissionCheck()
   const [isSchedulable, setIsSchedulable] = useState(initialSchedulable)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -41,12 +43,12 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
       
       toast.success(
         checked 
-          ? `${userFullName} è ora pianificabile nei turni`
-          : `${userFullName} non è più pianificabile nei turni`
+          ? t('contracts.scheduling.messages.schedulableEnabled').replace('{userFullName}', userFullName)
+          : t('contracts.scheduling.messages.schedulableDisabled').replace('{userFullName}', userFullName)
       )
     } catch (error) {
       console.error('Error updating schedulable status:', error)
-      toast.error('Errore durante l\'aggiornamento dello stato pianificabile')
+      toast.error(t('contracts.scheduling.messages.updateError'))
     } finally {
       setIsUpdating(false)
     }
@@ -59,22 +61,22 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Stato Pianificazione
+            {t('contracts.scheduling.title')}
           </CardTitle>
           <CardDescription>
-            Controlla se questo utente può essere assegnato ai turni nel planner
+            {t('contracts.scheduling.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between space-x-2">
             <div className="flex-1">
               <Label htmlFor="schedulable-toggle" className="text-base font-medium">
-                Utente Pianificabile
+                {t('contracts.scheduling.schedulableLabel')}
               </Label>
               <p className="text-sm text-muted-foreground mt-1">
                 {isSchedulable 
-                  ? 'L\'utente appare nel planner e può essere assegnato ai turni'
-                  : 'L\'utente non appare nel planner e non può essere assegnato ai turni'
+                  ? t('contracts.scheduling.schedulableTrue')
+                  : t('contracts.scheduling.schedulableFalse')
                 }
               </p>
             </div>
@@ -90,26 +92,26 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
           {isSchedulable ? (
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Utente Pianificabile</AlertTitle>
+              <AlertTitle>{t('contracts.scheduling.schedulableTitle')}</AlertTitle>
               <AlertDescription>
-                Questo utente è abilitato per la pianificazione dei turni e apparirà nelle viste del planner.
+                {t('contracts.scheduling.schedulableAlert')}
               </AlertDescription>
             </Alert>
           ) : (
             <Alert variant="destructive">
               <Info className="h-4 w-4" />
-              <AlertTitle>Utente Non Pianificabile</AlertTitle>
+              <AlertTitle>{t('contracts.scheduling.notSchedulableTitle')}</AlertTitle>
               <AlertDescription>
-                Questo utente non può essere assegnato ai turni. Attiva l'opzione sopra per renderlo pianificabile.
+                {t('contracts.scheduling.notSchedulableAlert')}
               </AlertDescription>
             </Alert>
           )}
 
           {/* Status Badge */}
           <div className="flex items-center gap-2 pt-2">
-            <span className="text-sm text-muted-foreground">Stato corrente:</span>
+            <span className="text-sm text-muted-foreground">{t('contracts.scheduling.currentStatus')}:</span>
             <Badge variant={isSchedulable ? 'default' : 'secondary'}>
-              {isSchedulable ? 'Pianificabile' : 'Non Pianificabile'}
+              {isSchedulable ? t('contracts.scheduling.schedulable') : t('contracts.scheduling.notSchedulable')}
             </Badge>
           </div>
         </CardContent>
@@ -121,9 +123,9 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
       ) : (
         <Alert>
           <Info className="h-4 w-4" />
-          <AlertTitle>Permessi Insufficienti</AlertTitle>
+          <AlertTitle>{t('contracts.scheduling.insufficientPermissions')}</AlertTitle>
           <AlertDescription>
-            Non hai i permessi necessari per gestire i contratti. Contatta un amministratore.
+            {t('contracts.scheduling.insufficientPermissionsDescription')}
           </AlertDescription>
         </Alert>
       )}

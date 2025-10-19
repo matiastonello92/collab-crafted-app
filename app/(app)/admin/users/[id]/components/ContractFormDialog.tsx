@@ -50,7 +50,9 @@ export function ContractFormDialog({
   const isFrench = requiresFrenchFields(locationCountry)
   const contractTypeCodes = getContractTypeCodesForCountry(locationCountry)
   
-  const form = useForm<ContractFormValues>({
+  type FormValues = z.infer<ReturnType<typeof createContractFormSchema>>
+  
+  const form = useForm<FormValues>({
     resolver: zodResolver(createContractFormSchema(t)),
     defaultValues: {
       contract_type: contract?.contract_type || '',
@@ -59,7 +61,7 @@ export function ContractFormDialog({
       end_date: contract?.end_date ? new Date(contract.end_date).toISOString().split('T')[0] : '',
       weekly_hours: contract?.weekly_hours || 35,
       working_days_per_week: contract?.working_days_per_week || 5,
-      trial_period_days: contract?.trial_period_days || 0,
+      trial_period_days: contract?.trial_period_days ?? 0,
       is_forfait_journalier: contract?.is_forfait_journalier || false,
       daily_rate: contract?.daily_rate || undefined,
       hourly_rate: contract?.hourly_rate || undefined,
@@ -129,7 +131,7 @@ export function ContractFormDialog({
     }
   }
 
-  const onSubmit = async (data: ContractFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     
     try {
