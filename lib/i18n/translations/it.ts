@@ -45,6 +45,7 @@ export const it = {
     inactive: 'Inattivo',
     errorOccurred: 'Si è verificato un errore',
     tryAgainLater: 'Riprova più tardi.',
+    retry: 'Riprova',
     auditSystemWarning: '⚠️ Sistema di audit in fase di implementazione',
     inDevelopment: 'In Sviluppo',
     access: 'Accedi',
@@ -493,6 +494,8 @@ export const it = {
       title: 'Congedi e Assenze',
       subtitle: 'Storico richieste di congedo per questo utente',
       
+      unknownApprover: 'Manager non disponibile',
+      
       stats: {
         pending: 'In Attesa',
         approvedYTD: 'Approvati (anno corrente)',
@@ -543,6 +546,7 @@ export const it = {
         rejectSuccess: 'Richiesta rifiutata',
         approveError: 'Errore durante l\'approvazione',
         rejectError: 'Errore durante il rifiuto',
+        fetchError: 'Impossibile caricare le richieste di congedo',
       },
     },
   },

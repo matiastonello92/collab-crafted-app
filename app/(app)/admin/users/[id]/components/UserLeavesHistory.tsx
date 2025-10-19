@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, CheckCircle, XCircle, Clock, User } from 'lucide-react'
+import { Calendar, CheckCircle, XCircle, Clock, User, AlertCircle } from 'lucide-react'
 import { LeaveDecisionDialog } from './LeaveDecisionDialog'
 import { usePermissions } from '@/hooks/usePermissions'
 import { checkPermission } from '@/lib/permissions/unified'
@@ -20,7 +20,7 @@ interface UserLeavesHistoryProps {
 
 export function UserLeavesHistory({ userId }: UserLeavesHistoryProps) {
   const { t } = useTranslation()
-  const { requests: allRequests, loading, mutate } = useUserLeaveRequests(userId)
+  const { requests: allRequests, loading, error, mutate } = useUserLeaveRequests(userId)
   const { permissions } = usePermissions()
   const canManageLeaves = checkPermission(permissions, ['leave:manage', 'shifts:approve'])
 
@@ -48,6 +48,27 @@ export function UserLeavesHistory({ userId }: UserLeavesHistoryProps) {
       <div className="flex justify-center py-8">
         <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle className="text-destructive flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            {t('common.error')}
+          </CardTitle>
+          <CardDescription>
+            {t('contracts.leaves.messages.fetchError')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => mutate()} variant="outline">
+            {t('common.retry')}
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -286,11 +307,13 @@ function LeaveRequestCard({ request }: { request: any }) {
             </p>
           )}
 
-          {request.approved_at && request.profiles && (
+          {request.approved_at && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
               <span>
-                {t('contracts.leaves.fields.approvedBy')}: {request.profiles.full_name}
+                {t('contracts.leaves.fields.approvedBy')}: {
+                  request.profiles?.full_name || t('contracts.leaves.unknownApprover')
+                }
               </span>
               <span>•</span>
               <span>

@@ -34,7 +34,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // pending, approved, rejected, all
 
-    // Build query
+    // Build query - Query 1: Leave requests + leave types (safe)
     let query = supabase
       .from('leave_requests')
       .select(`
@@ -44,10 +44,6 @@ export async function GET(
           key,
           label,
           color
-        ),
-        profiles!leave_requests_approver_id_fkey (
-          id,
-          full_name
         )
       `)
       .eq('user_id', userId)
@@ -58,14 +54,42 @@ export async function GET(
       query = query.eq('status', status)
     }
 
-    const { data: requests, error } = await query
+    const { data: requests, error: requestsError } = await query
 
-    if (error) {
-      console.error('Error fetching user leave requests:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (requestsError) {
+      console.error('Error fetching leave requests:', requestsError)
+      return NextResponse.json({ error: requestsError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ requests: requests || [] })
+    // Query 2: Approver profiles (safe with RLS)
+    const approverIds = requests
+      ?.filter(r => r.approver_id)
+      .map(r => r.approver_id)
+      .filter((id, idx, self) => self.indexOf(id) === idx) || []
+
+    let approverProfiles: Record<string, { id: string; full_name: string }> = {}
+
+    if (approverIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', approverIds)
+      
+      if (!profilesError && profiles) {
+        approverProfiles = profiles.reduce((acc, p) => {
+          acc[p.id] = p
+          return acc
+        }, {} as Record<string, { id: string; full_name: string }>)
+      }
+    }
+
+    // Merge data safely
+    const enrichedRequests = requests?.map(r => ({
+      ...r,
+      profiles: r.approver_id ? approverProfiles[r.approver_id] || null : null
+    }))
+
+    return NextResponse.json({ requests: enrichedRequests || [] })
   } catch (error) {
     console.error('Unexpected error in user leave requests:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

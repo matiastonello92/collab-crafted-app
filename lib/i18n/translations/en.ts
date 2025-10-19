@@ -45,6 +45,7 @@ export const en = {
     inactive: 'Inactive',
     errorOccurred: 'An error occurred',
     tryAgainLater: 'Please try again later.',
+    retry: 'Retry',
     auditSystemWarning: '⚠️ Audit system under development',
     inDevelopment: 'In Development',
     access: 'Access',
@@ -493,6 +494,8 @@ export const en = {
       title: 'Leaves & Absences',
       subtitle: 'Leave request history for this user',
       
+      unknownApprover: 'Manager unavailable',
+      
       stats: {
         pending: 'Pending',
         approvedYTD: 'Approved (YTD)',
@@ -543,6 +546,7 @@ export const en = {
         rejectSuccess: 'Request rejected',
         approveError: 'Error approving request',
         rejectError: 'Error rejecting request',
+        fetchError: 'Failed to load leave requests',
       },
     },
   },
