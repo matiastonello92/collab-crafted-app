@@ -6,9 +6,11 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Info, Construction } from 'lucide-react'
+import { Calendar, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSupabase } from '@/hooks/useSupabase'
+import { usePermissionCheck } from '@/hooks/usePermissions'
+import { ContractsList } from './ContractsList'
 
 interface ContractsSchedulingPanelProps {
   userId: string
@@ -18,8 +20,11 @@ interface ContractsSchedulingPanelProps {
 
 export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedulable, userFullName }: ContractsSchedulingPanelProps) {
   const supabase = useSupabase()
+  const { hasPermission } = usePermissionCheck()
   const [isSchedulable, setIsSchedulable] = useState(initialSchedulable)
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  const canManageContracts = hasPermission('users:manage_contracts') || hasPermission('users:manage')
 
   const handleSchedulableToggle = async (checked: boolean) => {
     setIsUpdating(true)
@@ -77,7 +82,7 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
               id="schedulable-toggle"
               checked={isSchedulable}
               onCheckedChange={handleSchedulableToggle}
-              disabled={isUpdating}
+              disabled={isUpdating || !canManageContracts}
             />
           </div>
 
@@ -110,38 +115,18 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
         </CardContent>
       </Card>
 
-      {/* Contracts Section - Coming Soon */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Construction className="h-5 w-5 text-muted-foreground" />
-            Contratti e Vincoli
-          </CardTitle>
-          <CardDescription>
-            Gestione dei contratti di lavoro e vincoli di pianificazione
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 space-y-4">
-            <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-              <Construction className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Coming Soon</h3>
-              <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-                La gestione dei contratti sarà presto disponibile. Potrai definire:
-              </p>
-              <ul className="text-sm text-muted-foreground mt-3 space-y-1 max-w-md mx-auto text-left list-disc list-inside">
-                <li>Tipo di contratto (full-time, part-time, stagionale, ecc.)</li>
-                <li>Ore settimanali previste dal contratto</li>
-                <li>Limiti giornalieri e settimanali</li>
-                <li>Vincoli di riposo minimo tra turni</li>
-                <li>Giorni consecutivi massimi lavorabili</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Contracts Section */}
+      {canManageContracts ? (
+        <ContractsList userId={userId} userFullName={userFullName} />
+      ) : (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Permessi Insufficienti</AlertTitle>
+          <AlertDescription>
+            Non hai i permessi necessari per gestire i contratti. Contatta un amministratore.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }

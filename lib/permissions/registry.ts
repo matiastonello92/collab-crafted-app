@@ -46,6 +46,7 @@ export const PERMISSIONS = {
     'users:delete',
     'users:edit',
     'users:manage',
+    'users:manage_contracts',
     'users:view',
   ],
   finance: [

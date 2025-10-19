@@ -13,16 +13,26 @@ import { useTranslation } from '@/lib/i18n'
 interface UserContract {
   id: string
   contract_type: string
+  job_title?: string
   start_date: string
   end_date: string | null
   weekly_hours: number
+  working_days_per_week: number
   daily_hours_min: number | null
   daily_hours_max: number | null
   min_rest_hours: number | null
   max_consecutive_days: number | null
   max_weekly_hours: number | null
+  trial_period_days: number
+  collective_agreement?: string
+  coefficient?: string
+  hourly_rate?: number
+  monthly_salary?: number
+  salary_currency: string
+  country_code?: string
   notes: string | null
   is_active: boolean
+  terminated_at?: string
   created_at: string
 }
 
@@ -114,13 +124,20 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                {getContractTypeLabel(contract.contract_type)}
+                {contract.job_title || getContractTypeLabel(contract.contract_type)}
               </CardTitle>
-              <Badge variant={contract.is_active ? 'default' : 'secondary'}>
-                {contract.is_active ? t('contracts.active') : t('contracts.inactive')}
+              <Badge variant={contract.is_active && !contract.terminated_at ? 'default' : 'secondary'}>
+                {contract.terminated_at 
+                  ? t('contracts.terminated') 
+                  : contract.is_active 
+                  ? t('contracts.active') 
+                  : t('contracts.inactive')
+                }
               </Badge>
             </div>
             <CardDescription>
+              {getContractTypeLabel(contract.contract_type)}
+              {' • '}
               {t('contracts.validFrom')} {format(new Date(contract.start_date), 'PPP', { locale: it })}
               {contract.end_date && (
                 <> {t('contracts.to')} {format(new Date(contract.end_date), 'PPP', { locale: it })}</>
@@ -128,7 +145,7 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Working Hours */}
+            {/* Working Hours & Salary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
@@ -136,19 +153,44 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
                   {t('contracts.weeklyHours')}
                 </div>
                 <p className="text-2xl font-bold">{contract.weekly_hours}h</p>
+                <p className="text-xs text-muted-foreground">
+                  {contract.working_days_per_week} giorni/settimana
+                </p>
               </div>
               
-              {(contract.daily_hours_min || contract.daily_hours_max) && (
-                <div className="space-y-1">
-                  <div className="text-sm font-medium">{t('contracts.dailyHours')}</div>
-                  <p className="text-sm text-muted-foreground">
-                    {contract.daily_hours_min && `Min: ${contract.daily_hours_min}h`}
-                    {contract.daily_hours_min && contract.daily_hours_max && ' | '}
-                    {contract.daily_hours_max && `Max: ${contract.daily_hours_max}h`}
-                  </p>
-                </div>
-              )}
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Retribuzione</div>
+                <p className="text-lg font-semibold">
+                  {contract.monthly_salary 
+                    ? `€${contract.monthly_salary.toFixed(2)}/mese`
+                    : contract.hourly_rate
+                    ? `€${contract.hourly_rate.toFixed(2)}/ora`
+                    : 'Non specificata'
+                  }
+                </p>
+              </div>
             </div>
+
+            {/* French-specific fields */}
+            {(contract.collective_agreement || contract.coefficient) && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-semibold mb-3">Informazioni Legali</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  {contract.collective_agreement && (
+                    <div>
+                      <span className="text-muted-foreground">CCNL:</span>
+                      <span className="ml-2 font-medium">{contract.collective_agreement}</span>
+                    </div>
+                  )}
+                  {contract.coefficient && (
+                    <div>
+                      <span className="text-muted-foreground">Coefficiente:</span>
+                      <span className="ml-2 font-medium">{contract.coefficient}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Scheduling Constraints */}
             {(contract.min_rest_hours || contract.max_consecutive_days || contract.max_weekly_hours) && (
@@ -177,11 +219,30 @@ export function UserContractsView({ userId, isSchedulable }: UserContractsViewPr
               </div>
             )}
 
+            {/* Trial Period */}
+            {contract.trial_period_days > 0 && (
+              <div className="border-t pt-4">
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Periodo di prova:</span>
+                  <span className="ml-2 font-medium">{contract.trial_period_days} giorni</span>
+                </div>
+              </div>
+            )}
+
             {/* Notes */}
             {contract.notes && (
               <div className="border-t pt-4">
                 <h4 className="text-sm font-semibold mb-2">{t('contracts.notes')}</h4>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contract.notes}</p>
+              </div>
+            )}
+
+            {/* Termination Info */}
+            {contract.terminated_at && (
+              <div className="border-t pt-4">
+                <p className="text-xs text-destructive">
+                  Contratto terminato il {format(new Date(contract.terminated_at), 'PPP', { locale: it })}
+                </p>
               </div>
             )}
           </CardContent>
