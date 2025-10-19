@@ -156,6 +156,75 @@ export type Database = {
           },
         ]
       }
+      bonuses_advances: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string
+          currency: string
+          description: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          payment_date: string | null
+          related_month: string | null
+          related_period_end: string | null
+          related_period_start: string | null
+          status: string
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          description: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          payment_date?: string | null
+          related_month?: string | null
+          related_period_end?: string | null
+          related_period_start?: string | null
+          status?: string
+          transaction_date: string
+          transaction_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          payment_date?: string | null
+          related_month?: string | null
+          related_period_end?: string | null
+          related_period_start?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cash_closures: {
         Row: {
           closure_date: string
@@ -437,6 +506,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contract_amendments: {
+        Row: {
+          amendment_date: string
+          amendment_type: string
+          approved_at: string | null
+          approved_by: string | null
+          contract_id: string
+          created_at: string
+          created_by: string
+          document_url: string | null
+          effective_date: string
+          id: string
+          location_id: string
+          new_values: Json
+          notes: string | null
+          org_id: string
+          previous_values: Json
+          reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amendment_date: string
+          amendment_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id: string
+          created_at?: string
+          created_by: string
+          document_url?: string | null
+          effective_date: string
+          id?: string
+          location_id: string
+          new_values?: Json
+          notes?: string | null
+          org_id: string
+          previous_values?: Json
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amendment_date?: string
+          amendment_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id?: string
+          created_at?: string
+          created_by?: string
+          document_url?: string | null
+          effective_date?: string
+          id?: string
+          location_id?: string
+          new_values?: Json
+          notes?: string | null
+          org_id?: string
+          previous_values?: Json
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       email_logs: {
         Row: {
@@ -3371,6 +3506,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transport_allowances: {
+        Row: {
+          allowance_name: string
+          allowance_type: string
+          created_at: string
+          created_by: string
+          employee_contribution_pct: number | null
+          employer_contribution_pct: number | null
+          end_date: string | null
+          id: string
+          justification_document_url: string | null
+          location_id: string
+          monthly_amount: number
+          notes: string | null
+          org_id: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowance_name: string
+          allowance_type: string
+          created_at?: string
+          created_by: string
+          employee_contribution_pct?: number | null
+          employer_contribution_pct?: number | null
+          end_date?: string | null
+          id?: string
+          justification_document_url?: string | null
+          location_id: string
+          monthly_amount: number
+          notes?: string | null
+          org_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowance_name?: string
+          allowance_type?: string
+          created_at?: string
+          created_by?: string
+          employee_contribution_pct?: number | null
+          employer_contribution_pct?: number | null
+          end_date?: string | null
+          id?: string
+          justification_document_url?: string | null
+          location_id?: string
+          monthly_amount?: number
+          notes?: string | null
+          org_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_contracts: {
         Row: {
