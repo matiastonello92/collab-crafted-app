@@ -117,39 +117,22 @@ export const it = {
     notSchedulable: 'Utente non pianificabile',
     notSchedulableDescription: 'Questo utente non può essere assegnato ai turni',
 
-    // Status
-    // Empty states
-    empty: {
-      title: 'Nessun contratto',
-      description: 'Inizia creando un nuovo contratto per questo utente',
-    },
-    
-    // Dialogs
-    dialogs: {
-      terminateTitle: 'Terminare il contratto?',
-      terminateDescription: 'Questa azione segnerà il contratto come terminato. Il contratto non potrà più essere modificato ma rimarrà visibile nello storico.',
-    },
-    
     status: {
       active: 'Attivo',
       future: 'Futuro',
       expired: 'Scaduto',
       terminated: 'Terminato',
       inactive: 'Inattivo',
-      inactive: 'Inattivo',
-      future: 'Futuro',
-      expired: 'Scaduto',
-      terminated: 'Terminato',
       forfait: 'Forfait',
     },
 
     // Actions
     actions: {
-      save: 'Salva Contratto',
-      cancel: 'Annulla',
+      newContract: 'Nuovo Contratto',
       edit: 'Modifica',
-      terminate: 'Termina Contratto',
-      confirmTerminate: 'Conferma Terminazione',
+      save: 'Salva',
+      cancel: 'Annulla',
+      terminateContract: 'Termina Contratto',
     },
 
     // Form Sections
@@ -305,17 +288,6 @@ export const it = {
       },
     },
     
-    // Validation (continuano le chiavi esistenti)
-    validation: {
-      createSuccess: 'Contratto creato con successo',
-      createError: 'Errore durante la creazione del contratto',
-      updateSuccess: 'Contratto aggiornato con successo',
-      updateError: 'Errore durante l\'aggiornamento del contratto',
-      terminateSuccess: 'Contratto terminato con successo',
-      terminateError: 'Errore durante la terminazione del contratto',
-      loadError: 'Errore durante il caricamento dei contratti',
-    },
-
     // Validation
     validation: {
       contractTypeRequired: 'Tipo contratto obbligatorio',

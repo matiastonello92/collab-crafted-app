@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { z } from 'zod'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -50,9 +51,7 @@ export function ContractFormDialog({
   const isFrench = requiresFrenchFields(locationCountry)
   const contractTypeCodes = getContractTypeCodesForCountry(locationCountry)
   
-  type FormValues = z.infer<ReturnType<typeof createContractFormSchema>>
-  
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(createContractFormSchema(t)),
     defaultValues: {
       contract_type: contract?.contract_type || '',
@@ -131,7 +130,7 @@ export function ContractFormDialog({
     }
   }
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true)
     
     try {

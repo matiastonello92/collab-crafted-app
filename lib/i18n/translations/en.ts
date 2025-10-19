@@ -117,39 +117,22 @@ export const en = {
     notSchedulable: 'User not schedulable',
     notSchedulableDescription: 'This user cannot be assigned to shifts',
 
-    // Status
-    // Empty states
-    empty: {
-      title: 'No contracts',
-      description: 'Start by creating a new contract for this user',
-    },
-    
-    // Dialogs
-    dialogs: {
-      terminateTitle: 'Terminate contract?',
-      terminateDescription: 'This action will mark the contract as terminated. The contract can no longer be modified but will remain visible in history.',
-    },
-    
     status: {
       active: 'Active',
       future: 'Future',
       expired: 'Expired',
       terminated: 'Terminated',
       inactive: 'Inactive',
-      inactive: 'Inactive',
-      future: 'Future',
-      expired: 'Expired',
-      terminated: 'Terminated',
       forfait: 'Daily Rate',
     },
 
     // Actions
     actions: {
-      save: 'Save Contract',
-      cancel: 'Cancel',
+      newContract: 'New Contract',
       edit: 'Edit',
-      terminate: 'Terminate Contract',
-      confirmTerminate: 'Confirm Termination',
+      save: 'Save',
+      cancel: 'Cancel',
+      terminateContract: 'Terminate Contract',
     },
 
     // Form Sections
@@ -305,17 +288,6 @@ export const en = {
       },
     },
     
-    // Validation (existing keys continue)
-    validation: {
-      createSuccess: 'Contract created successfully',
-      createError: 'Error creating contract',
-      updateSuccess: 'Contract updated successfully',
-      updateError: 'Error updating contract',
-      terminateSuccess: 'Contract terminated successfully',
-      terminateError: 'Error terminating contract',
-      loadError: 'Error loading contracts',
-    },
-
     // Validation
     validation: {
       contractTypeRequired: 'Contract type is required',
