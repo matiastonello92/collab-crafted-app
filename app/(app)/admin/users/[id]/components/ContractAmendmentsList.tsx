@@ -8,6 +8,7 @@ import { Loader2, Plus, FileText, Calendar } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 import { useContractAmendments } from '@/hooks/useContractAmendments'
 import { format } from 'date-fns'
+import { ContractAmendmentDialog } from './ContractAmendmentDialog'
 
 interface ContractAmendmentsListProps {
   userId: string
@@ -56,8 +57,18 @@ export function ContractAmendmentsList({ userId }: ContractAmendmentsListProps) 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <>
+      <ContractAmendmentDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        userId={userId}
+        onSuccess={() => {
+          setShowDialog(false)
+        }}
+      />
+      
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">{t('contracts.amendments.title')}</h3>
           <p className="text-sm text-muted-foreground">
@@ -152,6 +163,7 @@ export function ContractAmendmentsList({ userId }: ContractAmendmentsListProps) 
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

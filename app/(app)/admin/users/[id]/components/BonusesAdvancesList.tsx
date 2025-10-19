@@ -10,6 +10,7 @@ import { useTranslation } from '@/lib/i18n'
 import { useBonusesAdvances } from '@/hooks/useBonusesAdvances'
 import { format } from 'date-fns'
 import { it, enUS } from 'date-fns/locale'
+import { BonusAdvanceDialog } from './BonusAdvanceDialog'
 
 interface BonusesAdvancesListProps {
   userId: string
@@ -61,8 +62,19 @@ export function BonusesAdvancesList({ userId }: BonusesAdvancesListProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <>
+      <BonusAdvanceDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        userId={userId}
+        onSuccess={() => {
+          setShowDialog(false)
+          // Trigger refresh of the list
+        }}
+      />
+      
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">{t('contracts.bonuses.title')}</h3>
           <p className="text-sm text-muted-foreground">
@@ -165,6 +177,7 @@ export function BonusesAdvancesList({ userId }: BonusesAdvancesListProps) {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </>
   )
 }

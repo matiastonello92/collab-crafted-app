@@ -9,6 +9,7 @@ import { useTranslation } from '@/lib/i18n'
 import { useTransportAllowances } from '@/hooks/useTransportAllowances'
 import { format } from 'date-fns'
 import { it, enUS } from 'date-fns/locale'
+import { TransportAllowanceDialog } from './TransportAllowanceDialog'
 
 interface TransportAllowancesListProps {
   userId: string
@@ -42,8 +43,18 @@ export function TransportAllowancesList({ userId }: TransportAllowancesListProps
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <>
+      <TransportAllowanceDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        userId={userId}
+        onSuccess={() => {
+          setShowDialog(false)
+        }}
+      />
+      
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">{t('contracts.transport.title')}</h3>
           <p className="text-sm text-muted-foreground">
@@ -108,6 +119,7 @@ export function TransportAllowancesList({ userId }: TransportAllowancesListProps
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
