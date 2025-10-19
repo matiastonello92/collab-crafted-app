@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Calendar, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSupabase } from '@/hooks/useSupabase'
@@ -67,7 +66,7 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
             {t('contracts.scheduling.description')}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <div className="flex items-center justify-between space-x-2">
             <div className="flex-1">
               <Label htmlFor="schedulable-toggle" className="text-base font-medium">
@@ -86,33 +85,6 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
               onCheckedChange={handleSchedulableToggle}
               disabled={isUpdating || !canManageContracts}
             />
-          </div>
-
-          {/* Visual Feedback */}
-          {isSchedulable ? (
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>{t('contracts.scheduling.schedulableTitle')}</AlertTitle>
-              <AlertDescription>
-                {t('contracts.scheduling.schedulableAlert')}
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert variant="destructive">
-              <Info className="h-4 w-4" />
-              <AlertTitle>{t('contracts.scheduling.notSchedulableTitle')}</AlertTitle>
-              <AlertDescription>
-                {t('contracts.scheduling.notSchedulableAlert')}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Status Badge */}
-          <div className="flex items-center gap-2 pt-2">
-            <span className="text-sm text-muted-foreground">{t('contracts.scheduling.currentStatus')}:</span>
-            <Badge variant={isSchedulable ? 'default' : 'secondary'}>
-              {isSchedulable ? t('contracts.scheduling.schedulable') : t('contracts.scheduling.notSchedulable')}
-            </Badge>
           </div>
         </CardContent>
       </Card>
