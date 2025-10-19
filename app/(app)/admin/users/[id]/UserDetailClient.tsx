@@ -96,12 +96,11 @@ export default function UserDetailClient({
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="w-full overflow-x-auto flex-nowrap">
           <TabsTrigger value="overview">{t('admin.tabOverview')}</TabsTrigger>
           <TabsTrigger value="roles">{t('admin.tabRolesLocation')}</TabsTrigger>
           <TabsTrigger value="job-tags">{t('admin.tabJobTags')}</TabsTrigger>
           <TabsTrigger value="contracts">
-            <Calendar className="h-4 w-4 mr-2" />
             {t('admin.tabContracts')}
           </TabsTrigger>
           <TabsTrigger value="permissions">{t('admin.tabPermissions')}</TabsTrigger>
