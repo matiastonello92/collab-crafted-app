@@ -1,16 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslation } from '@/lib/i18n'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Calendar, Info } from 'lucide-react'
-import { toast } from 'sonner'
-import { useSupabase } from '@/hooks/useSupabase'
-import { usePermissionCheck } from '@/hooks/usePermissions'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AlertCircle } from 'lucide-react'
 import { ContractsList } from './ContractsList'
+import { ContractAmendmentsList } from './ContractAmendmentsList'
+import { TransportAllowancesList } from './TransportAllowancesList'
+import { BonusesAdvancesList } from './BonusesAdvancesList'
+import { useSupabase } from '@/hooks/useSupabase'
+import { usePermissions } from '@/hooks/usePermissions'
+import { checkPermission } from '@/lib/permissions/unified'
+import { toast } from 'sonner'
+import { useTranslation } from '@/lib/i18n'
 
 interface ContractsSchedulingPanelProps {
   userId: string
@@ -21,11 +26,11 @@ interface ContractsSchedulingPanelProps {
 export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedulable, userFullName }: ContractsSchedulingPanelProps) {
   const supabase = useSupabase()
   const { t } = useTranslation()
-  const { hasPermission } = usePermissionCheck()
+  const { permissions } = usePermissions()
   const [isSchedulable, setIsSchedulable] = useState(initialSchedulable)
   const [isUpdating, setIsUpdating] = useState(false)
   
-  const canManageContracts = hasPermission('users:manage_contracts') || hasPermission('users:manage')
+  const canManageContracts = checkPermission(permissions, ['users:manage_contracts', 'users:manage'])
 
   const handleSchedulableToggle = async (checked: boolean) => {
     setIsUpdating(true)
@@ -39,68 +44,47 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
       if (error) throw error
 
       setIsSchedulable(checked)
-      
-      toast.success(
-        checked 
-          ? t('contracts.scheduling.messages.schedulableEnabled').replace('{userFullName}', userFullName)
-          : t('contracts.scheduling.messages.schedulableDisabled').replace('{userFullName}', userFullName)
-      )
+      toast.success(checked ? `${userFullName} è ora programmabile` : `${userFullName} non è più programmabile`)
     } catch (error) {
       console.error('Error updating schedulable status:', error)
-      toast.error(t('contracts.scheduling.messages.updateError'))
+      toast.error('Errore aggiornamento stato')
     } finally {
       setIsUpdating(false)
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Scheduling Status Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            {t('contracts.scheduling.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('contracts.scheduling.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between space-x-2">
-            <div className="flex-1">
-              <Label htmlFor="schedulable-toggle" className="text-base font-medium">
-                {t('contracts.scheduling.schedulableLabel')}
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isSchedulable 
-                  ? t('contracts.scheduling.schedulableTrue')
-                  : t('contracts.scheduling.schedulableFalse')
-                }
-              </p>
-            </div>
-            <Switch
-              id="schedulable-toggle"
-              checked={isSchedulable}
-              onCheckedChange={handleSchedulableToggle}
-              disabled={isUpdating || !canManageContracts}
-            />
+    <Card>
+      <CardHeader>
+        <CardTitle>Contratti e Programmazione</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="is-schedulable" className="text-base">Programmabile</Label>
+            <p className="text-sm text-muted-foreground">L'utente può essere assegnato ai turni</p>
           </div>
-        </CardContent>
-      </Card>
+          <Switch id="is-schedulable" checked={isSchedulable} onCheckedChange={handleSchedulableToggle} disabled={isUpdating} />
+        </div>
 
-      {/* Contracts Section */}
-      {canManageContracts ? (
-        <ContractsList userId={userId} userFullName={userFullName} />
-      ) : (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertTitle>{t('contracts.scheduling.insufficientPermissions')}</AlertTitle>
-          <AlertDescription>
-            {t('contracts.scheduling.insufficientPermissionsDescription')}
-          </AlertDescription>
-        </Alert>
-      )}
-    </div>
+        {canManageContracts ? (
+          <Tabs defaultValue="current" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="current">Contratto Attuale</TabsTrigger>
+              <TabsTrigger value="all">Tutti & Avenant</TabsTrigger>
+              <TabsTrigger value="transport">Indennità</TabsTrigger>
+              <TabsTrigger value="bonuses">Premi</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="current" className="mt-6"><ContractsList userId={userId} userFullName={userFullName} /></TabsContent>
+            <TabsContent value="all" className="mt-6"><ContractAmendmentsList userId={userId} /></TabsContent>
+            <TabsContent value="transport" className="mt-6"><TransportAllowancesList userId={userId} /></TabsContent>
+            <TabsContent value="bonuses" className="mt-6"><BonusesAdvancesList userId={userId} /></TabsContent>
+          </Tabs>
+        ) : (
+          <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>Non hai i permessi necessari</AlertDescription></Alert>
+        )}
+      </CardContent>
+    </Card>
   )
 }

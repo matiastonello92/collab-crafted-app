@@ -127,3 +127,102 @@ export function requiresFrenchFields(country?: string): boolean {
   const normalized = country.toUpperCase()
   return normalized === 'FRANCE' || normalized === 'FR'
 }
+
+// ========== CONTRACT AMENDMENTS ==========
+export interface ContractAmendment {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  contract_id: string
+  amendment_date: string
+  effective_date: string
+  amendment_type: 'salary_change' | 'hours_change' | 'position_change' | 'other'
+  previous_values: Record<string, any>
+  new_values: Record<string, any>
+  reason?: string
+  notes?: string
+  document_url?: string
+  approved_by?: string
+  approved_at?: string
+  status: 'draft' | 'active' | 'superseded'
+  created_at: string
+  created_by: string
+  updated_at: string
+}
+
+export interface AmendmentFormData {
+  amendment_date: string
+  effective_date: string
+  amendment_type: string
+  previous_values: Record<string, any>
+  new_values: Record<string, any>
+  reason?: string
+  notes?: string
+}
+
+// ========== TRANSPORT ALLOWANCES ==========
+export interface TransportAllowance {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  allowance_name: string
+  allowance_type: 'public_transport' | 'personal_vehicle' | 'bike' | 'other'
+  monthly_amount: number
+  employer_contribution_pct: number
+  employee_contribution_pct: number
+  start_date: string
+  end_date?: string
+  status: 'active' | 'suspended' | 'terminated'
+  justification_document_url?: string
+  notes?: string
+  created_at: string
+  created_by: string
+  updated_at: string
+}
+
+export interface TransportAllowanceFormData {
+  allowance_name: string
+  allowance_type: string
+  monthly_amount: number
+  employer_contribution_pct: number
+  employee_contribution_pct: number
+  start_date: string
+  end_date?: string
+  notes?: string
+}
+
+// ========== BONUSES & ADVANCES ==========
+export interface BonusAdvance {
+  id: string
+  org_id: string
+  location_id: string
+  user_id: string
+  transaction_type: 'bonus' | 'advance' | 'commission' | 'other'
+  description: string
+  amount: number
+  currency: string
+  transaction_date: string
+  payment_date?: string
+  related_month?: string
+  related_period_start?: string
+  related_period_end?: string
+  status: 'pending' | 'approved' | 'paid' | 'cancelled'
+  approved_by?: string
+  approved_at?: string
+  notes?: string
+  created_at: string
+  created_by: string
+  updated_at: string
+}
+
+export interface BonusAdvanceFormData {
+  transaction_type: string
+  description: string
+  amount: number
+  transaction_date: string
+  payment_date?: string
+  related_month?: string
+  notes?: string
+}
