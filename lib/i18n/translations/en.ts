@@ -116,6 +116,10 @@ export const en = {
     loading: 'Loading contracts...',
     notSchedulable: 'User not schedulable',
     notSchedulableDescription: 'This user cannot be assigned to shifts',
+    empty: {
+      title: 'No contracts',
+      description: 'Start by creating a new contract for this user',
+    },
 
     status: {
       active: 'Active',
@@ -1235,6 +1239,7 @@ export const en = {
     tabCompliance: 'Compliance',
     tabActivity: 'Activity',
     tabSecurity: 'Security',
+    tabContracts: 'Contracts',
   },
   
   // QA & Debug

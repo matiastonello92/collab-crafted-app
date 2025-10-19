@@ -63,7 +63,7 @@ export default function UserDetailClient({
         <Button asChild variant="outline" size="sm">
           <Link href="/admin/users">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Torna alla lista
+            {t('admin.backToList')}
           </Link>
         </Button>
         <div className="flex-1">
@@ -80,11 +80,11 @@ export default function UserDetailClient({
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled>
             <Mail className="h-4 w-4 mr-2" />
-            Resend Invito
+            {t('admin.resendInvite')}
           </Button>
           <Button variant="outline" size="sm" disabled>
             <Settings className="h-4 w-4 mr-2" />
-            Gestisci Ruoli
+            {t('admin.manageRoles')}
           </Button>
           <DeleteUserDialog 
             userId={user.id}
@@ -102,7 +102,7 @@ export default function UserDetailClient({
           <TabsTrigger value="job-tags">{t('admin.tabJobTags')}</TabsTrigger>
           <TabsTrigger value="contracts">
             <Calendar className="h-4 w-4 mr-2" />
-            Contratti
+            {t('admin.tabContracts')}
           </TabsTrigger>
           <TabsTrigger value="permissions">{t('admin.tabPermissions')}</TabsTrigger>
           <TabsTrigger value="compliance">{t('admin.tabCompliance')}</TabsTrigger>

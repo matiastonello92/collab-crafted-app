@@ -116,6 +116,10 @@ export const it = {
     loading: 'Caricamento contratti...',
     notSchedulable: 'Utente non pianificabile',
     notSchedulableDescription: 'Questo utente non può essere assegnato ai turni',
+    empty: {
+      title: 'Nessun contratto',
+      description: 'Inizia creando un nuovo contratto per questo utente',
+    },
 
     status: {
       active: 'Attivo',
@@ -1243,6 +1247,7 @@ export const it = {
     tabCompliance: 'Compliance',
     tabActivity: 'Attività',
     tabSecurity: 'Sicurezza',
+    tabContracts: 'Contratti',
   },
   
   // QA & Debug
