@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { useSupabase } from '@/hooks/useSupabase'
-import { contractFormSchema, type ContractFormValues } from '@/lib/validations/contracts'
+import { useTranslation } from '@/lib/i18n'
+import { createContractFormSchema, type ContractFormValues } from '@/lib/validations/contracts'
 import { 
-  getContractTypesForCountry, 
+  getContractTypeCodesForCountry,
+  getContractTypeTranslationKey,
   requiresFrenchFields, 
   type UserContract,
   FRANCE_NIVEAUX,
@@ -40,15 +42,16 @@ export function ContractFormDialog({
   contract,
   onSuccess
 }: ContractFormDialogProps) {
+  const { t } = useTranslation()
   const supabase = useSupabase()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orgId, setOrgId] = useState<string>('')
   
   const isFrench = requiresFrenchFields(locationCountry)
-  const contractTypes = getContractTypesForCountry(locationCountry)
+  const contractTypeCodes = getContractTypeCodesForCountry(locationCountry)
   
-  const form = useForm({
-    resolver: zodResolver(contractFormSchema),
+  const form = useForm<ContractFormValues>({
+    resolver: zodResolver(createContractFormSchema(t)),
     defaultValues: {
       contract_type: contract?.contract_type || '',
       job_title: contract?.job_title || '',
@@ -75,7 +78,7 @@ export function ContractFormDialog({
   const niveau = form.watch('niveau')
   const echelon = form.watch('echelon')
 
-  // Auto-calcola coefficient quando niveau o echelon cambiano
+  // Auto-calculate coefficient when niveau or echelon changes
   useEffect(() => {
     if (isFrench && niveau && echelon) {
       const coeff = getCoefficient(niveau, echelon)
@@ -109,28 +112,24 @@ export function ContractFormDialog({
         })
       }
     }
-  }, [open, contract])
+  }, [open, contract, form])
 
   const loadOrgId = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('locations')
         .select('org_id')
-        .eq('id', locationId)
+        .eq('location_id', locationId)
         .single()
-      
+
+      if (error) throw error
       if (data) setOrgId(data.org_id)
     } catch (error) {
       console.error('Error loading org_id:', error)
     }
   }
 
-  const onSubmit = async (values: any) => {
-    if (!orgId) {
-      toast.error('Errore: impossibile determinare l\'organizzazione')
-      return
-    }
-
+  const onSubmit = async (data: ContractFormValues) => {
     setIsSubmitting(true)
     
     try {
@@ -138,52 +137,33 @@ export function ContractFormDialog({
         user_id: userId,
         org_id: orgId,
         location_id: locationId,
-        contract_type: values.contract_type,
-        job_title: values.job_title || null,
-        start_date: values.start_date,
-        end_date: values.end_date || null,
-        weekly_hours: values.is_forfait_journalier ? null : values.weekly_hours,
-        working_days_per_week: values.working_days_per_week,
-        trial_period_days: values.trial_period_days,
-        is_forfait_journalier: values.is_forfait_journalier,
-        daily_rate: values.daily_rate || null,
-        hourly_rate: values.hourly_rate || null,
-        monthly_salary: values.monthly_salary || null,
-        collective_agreement: values.collective_agreement || null,
-        coefficient: values.coefficient || null,
-        echelon: values.echelon || null,
-        niveau: values.niveau || null,
-        min_rest_hours: values.min_rest_hours,
-        max_consecutive_days: values.max_consecutive_days,
-        notes: values.notes || null,
-        is_active: true,
+        country_code: locationCountry || 'IT',
+        ...data,
       }
 
       if (contract) {
-        // Update existing contract
         const { error } = await supabase
           .from('user_contracts')
           .update(contractData)
           .eq('id', contract.id)
 
         if (error) throw error
-        toast.success('Contratto aggiornato con successo')
+        toast.success(t('contracts.messages.updateSuccess'))
       } else {
-        // Create new contract
         const { error } = await supabase
           .from('user_contracts')
-          .insert(contractData)
+          .insert([contractData])
 
         if (error) throw error
-        toast.success('Contratto creato con successo')
+        toast.success(t('contracts.messages.createSuccess'))
       }
 
       onSuccess()
       onOpenChange(false)
       form.reset()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving contract:', error)
-      toast.error(error.message || 'Errore durante il salvataggio del contratto')
+      toast.error(contract ? t('contracts.messages.updateError') : t('contracts.messages.createError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -191,15 +171,15 @@ export function ContractFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {contract ? 'Modifica Contratto' : 'Nuovo Contratto'}
+            {contract ? t('contracts.editContract') : t('contracts.newContract')}
           </DialogTitle>
           <DialogDescription>
             {contract 
-              ? 'Modifica i dettagli del contratto di lavoro'
-              : 'Crea un nuovo contratto di lavoro per questo utente'
+              ? t('contracts.dialogs.editTitle')
+              : t('contracts.dialogs.newTitle')
             }
             {locationCountry && ` (${locationCountry})`}
           </DialogDescription>
@@ -207,26 +187,26 @@ export function ContractFormDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Informazioni Base */}
+            {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Informazioni Base</h3>
+              <h3 className="text-sm font-semibold">{t('contracts.sections.basicInfo')}</h3>
               
               <FormField
                 control={form.control}
                 name="contract_type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipo Contratto *</FormLabel>
+                    <FormLabel>{t('contracts.fields.contractType')} *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleziona tipo contratto" />
+                          <SelectValue placeholder={t('contracts.fields.contractTypePlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {contractTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
+                        {contractTypeCodes.map((code) => (
+                          <SelectItem key={code} value={code}>
+                            {t(getContractTypeTranslationKey(code))}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -241,9 +221,9 @@ export function ContractFormDialog({
                 name="job_title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Posizione/Ruolo</FormLabel>
+                    <FormLabel>{t('contracts.fields.jobTitle')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="es. Cameriere, Chef, Manager" {...field} />
+                      <Input placeholder={t('contracts.fields.jobTitlePlaceholder')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -256,7 +236,7 @@ export function ContractFormDialog({
                   name="start_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data Inizio *</FormLabel>
+                      <FormLabel>{t('contracts.fields.startDate')} *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -270,13 +250,12 @@ export function ContractFormDialog({
                   name="end_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data Fine</FormLabel>
+                      <FormLabel>
+                        {t('contracts.fields.endDate')} {t('contracts.fields.endDateOptional')}
+                      </FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Lasciare vuoto per contratti indeterminati
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -284,19 +263,85 @@ export function ContractFormDialog({
               </div>
             </div>
 
-            {/* Orari di Lavoro */}
+            {/* Working Hours */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Orari di Lavoro</h3>
+              <h3 className="text-sm font-semibold">{t('contracts.sections.workingHours')}</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {!isForfait && (
+                  <FormField
+                    control={form.control}
+                    name="weekly_hours"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('contracts.fields.weeklyHours')} *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder={t('contracts.fields.weeklyHoursPlaceholder')}
+                            {...field}
+                            onChange={e => field.onChange(parseFloat(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                <FormField
+                  control={form.control}
+                  name="working_days_per_week"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('contracts.fields.workingDaysPerWeek')} *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder={t('contracts.fields.workingDaysPerWeekPlaceholder')}
+                          {...field}
+                          onChange={e => field.onChange(parseInt(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="trial_period_days"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contracts.fields.trialPeriodDays')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder={t('contracts.fields.trialPeriodPlaceholder')}
+                        {...field}
+                        onChange={e => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Remuneration */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">{t('contracts.sections.remuneration')}</h3>
               
               <FormField
                 control={form.control}
                 name="is_forfait_journalier"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel>Forfait Giornaliero</FormLabel>
-                      <FormDescription className="text-xs">
-                        Contratto a giornata (senza ore fisse)
+                      <FormLabel className="text-base">{t('contracts.fields.isForfaitJournalier')}</FormLabel>
+                      <FormDescription>
+                        {t('contracts.fields.isForfaitDescription')}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -308,93 +353,21 @@ export function ContractFormDialog({
                   </FormItem>
                 )}
               />
-              
-              <div className="grid grid-cols-2 gap-4">
-                {!isForfait && (
-                  <FormField
-                    control={form.control}
-                    name="weekly_hours"
-                    render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ore Settimanali *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="1" 
-                          max="80" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                    )}
-                  />
-                )}
 
-                <FormField
-                  control={form.control}
-                  name="working_days_per_week"
-                  render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Giorni Lavorativi/Settimana *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="1" 
-                        max="7" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="trial_period_days"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Periodo di Prova (giorni)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Retribuzione */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Retribuzione</h3>
-              
               {isForfait ? (
                 <FormField
                   control={form.control}
                   name="daily_rate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tariffa Giornaliera (€) *</FormLabel>
+                      <FormLabel>{t('contracts.fields.dailyRate')} *</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.01" 
-                          min="0" 
-                          {...field} 
-                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                          value={field.value ?? ''}
+                          placeholder={t('contracts.fields.dailyRatePlaceholder')}
+                          {...field}
+                          onChange={e => field.onChange(parseFloat(e.target.value))}
                         />
                       </FormControl>
                       <FormMessage />
@@ -408,15 +381,14 @@ export function ContractFormDialog({
                     name="hourly_rate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tariffa Oraria (€)</FormLabel>
+                        <FormLabel>{t('contracts.fields.hourlyRate')}</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
                             step="0.01" 
-                            min="0" 
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                            value={field.value ?? ''}
+                            placeholder={t('contracts.fields.hourlyRatePlaceholder')}
+                            {...field}
+                            onChange={e => field.onChange(parseFloat(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -429,15 +401,14 @@ export function ContractFormDialog({
                     name="monthly_salary"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Salario Mensile (€)</FormLabel>
+                        <FormLabel>{t('contracts.fields.monthlySalary')}</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
                             step="0.01" 
-                            min="0" 
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                            value={field.value ?? ''}
+                            placeholder={t('contracts.fields.monthlySalaryPlaceholder')}
+                            {...field}
+                            onChange={e => field.onChange(parseFloat(e.target.value))}
                           />
                         </FormControl>
                         <FormMessage />
@@ -446,24 +417,21 @@ export function ContractFormDialog({
                   />
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
-                * Specificare {isForfait ? 'tariffa giornaliera' : 'almeno una tra tariffa oraria o salario mensile'}
-              </p>
             </div>
 
-            {/* Campi Specifici Francia */}
+            {/* French Specific Fields */}
             {isFrench && (
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold">Informazioni Legali (Francia)</h3>
+                <h3 className="text-sm font-semibold">{t('contracts.sections.frenchSpecific')}</h3>
                 
                 <FormField
                   control={form.control}
                   name="collective_agreement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Convenzione Collettiva</FormLabel>
+                      <FormLabel>{t('contracts.fields.collectiveAgreement')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="es. Convention collective HCR" {...field} />
+                        <Input placeholder={t('contracts.fields.collectiveAgreementPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -476,11 +444,11 @@ export function ContractFormDialog({
                     name="niveau"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Niveau</FormLabel>
+                        <FormLabel>{t('contracts.fields.niveau')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleziona niveau" />
+                              <SelectValue placeholder={t('contracts.fields.niveauPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -501,11 +469,11 @@ export function ContractFormDialog({
                     name="echelon"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Échelon</FormLabel>
+                        <FormLabel>{t('contracts.fields.echelon')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleziona échelon" />
+                              <SelectValue placeholder={t('contracts.fields.echelonPlaceholder')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -527,12 +495,12 @@ export function ContractFormDialog({
                   name="coefficient"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Coefficiente</FormLabel>
+                      <FormLabel>{t('contracts.fields.coefficient')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Calcolato automaticamente" {...field} readOnly />
+                        <Input placeholder={t('contracts.fields.coefficientPlaceholder')} {...field} disabled />
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Auto-calcolato da Niveau + Échelon
+                      <FormDescription>
+                        {t('contracts.fields.coefficientDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -541,9 +509,9 @@ export function ContractFormDialog({
               </div>
             )}
 
-            {/* Vincoli di Pianificazione */}
+            {/* Planning Constraints */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold">Vincoli di Pianificazione</h3>
+              <h3 className="text-sm font-semibold">{t('contracts.sections.planningConstraints')}</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -551,19 +519,17 @@ export function ContractFormDialog({
                   name="min_rest_hours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Riposo Minimo tra Turni (ore)</FormLabel>
+                      <FormLabel>{t('contracts.fields.minRestHours')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
-                          min="8" 
-                          max="24" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 11)}
-                          value={field.value || ''}
+                          placeholder={t('contracts.fields.minRestHoursPlaceholder')}
+                          {...field}
+                          onChange={e => field.onChange(parseInt(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Minimo legale: 11 ore
+                      <FormDescription>
+                        {t('contracts.fields.minRestHoursDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -575,19 +541,17 @@ export function ContractFormDialog({
                   name="max_consecutive_days"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Giorni Consecutivi Max</FormLabel>
+                      <FormLabel>{t('contracts.fields.maxConsecutiveDays')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
-                          min="1" 
-                          max="14" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 6)}
-                          value={field.value || ''}
+                          placeholder={t('contracts.fields.maxConsecutiveDaysPlaceholder')}
+                          {...field}
+                          onChange={e => field.onChange(parseInt(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Standard: 6 giorni
+                      <FormDescription>
+                        {t('contracts.fields.maxConsecutiveDaysDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -596,25 +560,28 @@ export function ContractFormDialog({
               </div>
             </div>
 
-            {/* Note */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Eventuali note aggiuntive sul contratto"
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Notes */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">{t('contracts.sections.notes')}</h3>
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('contracts.fields.notesPlaceholder')}</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder={t('contracts.fields.notesPlaceholder')}
+                        rows={3}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button
@@ -623,11 +590,11 @@ export function ContractFormDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
-                Annulla
+                {t('contracts.actions.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {contract ? 'Salva Modifiche' : 'Crea Contratto'}
+                {t('contracts.actions.save')}
               </Button>
             </DialogFooter>
           </form>

@@ -99,6 +99,182 @@ export const en = {
     }
   },
   
+  // Contracts
+  contracts: {
+    title: 'Employment Contracts',
+    subtitle: 'Manage contracts for {userFullName}',
+    newContract: 'New Contract',
+    editContract: 'Edit Contract',
+    viewContract: 'View Contract',
+    noContracts: 'No contracts found',
+    noContractsDescription: 'This user has no active contracts yet',
+    createFirstContract: 'Create the first contract for this user',
+    activeContracts: 'Active Contracts',
+    historicalContracts: 'Contract History',
+    readOnlyMode: 'Read-only mode',
+    readOnlyDescription: 'Contact an administrator to modify contracts',
+    loading: 'Loading contracts...',
+    notSchedulable: 'User not schedulable',
+    notSchedulableDescription: 'This user cannot be assigned to shifts',
+
+    // Status
+    status: {
+      active: 'Active',
+      inactive: 'Inactive',
+      future: 'Future',
+      expired: 'Expired',
+      terminated: 'Terminated',
+      forfait: 'Daily Rate',
+    },
+
+    // Actions
+    actions: {
+      save: 'Save Contract',
+      cancel: 'Cancel',
+      edit: 'Edit',
+      terminate: 'Terminate Contract',
+      confirmTerminate: 'Confirm Termination',
+    },
+
+    // Form Sections
+    sections: {
+      basicInfo: 'Basic Information',
+      basicInfoDesc: 'Contract type, dates and job position',
+      workingHours: 'Working Hours',
+      workingHoursDesc: 'Weekly hours and working days',
+      remuneration: 'Remuneration',
+      remunerationDesc: 'Salary and payment method',
+      frenchSpecific: 'France-Specific Information',
+      frenchSpecificDesc: 'Collective agreement, Niveau, Échelon and other French legal data',
+      planningConstraints: 'Planning Constraints',
+      planningConstraintsDesc: 'Time limits and mandatory rest periods',
+      notes: 'Notes',
+      notesDesc: 'Additional contract notes',
+    },
+
+    // Form Fields
+    fields: {
+      contractType: 'Contract Type',
+      contractTypePlaceholder: 'Select contract type',
+      jobTitle: 'Job Title',
+      jobTitlePlaceholder: 'e.g. Chef de Partie',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      endDateOptional: '(optional)',
+      weeklyHours: 'Weekly Hours',
+      weeklyHoursPlaceholder: '35',
+      workingDaysPerWeek: 'Working Days/Week',
+      workingDaysPerWeekPlaceholder: '5',
+      trialPeriodDays: 'Trial Period (days)',
+      trialPeriodPlaceholder: '0',
+      isForfaitJournalier: 'Daily Rate Contract',
+      isForfaitDescription: 'The contract uses a fixed daily rate instead of hourly',
+      dailyRate: 'Daily Rate',
+      dailyRatePlaceholder: '150.00',
+      hourlyRate: 'Hourly Rate',
+      hourlyRatePlaceholder: '15.00',
+      monthlySalary: 'Monthly Salary',
+      monthlySalaryPlaceholder: '2500.00',
+      collectiveAgreement: 'Collective Agreement',
+      collectiveAgreementPlaceholder: 'e.g. HCR - Hotels Cafes Restaurants',
+      coefficient: 'Coefficient',
+      coefficientPlaceholder: 'e.g. 150',
+      coefficientDescription: 'Automatically calculated from Niveau and Échelon',
+      echelon: 'Échelon',
+      echelonPlaceholder: 'Select échelon',
+      niveau: 'Niveau',
+      niveauPlaceholder: 'Select niveau',
+      minRestHours: 'Minimum Rest Hours',
+      minRestHoursPlaceholder: '11',
+      minRestHoursDescription: 'Rest hours between two consecutive shifts (legal minimum: 11h)',
+      maxConsecutiveDays: 'Maximum Consecutive Days',
+      maxConsecutiveDaysPlaceholder: '6',
+      maxConsecutiveDaysDescription: 'Maximum number of consecutive working days',
+      notesPlaceholder: 'Additional contract notes...',
+    },
+
+    // Contract Types
+    types: {
+      // France
+      cdi: 'CDI - Permanent Contract',
+      cdd: 'CDD - Fixed-term Contract',
+      cadre: 'Cadre - Executive Contract',
+      interim: 'Temporary Agency Work',
+      apprentissage: 'Apprenticeship Contract',
+      professionnalisation: 'Professionalization Contract',
+      saisonnier: 'Seasonal Contract',
+      // Default
+      full_time: 'Full-time',
+      part_time: 'Part-time',
+      temporary: 'Temporary',
+      seasonal: 'Seasonal',
+    },
+
+    // Display Labels
+    display: {
+      position: 'Position',
+      positionUnspecified: 'Position not specified',
+      remuneration: 'Remuneration',
+      remunerationUnspecified: 'Not specified',
+      perDay: '/day',
+      perHour: '/hour',
+      perMonth: '/month',
+      hoursPerWeek: 'hrs/week',
+      daysPerWeek: 'days/week',
+      from: 'From',
+      until: 'Until',
+      ongoingContract: 'Ongoing contract',
+      niveau: 'Niveau',
+      echelon: 'Échelon',
+      coefficient: 'Coefficient',
+      ccnl: 'Collective Agreement',
+      forfaitDaily: 'Daily rate contract',
+      minRest: 'Minimum rest',
+      hours: 'hours',
+      maxConsecutive: 'Max consecutive',
+      days: 'days',
+      trialPeriod: 'Trial period',
+      terminatedOn: 'Terminated on',
+    },
+
+    // Dialogs
+    dialogs: {
+      newTitle: 'New Contract',
+      editTitle: 'Edit Contract',
+      terminateTitle: 'Terminate Contract',
+      terminateDescription: 'Are you sure you want to terminate this contract? This action cannot be undone.',
+      terminateReason: 'Reason (optional)',
+    },
+
+    // Messages
+    messages: {
+      createSuccess: 'Contract created successfully',
+      createError: 'Error creating contract',
+      updateSuccess: 'Contract updated successfully',
+      updateError: 'Error updating contract',
+      terminateSuccess: 'Contract terminated successfully',
+      terminateError: 'Error terminating contract',
+      loadError: 'Error loading contracts',
+    },
+
+    // Validation
+    validation: {
+      contractTypeRequired: 'Contract type is required',
+      startDateRequired: 'Start date is required',
+      weeklyHoursMin: 'Cannot be negative',
+      weeklyHoursMax: 'Weekly hours must be between 0 and 80',
+      workingDaysMin: 'Minimum 1 day',
+      workingDaysMax: 'Maximum 7 days',
+      trialPeriodMin: 'Cannot be negative',
+      minRestHoursMin: 'Legal minimum 8 hours',
+      minRestHoursMax: 'Maximum 24 hours',
+      maxConsecutiveDaysMin: 'Minimum 1 day',
+      maxConsecutiveDaysMax: 'Maximum 14 days',
+      rateRequired: 'Specify daily rate for forfait, or hourly rate or monthly salary',
+      weeklyHoursRequired: 'Weekly hours required for non-forfait contracts',
+    },
+  },
+
   // User Profile & Overview
   userOverview: {
     emailVerified: 'Email verified',
@@ -2038,32 +2214,6 @@ export const en = {
     // Success/error
     profileUpdated: 'Profile updated successfully!',
     saveError: 'Error saving',
-  },
-
-  // Contracts
-  contracts: {
-    fullTime: 'Full Time',
-    partTime: 'Part Time',
-    seasonal: 'Seasonal',
-    temporary: 'Temporary',
-    internship: 'Internship',
-    active: 'Active',
-    inactive: 'Inactive',
-    notSchedulable: 'Not Schedulable',
-    notSchedulableDescription: 'Your account is not configured to be schedulable for shifts.',
-    noContracts: 'No Contracts',
-    noContractsDescription: 'You have no active contracts at the moment. Contact your manager if you think this is an error.',
-    readOnlyTitle: 'Read-Only View',
-    readOnlyDescription: 'You can view your contract details, but only managers and administrators can modify them.',
-    validFrom: 'Valid from',
-    to: 'to',
-    weeklyHours: 'Weekly Hours',
-    dailyHours: 'Daily Hours',
-    schedulingConstraints: 'Scheduling Constraints',
-    minRestHours: 'Minimum Rest',
-    maxConsecutiveDays: 'Max Consecutive Days',
-    maxWeeklyHours: 'Max Weekly Hours',
-    notes: 'Notes',
   },
 
   // Languages

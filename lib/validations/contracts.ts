@@ -1,49 +1,68 @@
 import { z } from 'zod'
 
-export const contractFormSchema = z.object({
-  contract_type: z.string().min(1, 'Tipo contratto obbligatorio'),
-  job_title: z.string().optional(),
-  start_date: z.string().min(1, 'Data inizio obbligatoria'),
-  end_date: z.string().optional(),
-  weekly_hours: z.number().min(0, 'Non può essere negativo').max(80, 'Ore settimanali devono essere tra 0 e 80').optional(),
-  working_days_per_week: z.number().min(1, 'Minimo 1 giorno').max(7, 'Massimo 7 giorni'),
-  trial_period_days: z.number().min(0, 'Non può essere negativo').default(0),
-  is_forfait_journalier: z.boolean().default(false),
-  daily_rate: z.number().min(0, 'Non può essere negativo').optional(),
-  hourly_rate: z.number().min(0, 'Non può essere negativo').optional(),
-  monthly_salary: z.number().min(0, 'Non può essere negativo').optional(),
-  collective_agreement: z.string().optional(),
-  coefficient: z.string().optional(),
-  echelon: z.string().optional(),
-  niveau: z.string().optional(),
-  min_rest_hours: z.number().min(8, 'Minimo legale 8 ore').max(24, 'Massimo 24 ore').default(11),
-  max_consecutive_days: z.number().min(1, 'Minimo 1 giorno').max(14, 'Massimo 14 giorni').default(6),
-  notes: z.string().optional(),
-}).refine(
-  data => {
-    // Se forfait, richiede daily_rate
-    if (data.is_forfait_journalier) {
-      return !!data.daily_rate
+// Factory function that creates schema with translations
+export function createContractFormSchema(t: (key: string) => string) {
+  return z.object({
+    contract_type: z.string().min(1, t('contracts.validation.contractTypeRequired')),
+    job_title: z.string().optional(),
+    start_date: z.string().min(1, t('contracts.validation.startDateRequired')),
+    end_date: z.string().optional(),
+    weekly_hours: z.number()
+      .min(0, t('contracts.validation.weeklyHoursMin'))
+      .max(80, t('contracts.validation.weeklyHoursMax'))
+      .optional(),
+    working_days_per_week: z.number()
+      .min(1, t('contracts.validation.workingDaysMin'))
+      .max(7, t('contracts.validation.workingDaysMax')),
+    trial_period_days: z.number()
+      .min(0, t('contracts.validation.trialPeriodMin'))
+      .default(0),
+    is_forfait_journalier: z.boolean().default(false),
+    daily_rate: z.number()
+      .min(0, t('contracts.validation.weeklyHoursMin'))
+      .optional(),
+    hourly_rate: z.number()
+      .min(0, t('contracts.validation.weeklyHoursMin'))
+      .optional(),
+    monthly_salary: z.number()
+      .min(0, t('contracts.validation.weeklyHoursMin'))
+      .optional(),
+    collective_agreement: z.string().optional(),
+    coefficient: z.string().optional(),
+    echelon: z.string().optional(),
+    niveau: z.string().optional(),
+    min_rest_hours: z.number()
+      .min(8, t('contracts.validation.minRestHoursMin'))
+      .max(24, t('contracts.validation.minRestHoursMax'))
+      .default(11),
+    max_consecutive_days: z.number()
+      .min(1, t('contracts.validation.maxConsecutiveDaysMin'))
+      .max(14, t('contracts.validation.maxConsecutiveDaysMax'))
+      .default(6),
+    notes: z.string().optional(),
+  }).refine(
+    data => {
+      if (data.is_forfait_journalier) {
+        return !!data.daily_rate
+      }
+      return !!(data.hourly_rate || data.monthly_salary)
+    },
+    { 
+      message: t('contracts.validation.rateRequired'), 
+      path: ['daily_rate'] 
     }
-    // Altrimenti richiede hourly_rate o monthly_salary
-    return !!(data.hourly_rate || data.monthly_salary)
-  },
-  { 
-    message: 'Specificare tariffa giornaliera per forfait, oppure tariffa oraria o salario mensile', 
-    path: ['daily_rate'] 
-  }
-).refine(
-  data => {
-    // Se NON forfait, weekly_hours è obbligatorio
-    if (!data.is_forfait_journalier && !data.weekly_hours) {
-      return false
+  ).refine(
+    data => {
+      if (!data.is_forfait_journalier && !data.weekly_hours) {
+        return false
+      }
+      return true
+    },
+    {
+      message: t('contracts.validation.weeklyHoursRequired'),
+      path: ['weekly_hours']
     }
-    return true
-  },
-  {
-    message: 'Ore settimanali obbligatorie per contratti non forfait',
-    path: ['weekly_hours']
-  }
-)
+  )
+}
 
-export type ContractFormValues = z.infer<typeof contractFormSchema>
+export type ContractFormValues = z.infer<ReturnType<typeof createContractFormSchema>>

@@ -99,6 +99,182 @@ export const it = {
     }
   },
   
+  // Contracts
+  contracts: {
+    title: 'Contratti di Lavoro',
+    subtitle: 'Gestisci i contratti per {userFullName}',
+    newContract: 'Nuovo Contratto',
+    editContract: 'Modifica Contratto',
+    viewContract: 'Visualizza Contratto',
+    noContracts: 'Nessun contratto trovato',
+    noContractsDescription: 'Questo utente non ha ancora contratti attivi',
+    createFirstContract: 'Crea il primo contratto per questo utente',
+    activeContracts: 'Contratti Attivi',
+    historicalContracts: 'Storico Contratti',
+    readOnlyMode: 'Modalità sola lettura',
+    readOnlyDescription: 'Contatta un amministratore per modificare i contratti',
+    loading: 'Caricamento contratti...',
+    notSchedulable: 'Utente non pianificabile',
+    notSchedulableDescription: 'Questo utente non può essere assegnato ai turni',
+
+    // Status
+    status: {
+      active: 'Attivo',
+      inactive: 'Inattivo',
+      future: 'Futuro',
+      expired: 'Scaduto',
+      terminated: 'Terminato',
+      forfait: 'Forfait',
+    },
+
+    // Actions
+    actions: {
+      save: 'Salva Contratto',
+      cancel: 'Annulla',
+      edit: 'Modifica',
+      terminate: 'Termina Contratto',
+      confirmTerminate: 'Conferma Terminazione',
+    },
+
+    // Form Sections
+    sections: {
+      basicInfo: 'Informazioni di Base',
+      basicInfoDesc: 'Tipo contratto, date e posizione lavorativa',
+      workingHours: 'Orario di Lavoro',
+      workingHoursDesc: 'Ore settimanali e giorni lavorativi',
+      remuneration: 'Retribuzione',
+      remunerationDesc: 'Salario e modalità di pagamento',
+      frenchSpecific: 'Informazioni Specifiche Francia',
+      frenchSpecificDesc: 'CCNL, Niveau, Échelon e altri dati legali francesi',
+      planningConstraints: 'Vincoli di Pianificazione',
+      planningConstraintsDesc: 'Limiti orari e riposi obbligatori',
+      notes: 'Note',
+      notesDesc: 'Note aggiuntive sul contratto',
+    },
+
+    // Form Fields
+    fields: {
+      contractType: 'Tipo Contratto',
+      contractTypePlaceholder: 'Seleziona tipo contratto',
+      jobTitle: 'Titolo Posizione',
+      jobTitlePlaceholder: 'es. Chef de Partie',
+      startDate: 'Data Inizio',
+      endDate: 'Data Fine',
+      endDateOptional: '(opzionale)',
+      weeklyHours: 'Ore Settimanali',
+      weeklyHoursPlaceholder: '35',
+      workingDaysPerWeek: 'Giorni Lavorativi/Settimana',
+      workingDaysPerWeekPlaceholder: '5',
+      trialPeriodDays: 'Periodo di Prova (giorni)',
+      trialPeriodPlaceholder: '0',
+      isForfaitJournalier: 'Contratto Forfait Giornaliero',
+      isForfaitDescription: 'Il contratto prevede una tariffa giornaliera fissa invece che oraria',
+      dailyRate: 'Tariffa Giornaliera',
+      dailyRatePlaceholder: '150.00',
+      hourlyRate: 'Tariffa Oraria',
+      hourlyRatePlaceholder: '15.00',
+      monthlySalary: 'Salario Mensile',
+      monthlySalaryPlaceholder: '2500.00',
+      collectiveAgreement: 'CCNL (Accordo Collettivo)',
+      collectiveAgreementPlaceholder: 'es. HCR - Hôtels Cafés Restaurants',
+      coefficient: 'Coefficient',
+      coefficientPlaceholder: 'es. 150',
+      coefficientDescription: 'Calcolato automaticamente da Niveau e Échelon',
+      echelon: 'Échelon',
+      echelonPlaceholder: 'Seleziona échelon',
+      niveau: 'Niveau',
+      niveauPlaceholder: 'Seleziona niveau',
+      minRestHours: 'Ore Riposo Minime',
+      minRestHoursPlaceholder: '11',
+      minRestHoursDescription: 'Ore di riposo tra due turni consecutivi (minimo legale: 11h)',
+      maxConsecutiveDays: 'Giorni Consecutivi Massimi',
+      maxConsecutiveDaysPlaceholder: '6',
+      maxConsecutiveDaysDescription: 'Numero massimo di giorni lavorativi consecutivi',
+      notesPlaceholder: 'Note aggiuntive sul contratto...',
+    },
+
+    // Contract Types
+    types: {
+      // France
+      cdi: 'CDI - Contratto a tempo indeterminato',
+      cdd: 'CDD - Contratto a tempo determinato',
+      cadre: 'Cadre - Contratto dirigenziale',
+      interim: 'Lavoro interinale',
+      apprentissage: 'Contratto di apprendistato',
+      professionnalisation: 'Contratto di professionalizzazione',
+      saisonnier: 'Contratto stagionale',
+      // Default
+      full_time: 'Full-time',
+      part_time: 'Part-time',
+      temporary: 'Temporary',
+      seasonal: 'Seasonal',
+    },
+
+    // Display Labels
+    display: {
+      position: 'Posizione',
+      positionUnspecified: 'Posizione non specificata',
+      remuneration: 'Retribuzione',
+      remunerationUnspecified: 'Non specificata',
+      perDay: '/giorno',
+      perHour: '/ora',
+      perMonth: '/mese',
+      hoursPerWeek: 'h/settimana',
+      daysPerWeek: 'gg/settimana',
+      from: 'Dal',
+      until: 'Fino al',
+      ongoingContract: 'Contratto a tempo indeterminato',
+      niveau: 'Niveau',
+      echelon: 'Échelon',
+      coefficient: 'Coefficient',
+      ccnl: 'CCNL',
+      forfaitDaily: 'Contratto a giornata',
+      minRest: 'Riposo minimo',
+      hours: 'ore',
+      maxConsecutive: 'Max consecutivi',
+      days: 'giorni',
+      trialPeriod: 'Periodo di prova',
+      terminatedOn: 'Terminato il',
+    },
+
+    // Dialogs
+    dialogs: {
+      newTitle: 'Nuovo Contratto',
+      editTitle: 'Modifica Contratto',
+      terminateTitle: 'Termina Contratto',
+      terminateDescription: 'Sei sicuro di voler terminare questo contratto? L\'azione non può essere annullata.',
+      terminateReason: 'Motivo (opzionale)',
+    },
+
+    // Messages
+    messages: {
+      createSuccess: 'Contratto creato con successo',
+      createError: 'Errore durante la creazione del contratto',
+      updateSuccess: 'Contratto aggiornato con successo',
+      updateError: 'Errore durante l\'aggiornamento del contratto',
+      terminateSuccess: 'Contratto terminato con successo',
+      terminateError: 'Errore durante la terminazione del contratto',
+      loadError: 'Errore durante il caricamento dei contratti',
+    },
+
+    // Validation
+    validation: {
+      contractTypeRequired: 'Tipo contratto obbligatorio',
+      startDateRequired: 'Data inizio obbligatoria',
+      weeklyHoursMin: 'Non può essere negativo',
+      weeklyHoursMax: 'Ore settimanali devono essere tra 0 e 80',
+      workingDaysMin: 'Minimo 1 giorno',
+      workingDaysMax: 'Massimo 7 giorni',
+      trialPeriodMin: 'Non può essere negativo',
+      minRestHoursMin: 'Minimo legale 8 ore',
+      minRestHoursMax: 'Massimo 24 ore',
+      maxConsecutiveDaysMin: 'Minimo 1 giorno',
+      maxConsecutiveDaysMax: 'Massimo 14 giorni',
+      rateRequired: 'Specificare tariffa giornaliera per forfait, oppure tariffa oraria o salario mensile',
+      weeklyHoursRequired: 'Ore settimanali obbligatorie per contratti non forfait',
+    },
+  },
+
   // User Profile & Overview
   userOverview: {
     emailVerified: 'Email verificata',
@@ -2173,32 +2349,6 @@ export const it = {
     // Success/error
     profileUpdated: 'Profilo aggiornato con successo!',
     saveError: 'Errore nel salvataggio',
-  },
-
-  // Contracts
-  contracts: {
-    fullTime: 'Tempo Pieno',
-    partTime: 'Part-Time',
-    seasonal: 'Stagionale',
-    temporary: 'Temporaneo',
-    internship: 'Stage',
-    active: 'Attivo',
-    inactive: 'Inattivo',
-    notSchedulable: 'Non Pianificabile',
-    notSchedulableDescription: 'Il tuo account non è configurato per essere pianificabile nei turni.',
-    noContracts: 'Nessun Contratto',
-    noContractsDescription: 'Non hai contratti attivi al momento. Contatta il tuo manager se pensi che sia un errore.',
-    readOnlyTitle: 'Visualizzazione Sola Lettura',
-    readOnlyDescription: 'Puoi visualizzare i dettagli del tuo contratto, ma solo i manager e amministratori possono modificarli.',
-    validFrom: 'Valido dal',
-    to: 'al',
-    weeklyHours: 'Ore Settimanali',
-    dailyHours: 'Ore Giornaliere',
-    schedulingConstraints: 'Vincoli di Pianificazione',
-    minRestHours: 'Riposo Minimo',
-    maxConsecutiveDays: 'Giorni Consecutivi Max',
-    maxWeeklyHours: 'Ore Settimanali Max',
-    notes: 'Note',
   },
 
   // Languages

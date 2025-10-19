@@ -56,32 +56,26 @@ export interface ContractFormData {
   notes?: string
 }
 
-// Tipi di contratto per Francia
-export const FRANCE_CONTRACT_TYPES = [
-  { value: 'cdi', label: 'CDI - Contratto a tempo indeterminato' },
-  { value: 'cdd', label: 'CDD - Contratto a tempo determinato' },
-  { value: 'cadre', label: 'Cadre - Contratto dirigenziale' },
-  { value: 'interim', label: 'Lavoro interinale' },
-  { value: 'apprentissage', label: 'Contratto di apprendistato' },
-  { value: 'professionnalisation', label: 'Contratto di professionalizzazione' },
-  { value: 'saisonnier', label: 'Contratto stagionale' },
-]
+// Contract type codes for France
+export const FRANCE_CONTRACT_TYPE_CODES = [
+  'cdi',
+  'cdd',
+  'cadre',
+  'interim',
+  'apprentissage',
+  'professionnalisation',
+  'saisonnier',
+] as const
 
-// Niveaux per Francia (HCR - Hôtels Cafés Restaurants)
-export const FRANCE_NIVEAUX = [
-  { value: 'I', label: 'Niveau I - Employé' },
-  { value: 'II', label: 'Niveau II - Employé qualifié' },
-  { value: 'III', label: 'Niveau III - Employé hautement qualifié' },
-  { value: 'IV', label: 'Niveau IV - Agent de maîtrise' },
-  { value: 'V', label: 'Niveau V - Cadre' },
-]
+// Niveaux codes for France (HCR - Hôtels Cafés Restaurants)
+export const FRANCE_NIVEAU_CODES = ['I', 'II', 'III', 'IV', 'V'] as const
 
-// Échelons per Niveau
-export const FRANCE_ECHELONS = [
-  { value: '1', label: 'Échelon 1' },
-  { value: '2', label: 'Échelon 2' },
-  { value: '3', label: 'Échelon 3' },
-]
+// Échelon codes
+export const FRANCE_ECHELON_CODES = ['1', '2', '3'] as const
+
+// For backward compatibility
+export const FRANCE_NIVEAUX = FRANCE_NIVEAU_CODES.map(value => ({ value, label: `Niveau ${value}` }))
+export const FRANCE_ECHELONS = FRANCE_ECHELON_CODES.map(value => ({ value, label: `Échelon ${value}` }))
 
 // Helper per calcolare il coefficient da niveau + echelon
 export function getCoefficient(niveau?: string, echelon?: string): string {
@@ -99,27 +93,32 @@ export function getCoefficient(niveau?: string, echelon?: string): string {
   return coefficients[niveau]?.[echelon]?.toString() || ''
 }
 
-// Tipi di contratto generici (per altri paesi)
-export const DEFAULT_CONTRACT_TYPES = [
-  { value: 'full_time', label: 'Full-time' },
-  { value: 'part_time', label: 'Part-time' },
-  { value: 'temporary', label: 'Temporary' },
-  { value: 'seasonal', label: 'Seasonal' },
-]
+// Default contract type codes (for other countries)
+export const DEFAULT_CONTRACT_TYPE_CODES = [
+  'full_time',
+  'part_time',
+  'temporary',
+  'seasonal',
+] as const
 
-// Funzione per ottenere tipi di contratto per paese
-export function getContractTypesForCountry(country?: string) {
-  if (!country) return DEFAULT_CONTRACT_TYPES
+// Get contract type codes for country
+export function getContractTypeCodesForCountry(country?: string): readonly string[] {
+  if (!country) return DEFAULT_CONTRACT_TYPE_CODES
   
   const normalized = country.toUpperCase()
   
   switch(normalized) {
     case 'FRANCE':
     case 'FR':
-      return FRANCE_CONTRACT_TYPES
+      return FRANCE_CONTRACT_TYPE_CODES
     default:
-      return DEFAULT_CONTRACT_TYPES
+      return DEFAULT_CONTRACT_TYPE_CODES
   }
+}
+
+// Get translation key for contract type
+export function getContractTypeTranslationKey(code: string): string {
+  return `contracts.types.${code}`
 }
 
 // Funzione per determinare se un paese richiede campi specifici
