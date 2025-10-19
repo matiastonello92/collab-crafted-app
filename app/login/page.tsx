@@ -36,6 +36,7 @@ export default function LoginPage() {
 
       if (authError) {
         setError(authError.message);
+        setLoading(false);
         return;
       }
 
