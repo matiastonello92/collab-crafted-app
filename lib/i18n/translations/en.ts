@@ -57,6 +57,10 @@ export const en = {
     tomorrow: 'Tomorrow',
     more: 'more',
     comingSoon: 'Coming Soon',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    cancelled: 'Cancelled',
     messages: {
       errorSaving: 'Error saving',
       savedSuccessfully: 'Saved successfully',
@@ -481,6 +485,64 @@ export const en = {
         amountPositive: 'Amount must be positive',
         advanceMaxAmount: 'Maximum advance: €10,000',
         transactionDateRequired: 'Transaction date is required',
+      },
+    },
+
+    // ===== Leaves & Absences =====
+    leaves: {
+      title: 'Leaves & Absences',
+      subtitle: 'Leave request history for this user',
+      
+      stats: {
+        pending: 'Pending',
+        approvedYTD: 'Approved (YTD)',
+        daysUsed: 'Days Used',
+        daysRemaining: 'Days Remaining',
+      },
+      
+      pending: {
+        title: 'Requests Awaiting Approval',
+        noPending: 'No pending requests',
+      },
+      
+      history: {
+        title: 'Request History',
+        tabAll: 'All',
+        tabApproved: 'Approved',
+        tabRejected: 'Rejected',
+        noHistory: 'No requests found',
+      },
+      
+      actions: {
+        approve: 'Approve',
+        reject: 'Reject',
+        newRequest: 'New Request',
+      },
+      
+      fields: {
+        type: 'Type',
+        period: 'Period',
+        reason: 'Reason',
+        managerNotes: 'Manager Notes',
+        approvedBy: 'Approved by',
+        approvedAt: 'Approved on',
+      },
+      
+      dialog: {
+        approveTitle: 'Approve Leave Request',
+        rejectTitle: 'Reject Leave Request',
+        approveConfirm: 'Confirm approval of this request?',
+        rejectConfirm: 'Confirm rejection of this request?',
+        notesLabel: 'Manager Notes',
+        notesPlaceholder: 'Add notes for the employee...',
+        rejectNotesRequired: 'Notes are required for rejection',
+      },
+      
+      messages: {
+        approveSuccess: 'Request approved successfully',
+        rejectSuccess: 'Request rejected',
+        approveError: 'Error approving request',
+        rejectError: 'Error rejecting request',
       },
     },
   },

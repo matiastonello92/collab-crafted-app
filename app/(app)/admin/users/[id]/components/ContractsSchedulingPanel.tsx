@@ -11,6 +11,7 @@ import { ContractsList } from './ContractsList'
 import { ContractAmendmentsList } from './ContractAmendmentsList'
 import { TransportAllowancesList } from './TransportAllowancesList'
 import { BonusesAdvancesList } from './BonusesAdvancesList'
+import { UserLeavesHistory } from './UserLeavesHistory'
 import { useSupabase } from '@/hooks/useSupabase'
 import { usePermissions } from '@/hooks/usePermissions'
 import { checkPermission } from '@/lib/permissions/unified'
@@ -69,17 +70,19 @@ export function ContractsSchedulingPanel({ userId, isSchedulable: initialSchedul
 
         {canManageContracts ? (
           <Tabs defaultValue="current" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="current">Contratto Attuale</TabsTrigger>
               <TabsTrigger value="all">Tutti & Avenant</TabsTrigger>
               <TabsTrigger value="transport">Indennità</TabsTrigger>
               <TabsTrigger value="bonuses">Premi</TabsTrigger>
+              <TabsTrigger value="leaves">Congedi</TabsTrigger>
             </TabsList>
             
             <TabsContent value="current" className="mt-6"><ContractsList userId={userId} userFullName={userFullName} /></TabsContent>
             <TabsContent value="all" className="mt-6"><ContractAmendmentsList userId={userId} /></TabsContent>
             <TabsContent value="transport" className="mt-6"><TransportAllowancesList userId={userId} /></TabsContent>
             <TabsContent value="bonuses" className="mt-6"><BonusesAdvancesList userId={userId} /></TabsContent>
+            <TabsContent value="leaves" className="mt-6"><UserLeavesHistory userId={userId} /></TabsContent>
           </Tabs>
         ) : (
           <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>Non hai i permessi necessari</AlertDescription></Alert>

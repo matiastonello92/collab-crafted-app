@@ -57,6 +57,10 @@ export const it = {
     tomorrow: 'Domani',
     more: 'altro',
     comingSoon: 'Coming Soon',
+    pending: 'In Attesa',
+    approved: 'Approvato',
+    rejected: 'Rifiutato',
+    cancelled: 'Annullato',
     messages: {
       errorSaving: 'Errore durante il salvataggio',
       savedSuccessfully: 'Salvato con successo',
@@ -481,6 +485,64 @@ export const it = {
         amountPositive: 'L\'importo deve essere positivo',
         advanceMaxAmount: 'Acconto massimo: €10,000',
         transactionDateRequired: 'Data transazione obbligatoria',
+      },
+    },
+
+    // ===== Leaves & Absences (Congedi e Assenze) =====
+    leaves: {
+      title: 'Congedi e Assenze',
+      subtitle: 'Storico richieste di congedo per questo utente',
+      
+      stats: {
+        pending: 'In Attesa',
+        approvedYTD: 'Approvati (anno corrente)',
+        daysUsed: 'Giorni utilizzati',
+        daysRemaining: 'Giorni rimanenti',
+      },
+      
+      pending: {
+        title: 'Richieste in Attesa di Approvazione',
+        noPending: 'Nessuna richiesta in attesa',
+      },
+      
+      history: {
+        title: 'Storico Richieste',
+        tabAll: 'Tutte',
+        tabApproved: 'Approvate',
+        tabRejected: 'Rifiutate',
+        noHistory: 'Nessuna richiesta trovata',
+      },
+      
+      actions: {
+        approve: 'Approva',
+        reject: 'Rifiuta',
+        newRequest: 'Nuova Richiesta',
+      },
+      
+      fields: {
+        type: 'Tipo',
+        period: 'Periodo',
+        reason: 'Motivo',
+        managerNotes: 'Note Manager',
+        approvedBy: 'Approvato da',
+        approvedAt: 'Approvato il',
+      },
+      
+      dialog: {
+        approveTitle: 'Approva Richiesta di Congedo',
+        rejectTitle: 'Rifiuta Richiesta di Congedo',
+        approveConfirm: 'Confermare l\'approvazione di questa richiesta?',
+        rejectConfirm: 'Confermare il rifiuto di questa richiesta?',
+        notesLabel: 'Note Manager',
+        notesPlaceholder: 'Aggiungi note per il dipendente...',
+        rejectNotesRequired: 'Le note sono obbligatorie per il rifiuto',
+      },
+      
+      messages: {
+        approveSuccess: 'Richiesta approvata con successo',
+        rejectSuccess: 'Richiesta rifiutata',
+        approveError: 'Errore durante l\'approvazione',
+        rejectError: 'Errore durante il rifiuto',
       },
     },
   },
