@@ -509,29 +509,27 @@ export function EmployeeGridView({
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   {stats && (
-                    <div className="text-xs space-y-0.5">
-                      {/* Ore Effettive lavorate (se presenti) */}
-                      {stats.actualHours > 0 && (
-                        <div className="font-semibold text-foreground">
-                          {formatHoursMinutes(stats.actualHours)}
-                        </div>
-                      )}
-                      
-                      {/* Ore Pianificate + Variance */}
-                      <div className="text-muted-foreground flex items-center gap-1.5">
-                        <span>Piano: {formatHoursMinutes(stats.plannedHours)}</span>
-                        
-                        {/* Mostra differenza solo se ci sono ore effettive */}
-                        {stats.actualHours > 0 && stats.variance !== 0 && (
-                          <span className={`font-medium ${
-                            stats.variance > 0 
-                              ? 'text-green-600 dark:text-green-400' 
-                              : 'text-orange-600 dark:text-orange-400'
-                          }`}>
-                            ({stats.variance > 0 ? '+' : ''}{formatHoursMinutes(Math.abs(stats.variance))})
+                    <div className="text-xs text-muted-foreground">
+                      {stats.actualHours > 0 ? (
+                        <>
+                          <span>{formatHoursMinutes(stats.plannedHours)}</span>
+                          {' / '}
+                          <span className="font-semibold text-foreground">
+                            {formatHoursMinutes(stats.actualHours)}
                           </span>
-                        )}
-                      </div>
+                          {stats.variance !== 0 && (
+                            <span className={`font-medium ml-1 ${
+                              stats.variance > 0 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-orange-600 dark:text-orange-400'
+                            }`}>
+                              ({stats.variance > 0 ? '+' : ''}{formatHoursMinutes(Math.abs(stats.variance))})
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span>{formatHoursMinutes(stats.plannedHours)}</span>
+                      )}
                     </div>
                   )}
                 </div>
