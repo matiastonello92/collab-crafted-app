@@ -308,6 +308,181 @@ export const it = {
       rateRequired: 'Specificare tariffa giornaliera per forfait, oppure tariffa oraria o salario mensile',
       weeklyHoursRequired: 'Ore settimanali obbligatorie per contratti non forfait',
     },
+
+    // ===== Contract Amendments (Emendamenti) =====
+    amendments: {
+      title: 'Emendamenti Contrattuali',
+      subtitle: 'Modifiche formali ai contratti esistenti',
+      noAmendments: 'Nessun emendamento trovato',
+      effectiveFrom: 'Effettivo dal',
+      
+      types: {
+        salary_change: 'Modifica Stipendio',
+        hours_change: 'Modifica Orario',
+        position_change: 'Cambio Ruolo',
+        other: 'Altro',
+      },
+      
+      status: {
+        draft: 'Bozza',
+        active: 'Attivo',
+        superseded: 'Sostituito',
+      },
+      
+      actions: {
+        newAmendment: 'Nuovo Emendamento',
+        editAmendment: 'Modifica Emendamento',
+        viewDiff: 'Visualizza Modifiche',
+        deleteAmendment: 'Elimina Emendamento',
+      },
+      
+      fields: {
+        amendmentDate: 'Data Emendamento',
+        effectiveDate: 'Data Effettiva',
+        amendmentType: 'Tipo Modifica',
+        reason: 'Motivo',
+        notes: 'Note',
+        previousValue: 'Valore Precedente',
+        newValue: 'Nuovo Valore',
+        document: 'Documento',
+      },
+      
+      messages: {
+        createSuccess: 'Emendamento creato con successo',
+        updateSuccess: 'Emendamento aggiornato con successo',
+        deleteSuccess: 'Emendamento eliminato con successo',
+        createError: 'Errore durante la creazione dell\'emendamento',
+        updateError: 'Errore durante l\'aggiornamento dell\'emendamento',
+        deleteError: 'Errore durante l\'eliminazione dell\'emendamento',
+      },
+    },
+
+    // ===== Transport Allowances (Indennità Trasporto) =====
+    transport: {
+      title: 'Indennità di Trasporto',
+      subtitle: 'Sussidi per trasporto domicilio-lavoro',
+      noAllowances: 'Nessuna indennità di trasporto trovata',
+      
+      types: {
+        public_transport: 'Trasporto Pubblico',
+        personal_vehicle: 'Veicolo Personale',
+        bike: 'Bicicletta',
+        other: 'Altro',
+      },
+      
+      status: {
+        active: 'Attivo',
+        suspended: 'Sospeso',
+        terminated: 'Terminato',
+      },
+      
+      actions: {
+        newAllowance: 'Nuova Indennità',
+        editAllowance: 'Modifica Indennità',
+        deleteAllowance: 'Elimina Indennità',
+      },
+      
+      fields: {
+        allowanceName: 'Nome Dispositivo',
+        allowanceType: 'Tipo Indennità',
+        monthlyAmount: 'Importo Mensile',
+        employerContribution: 'Contributo Datore (%)',
+        employeeContribution: 'Contributo Dipendente (%)',
+        startDate: 'Data Inizio',
+        endDate: 'Data Fine',
+        period: 'Periodo',
+        status: 'Stato',
+        notes: 'Note',
+        justificationDocument: 'Documento Giustificativo',
+      },
+      
+      display: {
+        perMonth: '/mese',
+        present: 'Presente',
+        employer: 'Datore',
+        employee: 'Dipendente',
+      },
+      
+      messages: {
+        createSuccess: 'Indennità creata con successo',
+        updateSuccess: 'Indennità aggiornata con successo',
+        deleteSuccess: 'Indennità eliminata con successo',
+        createError: 'Errore durante la creazione dell\'indennità',
+        updateError: 'Errore durante l\'aggiornamento dell\'indennità',
+        deleteError: 'Errore durante l\'eliminazione dell\'indennità',
+      },
+    },
+
+    // ===== Bonuses & Advances (Premi e Acconti) =====
+    bonuses: {
+      title: 'Premi e Acconti',
+      subtitle: 'Pagamenti extra e anticipi sullo stipendio',
+      noBonuses: 'Nessun premio o acconto trovato',
+      totalYTD: 'Totale Anno Corrente',
+      
+      types: {
+        bonus: 'Premio',
+        advance: 'Acconto',
+        commission: 'Provvigione',
+        other: 'Altro',
+      },
+      
+      status: {
+        pending: 'In Attesa',
+        approved: 'Approvato',
+        paid: 'Pagato',
+        cancelled: 'Annullato',
+      },
+      
+      filters: {
+        all: 'Tutti',
+      },
+      
+      actions: {
+        newBonusAdvance: 'Nuovo Premio/Acconto',
+        editBonus: 'Modifica',
+        deleteBonus: 'Elimina',
+        approveBonus: 'Approva',
+        markAsPaid: 'Segna come Pagato',
+        cancelBonus: 'Annulla',
+      },
+      
+      fields: {
+        transactionType: 'Tipo Transazione',
+        description: 'Descrizione',
+        amount: 'Importo',
+        transactionDate: 'Data Transazione',
+        paymentDate: 'Data Pagamento',
+        relatedMonth: 'Mese di Riferimento',
+        relatedPeriod: 'Periodo di Riferimento',
+        status: 'Stato',
+        notes: 'Note',
+        approvedBy: 'Approvato da',
+        approvedAt: 'Approvato il',
+      },
+      
+      messages: {
+        createSuccess: 'Premio/Acconto creato con successo',
+        updateSuccess: 'Premio/Acconto aggiornato con successo',
+        deleteSuccess: 'Premio/Acconto eliminato con successo',
+        approveSuccess: 'Premio/Acconto approvato con successo',
+        paidSuccess: 'Premio/Acconto segnato come pagato',
+        cancelSuccess: 'Premio/Acconto annullato',
+        createError: 'Errore durante la creazione',
+        updateError: 'Errore durante l\'aggiornamento',
+        deleteError: 'Errore durante l\'eliminazione',
+        approveError: 'Errore durante l\'approvazione',
+        paidError: 'Errore durante l\'aggiornamento dello stato',
+      },
+      
+      validation: {
+        descriptionRequired: 'Descrizione obbligatoria',
+        amountRequired: 'Importo obbligatorio',
+        amountPositive: 'L\'importo deve essere positivo',
+        advanceMaxAmount: 'Acconto massimo: €10,000',
+        transactionDateRequired: 'Data transazione obbligatoria',
+      },
+    },
   },
 
   // User Profile & Overview

@@ -308,6 +308,181 @@ export const en = {
       rateRequired: 'Specify daily rate for forfait, or hourly rate or monthly salary',
       weeklyHoursRequired: 'Weekly hours required for non-forfait contracts',
     },
+
+    // ===== Contract Amendments =====
+    amendments: {
+      title: 'Contract Amendments',
+      subtitle: 'Formal modifications to existing contracts',
+      noAmendments: 'No amendments found',
+      effectiveFrom: 'Effective from',
+      
+      types: {
+        salary_change: 'Salary Change',
+        hours_change: 'Hours Change',
+        position_change: 'Position Change',
+        other: 'Other',
+      },
+      
+      status: {
+        draft: 'Draft',
+        active: 'Active',
+        superseded: 'Superseded',
+      },
+      
+      actions: {
+        newAmendment: 'New Amendment',
+        editAmendment: 'Edit Amendment',
+        viewDiff: 'View Changes',
+        deleteAmendment: 'Delete Amendment',
+      },
+      
+      fields: {
+        amendmentDate: 'Amendment Date',
+        effectiveDate: 'Effective Date',
+        amendmentType: 'Amendment Type',
+        reason: 'Reason',
+        notes: 'Notes',
+        previousValue: 'Previous Value',
+        newValue: 'New Value',
+        document: 'Document',
+      },
+      
+      messages: {
+        createSuccess: 'Amendment created successfully',
+        updateSuccess: 'Amendment updated successfully',
+        deleteSuccess: 'Amendment deleted successfully',
+        createError: 'Error creating amendment',
+        updateError: 'Error updating amendment',
+        deleteError: 'Error deleting amendment',
+      },
+    },
+
+    // ===== Transport Allowances =====
+    transport: {
+      title: 'Transport Allowances',
+      subtitle: 'Home-to-work transport subsidies',
+      noAllowances: 'No transport allowances found',
+      
+      types: {
+        public_transport: 'Public Transport',
+        personal_vehicle: 'Personal Vehicle',
+        bike: 'Bicycle',
+        other: 'Other',
+      },
+      
+      status: {
+        active: 'Active',
+        suspended: 'Suspended',
+        terminated: 'Terminated',
+      },
+      
+      actions: {
+        newAllowance: 'New Allowance',
+        editAllowance: 'Edit Allowance',
+        deleteAllowance: 'Delete Allowance',
+      },
+      
+      fields: {
+        allowanceName: 'Device Name',
+        allowanceType: 'Allowance Type',
+        monthlyAmount: 'Monthly Amount',
+        employerContribution: 'Employer Contribution (%)',
+        employeeContribution: 'Employee Contribution (%)',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        period: 'Period',
+        status: 'Status',
+        notes: 'Notes',
+        justificationDocument: 'Justification Document',
+      },
+      
+      display: {
+        perMonth: '/month',
+        present: 'Present',
+        employer: 'Employer',
+        employee: 'Employee',
+      },
+      
+      messages: {
+        createSuccess: 'Allowance created successfully',
+        updateSuccess: 'Allowance updated successfully',
+        deleteSuccess: 'Allowance deleted successfully',
+        createError: 'Error creating allowance',
+        updateError: 'Error updating allowance',
+        deleteError: 'Error deleting allowance',
+      },
+    },
+
+    // ===== Bonuses & Advances =====
+    bonuses: {
+      title: 'Bonuses & Advances',
+      subtitle: 'Extra payments and salary advances',
+      noBonuses: 'No bonuses or advances found',
+      totalYTD: 'Total YTD',
+      
+      types: {
+        bonus: 'Bonus',
+        advance: 'Advance',
+        commission: 'Commission',
+        other: 'Other',
+      },
+      
+      status: {
+        pending: 'Pending',
+        approved: 'Approved',
+        paid: 'Paid',
+        cancelled: 'Cancelled',
+      },
+      
+      filters: {
+        all: 'All',
+      },
+      
+      actions: {
+        newBonusAdvance: 'New Bonus/Advance',
+        editBonus: 'Edit',
+        deleteBonus: 'Delete',
+        approveBonus: 'Approve',
+        markAsPaid: 'Mark as Paid',
+        cancelBonus: 'Cancel',
+      },
+      
+      fields: {
+        transactionType: 'Transaction Type',
+        description: 'Description',
+        amount: 'Amount',
+        transactionDate: 'Transaction Date',
+        paymentDate: 'Payment Date',
+        relatedMonth: 'Related Month',
+        relatedPeriod: 'Related Period',
+        status: 'Status',
+        notes: 'Notes',
+        approvedBy: 'Approved by',
+        approvedAt: 'Approved on',
+      },
+      
+      messages: {
+        createSuccess: 'Bonus/Advance created successfully',
+        updateSuccess: 'Bonus/Advance updated successfully',
+        deleteSuccess: 'Bonus/Advance deleted successfully',
+        approveSuccess: 'Bonus/Advance approved successfully',
+        paidSuccess: 'Bonus/Advance marked as paid',
+        cancelSuccess: 'Bonus/Advance cancelled',
+        createError: 'Error creating',
+        updateError: 'Error updating',
+        deleteError: 'Error deleting',
+        approveError: 'Error approving',
+        paidError: 'Error updating status',
+      },
+      
+      validation: {
+        descriptionRequired: 'Description is required',
+        amountRequired: 'Amount is required',
+        amountPositive: 'Amount must be positive',
+        advanceMaxAmount: 'Maximum advance: €10,000',
+        transactionDateRequired: 'Transaction date is required',
+      },
+    },
   },
 
   // User Profile & Overview
