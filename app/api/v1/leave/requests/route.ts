@@ -1,4 +1,4 @@
-// Klyra Shifts API - Leave Requests (Create)
+// Klyra Shifts API - Leave Requests (Create & Retrieve)
 
 import { NextResponse } from 'next/server'
 import { createSupabaseServerActionClient } from '@/utils/supabase/server'
@@ -6,6 +6,89 @@ import { createLeaveRequestSchema } from '@/lib/shifts/validations'
 import { checkLeaveCollision } from '@/lib/shifts/collision-checker'
 import { ZodError } from 'zod'
 
+// GET - Retrieve current user's leave requests
+export async function GET(request: Request) {
+  try {
+    const supabase = await createSupabaseServerActionClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Optional status filter from query params
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status')
+    const locationId = searchParams.get('location_id')
+    const weekStart = searchParams.get('week_start')
+
+    // Build query with joins
+    let query = supabase
+      .from('leave_requests')
+      .select(`
+        id,
+        org_id,
+        location_id,
+        user_id,
+        type_id,
+        start_at,
+        end_at,
+        reason,
+        status,
+        approver_id,
+        approved_at,
+        notes,
+        converted_to_leave_id,
+        created_at,
+        updated_at,
+        leave_types!leave_requests_type_id_fkey(
+          id, 
+          key, 
+          label, 
+          color, 
+          requires_approval
+        ),
+        profiles!leave_requests_user_id_fkey(
+          id,
+          full_name
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    // Add optional filters
+    if (status) {
+      query = query.eq('status', status)
+    }
+    if (locationId) {
+      query = query.eq('location_id', locationId)
+    }
+    if (weekStart) {
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+      query = query
+        .gte('start_at', weekStart)
+        .lt('start_at', weekEnd.toISOString())
+    }
+
+    const { data: requests, error } = await query
+
+    if (error) {
+      console.error('Error fetching user leave requests:', error)
+      throw error
+    }
+
+    return NextResponse.json({ requests: requests || [] })
+  } catch (error) {
+    console.error('Error in GET /api/v1/leave/requests:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST - Create new leave request
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerActionClient()

@@ -54,6 +54,10 @@ export const PERMISSIONS = {
     'finance:create',
     'finance:manage',
   ],
+  leave: [
+    'leave:manage',
+    'leave:approve',
+  ],
 } as const;
 
 export type Module = keyof typeof PERMISSIONS;
