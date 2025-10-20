@@ -56,7 +56,6 @@ export const PERMISSIONS = {
   ],
   leave: [
     'leave:manage',
-    'leave:approve',
   ],
 } as const;
 
