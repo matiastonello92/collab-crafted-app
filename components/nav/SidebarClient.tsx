@@ -40,7 +40,17 @@ import { useSupabase } from '@/hooks/useSupabase'
 import { isAdminFromClaims } from '@/lib/admin/claims'
 import { useTranslation } from '@/lib/i18n'
 
-export default function SidebarClient({ onNavigate }: { onNavigate?: () => void } = {}) {
+export default function SidebarClient({ 
+  onNavigate,
+  locations,
+  activeLocationId,
+  setActiveLocation
+}: { 
+  onNavigate?: () => void
+  locations?: { id: string; name: string; org_id: string }[]
+  activeLocationId?: string | null
+  setActiveLocation?: (id?: string | null) => Promise<void>
+} = {}) {
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
@@ -191,11 +201,27 @@ export default function SidebarClient({ onNavigate }: { onNavigate?: () => void 
         </Button>
       </div>
 
-      {!collapsed && context.location_name && (
-        <div className="border-b border-border/60 px-4 py-3">
-          <Badge variant="secondary" className="w-full justify-center rounded-full border border-border/60 bg-muted/60 text-[11px] font-semibold uppercase tracking-wide">
-            {context.location_name}
-          </Badge>
+      {/* Location Switcher */}
+      {locations && locations.length > 0 && (
+        <div className="border-b border-border/60 px-3 py-2">
+          {!collapsed ? (
+            <select
+              className="w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs font-medium text-foreground transition hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              value={activeLocationId ?? ''}
+              onChange={(e) => setActiveLocation?.(e.target.value)}
+              aria-label="Select location"
+            >
+              {locations.map(location => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="flex items-center justify-center py-1">
+              <MapPin className="size-4 text-muted-foreground" />
+            </div>
+          )}
         </div>
       )}
 

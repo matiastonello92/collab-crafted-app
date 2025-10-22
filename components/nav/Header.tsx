@@ -1,6 +1,7 @@
 import { getActiveLocationServer } from '@/lib/server/activeLocation';
 import { setActiveLocationAction } from '@/app/actions/active-location';
 import HeaderClient from './HeaderClient';
+import { MobileSidebar } from '../layouts/MobileSidebar';
 import { ClientOnly } from '@/lib/hydration/ClientOnly';
 import { t } from '@/lib/i18n';
 
@@ -16,14 +17,23 @@ export default async function Header() {
     : undefined;
 
   return (
-    <ClientOnly fallback={<div className="h-10 w-full" />}>
-      <HeaderClient
+    <div className="mx-auto flex w-full max-w-screen-2xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      {/* Mobile Menu Button */}
+      <MobileSidebar
         locations={locations}
         activeLocationId={active?.id ?? null}
-        persisted={persisted}
-        errorMessage={errorMessage}
         setActiveLocation={setActiveLocationAction}
       />
-    </ClientOnly>
+
+      <ClientOnly fallback={<div className="h-10 w-full" />}>
+        <HeaderClient
+          locations={locations}
+          activeLocationId={active?.id ?? null}
+          persisted={persisted}
+          errorMessage={errorMessage}
+          setActiveLocation={setActiveLocationAction}
+        />
+      </ClientOnly>
+    </div>
   );
 }
