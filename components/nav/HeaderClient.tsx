@@ -13,6 +13,7 @@ import { useTranslation } from '@/lib/i18n';
 import { GlobalSearchCommand } from '@/components/search/GlobalSearchCommand';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { NotificationsBell } from '@/components/nav/NotificationsBell';
 
 export default function HeaderClient({
   locations,
@@ -147,6 +148,9 @@ export default function HeaderClient({
             <GlobalSearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
           </PopoverContent>
         </Popover>
+
+        {/* Notifications Bell */}
+        <NotificationsBell />
 
         {locations?.length ? (
           <div className="relative flex-1 sm:flex-none">
