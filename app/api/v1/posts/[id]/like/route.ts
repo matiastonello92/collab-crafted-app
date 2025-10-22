@@ -1,0 +1,86 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { checkUserPermission } from '@/lib/api/permissions-check';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+/**
+ * POST /api/v1/posts/[id]/like - Toggle like on a post
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: postId } = await params;
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check posts:like permission
+    const canLike = await checkUserPermission(supabase, user.id, 'posts:like');
+    if (!canLike) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Get user's org_id
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.org_id) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    // Check if already liked
+    const { data: existingLike } = await supabase
+      .from('post_likes')
+      .select('*')
+      .eq('post_id', postId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (existingLike) {
+      // Unlike
+      const { error: deleteError } = await supabase
+        .from('post_likes')
+        .delete()
+        .eq('post_id', postId)
+        .eq('user_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      return NextResponse.json({ liked: false });
+    } else {
+      // Like
+      const { error: insertError } = await supabase
+        .from('post_likes')
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          org_id: profile.org_id,
+        });
+
+      if (insertError) throw insertError;
+
+      return NextResponse.json({ liked: true });
+    }
+  } catch (error) {
+    console.error('POST /api/v1/posts/[id]/like error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

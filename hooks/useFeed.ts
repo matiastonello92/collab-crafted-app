@@ -1,7 +1,8 @@
 'use client';
 
 import useSWR from 'swr';
-import { supabase } from '@/lib/supabase/client';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 
 export interface Post {
   id: string;
@@ -40,6 +41,7 @@ interface UseFeedOptions {
 }
 
 const fetcher = async (url: string): Promise<FeedResponse> => {
+  const supabase = createSupabaseBrowserClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
@@ -58,6 +60,9 @@ const fetcher = async (url: string): Promise<FeedResponse> => {
 
 export function useFeed(options: UseFeedOptions = {}) {
   const { locationId, limit = 20, filter = 'all', authorId } = options;
+  const { permissions } = usePermissions(locationId);
+  
+  const canView = hasPermission(permissions, 'posts:view');
 
   const params = new URLSearchParams();
   if (locationId) params.set('locationId', locationId);
@@ -67,10 +72,14 @@ export function useFeed(options: UseFeedOptions = {}) {
 
   const key = `/api/v1/posts?${params.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR<FeedResponse>(key, fetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 30000, // 30s
-  });
+  const { data, error, isLoading, mutate } = useSWR<FeedResponse>(
+    canView ? key : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30000, // 30s
+    }
+  );
 
   const addPost = async (newPost: Post) => {
     // Optimistic update
@@ -105,6 +114,7 @@ export function useFeed(options: UseFeedOptions = {}) {
     );
 
     try {
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
@@ -138,6 +148,7 @@ export function useFeed(options: UseFeedOptions = {}) {
     );
 
     try {
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
