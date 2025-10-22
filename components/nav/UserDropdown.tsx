@@ -12,14 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n'
 
 export function UserDropdown() {
   const { t } = useTranslation()
-  const [user, setUser] = useState<{ email: string; name?: string } | null>(null)
+  const [user, setUser] = useState<{ email: string; name?: string; avatar_url?: string | null } | null>(null)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -30,7 +30,7 @@ export function UserDropdown() {
         // Try to get profile data
         const { data: profile } = await supabase
           .from('profiles')
-          .select('first_name, last_name, full_name')
+          .select('first_name, last_name, full_name, avatar_url')
           .eq('id', data.user.id)
           .maybeSingle()
 
@@ -40,7 +40,8 @@ export function UserDropdown() {
 
         setUser({
           email: data.user.email || '',
-          name: displayName
+          name: displayName,
+          avatar_url: profile?.avatar_url
         })
       }
     }
@@ -63,17 +64,15 @@ export function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 h-auto rounded-full px-2.5 py-1.5">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-8 w-8">
+            {user.avatar_url && (
+              <AvatarImage src={user.avatar_url} alt={user.name || user.email} />
+            )}
             <AvatarFallback className="text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="hidden md:flex flex-col items-start">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
