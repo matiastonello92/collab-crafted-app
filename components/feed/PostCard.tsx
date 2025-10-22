@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreVertical, Flag } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
@@ -12,6 +12,8 @@ import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 import { Post } from '@/hooks/useInfiniteFeed';
 import { MediaGallery } from './MediaGallery';
 import { MentionsText } from './MentionsText';
+import { ReportPostDialog } from './ReportPostDialog';
+import { usePostAnalytics } from '@/hooks/usePostAnalytics';
 import { toast } from 'sonner';
 
 interface PostCardProps {
@@ -26,6 +28,8 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked_by_me);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLiking, setIsLiking] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const { ref } = usePostAnalytics(post.id, true);
 
   const canLike = hasPermission(permissions, 'posts:like');
   const canComment = hasPermission(permissions, 'posts:comment');
@@ -55,8 +59,9 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
   };
 
   return (
-    <Card className="p-4 space-y-3">
-      {/* Header */}
+    <>
+      <Card ref={ref} className="p-4 space-y-3">
+        {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <Avatar>
@@ -83,6 +88,13 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
               Fissato
             </Badge>
           )}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setReportDialogOpen(true)}
+          >
+            <Flag className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon">
             <MoreVertical className="h-4 w-4" />
           </Button>
@@ -137,5 +149,12 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
         </Button>
       </div>
     </Card>
+
+    <ReportPostDialog
+      postId={post.id}
+      open={reportDialogOpen}
+      onOpenChange={setReportDialogOpen}
+    />
+    </>
   );
 }
