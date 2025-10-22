@@ -720,6 +720,51 @@ export type Database = {
           },
         ]
       }
+      hidden_posts: {
+        Row: {
+          hidden_at: string
+          hidden_by: string
+          id: string
+          post_id: string
+          reason: string | null
+          unhidden_at: string | null
+          unhidden_by: string | null
+        }
+        Insert: {
+          hidden_at?: string
+          hidden_by: string
+          id?: string
+          post_id: string
+          reason?: string | null
+          unhidden_at?: string | null
+          unhidden_by?: string | null
+        }
+        Update: {
+          hidden_at?: string
+          hidden_by?: string
+          id?: string
+          post_id?: string
+          reason?: string | null
+          unhidden_at?: string | null
+          unhidden_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hidden_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hidden_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_catalog_items: {
         Row: {
           category: string
@@ -2101,6 +2146,45 @@ export type Database = {
         }
         Relationships: []
       }
+      post_analytics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           author_id: string
@@ -2167,6 +2251,13 @@ export type Database = {
             foreignKeyName: "post_comments_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -2198,6 +2289,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "post_likes_post_id_fkey"
@@ -2266,6 +2364,70 @@ export type Database = {
             foreignKeyName: "post_mentions_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          post_id: string
+          reason: string
+          reported_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id: string
+          reason: string
+          reported_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id?: string
+          reason?: string
+          reported_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -2325,6 +2487,13 @@ export type Database = {
             foreignKeyName: "post_shares_original_post_id_fkey"
             columns: ["original_post_id"]
             isOneToOne: false
+            referencedRelation: "post_engagement_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_shares_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -2347,6 +2516,7 @@ export type Database = {
           edited_at: string | null
           id: string
           is_archived: boolean | null
+          is_hidden: boolean
           is_pinned: boolean | null
           likes_count: number | null
           location_id: string | null
@@ -2365,6 +2535,7 @@ export type Database = {
           edited_at?: string | null
           id?: string
           is_archived?: boolean | null
+          is_hidden?: boolean
           is_pinned?: boolean | null
           likes_count?: number | null
           location_id?: string | null
@@ -2383,6 +2554,7 @@ export type Database = {
           edited_at?: string | null
           id?: string
           is_archived?: boolean | null
+          is_hidden?: boolean
           is_pinned?: boolean | null
           likes_count?: number | null
           location_id?: string | null
@@ -4343,6 +4515,51 @@ export type Database = {
           },
         ]
       }
+      post_engagement_stats: {
+        Row: {
+          author_id: string | null
+          comments_count: number | null
+          created_at: string | null
+          engagement_score: number | null
+          hours_old: number | null
+          id: string | null
+          likes_count: number | null
+          location_id: string | null
+          org_id: string | null
+          shares_count: number | null
+          views_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       recipe_usage_stats: {
         Row: {
           cook_count: number | null
@@ -4397,6 +4614,10 @@ export type Database = {
         Args: { p_header_id: string }
         Returns: number
       }
+      can_report_post: {
+        Args: { p_post_id: string; p_user_id: string }
+        Returns: boolean
+      }
       citext: {
         Args: { "": boolean } | { "": string } | { "": unknown }
         Returns: string
@@ -4444,6 +4665,10 @@ export type Database = {
       get_my_default_location: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_post_stats: {
+        Args: { p_post_id: string }
+        Returns: Json
       }
       get_users_for_location: {
         Args: { p_location_id?: string; p_org_id?: string }

@@ -32,6 +32,7 @@ import {
   Plus,
   Upload,
   CreditCard,
+  MessageSquare,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -62,6 +63,7 @@ export default function SidebarClient({
   
   const navigation: any[] = [
     { name: t('nav.dashboard'), href: '/', icon: Home, permission: null },
+    { name: t('nav.feed'), href: '/feed', icon: MessageSquare, permission: 'posts:view' },
     { 
       name: t('nav.inventory'), 
       icon: Package, 
