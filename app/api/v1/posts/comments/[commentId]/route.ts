@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
-import { checkUserPermission } from '@/lib/api/permissions-check';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -49,7 +48,10 @@ export async function PATCH(
     }
 
     const isOwner = existingComment.author_id === user.id;
-    const canModerate = await checkUserPermission(supabase, user.id, 'posts:moderate');
+    const { data: canModerate } = await supabase.rpc('user_has_permission', {
+      p_user_id: user.id,
+      p_permission: 'posts:moderate'
+    });
 
     if (!isOwner && !canModerate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -114,7 +116,10 @@ export async function DELETE(
     }
 
     const isOwner = comment.author_id === user.id;
-    const canModerate = await checkUserPermission(supabase, user.id, 'posts:moderate');
+    const { data: canModerate } = await supabase.rpc('user_has_permission', {
+      p_user_id: user.id,
+      p_permission: 'posts:moderate'
+    });
 
     if (!isOwner && !canModerate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

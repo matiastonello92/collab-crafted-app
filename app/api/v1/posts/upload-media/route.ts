@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { checkUserPermission } from '@/lib/api/permissions-check';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -31,7 +30,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check posts:create permission
-    const canCreate = await checkUserPermission(supabase, user.id, 'posts:create');
+    const { data: canCreate } = await supabase.rpc('user_has_permission', {
+      p_user_id: user.id,
+      p_permission: 'posts:create'
+    });
     if (!canCreate) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

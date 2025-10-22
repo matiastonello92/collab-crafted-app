@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { checkUserPermission } from '@/lib/api/permissions-check';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -30,7 +29,10 @@ export async function POST(
     }
 
     // Check posts:like permission
-    const canLike = await checkUserPermission(supabase, user.id, 'posts:like');
+    const { data: canLike } = await supabase.rpc('user_has_permission', {
+      p_user_id: user.id,
+      p_permission: 'posts:like'
+    });
     if (!canLike) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

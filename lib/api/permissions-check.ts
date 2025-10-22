@@ -1,6 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
+ * @deprecated Use `supabase.rpc('user_has_permission', { p_user_id, p_permission })` directly instead
+ * This file calls a non-existent RPC function and will be removed in future versions.
+ * 
+ * For server-side: Use `supabase.rpc('user_has_permission', ...)`
+ * For client-side: Use `usePermissions()` hook with SWR caching
+ * 
  * Check if user has a specific permission
  * Uses RPC to fetch permissions from database
  */
