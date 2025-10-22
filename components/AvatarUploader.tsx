@@ -43,12 +43,12 @@ export function AvatarUploader({
   const loadCurrentAvatar = async () => {
     try {
       const key = `${orgId}/${userId}/avatar.jpg`
-      const response = await fetch(`/api/storage/signed-download?bucket=avatars&name=${key}`)
+      const { data } = await supabase.storage.from('avatars').list(orgId + '/' + userId)
       
-      if (response.ok) {
-        const { url } = await response.json()
-        setAvatarUrl(url)
-        onAvatarUpdate?.(url)
+      if (data && data.length > 0) {
+        const publicUrl = supabase.storage.from('avatars').getPublicUrl(key).data.publicUrl
+        setAvatarUrl(publicUrl)
+        onAvatarUpdate?.(publicUrl)
       }
     } catch (error) {
       // Avatar doesn't exist or can't be loaded, that's ok
@@ -78,16 +78,9 @@ export function AvatarUploader({
 
       if (error) throw new Error(error.message)
 
-      const response = await fetch(`/api/storage/signed-download?bucket=avatars&name=${key}`)
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to get signed URL')
-      }
-
-      const { url } = await response.json()
-      setAvatarUrl(url)
-      onAvatarUpdate?.(url)
+      const publicUrl = supabase.storage.from('avatars').getPublicUrl(key).data.publicUrl
+      setAvatarUrl(publicUrl)
+      onAvatarUpdate?.(publicUrl)
       toast.success(t('common.avatarUploader.uploadSuccess'))
 
     } catch (error: any) {

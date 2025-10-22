@@ -147,13 +147,10 @@ export default function HeaderClient({
         </Popover>
 
         {/* Theme + Language + Notifications + User */}
-        <div className="flex items-center gap-1 rounded-full border border-border/60 bg-card/80 px-1.5 py-1 shadow-sm">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <span className="h-6 w-px rounded-full bg-border/60" aria-hidden="true" />
           <LanguageSwitcher />
-          <span className="h-6 w-px rounded-full bg-border/60" aria-hidden="true" />
           <NotificationsBell />
-          <span className="h-6 w-px rounded-full bg-border/60" aria-hidden="true" />
           <UserDropdown />
         </div>
       </div>
