@@ -160,7 +160,7 @@ export async function POST(request: Request) {
       warning = 'This leave request overlaps with one or more assigned shifts. Please coordinate with your manager.'
     }
 
-    // Create leave request
+    // Create leave request with dynamic approval logic
     const { data: leaveRequest, error } = await supabase
       .from('leave_requests')
       .insert({
@@ -171,7 +171,9 @@ export async function POST(request: Request) {
         start_at: validated.start_at,
         end_at: validated.end_at,
         reason: validated.reason,
-        status: 'pending',
+        status: leaveType.requires_approval ? 'pending' : 'approved',
+        approver_id: leaveType.requires_approval ? null : user.id,
+        approved_at: leaveType.requires_approval ? null : new Date().toISOString(),
       })
       .select()
       .single()

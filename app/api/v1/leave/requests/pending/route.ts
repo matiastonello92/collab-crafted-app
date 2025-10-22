@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build query with location filter if provided
+    // Only fetch pending requests that actually require approval
     let query = supabase
       .from('leave_requests')
       .select(`
@@ -55,10 +56,11 @@ export async function GET(req: NextRequest) {
         updated_at,
         location_id,
         profiles!leave_requests_user_id_fkey(id, full_name, avatar_url),
-        leave_types!leave_requests_type_id_fkey(id, key, label, color)
+        leave_types!leave_requests_type_id_fkey(id, key, label, color, requires_approval)
       `)
       .eq('org_id', profile.org_id)
       .eq('status', 'pending')
+      .eq('leave_types.requires_approval', true)
 
     if (locationId) {
       query = query.eq('location_id', locationId)
