@@ -179,7 +179,7 @@ export default function SidebarClient({
         collapsed ? 'w-20' : 'w-64'
       )}
     >
-      <div className="flex h-16 items-center justify-between gap-2 border-b border-border/60 px-4">
+      <div className="flex h-16 items-center justify-between gap-2 px-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <Image src="/brand/klyra-icon.svg" alt="Klyra" width={24} height={24} className="size-6" priority />
@@ -203,7 +203,7 @@ export default function SidebarClient({
 
       {/* Location Switcher */}
       {locations && locations.length > 0 && (
-        <div className="border-b border-border/60 px-3 py-2">
+        <div className="px-3 py-2">
           {!collapsed ? (
             <select
               className="w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs font-medium text-foreground transition hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
