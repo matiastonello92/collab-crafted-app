@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 
 export async function POST(
   request: NextRequest,
@@ -10,15 +7,7 @@ export async function POST(
 ) {
   try {
     const { id: postId } = await params;
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { authorization: authHeader } },
-    });
+    const supabase = await createSupabaseServerClient();
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -97,15 +86,7 @@ export async function DELETE(
 ) {
   try {
     const { id: postId } = await params;
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { authorization: authHeader } },
-    });
+    const supabase = await createSupabaseServerClient();
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

@@ -41,14 +41,8 @@ interface UseFeedOptions {
 }
 
 const fetcher = async (url: string): Promise<FeedResponse> => {
-  const supabase = createSupabaseBrowserClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authenticated');
-
   const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${session.access_token}`,
-    },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -114,15 +108,9 @@ export function useFeed(options: UseFeedOptions = {}) {
     );
 
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
       await fetch(`/api/v1/posts/${postId}/like`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+        credentials: 'include',
       });
 
       // Revalidate
@@ -148,15 +136,9 @@ export function useFeed(options: UseFeedOptions = {}) {
     );
 
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
       await fetch(`/api/v1/posts/${postId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+        credentials: 'include',
       });
 
       mutate();
@@ -168,16 +150,12 @@ export function useFeed(options: UseFeedOptions = {}) {
 
   const sharePost = async (postId: string, shareComment?: string) => {
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
       const response = await fetch(`/api/v1/posts/${postId}/share`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ shareComment }),
       });
 

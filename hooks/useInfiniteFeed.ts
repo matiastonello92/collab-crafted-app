@@ -41,17 +41,8 @@ interface UseInfiniteFeedOptions {
 }
 
 const fetcher = async (url: string): Promise<FeedResponse> => {
-  const supabase = createSupabaseBrowserClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('Not authenticated');
-  }
-
   const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${session.access_token}`,
-    },
+    credentials: 'include',
   });
 
   if (!response.ok) {
