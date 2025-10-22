@@ -57,6 +57,16 @@ export const PERMISSIONS = {
   leave: [
     'leave:manage',
   ],
+  posts: [
+    'posts:view',
+    'posts:create',
+    'posts:edit_own',
+    'posts:delete_own',
+    'posts:moderate',
+    'posts:comment',
+    'posts:like',
+    'posts:share',
+  ],
 } as const;
 
 export type Module = keyof typeof PERMISSIONS;

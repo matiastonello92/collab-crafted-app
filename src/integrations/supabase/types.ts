@@ -2101,6 +2101,328 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          is_edited: boolean | null
+          likes_count: number | null
+          org_id: string
+          parent_comment_id: string | null
+          post_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_edited?: boolean | null
+          likes_count?: number | null
+          org_id: string
+          parent_comment_id?: string | null
+          post_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_edited?: boolean | null
+          likes_count?: number | null
+          org_id?: string
+          parent_comment_id?: string | null
+          post_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          org_id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          org_id: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          org_id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_mentions: {
+        Row: {
+          created_at: string
+          id: string
+          mentioned_org_id: string | null
+          mentioned_user_id: string | null
+          org_id: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentioned_org_id?: string | null
+          mentioned_user_id?: string | null
+          org_id: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentioned_org_id?: string | null
+          mentioned_user_id?: string | null
+          org_id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_mentions_mentioned_org_id_fkey"
+            columns: ["mentioned_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_mentions_mentioned_user_id_fkey"
+            columns: ["mentioned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_mentions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_shares: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string | null
+          org_id: string
+          original_post_id: string
+          share_comment: string | null
+          shared_by_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id?: string | null
+          org_id: string
+          original_post_id: string
+          share_comment?: string | null
+          shared_by_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string | null
+          org_id?: string
+          original_post_id?: string
+          share_comment?: string | null
+          shared_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_shares_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_shares_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_shares_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "post_shares_original_post_id_fkey"
+            columns: ["original_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_shares_shared_by_user_id_fkey"
+            columns: ["shared_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          allowed_locations: string[] | null
+          author_id: string
+          comments_count: number | null
+          content: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          is_archived: boolean | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          location_id: string | null
+          media_urls: Json | null
+          org_id: string
+          shares_count: number | null
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          allowed_locations?: string[] | null
+          author_id: string
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          location_id?: string | null
+          media_urls?: Json | null
+          org_id: string
+          shares_count?: number | null
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          allowed_locations?: string[] | null
+          author_id?: string
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          location_id?: string | null
+          media_urls?: Json | null
+          org_id?: string
+          shares_count?: number | null
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
