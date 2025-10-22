@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 
 export interface UploadedMedia {
@@ -26,19 +25,12 @@ export function useMediaUpload(locationId?: string) {
     setProgress(0);
 
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) throw new Error('Not authenticated');
-
       const formData = new FormData();
       formData.append('file', file);
 
       const response = await fetch('/api/v1/posts/upload-media', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+        credentials: 'include',
         body: formData,
       });
 

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { usePermissions, hasPermission } from '@/hooks/usePermissions'
 import { toast } from 'sonner'
 
@@ -19,19 +18,11 @@ export function usePostShare() {
     setIsSharing(true)
     
     try {
-      const supabase = createSupabaseBrowserClient()
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session?.access_token) {
-        toast.error('Non autenticato')
-        return { success: false, error: 'Not authenticated' }
-      }
-
       const response = await fetch(`/api/v1/posts/${postId}/share`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ shareComment }),
       })
@@ -64,19 +55,9 @@ export function usePostShare() {
     setIsSharing(true)
     
     try {
-      const supabase = createSupabaseBrowserClient()
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session?.access_token) {
-        toast.error('Non autenticato')
-        return { success: false, error: 'Not authenticated' }
-      }
-
       const response = await fetch(`/api/v1/posts/${postId}/share`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+        credentials: 'include',
       })
 
       if (!response.ok) {

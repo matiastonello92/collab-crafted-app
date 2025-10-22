@@ -1,7 +1,6 @@
 'use client';
 
 import useSWR from 'swr';
-import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 
 export interface Comment {
@@ -24,15 +23,8 @@ interface CommentsResponse {
 }
 
 const fetcher = async (url: string): Promise<CommentsResponse> => {
-  const supabase = createSupabaseBrowserClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) throw new Error('Not authenticated');
-
   const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${session.access_token}`,
-    },
+    credentials: 'include',
   });
 
   if (!response.ok) throw new Error('Failed to fetch comments');
@@ -60,15 +52,10 @@ export function useComments(postId: string, locationId?: string) {
       throw new Error('No permission to comment');
     }
 
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) throw new Error('Not authenticated');
-
     const response = await fetch(key, {
       method: 'POST',
+      credentials: 'include',
       headers: {
-        'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -93,11 +80,6 @@ export function useComments(postId: string, locationId?: string) {
   };
 
   const deleteComment = async (commentId: string) => {
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) throw new Error('Not authenticated');
-
     // Optimistic update
     mutate((current) => ({
       comments: (current?.comments || []).filter((c) => c.id !== commentId),
@@ -106,9 +88,7 @@ export function useComments(postId: string, locationId?: string) {
     try {
       await fetch(`/api/v1/posts/comments/${commentId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+        credentials: 'include',
       });
 
       mutate();

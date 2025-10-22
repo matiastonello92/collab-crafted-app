@@ -1,7 +1,6 @@
 'use client'
 
 import useSWR from 'swr'
-import { createSupabaseBrowserClient } from '@/utils/supabase/client'
 import { usePermissions, hasPermission } from '@/hooks/usePermissions'
 
 export interface PostReport {
@@ -37,17 +36,8 @@ interface ReportsResponse {
 }
 
 const fetcher = async (url: string): Promise<ReportsResponse> => {
-  const supabase = createSupabaseBrowserClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session?.access_token) {
-    throw new Error('Not authenticated')
-  }
-
   const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${session.access_token}`,
-    },
+    credentials: 'include',
   })
 
   if (!response.ok) {
@@ -74,18 +64,11 @@ export function usePostReports(status?: 'pending' | 'reviewed' | 'dismissed' | '
   )
 
   const reportPost = async (postId: string, reason: string, details?: string) => {
-    const supabase = createSupabaseBrowserClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    if (!session?.access_token) {
-      throw new Error('Not authenticated')
-    }
-
     const response = await fetch(`/api/v1/posts/${postId}/report`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ reason, details }),
     })
@@ -99,18 +82,11 @@ export function usePostReports(status?: 'pending' | 'reviewed' | 'dismissed' | '
   }
 
   const reviewReport = async (reportId: string, status: 'reviewed' | 'dismissed' | 'actioned', notes?: string) => {
-    const supabase = createSupabaseBrowserClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    if (!session?.access_token) {
-      throw new Error('Not authenticated')
-    }
-
     const response = await fetch(`/api/v1/posts/reports/${reportId}`, {
       method: 'PATCH',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ status, notes }),
     })
