@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 
 /**
  * POST /api/v1/posts/[id]/like - Toggle like on a post
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const { id: postId } = await params;
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 
 export async function POST(
   request: NextRequest,
@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const { id: postId } = await params;
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -86,7 +86,7 @@ export async function DELETE(
 ) {
   try {
     const { id: postId } = await params;
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

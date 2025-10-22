@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createSupabaseServerClient } from '@/utils/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 
 // Schema validation
 const postsQuerySchema = z.object({
@@ -29,7 +29,7 @@ const createPostSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
 
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerActionClient();
 
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
