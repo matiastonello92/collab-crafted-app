@@ -79,6 +79,19 @@ export function AvatarUploader({
       if (error) throw new Error(error.message)
 
       const publicUrl = supabase.storage.from('avatars').getPublicUrl(key).data.publicUrl
+      
+      // Update database directly
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', userId)
+      
+      if (updateError) {
+        console.error('Failed to update profile avatar:', updateError)
+        toast.error(t('common.avatarUploader.uploadError').replace('{error}', updateError.message))
+        return
+      }
+
       setAvatarUrl(publicUrl)
       onAvatarUpdate?.(publicUrl)
       toast.success(t('common.avatarUploader.uploadSuccess'))
