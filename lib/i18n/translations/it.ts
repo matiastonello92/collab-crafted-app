@@ -552,6 +552,8 @@ export const it = {
     platform: 'Platform',
     systemActive: 'Sistema Attivo',
     home: 'Home',
+    feed: 'Feed',
+    moderation: 'Moderazione',
     other: 'Altro',
   },
 

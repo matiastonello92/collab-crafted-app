@@ -81,8 +81,7 @@ export async function GET(request: NextRequest) {
           id,
           mentioned_user:profiles!mentioned_user_id(id, full_name),
           mentioned_org:organizations!mentioned_org_id(org_id, name)
-        ),
-        my_like:post_likes!inner(user_id)
+        )
       `)
       .order('created_at', { ascending: false })
       .limit(params.limit);
