@@ -4582,14 +4582,8 @@ export type Database = {
       }
     }
     Functions: {
-      _count_null_org: {
-        Args: { p_table: string }
-        Returns: number
-      }
-      _mismatch_count: {
-        Args: { p_table: string }
-        Returns: number
-      }
+      _count_null_org: { Args: { p_table: string }; Returns: number }
+      _mismatch_count: { Args: { p_table: string }; Returns: number }
       admin_assign_manager: {
         Args: { loc_id: string; target_email: string }
         Returns: undefined
@@ -4606,41 +4600,11 @@ export type Database = {
         Args: { loc_id: string; target_email: string }
         Returns: undefined
       }
-      app_health: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      calculate_header_total: {
-        Args: { p_header_id: string }
-        Returns: number
-      }
+      app_health: { Args: never; Returns: Json }
+      calculate_header_total: { Args: { p_header_id: string }; Returns: number }
       can_report_post: {
         Args: { p_post_id: string; p_user_id: string }
         Returns: boolean
-      }
-      citext: {
-        Args: { "": boolean } | { "": string } | { "": unknown }
-        Returns: string
-      }
-      citext_hash: {
-        Args: { "": string }
-        Returns: number
-      }
-      citextin: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      citextout: {
-        Args: { "": string }
-        Returns: unknown
-      }
-      citextrecv: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      citextsend: {
-        Args: { "": string }
-        Returns: string
       }
       create_default_permissions_for_org: {
         Args: { p_org_id: string }
@@ -4654,22 +4618,10 @@ export type Database = {
         Args: { p_feature_key: string; p_org: string }
         Returns: Json
       }
-      generate_job_tag_key: {
-        Args: { p_label: string }
-        Returns: string
-      }
-      get_active_plan_id: {
-        Args: { p_org: string }
-        Returns: string
-      }
-      get_my_default_location: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_post_stats: {
-        Args: { p_post_id: string }
-        Returns: Json
-      }
+      generate_job_tag_key: { Args: { p_label: string }; Returns: string }
+      get_active_plan_id: { Args: { p_org: string }; Returns: string }
+      get_my_default_location: { Args: never; Returns: string }
+      get_post_stats: { Args: { p_post_id: string }; Returns: Json }
       get_users_for_location: {
         Args: { p_location_id?: string; p_org_id?: string }
         Returns: {
@@ -4682,13 +4634,10 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: Json
       }
-      invitation_accept_v2: {
-        Args: { p_token: string }
-        Returns: Json
-      }
-      invitation_create_v2: {
-        Args:
-          | {
+      invitation_accept_v2: { Args: { p_token: string }; Returns: Json }
+      invitation_create_v2:
+        | {
+            Args: {
               p_days?: number
               p_email: string
               p_job_tags?: Json
@@ -4696,30 +4645,60 @@ export type Database = {
               p_overrides?: Json
               p_role_id: string
             }
-          | {
+            Returns: {
+              accepted_at: string | null
+              created_at: string | null
+              email: string
+              expires_at: string
+              first_name: string | null
+              id: string
+              invited_by: string | null
+              last_name: string | null
+              notes: string | null
+              org_id: string
+              revoked_at: string | null
+              status: string | null
+              token: string
+              updated_at: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "invitations"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
               p_days?: number
               p_email: string
               p_location_ids: string[]
               p_overrides?: Json
               p_role_id: string
             }
-        Returns: {
-          accepted_at: string | null
-          created_at: string | null
-          email: string
-          expires_at: string
-          first_name: string | null
-          id: string
-          invited_by: string | null
-          last_name: string | null
-          notes: string | null
-          org_id: string
-          revoked_at: string | null
-          status: string | null
-          token: string
-          updated_at: string | null
-        }
-      }
+            Returns: {
+              accepted_at: string | null
+              created_at: string | null
+              email: string
+              expires_at: string
+              first_name: string | null
+              id: string
+              invited_by: string | null
+              last_name: string | null
+              notes: string | null
+              org_id: string
+              revoked_at: string | null
+              status: string | null
+              token: string
+              updated_at: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "invitations"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       invitation_validate_v2: {
         Args: { p_token: string }
         Returns: {
@@ -4731,38 +4710,14 @@ export type Database = {
           role_name: string
         }[]
       }
-      is_manager_for_location: {
-        Args: { loc_id: string }
-        Returns: boolean
-      }
-      is_org_admin: {
-        Args: { p_org: string }
-        Returns: boolean
-      }
-      is_platform_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      job_tag_id_by_name: {
-        Args: { p_name: string }
-        Returns: string
-      }
-      jwt: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      jwt_has_permission: {
-        Args: { perm: string }
-        Returns: boolean
-      }
-      jwt_is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      org_dashboard_stats: {
-        Args: { p_org_id: string }
-        Returns: Json
-      }
+      is_manager_for_location: { Args: { loc_id: string }; Returns: boolean }
+      is_org_admin: { Args: { p_org: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
+      job_tag_id_by_name: { Args: { p_name: string }; Returns: string }
+      jwt: { Args: never; Returns: Json }
+      jwt_has_permission: { Args: { perm: string }; Returns: boolean }
+      jwt_is_admin: { Args: never; Returns: boolean }
+      org_dashboard_stats: { Args: { p_org_id: string }; Returns: Json }
       organization_bootstrap: {
         Args: {
           p_location_name?: string
@@ -4771,14 +4726,8 @@ export type Database = {
         }
         Returns: Json
       }
-      permission_id_by_name: {
-        Args: { p_name: string }
-        Returns: string
-      }
-      platform_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      permission_id_by_name: { Args: { p_name: string }; Returns: string }
+      platform_admin: { Args: never; Returns: boolean }
       platform_audit_recent: {
         Args: { p_limit?: number }
         Returns: {
@@ -4790,17 +4739,50 @@ export type Database = {
           user_id: string
         }[]
       }
-      platform_org_counts: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      platform_plans_overview: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      profile_update_self: {
-        Args:
-          | {
+      platform_org_counts: { Args: never; Returns: Json }
+      platform_plans_overview: { Args: never; Returns: Json }
+      profile_update_self:
+        | {
+            Args: {
+              p_avatar_url?: string
+              p_full_name?: string
+              p_locale?: string
+              p_marketing_opt_in?: boolean
+              p_notif_prefs?: Json
+              p_phone?: string
+              p_timezone?: string
+            }
+            Returns: {
+              avatar_url: string | null
+              created_at: string | null
+              default_location_id: string | null
+              email: string | null
+              email_preferences: Json | null
+              first_name: string | null
+              full_name: string | null
+              id: string
+              is_active: boolean | null
+              is_schedulable: boolean
+              last_name: string | null
+              locale: string | null
+              marketing_opt_in: boolean | null
+              notes: string | null
+              notif_prefs: Json | null
+              org_id: string
+              phone: string | null
+              pin_code: string | null
+              timezone: string | null
+              updated_at: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "profiles"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
               p_avatar_url?: string
               p_first_name?: string
               p_last_name?: string
@@ -4810,42 +4792,36 @@ export type Database = {
               p_phone?: string
               p_timezone?: string
             }
-          | {
-              p_avatar_url?: string
-              p_full_name?: string
-              p_locale?: string
-              p_marketing_opt_in?: boolean
-              p_notif_prefs?: Json
-              p_phone?: string
-              p_timezone?: string
+            Returns: {
+              avatar_url: string | null
+              created_at: string | null
+              default_location_id: string | null
+              email: string | null
+              email_preferences: Json | null
+              first_name: string | null
+              full_name: string | null
+              id: string
+              is_active: boolean | null
+              is_schedulable: boolean
+              last_name: string | null
+              locale: string | null
+              marketing_opt_in: boolean | null
+              notes: string | null
+              notif_prefs: Json | null
+              org_id: string
+              phone: string | null
+              pin_code: string | null
+              timezone: string | null
+              updated_at: string | null
             }
-        Returns: {
-          avatar_url: string | null
-          created_at: string | null
-          default_location_id: string | null
-          email: string | null
-          email_preferences: Json | null
-          first_name: string | null
-          full_name: string | null
-          id: string
-          is_active: boolean | null
-          is_schedulable: boolean
-          last_name: string | null
-          locale: string | null
-          marketing_opt_in: boolean | null
-          notes: string | null
-          notif_prefs: Json | null
-          org_id: string
-          phone: string | null
-          pin_code: string | null
-          timezone: string | null
-          updated_at: string | null
-        }
-      }
-      rate_limit_gc: {
-        Args: { p_older_than_days?: number }
-        Returns: number
-      }
+            SetofOptions: {
+              from: "*"
+              to: "profiles"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      rate_limit_gc: { Args: { p_older_than_days?: number }; Returns: number }
       rate_limit_hit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean
@@ -4854,10 +4830,7 @@ export type Database = {
         Args: { p_recipe_id: string; p_sub_recipe_id: string }
         Returns: boolean
       }
-      refresh_recipe_usage_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_recipe_usage_stats: { Args: never; Returns: undefined }
       search_recipes_by_items: {
         Args: {
           p_exclude_items?: string[]
@@ -4881,14 +4854,8 @@ export type Database = {
         }
         Returns: undefined
       }
-      storage_org_from_name: {
-        Args: { p_name: string }
-        Returns: string
-      }
-      storage_user_from_name: {
-        Args: { p_name: string }
-        Returns: string
-      }
+      storage_org_from_name: { Args: { p_name: string }; Returns: string }
+      storage_user_from_name: { Args: { p_name: string }; Returns: string }
       user_can_manage_inventory: {
         Args: { p_location_id: string; p_org_id: string }
         Returns: boolean
@@ -4905,30 +4872,15 @@ export type Database = {
         Args: { p_permission: string; p_user: string }
         Returns: boolean
       }
-      user_in_location: {
-        Args: { p_location: string }
-        Returns: boolean
-      }
-      user_in_org: {
-        Args: { p_org: string }
-        Returns: boolean
-      }
-      user_is_admin: {
-        Args: { p_user: string }
-        Returns: boolean
-      }
+      user_in_location: { Args: { p_location: string }; Returns: boolean }
+      user_in_org: { Args: { p_org: string }; Returns: boolean }
+      user_is_admin: { Args: { p_user: string }; Returns: boolean }
       user_is_location_admin: {
         Args: { p_location_id: string }
         Returns: boolean
       }
-      user_is_org_admin: {
-        Args: { p_org: string }
-        Returns: boolean
-      }
-      user_is_org_manager: {
-        Args: { p_org: string }
-        Returns: boolean
-      }
+      user_is_org_admin: { Args: { p_org: string }; Returns: boolean }
+      user_is_org_manager: { Args: { p_org: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
