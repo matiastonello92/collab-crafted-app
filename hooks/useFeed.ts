@@ -166,6 +166,36 @@ export function useFeed(options: UseFeedOptions = {}) {
     }
   };
 
+  const sharePost = async (postId: string, shareComment?: string) => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(`/api/v1/posts/${postId}/share`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ shareComment }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to share post');
+      }
+
+      // Revalidate to get updated shares_count
+      mutate();
+      
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to share post:', err);
+      throw err;
+    }
+  };
+
   return {
     posts: data?.posts,
     nextCursor: data?.nextCursor,
@@ -174,6 +204,7 @@ export function useFeed(options: UseFeedOptions = {}) {
     addPost,
     likePost,
     deletePost,
+    sharePost,
     mutate,
   };
 }

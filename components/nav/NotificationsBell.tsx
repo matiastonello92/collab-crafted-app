@@ -19,6 +19,9 @@ export function NotificationsBell() {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'calendar': return <Calendar className="h-4 w-4" />
+      case 'at-sign': return <Bell className="h-4 w-4" />
+      case 'share': return <Bell className="h-4 w-4" />
+      case 'message-circle': return <Bell className="h-4 w-4" />
       default: return <Bell className="h-4 w-4" />
     }
   }
