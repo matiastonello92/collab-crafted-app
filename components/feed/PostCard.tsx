@@ -24,12 +24,14 @@ interface PostCardProps {
   post: Post;
   currentUserId?: string | null;
   onLike?: (postId: string) => void;
-  onShare?: (postId: string) => void;
+  onShare?: (postId: string) => Promise<void>;
+  onDelete?: (postId: string) => Promise<void>;
+  onUpdate?: () => void;
 }
 
 const MAX_CONTENT_LENGTH = 300;
 
-export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps) {
+export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpdate }: PostCardProps) {
   const { permissions } = usePermissions();
   const [isLiked, setIsLiked] = useState(post.is_liked_by_me);
   const [likesCount, setLikesCount] = useState(post.likes_count);
@@ -78,18 +80,8 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
     if (!confirm('Sei sicuro di voler eliminare questo post?')) return;
 
     try {
-      const response = await fetch(`/api/v1/posts/${post.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete post');
-      }
-
+      await onDelete?.(post.id);
       toast.success('Post eliminato');
-      // Trigger page refresh or parent component refresh
-      window.location.reload();
     } catch (error) {
       toast.error('Errore durante l\'eliminazione');
     }
@@ -100,15 +92,22 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
   };
 
   const handleRepost = async () => {
+    if (!canShare) return;
+
     const previousCount = sharesCount;
-    setSharesCount(prev => prev + 1);
 
     try {
       await onShare?.(post.id);
+      setSharesCount(prev => prev + 1);
       toast.success('Post ricondiviso');
-    } catch (error) {
-      setSharesCount(previousCount);
-      toast.error('Errore durante la ricondivisione');
+    } catch (error: any) {
+      const errorMessage = error?.message || '';
+      
+      if (errorMessage.includes('Already shared')) {
+        toast.error('Hai già ricondiviso questo post');
+      } else {
+        toast.error('Errore durante la ricondivisione');
+      }
     }
   };
 
@@ -251,7 +250,7 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
       initialMedia={post.media_urls || []}
       open={editDialogOpen}
       onOpenChange={setEditDialogOpen}
-      onSuccess={() => window.location.reload()}
+      onSuccess={() => onUpdate?.()}
     />
     </>
   );

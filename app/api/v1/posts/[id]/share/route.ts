@@ -39,11 +39,6 @@ export async function POST(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Prevent sharing own post
-    if (post.author_id === user.id) {
-      return NextResponse.json({ error: 'Cannot share own post' }, { status: 400 });
-    }
-
     // Check if already shared
     const { data: existingShare } = await supabase
       .from('post_shares')

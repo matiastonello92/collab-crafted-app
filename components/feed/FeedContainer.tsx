@@ -39,6 +39,24 @@ export function FeedContainer({ locationId, filter = 'all', authorId, mutateRef 
 
   const { likePost, sharePost } = useFeed({ locationId });
 
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/v1/posts/${postId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete');
+      }
+
+      // Refresh feed after successful delete
+      mutate();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // Expose mutate function through ref
   useEffect(() => {
     if (mutateRef) {
@@ -119,12 +137,13 @@ export function FeedContainer({ locationId, filter = 'all', authorId, mutateRef 
           onShare={async (postId) => {
             try {
               await sharePost(postId);
-              toast.success('Post condiviso con successo');
               mutate();
-            } catch (error) {
-              toast.error('Errore nella condivisione del post');
+            } catch (error: any) {
+              throw error;
             }
           }}
+          onDelete={handleDeletePost}
+          onUpdate={() => mutate()}
         />
       ))}
 

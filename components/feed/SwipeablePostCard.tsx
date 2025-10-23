@@ -9,7 +9,7 @@ interface SwipeablePostCardProps {
   post: Post
   currentUserId?: string | null
   onLike?: (postId: string) => Promise<void>
-  onShare?: (postId: string) => void
+  onShare?: (postId: string) => Promise<void>
   onSwipeLeft?: () => void
   onSwipeRight?: () => void
 }
