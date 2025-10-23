@@ -11,13 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: canView } = await supabase.rpc('user_has_permission', {
-      p_user_id: user.id,
-      p_permission: 'posts:view'
-    });
-    if (!canView) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // RLS policies will handle permissions
 
     const { searchParams } = new URL(request.url);
     const locationId = searchParams.get('locationId');

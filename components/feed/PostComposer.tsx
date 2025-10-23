@@ -59,6 +59,7 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
       // Create post via API
       const response = await fetch('/api/v1/posts', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

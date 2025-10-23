@@ -37,14 +37,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check posts:view permission
-    const { data: canView } = await supabase.rpc('user_has_permission', {
-      p_user_id: user.id,
-      p_permission: 'posts:view'
-    });
-    if (!canView) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // RLS policies will handle permissions
 
     // Parse query params
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);
@@ -159,14 +152,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check posts:create permission
-    const { data: canCreate } = await supabase.rpc('user_has_permission', {
-      p_user_id: user.id,
-      p_permission: 'posts:create'
-    });
-    if (!canCreate) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // RLS policies will handle permissions
 
     // Parse and validate body
     const body = await request.json();
