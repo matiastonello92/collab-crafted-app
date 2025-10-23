@@ -5,10 +5,15 @@ import { usePathname } from 'next/navigation'
 import { Home, Calendar, Users, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/lib/i18n'
+import { hapticLight } from '@/lib/capacitor/native'
 
 export function BottomNav() {
   const { t } = useTranslation()
   const pathname = usePathname()
+  
+  const handleNavClick = () => {
+    hapticLight()
+  }
   
   const navItems = [
     { href: '/dashboard', icon: Home, label: t('nav.home') },
@@ -18,7 +23,7 @@ export function BottomNav() {
   ]
   
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 safe-area-inset-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-safe">
       <div className="flex justify-around p-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -26,8 +31,9 @@ export function BottomNav() {
             <Link 
               key={item.href}
               href={item.href}
+              onClick={handleNavClick}
               className={cn(
-                "flex flex-col items-center gap-1 min-w-[60px] min-h-[44px] p-2 rounded-lg transition-colors",
+                "flex flex-col items-center gap-1 min-w-[60px] min-h-[48px] p-2 rounded-lg transition-colors touch-target",
                 "active:scale-95 touch-manipulation",
                 isActive 
                   ? "bg-accent text-accent-foreground" 

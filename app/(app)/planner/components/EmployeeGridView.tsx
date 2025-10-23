@@ -14,6 +14,8 @@ import type { ShiftWithAssignments, UserProfile } from '@/types/shifts'
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, DragOverEvent, useSensor, useSensors, MouseSensor, TouchSensor, pointerWithin, closestCenter, MeasuringStrategy } from '@dnd-kit/core'
 import { toast } from 'sonner'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { EmployeeListMobile } from './EmployeeListMobile'
 
 // Delete Zone Component - Separate to ensure proper droppable registration
 function DeleteZone({ visible, t }: { visible: boolean; t: any }) {
@@ -101,7 +103,22 @@ export function EmployeeGridView({
 }: Props) {
   const { t } = useTranslation()
   const router = useRouter()
+  const { isMobile } = useBreakpoint()
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
+  
+  // Mobile: show simplified list view without drag&drop
+  if (isMobile) {
+    return (
+      <EmployeeListMobile
+        shifts={shifts}
+        leaves={leaves}
+        users={users}
+        weekStart={weekStart}
+        onShiftClick={onShiftClick}
+        onCellClick={onCellClick}
+      />
+    )
+  }
   // ✅ Local state for optimistic updates
   const [localShifts, setLocalShifts] = useState<ShiftWithAssignments[]>(shifts)
   

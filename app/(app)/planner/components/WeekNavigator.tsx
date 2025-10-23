@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, ChevronRight, Calendar, Send, Lock, Eye, EyeOff } from 'lucide-react'
 import { formatWeekLabel, getPreviousWeek, getNextWeek, getCurrentWeekStart } from '@/lib/shifts/week-utils'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 interface Props {
   currentWeek: string // ISO date (lunedì)
@@ -21,6 +22,7 @@ interface Props {
 
 export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, onPublish, onLock, canPublish, canLock, showUsersWithoutShifts, onToggleUsersWithoutShifts }: Props) {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoint()
   
   const goToPrevWeek = () => {
     onWeekChange(getPreviousWeek(currentWeek))
@@ -61,22 +63,23 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
   }
   
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b bg-card">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-3 px-4 py-4 border-b bg-card lg:flex-row lg:items-center lg:justify-between lg:px-6">
+      {/* Week Navigation */}
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button 
           variant="outline" 
-          size="sm" 
+          size={isMobile ? "default" : "sm"}
           onClick={goToPrevWeek}
-          className="h-8"
+          className="h-9 w-9 p-0 sm:h-10 sm:w-10"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
         
-        <div className="flex flex-col min-w-[200px]">
-          <h2 className="text-lg font-semibold">{formatWeekLabel(currentWeek)}</h2>
+        <div className="flex flex-col min-w-[180px] sm:min-w-[200px]">
+          <h2 className="text-base font-semibold sm:text-lg">{formatWeekLabel(currentWeek)}</h2>
           <Badge 
             variant={getStatusBadgeVariant()}
-            className="w-fit mt-1"
+            className="w-fit mt-1 text-xs"
           >
             {getStatusLabel()}
           </Badge>
@@ -84,42 +87,42 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
         
         <Button 
           variant="outline" 
-          size="sm" 
+          size={isMobile ? "default" : "sm"}
           onClick={goToNextWeek}
-          className="h-8"
+          className="h-9 w-9 p-0 sm:h-10 sm:w-10"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
         
         <Button 
           variant="ghost" 
-          size="sm" 
+          size={isMobile ? "sm" : "sm"}
           onClick={goToToday}
-          className="h-8"
+          className="h-9 sm:h-10"
         >
-          <Calendar className="h-4 w-4 mr-2" />
-          {t('common.today')}
+          <Calendar className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">{t('common.today')}</span>
         </Button>
       </div>
 
       {/* Rota Actions */}
-      <div className="flex items-center gap-2">
-        {onToggleUsersWithoutShifts && (
+      <div className="flex flex-wrap items-center gap-2">
+        {onToggleUsersWithoutShifts && !isMobile && (
           <Button
             variant="outline"
             size="sm"
             onClick={() => onToggleUsersWithoutShifts(!showUsersWithoutShifts)}
-            className="h-8"
+            className="h-9 text-xs sm:h-10 sm:text-sm"
           >
             {showUsersWithoutShifts ? (
               <>
-                <EyeOff className="h-4 w-4 mr-2" />
-                {t('planner.dragDrop.hideUsersWithoutShifts')}
+                <EyeOff className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('planner.dragDrop.hideUsersWithoutShifts')}</span>
               </>
             ) : (
               <>
-                <Eye className="h-4 w-4 mr-2" />
-                {t('planner.dragDrop.showAllUsers')}
+                <Eye className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('planner.dragDrop.showAllUsers')}</span>
               </>
             )}
           </Button>
@@ -130,10 +133,11 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             variant="default" 
             size="sm"
             onClick={onPublish}
-            className="h-8"
+            className="h-9 flex-1 text-xs sm:h-10 sm:flex-none sm:text-sm"
           >
-            <Send className="h-4 w-4 mr-2" />
-            {t('planner.common.publishRota')}
+            <Send className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('planner.common.publishRota')}</span>
+            <span className="sm:hidden">Pubblica</span>
           </Button>
         )}
         
@@ -142,10 +146,11 @@ export function WeekNavigator({ currentWeek, onWeekChange, rotaStatus, rotaId, o
             variant="destructive" 
             size="sm"
             onClick={onLock}
-            className="h-8"
+            className="h-9 flex-1 text-xs sm:h-10 sm:flex-none sm:text-sm"
           >
-            <Lock className="h-4 w-4 mr-2" />
-            {t('planner.common.lockRota')}
+            <Lock className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('planner.common.lockRota')}</span>
+            <span className="sm:hidden">Blocca</span>
           </Button>
         )}
       </div>

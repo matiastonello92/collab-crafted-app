@@ -278,7 +278,7 @@ export function ShiftEditDialog({ shift, open, onClose, onSave, jobTags, users }
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
+        <DialogContent className="w-[95vw] max-w-2xl lg:w-auto max-h-[85vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {!isNew && shift.actual_start_at && !shift.actual_end_at && <span>🟠</span>}

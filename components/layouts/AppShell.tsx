@@ -7,7 +7,7 @@ import { MobileSidebar } from './MobileSidebar';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh bg-background text-foreground">
+    <div className="flex min-h-dvh bg-background text-foreground pt-safe">
       {/* DESKTOP: Sidebar normale */}
       <Suspense fallback={<aside className="hidden min-h-dvh w-64 border-r border-border/60 bg-card lg:block" />}>
         <div className="hidden lg:block">

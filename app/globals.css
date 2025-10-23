@@ -166,9 +166,55 @@ label {
   font-size: 1rem; /* Minimum 16px to prevent iOS zoom */
 }
 
-/* Mobile Safe Area */
-.safe-area-inset-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+/* Mobile Safe Area (Capacitor) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Touch-friendly utilities */
+@layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target-large {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Prevent zoom on double tap (iOS) */
+  .no-double-tap-zoom {
+    touch-action: manipulation;
+  }
+  
+  /* Smooth scroll */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Safe area padding utilities */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+  
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0);
+  }
+  
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
 }
 
 /* Phone Input Component Styles */
