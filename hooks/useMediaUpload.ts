@@ -49,8 +49,56 @@ export function useMediaUpload(locationId?: string) {
     }
   };
 
+  const uploadMultipleFiles = async (files: File[]): Promise<UploadedMedia[]> => {
+    if (!canUpload) {
+      throw new Error('No permission to upload media');
+    }
+
+    if (files.length === 0) return [];
+
+    setIsUploading(true);
+    setProgress(0);
+
+    try {
+      const results: UploadedMedia[] = [];
+      let completed = 0;
+
+      for (const file of files) {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/v1/posts/upload-media', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            console.error(`Failed to upload ${file.name}`);
+            continue;
+          }
+
+          const data = await response.json();
+          results.push(data);
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+        }
+
+        completed++;
+        setProgress(Math.round((completed / files.length) * 100));
+      }
+
+      return results;
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setProgress(0), 1000);
+    }
+  };
+
   return {
     uploadFile,
+    uploadMultipleFiles,
     isUploading,
     progress,
     canUpload,

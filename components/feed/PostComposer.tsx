@@ -30,16 +30,29 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
   const { uploadFile, isUploading, progress } = useMediaUpload(locationId);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Limit to 10 media total
+    const remainingSlots = 10 - media.length;
+    const filesToUpload = files.slice(0, remainingSlots);
+
+    if (files.length > remainingSlots) {
+      toast.error(`Puoi aggiungere massimo 10 media. ${files.length - remainingSlots} file ignorati.`);
+    }
 
     try {
-      const uploaded = await uploadFile(file);
-      setMedia(prev => [...prev, { type: uploaded.type, url: uploaded.url }]);
-      toast.success('Media caricato con successo');
+      const uploadPromises = filesToUpload.map(file => uploadFile(file));
+      const uploaded = await Promise.all(uploadPromises);
+      
+      setMedia(prev => [...prev, ...uploaded.map(u => ({ type: u.type, url: u.url }))]);
+      toast.success(`${uploaded.length} media caricati con successo`);
     } catch (error) {
-      toast.error('Errore nel caricamento del media');
+      toast.error('Errore nel caricamento dei media');
     }
+
+    // Reset input
+    e.target.value = '';
   };
 
   const handleRemoveMedia = (index: number) => {
@@ -130,14 +143,15 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
                 accept="image/*,video/*"
                 className="hidden"
                 onChange={handleFileSelect}
-                disabled={isUploading || isSubmitting}
+                disabled={isUploading || isSubmitting || media.length >= 10}
+                multiple
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 asChild
-                disabled={isUploading || isSubmitting}
+                disabled={isUploading || isSubmitting || media.length >= 10}
                 className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
               >
                 <span className="cursor-pointer flex items-center gap-2">

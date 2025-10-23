@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Repeat2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { motion } from 'motion/react';
@@ -16,6 +16,7 @@ import { MentionsText } from './MentionsText';
 import { ReportPostDialog } from './ReportPostDialog';
 import { PostOptionsMenu } from './PostOptionsMenu';
 import { CommentSection } from './CommentSection';
+import { EditPostDialog } from './EditPostDialog';
 import { usePostAnalytics } from '@/hooks/usePostAnalytics';
 import { toast } from 'sonner';
 
@@ -34,8 +35,10 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLiking, setIsLiking] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [sharesCount, setSharesCount] = useState(post.shares_count);
   const { ref } = usePostAnalytics(post.id, true);
 
   const canLike = hasPermission(permissions, 'posts:like');
@@ -68,6 +71,44 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
       toast.error('Errore durante il like');
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Sei sicuro di voler eliminare questo post?')) return;
+
+    try {
+      const response = await fetch(`/api/v1/posts/${post.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete post');
+      }
+
+      toast.success('Post eliminato');
+      // Trigger page refresh or parent component refresh
+      window.location.reload();
+    } catch (error) {
+      toast.error('Errore durante l\'eliminazione');
+    }
+  };
+
+  const handleEdit = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleRepost = async () => {
+    const previousCount = sharesCount;
+    setSharesCount(prev => prev + 1);
+
+    try {
+      await onShare?.(post.id);
+      toast.success('Post ricondiviso');
+    } catch (error) {
+      setSharesCount(previousCount);
+      toast.error('Errore durante la ricondivisione');
     }
   };
 
@@ -106,6 +147,8 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
             isAuthor={isAuthor}
             isAdmin={hasPermission(permissions, 'posts:moderate')}
             isPinned={post.is_pinned}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             onReport={() => setReportDialogOpen(true)}
           />
         </div>
@@ -171,8 +214,18 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
           disabled={!canShare}
         >
           <Share2 className="h-4 w-4" />
-          {post.shares_count > 0 && (
-            <span className="text-sm font-medium">{post.shares_count}</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2 hover:bg-green-500/10 hover:text-green-600 transition-colors"
+          onClick={handleRepost}
+          disabled={!canShare}
+        >
+          <Repeat2 className="h-4 w-4" />
+          {sharesCount > 0 && (
+            <span className="text-sm font-medium">{sharesCount}</span>
           )}
         </Button>
       </div>
@@ -190,6 +243,15 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
       postId={post.id}
       open={reportDialogOpen}
       onOpenChange={setReportDialogOpen}
+    />
+
+    <EditPostDialog
+      postId={post.id}
+      initialContent={post.content}
+      initialMedia={post.media_urls || []}
+      open={editDialogOpen}
+      onOpenChange={setEditDialogOpen}
+      onSuccess={() => window.location.reload()}
     />
     </>
   );

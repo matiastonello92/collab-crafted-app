@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { getStorageUrl } from '@/utils/storage';
+import { MediaLightbox } from './MediaLightbox';
 
 interface MediaItem {
   type: 'image' | 'video';
@@ -16,9 +17,15 @@ interface MediaGalleryProps {
 }
 
 export function MediaGallery({ media }: MediaGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   if (!media || media.length === 0) return null;
+
+  const handleMediaClick = (index: number) => {
+    setSelectedIndex(index);
+    setLightboxOpen(true);
+  };
 
   const gridClass = cn(
     'grid gap-2 mt-3 rounded-lg overflow-hidden',
@@ -29,17 +36,18 @@ export function MediaGallery({ media }: MediaGalleryProps) {
   );
 
   return (
-    <div className={gridClass}>
-      {media.slice(0, 4).map((item, index) => (
-        <div
-          key={index}
-          className={cn(
-            'relative overflow-hidden bg-accent/10',
-            media.length === 3 && index === 0 && 'col-span-2',
-            media.length === 1 ? 'aspect-video' : 'aspect-square'
-          )}
-          onClick={() => setSelectedIndex(index)}
-        >
+    <>
+      <div className={gridClass}>
+        {media.slice(0, 4).map((item, index) => (
+          <div
+            key={index}
+            className={cn(
+              'relative overflow-hidden bg-accent/10 cursor-pointer',
+              media.length === 3 && index === 0 && 'col-span-2',
+              media.length === 1 ? 'aspect-video' : 'aspect-square'
+            )}
+            onClick={() => handleMediaClick(index)}
+          >
           {item.type === 'image' ? (
             <Image
               src={getStorageUrl(item.url)}
@@ -67,5 +75,15 @@ export function MediaGallery({ media }: MediaGalleryProps) {
         </div>
       ))}
     </div>
+
+    <MediaLightbox
+      media={media}
+      initialIndex={selectedIndex}
+      open={lightboxOpen}
+      onOpenChange={setLightboxOpen}
+      currentIndex={selectedIndex}
+      onIndexChange={setSelectedIndex}
+    />
+    </>
   );
 }
