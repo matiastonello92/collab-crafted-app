@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical, Flag } from 'lucide-react';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { motion } from 'motion/react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import { Post } from '@/hooks/useInfiniteFeed';
 import { MediaGallery } from './MediaGallery';
 import { MentionsText } from './MentionsText';
 import { ReportPostDialog } from './ReportPostDialog';
+import { PostOptionsMenu } from './PostOptionsMenu';
+import { CommentSection } from './CommentSection';
 import { usePostAnalytics } from '@/hooks/usePostAnalytics';
 import { toast } from 'sonner';
 
@@ -29,6 +32,7 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLiking, setIsLiking] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const { ref } = usePostAnalytics(post.id, true);
 
   const canLike = hasPermission(permissions, 'posts:like');
@@ -60,11 +64,11 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
 
   return (
     <>
-      <Card ref={ref} className="p-4 space-y-3">
+      <Card ref={ref} className="p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
         {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Avatar>
+          <Avatar className="h-12 w-12">
             <AvatarImage src={post.author.avatar_url} />
             <AvatarFallback>
               {post.author.full_name.split(' ').map(n => n[0]).join('')}
@@ -88,16 +92,13 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
               Fissato
             </Badge>
           )}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setReportDialogOpen(true)}
-          >
-            <Flag className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <PostOptionsMenu
+            postId={post.id}
+            isAuthor={false}
+            isAdmin={hasPermission(permissions, 'posts:moderate')}
+            isPinned={post.is_pinned}
+            onReport={() => setReportDialogOpen(true)}
+          />
         </div>
       </div>
 
@@ -112,42 +113,56 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 hover:bg-red-500/10 hover:text-red-500 transition-colors"
           onClick={handleLike}
           disabled={!canLike || isLiking}
         >
-          <Heart 
-            className={`h-4 w-4 transition-colors ${
-              isLiked ? 'fill-red-500 text-red-500' : ''
-            }`}
-          />
-          <span className="text-sm">{likesCount}</span>
+          <motion.div
+            whileTap={{ scale: 1.2 }}
+            animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
+            transition={{ duration: 0.3 }}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors ${
+                isLiked ? 'fill-red-500 text-red-500' : ''
+              }`}
+            />
+          </motion.div>
+          <span className="text-sm font-medium">{likesCount}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
-          onClick={() => onComment?.(post.id)}
+          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+          onClick={() => setShowComments(!showComments)}
           disabled={!canComment}
         >
           <MessageCircle className="h-4 w-4" />
-          <span className="text-sm">{post.comments_count}</span>
+          <span className="text-sm font-medium">{post.comments_count}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
           onClick={() => onShare?.(post.id)}
           disabled={!canShare}
         >
           <Share2 className="h-4 w-4" />
           {post.shares_count > 0 && (
-            <span className="text-sm">{post.shares_count}</span>
+            <span className="text-sm font-medium">{post.shares_count}</span>
           )}
         </Button>
       </div>
+
+      {/* Comments Section */}
+      {showComments && (
+        <CommentSection 
+          postId={post.id}
+          currentUserId={post.author.id}
+        />
+      )}
     </Card>
 
     <ReportPostDialog

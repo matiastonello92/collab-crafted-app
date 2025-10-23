@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ImagePlus, Loader2, Send } from 'lucide-react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -102,90 +102,90 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
     }
   };
 
+  const MAX_CONTENT_LENGTH = 5000;
   const characterCount = content.length;
-  const maxCharacters = 5000;
-  const isOverLimit = characterCount > maxCharacters;
+  const isOverLimit = characterCount > MAX_CONTENT_LENGTH;
 
   return (
-    <Card className="p-4">
-      <div className="flex gap-3">
-        {userProfile && (
-          <Avatar>
-            <AvatarImage src={userProfile.avatar_url} />
-            <AvatarFallback>
-              {userProfile.full_name.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-        )}
+    <Card className="p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={userProfile?.avatar_url} />
+          <AvatarFallback>
+            {userProfile?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+          </AvatarFallback>
+        </Avatar>
 
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-4">
           <MentionInput
             value={content}
             onChange={setContent}
             onMentionSelect={handleMentionSelect}
             placeholder="Cosa vuoi condividere?"
             locationId={locationId}
-            maxLength={maxCharacters}
-            className="min-h-[100px]"
+            maxLength={MAX_CONTENT_LENGTH}
+            className="min-h-[120px] text-base"
           />
 
           <MediaPreview media={media} onRemove={handleRemoveMedia} />
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <label>
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                  disabled={isUploading || isSubmitting}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  disabled={isUploading || isSubmitting}
-                >
-                  <span className="cursor-pointer">
-                    {isUploading ? (
+          <div className="flex items-center justify-between pt-3 border-t">
+            <label>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={handleFileSelect}
+                disabled={isUploading || isSubmitting}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                asChild
+                disabled={isUploading || isSubmitting}
+                className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
+              >
+                <span className="cursor-pointer flex items-center gap-2">
+                  {isUploading ? (
+                    <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ImagePlus className="h-4 w-4" />
-                    )}
-                  </span>
-                </Button>
-              </label>
-
-              {isUploading && (
-                <span className="text-xs text-muted-foreground">
-                  {progress}%
+                      <span className="font-medium">{progress}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <ImageIcon className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">Aggiungi Media</span>
+                    </>
+                  )}
                 </span>
-              )}
-            </div>
+              </Button>
+            </label>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <span
-                className={`text-xs ${
+                className={`text-sm font-medium ${
                   isOverLimit ? 'text-destructive' : 'text-muted-foreground'
                 }`}
               >
-                {characterCount} / {maxCharacters}
+                {characterCount} / {MAX_CONTENT_LENGTH}
               </span>
 
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || isUploading || isOverLimit || (!content.trim() && media.length === 0)}
-                size="sm"
+                size="default"
+                className="min-w-[120px]"
               >
                 {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Pubblica
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Pubblicazione...
                   </>
+                ) : (
+                  'Pubblica'
                 )}
               </Button>
             </div>

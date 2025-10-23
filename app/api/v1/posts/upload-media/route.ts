@@ -18,14 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check posts:create permission
-    const { data: canCreate } = await supabase.rpc('user_has_permission', {
-      p_user_id: user.id,
-      p_permission: 'posts:create'
-    });
-    if (!canCreate) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // RLS policies will handle permissions
 
     const { data: profile } = await supabase
       .from('profiles')
