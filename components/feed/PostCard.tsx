@@ -26,6 +26,8 @@ interface PostCardProps {
   onShare?: (postId: string) => void;
 }
 
+const MAX_CONTENT_LENGTH = 300;
+
 export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps) {
   const { permissions } = usePermissions();
   const [isLiked, setIsLiked] = useState(post.is_liked_by_me);
@@ -33,12 +35,18 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
   const [isLiking, setIsLiking] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { ref } = usePostAnalytics(post.id, true);
 
   const canLike = hasPermission(permissions, 'posts:like');
   const canComment = hasPermission(permissions, 'posts:comment');
   const canShare = hasPermission(permissions, 'posts:share');
   const isAuthor = currentUserId === post.author.id;
+
+  const shouldTruncate = post.content.length > MAX_CONTENT_LENGTH;
+  const displayContent = shouldTruncate && !isExpanded
+    ? post.content.substring(0, MAX_CONTENT_LENGTH) + '...'
+    : post.content;
 
   const handleLike = async () => {
     if (!canLike || isLiking) return;
@@ -105,7 +113,19 @@ export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps
 
       {/* Content */}
       <div className="space-y-2">
-        <MentionsText content={post.content} mentions={post.mentions} />
+        <MentionsText content={displayContent} mentions={post.mentions} />
+        
+        {shouldTruncate && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-primary hover:underline p-0 h-auto font-medium"
+          >
+            {isExpanded ? 'Mostra meno' : 'Leggi tutto'}
+          </Button>
+        )}
+        
         <MediaGallery media={post.media_urls || []} />
       </div>
 

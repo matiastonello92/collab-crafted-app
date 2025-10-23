@@ -11,9 +11,9 @@ export default async function FeedPage() {
   
   if (user) {
     const { data: profile } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id, first_name, last_name, avatar_url')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
     
     if (profile) {
