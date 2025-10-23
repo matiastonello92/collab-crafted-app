@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { getStorageUrl } from '@/utils/storage';
 
 interface MediaItem {
   type: 'image' | 'video';
@@ -41,7 +42,7 @@ export function MediaGallery({ media }: MediaGalleryProps) {
         >
           {item.type === 'image' ? (
             <Image
-              src={item.url}
+              src={getStorageUrl(item.url)}
               alt={`Media ${index + 1}`}
               fill
               className="object-cover cursor-pointer hover:scale-105 transition-transform"
@@ -49,8 +50,8 @@ export function MediaGallery({ media }: MediaGalleryProps) {
             />
           ) : (
             <video
-              src={item.url}
-              poster={item.thumbnail}
+              src={getStorageUrl(item.url)}
+              poster={item.thumbnail ? getStorageUrl(item.thumbnail) : undefined}
               controls
               className="w-full h-full object-cover"
               preload="metadata"

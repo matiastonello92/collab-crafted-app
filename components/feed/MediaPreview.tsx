@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getStorageUrl } from '@/utils/storage';
 
 interface MediaItem {
   type: 'image' | 'video';
@@ -28,15 +29,15 @@ export function MediaPreview({ media, onRemove }: MediaPreviewProps) {
         >
           {item.type === 'image' ? (
             <Image
-              src={item.url}
+              src={getStorageUrl(item.url)}
               alt={`Preview ${index + 1}`}
               fill
               className="object-cover"
             />
           ) : (
             <video
-              src={item.url}
-              poster={item.thumbnail}
+              src={getStorageUrl(item.url)}
+              poster={item.thumbnail ? getStorageUrl(item.thumbnail) : undefined}
               className="w-full h-full object-cover"
             />
           )}

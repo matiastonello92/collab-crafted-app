@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useInfiniteFeed } from '@/hooks/useInfiniteFeed';
 import { usePostsRealtime } from '@/hooks/usePostsRealtime';
@@ -10,6 +10,8 @@ import { FeedSkeleton } from './FeedSkeleton';
 import { EmptyFeedState } from './EmptyFeedState';
 import { useFeed } from '@/hooks/useFeed';
 import { usePermissions } from '@/hooks/usePermissions';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 interface FeedContainerProps {
   locationId?: string;
@@ -20,6 +22,7 @@ interface FeedContainerProps {
 export function FeedContainer({ locationId, filter = 'all', authorId }: FeedContainerProps) {
   const { permissions } = usePermissions(locationId);
   const canCreate = hasPermission(permissions, 'posts:create');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   const {
     posts,
@@ -33,7 +36,15 @@ export function FeedContainer({ locationId, filter = 'all', authorId }: FeedCont
     canView,
   } = useInfiniteFeed({ locationId, filter, authorId, limit: 20 });
 
-  const { likePost } = useFeed({ locationId });
+  const { likePost, sharePost } = useFeed({ locationId });
+
+  // Get current user ID
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id || null);
+    });
+  }, []);
 
   // Infinite scroll trigger
   const { ref: loadMoreRef, inView } = useInView({
@@ -95,14 +106,16 @@ export function FeedContainer({ locationId, filter = 'all', authorId }: FeedCont
         <PostCard
           key={post.id}
           post={post}
+          currentUserId={currentUserId}
           onLike={likePost}
-          onComment={(postId) => {
-            // Navigate to post detail or open comments modal
-            console.log('Comment on post:', postId);
-          }}
-          onShare={(postId) => {
-            // Open share dialog
-            console.log('Share post:', postId);
+          onShare={async (postId) => {
+            try {
+              await sharePost(postId);
+              toast.success('Post condiviso con successo');
+              mutate();
+            } catch (error) {
+              toast.error('Errore nella condivisione del post');
+            }
           }}
         />
       ))}

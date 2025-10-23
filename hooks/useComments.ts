@@ -49,8 +49,11 @@ export function useComments(postId: string, locationId?: string) {
 
   const addComment = async (content: string, parentCommentId?: string) => {
     if (!canComment) {
+      console.error('No permission to comment');
       throw new Error('No permission to comment');
     }
+
+    console.log('Adding comment:', { postId, content, parentCommentId, key });
 
     const response = await fetch(key, {
       method: 'POST',
@@ -64,9 +67,16 @@ export function useComments(postId: string, locationId?: string) {
       }),
     });
 
-    if (!response.ok) throw new Error('Failed to add comment');
+    console.log('Comment response status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Failed to add comment' }));
+      console.error('Comment error:', error);
+      throw new Error(error.error || 'Failed to add comment');
+    }
 
     const { comment } = await response.json();
+    console.log('Comment added successfully:', comment);
 
     // Optimistic update
     mutate((current) => ({

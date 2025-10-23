@@ -28,7 +28,6 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { uploadFile, isUploading, progress } = useMediaUpload(locationId);
-  const { addPost } = useFeed({ locationId });
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,11 +75,6 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
       if (!response.ok) {
         throw new Error('Failed to create post');
       }
-
-      const { post } = await response.json();
-
-      // Optimistically add to feed
-      addPost(post);
 
       // Reset form
       setContent('');

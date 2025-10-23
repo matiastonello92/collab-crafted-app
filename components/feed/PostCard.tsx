@@ -21,12 +21,12 @@ import { toast } from 'sonner';
 
 interface PostCardProps {
   post: Post;
+  currentUserId?: string | null;
   onLike?: (postId: string) => void;
-  onComment?: (postId: string) => void;
   onShare?: (postId: string) => void;
 }
 
-export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
+export function PostCard({ post, currentUserId, onLike, onShare }: PostCardProps) {
   const { permissions } = usePermissions();
   const [isLiked, setIsLiked] = useState(post.is_liked_by_me);
   const [likesCount, setLikesCount] = useState(post.likes_count);
@@ -38,6 +38,7 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
   const canLike = hasPermission(permissions, 'posts:like');
   const canComment = hasPermission(permissions, 'posts:comment');
   const canShare = hasPermission(permissions, 'posts:share');
+  const isAuthor = currentUserId === post.author.id;
 
   const handleLike = async () => {
     if (!canLike || isLiking) return;
@@ -94,7 +95,7 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
           )}
           <PostOptionsMenu
             postId={post.id}
-            isAuthor={false}
+            isAuthor={isAuthor}
             isAdmin={hasPermission(permissions, 'posts:moderate')}
             isPinned={post.is_pinned}
             onReport={() => setReportDialogOpen(true)}
@@ -160,7 +161,7 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
       {showComments && (
         <CommentSection 
           postId={post.id}
-          currentUserId={post.author.id}
+          currentUserId={currentUserId || undefined}
         />
       )}
     </Card>

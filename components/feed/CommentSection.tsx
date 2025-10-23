@@ -24,9 +24,7 @@ export function CommentSection({ postId, locationId, currentUserId }: CommentSec
   }
 
   return (
-    <div className="space-y-3">
-      <Separator />
-      
+    <div className="space-y-3 pt-3 border-t">
       {canComment && (
         <CommentComposer 
           postId={postId} 

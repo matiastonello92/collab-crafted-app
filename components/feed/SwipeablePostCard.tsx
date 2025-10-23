@@ -7,8 +7,8 @@ import type { Post } from '@/hooks/useInfiniteFeed'
 
 interface SwipeablePostCardProps {
   post: Post
+  currentUserId?: string | null
   onLike?: (postId: string) => Promise<void>
-  onComment?: (postId: string) => void
   onShare?: (postId: string) => void
   onSwipeLeft?: () => void
   onSwipeRight?: () => void
@@ -16,8 +16,8 @@ interface SwipeablePostCardProps {
 
 export function SwipeablePostCard({
   post,
+  currentUserId,
   onLike,
-  onComment,
   onShare,
   onSwipeLeft,
   onSwipeRight,
@@ -100,8 +100,8 @@ export function SwipeablePostCard({
 
       <PostCard
         post={post}
+        currentUserId={currentUserId}
         onLike={onLike}
-        onComment={onComment}
         onShare={onShare}
       />
     </div>
