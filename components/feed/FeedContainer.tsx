@@ -17,9 +17,10 @@ interface FeedContainerProps {
   locationId?: string;
   filter?: 'all' | 'pinned' | 'archived';
   authorId?: string;
+  mutateRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-export function FeedContainer({ locationId, filter = 'all', authorId }: FeedContainerProps) {
+export function FeedContainer({ locationId, filter = 'all', authorId, mutateRef }: FeedContainerProps) {
   const { permissions } = usePermissions(locationId);
   const canCreate = hasPermission(permissions, 'posts:create');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -37,6 +38,13 @@ export function FeedContainer({ locationId, filter = 'all', authorId }: FeedCont
   } = useInfiniteFeed({ locationId, filter, authorId, limit: 20 });
 
   const { likePost, sharePost } = useFeed({ locationId });
+
+  // Expose mutate function through ref
+  useEffect(() => {
+    if (mutateRef) {
+      mutateRef.current = mutate;
+    }
+  }, [mutate, mutateRef]);
 
   // Get current user ID
   useEffect(() => {
