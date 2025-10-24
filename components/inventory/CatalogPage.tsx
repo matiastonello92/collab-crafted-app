@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useAppStore } from '@/lib/store/unified';
 import { usePermissions, hasPermission } from '@/hooks/usePermissions';
 import { useTranslation } from '@/lib/i18n';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { hapticLight, setupKeyboard } from '@/lib/capacitor/native';
 
 interface CatalogPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -34,6 +36,7 @@ interface CatalogItem {
 
 export function CatalogPage({ category }: CatalogPageProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +51,11 @@ export function CatalogPage({ category }: CatalogPageProps) {
   const locationId = useAppStore(state => state.context.location_id);
   const hasHydrated = useAppStore(state => state.hasHydrated);
   const { isAdmin, permissions } = usePermissions(locationId || undefined);
+
+  // Setup keyboard for mobile
+  useEffect(() => {
+    setupKeyboard();
+  }, []);
 
   const loadCatalog = useCallback(async () => {
     if (!locationId) return;

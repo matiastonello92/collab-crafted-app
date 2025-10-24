@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { setupKeyboard } from '@/lib/capacitor/native';
 
 interface CreateInventoryModalProps {
   isOpen: boolean;
@@ -33,15 +35,17 @@ export function CreateInventoryModal({
   category
 }: CreateInventoryModalProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [mode, setMode] = useState<'template' | 'last' | 'empty'>('template');
 
-  // Load templates when modal opens
+  // Setup keyboard and load templates when modal opens
   useEffect(() => {
     if (isOpen) {
+      setupKeyboard();
       loadTemplates();
     }
   }, [isOpen, locationId, category]);
@@ -124,9 +128,11 @@ export function CreateInventoryModal({
           <TabsContent value="template" className="space-y-4">
             {hasTemplates ? (
               <div className="space-y-2">
-                <Label htmlFor="template">{t('inventory.labels.none')}</Label>
+                <Label htmlFor="template" className={isMobile ? 'text-base' : ''}>
+                  {t('inventory.labels.none')}
+                </Label>
                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                  <SelectTrigger>
+                  <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                     <SelectValue placeholder={t('inventory.placeholders.selectProduct')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -160,23 +166,31 @@ export function CreateInventoryModal({
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="notes">{t('inventory.labels.notes')}</Label>
+          <Label htmlFor="notes" className={isMobile ? 'text-base' : ''}>
+            {t('inventory.labels.notes')}
+          </Label>
           <Textarea
             id="notes"
             placeholder={t('inventory.placeholders.enterNotes')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            rows={3}
+            rows={isMobile ? 4 : 3}
+            className={isMobile ? 'min-h-[100px] text-base' : ''}
           />
         </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={onClose}>
+        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row justify-end'} gap-2`}>
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            className={isMobile ? 'w-full min-h-[44px] order-2' : ''}
+          >
             {t('inventory.buttons.cancel')}
           </Button>
           <Button 
             onClick={handleCreateInventory} 
             disabled={loading || (mode === 'template' && !selectedTemplate)}
+            className={isMobile ? 'w-full min-h-[44px] order-1' : ''}
           >
             {loading ? t('inventory.loading.creating') : t('inventory.buttons.createInventory')}
           </Button>

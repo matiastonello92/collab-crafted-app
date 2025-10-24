@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { setupKeyboard } from '@/lib/capacitor/native';
 
 interface CatalogItem {
   id: string;
@@ -37,6 +39,7 @@ export function AddItemDialog({
   category
 }: AddItemDialogProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -83,6 +86,7 @@ export function AddItemDialog({
 
   useEffect(() => {
     if (open) {
+      setupKeyboard();
       loadCatalogItems();
     }
   }, [open, locationId, category]);
@@ -228,9 +232,11 @@ export function AddItemDialog({
 
           <TabsContent value="existing" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="product">{t('inventory.labels.product')}</Label>
+              <Label htmlFor="product" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.product')}
+              </Label>
               <Select value={selectedItem} onValueChange={setSelectedItem}>
-                <SelectTrigger>
+                <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                   <SelectValue placeholder={t('inventory.placeholders.selectProduct')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,7 +250,9 @@ export function AddItemDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quantity">{t('inventory.labels.quantity')}</Label>
+              <Label htmlFor="quantity" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.quantity')}
+              </Label>
               <Input
                 id="quantity"
                 type="number"
@@ -252,14 +260,23 @@ export function AddItemDialog({
                 step="0.1"
                 value={quantity}
                 onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
+                className={isMobile ? 'min-h-[44px] text-base' : ''}
               />
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={onClose}>
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-row justify-end'} gap-2 pt-4`}>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+                className={isMobile ? 'w-full min-h-[44px] order-2' : ''}
+              >
                 {t('inventory.buttons.cancel')}
               </Button>
-              <Button onClick={handleAddItem} disabled={loading}>
+              <Button 
+                onClick={handleAddItem} 
+                disabled={loading}
+                className={isMobile ? 'w-full min-h-[44px] order-1' : ''}
+              >
                 {loading ? t('inventory.loading.saving') : t('inventory.buttons.add')}
               </Button>
             </div>
@@ -267,12 +284,14 @@ export function AddItemDialog({
 
           <TabsContent value="new" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-category">{t('inventory.labels.category')} *</Label>
+              <Label htmlFor="new-category" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.category')} *
+              </Label>
               <Select
                 value={newProduct.product_category}
                 onValueChange={(value) => setNewProduct(prev => ({ ...prev, product_category: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                   <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -286,17 +305,22 @@ export function AddItemDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-name">{t('inventory.labels.name')} *</Label>
+              <Label htmlFor="new-name" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.name')} *
+              </Label>
               <Input
                 id="new-name"
                 placeholder={t('inventory.placeholders.enterName')}
                 value={newProduct.name}
                 onChange={(e) => setNewProduct(prev => ({ ...prev, name: e.target.value }))}
+                className={isMobile ? 'min-h-[44px] text-base' : ''}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-uom">{t('inventory.labels.uom')} *</Label>
+              <Label htmlFor="new-uom" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.uom')} *
+              </Label>
               <Select
                 value={newProduct.uom}
                 onValueChange={(value) => {
@@ -307,7 +331,7 @@ export function AddItemDialog({
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                   <SelectValue placeholder={t('inventory.placeholders.selectUom')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,12 +349,15 @@ export function AddItemDialog({
                   placeholder={t('inventory.placeholders.enterCustomUnit')}
                   value={newProduct.uom}
                   onChange={(e) => setNewProduct(prev => ({ ...prev, uom: e.target.value }))}
+                  className={isMobile ? 'min-h-[44px] text-base' : ''}
                 />
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-price">{t('inventory.labels.unitPrice')} (€) *</Label>
+              <Label htmlFor="new-price" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.unitPrice')} (€) *
+              </Label>
               <Input
                 id="new-price"
                 type="number"
@@ -338,11 +365,14 @@ export function AddItemDialog({
                 placeholder={t('inventory.placeholders.enterPrice')}
                 value={newProduct.default_unit_price}
                 onChange={(e) => setNewProduct(prev => ({ ...prev, default_unit_price: e.target.value }))}
+                className={isMobile ? 'min-h-[44px] text-base' : ''}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-quantity">{t('inventory.labels.quantity')}</Label>
+              <Label htmlFor="new-quantity" className={isMobile ? 'text-base' : ''}>
+                {t('inventory.labels.quantity')}
+              </Label>
               <Input
                 id="new-quantity"
                 type="number"
@@ -350,14 +380,23 @@ export function AddItemDialog({
                 step="0.1"
                 value={quantity}
                 onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
+                className={isMobile ? 'min-h-[44px] text-base' : ''}
               />
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={onClose}>
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-row justify-end'} gap-2 pt-4`}>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+                className={isMobile ? 'w-full min-h-[44px] order-2' : ''}
+              >
                 {t('inventory.buttons.cancel')}
               </Button>
-              <Button onClick={handleCreateAndAdd} disabled={loading}>
+              <Button 
+                onClick={handleCreateAndAdd} 
+                disabled={loading}
+                className={isMobile ? 'w-full min-h-[44px] order-1' : ''}
+              >
                 {loading ? t('inventory.loading.creating') : t('inventory.buttons.createAndAdd')}
               </Button>
             </div>

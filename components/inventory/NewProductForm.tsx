@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { setupKeyboard } from '@/lib/capacitor/native';
 
 interface CatalogItem {
   id: string;
@@ -28,6 +30,7 @@ export function NewProductForm({
   onProductCreated
 }: NewProductFormProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [formData, setFormData] = useState({
     name: '',
     uom: '',
@@ -36,6 +39,10 @@ export function NewProductForm({
     showCustomUom: false
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setupKeyboard();
+  }, []);
 
   // Category options per department
   const getCategoryOptions = (cat: string) => {
@@ -110,22 +117,27 @@ export function NewProductForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">{t('inventory.labels.name')} *</Label>
+        <Label htmlFor="name" className={isMobile ? 'text-base' : ''}>
+          {t('inventory.labels.name')} *
+        </Label>
         <Input
           id="name"
           placeholder={t('inventory.placeholders.enterName')}
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          className={isMobile ? 'min-h-[44px] text-base' : ''}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">{t('inventory.labels.category')} *</Label>
+        <Label htmlFor="category" className={isMobile ? 'text-base' : ''}>
+          {t('inventory.labels.category')} *
+        </Label>
         <Select
           value={formData.product_category}
           onValueChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
         >
-          <SelectTrigger>
+          <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
             <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
           </SelectTrigger>
           <SelectContent>
@@ -139,7 +151,9 @@ export function NewProductForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="uom">{t('inventory.labels.uom')} *</Label>
+        <Label htmlFor="uom" className={isMobile ? 'text-base' : ''}>
+          {t('inventory.labels.uom')} *
+        </Label>
         <Select
           value={formData.uom}
           onValueChange={(value) => {
@@ -150,7 +164,7 @@ export function NewProductForm({
             }
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
             <SelectValue placeholder={t('inventory.placeholders.selectUom')} />
           </SelectTrigger>
           <SelectContent className="bg-white dark:bg-slate-900 z-50">
@@ -168,12 +182,15 @@ export function NewProductForm({
             placeholder={t('inventory.placeholders.enterCustomUnit')}
             value={formData.uom}
             onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
+            className={isMobile ? 'min-h-[44px] text-base' : ''}
           />
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="price">{t('inventory.labels.unitPrice')} (€) *</Label>
+        <Label htmlFor="price" className={isMobile ? 'text-base' : ''}>
+          {t('inventory.labels.unitPrice')} (€) *
+        </Label>
         <Input
           id="price"
           type="number"
@@ -181,10 +198,15 @@ export function NewProductForm({
           placeholder={t('inventory.placeholders.enterPrice')}
           value={formData.default_unit_price}
           onChange={(e) => setFormData(prev => ({ ...prev, default_unit_price: e.target.value }))}
+          className={isMobile ? 'min-h-[44px] text-base' : ''}
         />
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full">
+      <Button 
+        type="submit" 
+        disabled={loading} 
+        className={`w-full ${isMobile ? 'min-h-[48px]' : ''}`}
+      >
         {loading ? t('inventory.loading.creating') : t('inventory.buttons.newProduct')}
       </Button>
     </form>

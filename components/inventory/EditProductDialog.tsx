@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { setupKeyboard } from '@/lib/capacitor/native';
 
 interface EditProductDialogProps {
   product: {
@@ -26,6 +28,7 @@ interface EditProductDialogProps {
 
 export function EditProductDialog({ product, category, onClose, onSuccess }: EditProductDialogProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [formData, setFormData] = useState({
     name: product.name,
     uom: product.uom,
@@ -35,6 +38,10 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
     showCustomUom: !['Kg', 'g', 'Lt', 'ml', 'cl', 'Pce'].includes(product.uom)
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setupKeyboard();
+  }, []);
 
   const getCategoryOptions = (cat: string) => {
     if (cat === 'kitchen') return [
@@ -111,21 +118,26 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">{t('inventory.labels.name')} *</Label>
+            <Label htmlFor="edit-name" className={isMobile ? 'text-base' : ''}>
+              {t('inventory.labels.name')} *
+            </Label>
             <Input
               id="edit-name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              className={isMobile ? 'min-h-[44px] text-base' : ''}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-category">{t('inventory.labels.category')}</Label>
+            <Label htmlFor="edit-category" className={isMobile ? 'text-base' : ''}>
+              {t('inventory.labels.category')}
+            </Label>
             <Select
               value={formData.product_category}
               onValueChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
             >
-              <SelectTrigger>
+              <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                 <SelectValue placeholder={t('inventory.placeholders.selectCategory')} />
               </SelectTrigger>
               <SelectContent>
@@ -139,7 +151,9 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-uom">{t('inventory.labels.uom')} *</Label>
+            <Label htmlFor="edit-uom" className={isMobile ? 'text-base' : ''}>
+              {t('inventory.labels.uom')} *
+            </Label>
             <Select
               value={formData.showCustomUom ? 'custom' : formData.uom}
               onValueChange={(value) => {
@@ -150,7 +164,7 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className={isMobile ? 'min-h-[44px] text-base' : ''}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -168,18 +182,22 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
                 placeholder={t('inventory.placeholders.enterCustomUnit')}
                 value={formData.uom}
                 onChange={(e) => setFormData(prev => ({ ...prev, uom: e.target.value }))}
+                className={isMobile ? 'min-h-[44px] text-base' : ''}
               />
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-price">{t('inventory.labels.unitPrice')} (€) *</Label>
+            <Label htmlFor="edit-price" className={isMobile ? 'text-base' : ''}>
+              {t('inventory.labels.unitPrice')} (€) *
+            </Label>
             <Input
               id="edit-price"
               type="number"
               step="0.01"
               value={formData.default_unit_price}
               onChange={(e) => setFormData(prev => ({ ...prev, default_unit_price: e.target.value }))}
+              className={isMobile ? 'min-h-[44px] text-base' : ''}
             />
           </div>
 
@@ -188,15 +206,27 @@ export function EditProductDialog({ product, category, onClose, onSuccess }: Edi
               id="edit-active"
               checked={formData.is_active}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+              className={isMobile ? 'scale-110' : ''}
             />
-            <Label htmlFor="edit-active">{t('inventory.status.active')}</Label>
+            <Label htmlFor="edit-active" className={isMobile ? 'text-base' : ''}>
+              {t('inventory.status.active')}
+            </Label>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className={`flex ${isMobile ? 'flex-col' : 'flex-row justify-end'} gap-2 pt-4`}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              className={isMobile ? 'w-full min-h-[44px] order-2' : ''}
+            >
               {t('inventory.buttons.cancel')}
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className={isMobile ? 'w-full min-h-[44px] order-1' : ''}
+            >
               {loading ? t('inventory.loading.saving') : t('inventory.buttons.saveChanges')}
             </Button>
           </div>
