@@ -103,22 +103,8 @@ export function EmployeeGridView({
 }: Props) {
   const { t } = useTranslation()
   const router = useRouter()
-  const { isMobile } = useBreakpoint()
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(null)
   
-  // Mobile: show simplified list view without drag&drop
-  if (isMobile) {
-    return (
-      <EmployeeListMobile
-        shifts={shifts}
-        leaves={leaves}
-        users={users}
-        weekStart={weekStart}
-        onShiftClick={onShiftClick}
-        onCellClick={onCellClick}
-      />
-    )
-  }
   // ✅ Local state for optimistic updates
   const [localShifts, setLocalShifts] = useState<ShiftWithAssignments[]>(shifts)
   
@@ -402,15 +388,30 @@ export function EmployeeGridView({
   )
 
   return (
-    <DndContext 
-      sensors={sensors}
-      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-      onDragStart={handleDragStart} 
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd} 
-      collisionDetection={collisionDetection}
-    >
-      <DeleteZone visible={activeShift !== null} t={t} />
+    <>
+      {/* Mobile version - hidden on desktop */}
+      <div className="block lg:hidden">
+        <EmployeeListMobile
+          shifts={shifts}
+          leaves={leaves}
+          users={users}
+          weekStart={weekStart}
+          onShiftClick={onShiftClick}
+          onCellClick={onCellClick}
+        />
+      </div>
+
+      {/* Desktop version - hidden on mobile */}
+      <div className="hidden lg:block">
+        <DndContext 
+          sensors={sensors}
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+          onDragStart={handleDragStart} 
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd} 
+          collisionDetection={collisionDetection}
+        >
+          <DeleteZone visible={activeShift !== null} t={t} />
       
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 sticky top-0 bg-background z-10 pb-2">
@@ -650,7 +651,9 @@ export function EmployeeGridView({
           </Card>
         )}
       </DragOverlay>
-    </DndContext>
+        </DndContext>
+      </div>
+    </>
   )
 }
 

@@ -11,9 +11,12 @@ export const BREAKPOINTS = {
 export type Breakpoint = keyof typeof BREAKPOINTS
 
 export function useBreakpoint() {
+  const [isClient, setIsClient] = useState(false)
   const [breakpoint, setBreakpoint] = useState<Breakpoint>('lg')
   
   useEffect(() => {
+    setIsClient(true)
+    
     const updateBreakpoint = () => {
       const width = window.innerWidth
       if (width >= BREAKPOINTS['2xl']) setBreakpoint('2xl')
@@ -30,9 +33,10 @@ export function useBreakpoint() {
   }, [])
   
   return {
-    breakpoint,
-    isMobile: breakpoint === 'sm' || breakpoint === 'md',
-    isTablet: breakpoint === 'md' || breakpoint === 'lg',
-    isDesktop: breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl',
+    breakpoint: isClient ? breakpoint : 'lg',
+    isMobile: isClient ? (breakpoint === 'sm' || breakpoint === 'md') : false,
+    isTablet: isClient ? (breakpoint === 'md' || breakpoint === 'lg') : false,
+    isDesktop: isClient ? (breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl') : true,
+    isHydrated: isClient,
   }
 }
