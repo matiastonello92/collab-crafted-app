@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Camera, Loader2, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { WebcamCapture } from './WebcamCapture'
+import { CameraCapture } from './CameraCapture'
 import { ImageCropper } from './ImageCropper'
 import { AvatarDialog } from './AvatarDialog'
 import { UploadOptionsDialog } from './UploadOptionsDialog'
@@ -145,8 +145,25 @@ export function AvatarUploader({
 
   const handleCropComplete = async (croppedBlob: Blob) => {
     setShowImageCropper(false)
+    
+    // Haptic feedback on crop complete
+    if (typeof window !== 'undefined') {
+      import('@/lib/capacitor/native').then(({ hapticLight }) => {
+        hapticLight()
+      })
+    }
+    
     await uploadCroppedImage(croppedBlob)
   }
+  
+  // Setup keyboard for Capacitor
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/lib/capacitor/native').then(({ setupKeyboard }) => {
+        setupKeyboard()
+      })
+    }
+  }, [])
 
   const handleAvatarClick = () => {
     setShowAvatarDialog(true)
@@ -222,7 +239,7 @@ export function AvatarUploader({
           className="hidden"
         />
 
-        <WebcamCapture
+        <CameraCapture
           open={showWebcam}
           onCapture={handleWebcamCapture}
           onClose={() => setShowWebcam(false)}
@@ -302,7 +319,7 @@ export function AvatarUploader({
         />
       </div>
 
-      <WebcamCapture
+      <CameraCapture
         open={showWebcam}
         onCapture={handleWebcamCapture}
         onClose={() => setShowWebcam(false)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, User, Settings, Bell, Save, Mail, Loader2, Shield, MapPin, Building, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useTranslation } from '@/lib/i18n'
 import { UserContractsView } from './UserContractsView'
 import { PhoneInput, isValidPhoneNumber } from '@/components/ui/phone-input'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 interface UserRole {
   role_name: string
@@ -48,9 +49,20 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
   const [newEmail, setNewEmail] = useState<string>(user.email || '')
   const [isChangingEmail, setIsChangingEmail] = useState(false)
   const [emailPendingVerification, setEmailPendingVerification] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('profile')
   const supabase = createSupabaseBrowserClient()
   const { locale, setLocale } = useLocale()
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoint()
+  
+  // Setup keyboard for Capacitor
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('@/lib/capacitor/native').then(({ setupKeyboard }) => {
+        setupKeyboard()
+      })
+    }
+  }, [])
 
 
   const isValidEmail = (email: string): boolean => {
@@ -228,14 +240,19 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header with Avatar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
+    <div className={`container mx-auto py-4 sm:py-6 px-4 space-y-4 sm:space-y-6 ${isMobile ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''}`}>
+      {/* Header with Avatar - Mobile Responsive */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Button 
+            variant="outline" 
+            size={isMobile ? "default" : "sm"}
+            className={isMobile ? "min-h-[44px]" : ""}
+            asChild
+          >
             <Link href="/">
-              <ArrowLeft className="h-4 w-4" />
-              {t('profile.backToDashboard')}
+              <ArrowLeft className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
+              {!isMobile && t('profile.backToDashboard')}
             </Link>
           </Button>
           
@@ -250,46 +267,107 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
             />
           )}
           
-          <div>
-            <h1 className="text-3xl font-bold">
-              {t('profile.greeting').replace('{name}', profile.first_name || 'Utente')}
-            </h1>
-            <p className="text-muted-foreground">
-              {t('profile.welcomeMessage')}
-            </p>
-          </div>
+          {!isMobile && (
+            <div>
+              <h1 className="text-3xl font-bold">
+                {t('profile.greeting').replace('{name}', profile.first_name || 'Utente')}
+              </h1>
+              <p className="text-muted-foreground">
+                {t('profile.welcomeMessage')}
+              </p>
+            </div>
+          )}
         </div>
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? t('profile.saving') : t('profile.saveChanges')}
-        </Button>
+        
+        {/* Save button: sticky bottom su mobile, top-right su desktop */}
+        {isMobile ? (
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-50 safe-area-bottom">
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="w-full min-h-[48px]"
+            >
+              <Save className="h-5 w-5 mr-2" />
+              {isSaving ? t('profile.saving') : t('profile.saveChanges')}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? t('profile.saving') : t('profile.saveChanges')}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Settings Tabs */}
       <div className="space-y-6">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              {t('profile.profile')}
-            </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              {t('profile.preferences')}
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              {t('profile.notifications')}
-            </TabsTrigger>
-            <TabsTrigger value="roles" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              {t('profile.rolesAccess')}
-            </TabsTrigger>
-            <TabsTrigger value="contracts" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              {t('profile.contractsPlanning')}
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {isMobile ? (
+            // Mobile: Select dropdown
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full min-h-[44px] mb-4">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="profile">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {t('profile.profile')}
+                  </div>
+                </SelectItem>
+                <SelectItem value="preferences">
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    {t('profile.preferences')}
+                  </div>
+                </SelectItem>
+                <SelectItem value="notifications">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    {t('profile.notifications')}
+                  </div>
+                </SelectItem>
+                <SelectItem value="roles">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    {t('profile.rolesAccess')}
+                  </div>
+                </SelectItem>
+                <SelectItem value="contracts">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {t('profile.contractsPlanning')}
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            // Desktop: tabs tradizionali
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {t('profile.profile')}
+              </TabsTrigger>
+              <TabsTrigger value="preferences" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                {t('profile.preferences')}
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                {t('profile.notifications')}
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                {t('profile.rolesAccess')}
+              </TabsTrigger>
+              <TabsTrigger value="contracts" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                {t('profile.contractsPlanning')}
+              </TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="profile" className="space-y-4">
             <Card>
@@ -300,32 +378,41 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Profile Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Profile Fields - Touch-friendly */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <Label htmlFor="first_name">{t('profile.firstName')}</Label>
+                    <Label htmlFor="first_name" className="text-sm sm:text-base">
+                      {t('profile.firstName')}
+                    </Label>
                     <Input
                       id="first_name"
                       value={profile.first_name || ''}
                       onChange={(e) => updateProfile('first_name', e.target.value)}
                       placeholder={t('profile.firstNamePlaceholder')}
+                      className="min-h-[44px] text-base"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="last_name">{t('profile.lastName')}</Label>
+                    <Label htmlFor="last_name" className="text-sm sm:text-base">
+                      {t('profile.lastName')}
+                    </Label>
                     <Input
                       id="last_name"
                       value={profile.last_name || ''}
                       onChange={(e) => updateProfile('last_name', e.target.value)}
                       placeholder={t('profile.lastNamePlaceholder')}
+                      className="min-h-[44px] text-base"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="phone">{t('profile.phone')}</Label>
+                    <Label htmlFor="phone" className="text-sm sm:text-base">
+                      {t('profile.phone')}
+                    </Label>
                     <PhoneInput
                       value={profile.phone || ''}
                       onChange={(value) => updateProfile('phone', value || '')}
                       placeholder={t('profile.phonePlaceholder')}
+                      className="min-h-[44px]"
                     />
                     {profile.phone && !isValidPhoneNumber(profile.phone) && (
                       <p className="text-sm text-destructive mt-1">
@@ -333,8 +420,10 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                       </p>
                     )}
                   </div>
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="email">{t('profile.email')}</Label>
+                  <div className="sm:col-span-2 space-y-2">
+                    <Label htmlFor="email" className="text-sm sm:text-base">
+                      {t('profile.email')}
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -342,6 +431,7 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                       onChange={(e) => setNewEmail(e.target.value)}
                       placeholder={t('profile.emailPlaceholder')}
                       disabled={isChangingEmail}
+                      className="min-h-[44px] text-base"
                     />
                     {newEmail !== user.email && (
                       <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
@@ -383,7 +473,9 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="locale">{t('profile.language')}</Label>
+                  <Label htmlFor="locale" className="text-sm sm:text-base">
+                    {t('profile.language')}
+                  </Label>
                   <Select
                     value={profile.locale || locale}
                     onValueChange={(value) => {
@@ -391,7 +483,7 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                       setLocale(value as 'it' | 'en');
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -403,12 +495,14 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="timezone">{t('profile.timezone')}</Label>
+                  <Label htmlFor="timezone" className="text-sm sm:text-base">
+                    {t('profile.timezone')}
+                  </Label>
                   <Select
                     value={profile.timezone || 'Europe/Rome'}
                     onValueChange={(value) => updateProfile('timezone', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="min-h-[44px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -448,12 +542,12 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                         onClick={handleTestEmail}
                         disabled={isTestingEmail}
                         variant="outline"
-                        size="sm"
+                        className={isMobile ? "w-full min-h-[44px]" : ""}
                       >
                         {isTestingEmail ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2 animate-spin`} />
                         ) : (
-                          <Mail className="h-4 w-4 mr-2" />
+                          <Mail className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
                         )}
                         {isTestingEmail ? t('profile.sending') : t('profile.sendTestEmail')}
                       </Button>
@@ -665,15 +759,15 @@ export function UserProfileClient({ user, profile: initialProfile, userId, orgId
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {locations.map((location) => (
                       <div
                         key={location.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border"
+                        className="flex items-center gap-3 p-4 rounded-lg border"
                       >
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <MapPin className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
                         <div>
-                          <p className="font-medium">{location.name}</p>
+                          <p className="font-medium text-base">{location.name}</p>
                           <p className="text-sm text-muted-foreground">
                             {roles.filter(r => r.location_id === location.id).length} {roles.filter(r => r.location_id === location.id).length === 1 ? t('me.rolesCount') : t('me.rolesCountPlural')}
                           </p>

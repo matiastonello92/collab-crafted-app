@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 interface UploadOptionsDialogProps {
   open: boolean
@@ -25,13 +26,16 @@ export function UploadOptionsDialog({
   onUseWebcam
 }: UploadOptionsDialogProps) {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoint()
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('profile.uploadPhotoTitle')}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl sm:text-2xl">
+            {t('profile.uploadPhotoTitle')}
+          </DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             {t('profile.uploadPhotoDescription')}
           </DialogDescription>
         </DialogHeader>
@@ -41,20 +45,23 @@ export function UploadOptionsDialog({
           <Button 
             onClick={onUploadFile}
             variant="outline"
-            className="w-full h-20 text-lg"
+            className="w-full min-h-[56px] sm:h-20 text-base sm:text-lg"
           >
             <Upload className="h-6 w-6 mr-3" />
             {t('common.avatarUploader.uploadFile')}
           </Button>
 
-          {/* Use Webcam Button */}
+          {/* Use Camera/Webcam Button */}
           <Button 
             onClick={onUseWebcam}
             variant="outline"
-            className="w-full h-20 text-lg"
+            className="w-full min-h-[56px] sm:h-20 text-base sm:text-lg"
           >
             <Camera className="h-6 w-6 mr-3" />
-            {t('common.avatarUploader.useWebcam')}
+            {isMobile 
+              ? t('common.avatarUploader.useCamera') || t('common.avatarUploader.useWebcam')
+              : t('common.avatarUploader.useWebcam')
+            }
           </Button>
         </div>
 

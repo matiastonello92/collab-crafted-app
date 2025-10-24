@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { ZoomIn, ZoomOut, Check, X } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 interface ImageCropperProps {
   open: boolean
@@ -24,6 +25,7 @@ interface CropArea {
 
 export function ImageCropper({ open, imageSrc, onCropComplete, onCancel }: ImageCropperProps) {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoint()
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null)
@@ -44,14 +46,16 @@ export function ImageCropper({ open, imageSrc, onCropComplete, onCancel }: Image
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>{t('profile.cropImage')}</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">{t('profile.cropImage')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Cropper Area */}
-          <div className="relative h-[400px] bg-black rounded-lg overflow-hidden">
+          {/* Cropper Area - più piccolo su mobile */}
+          <div className={`relative bg-black rounded-lg overflow-hidden ${
+            isMobile ? 'h-[300px]' : 'h-[400px]'
+          }`}>
             <Cropper
               image={imageSrc}
               crop={crop}
@@ -64,9 +68,9 @@ export function ImageCropper({ open, imageSrc, onCropComplete, onCancel }: Image
             />
           </div>
 
-          {/* Zoom Controls */}
+          {/* Zoom Controls - touch-friendly */}
           <div className="flex items-center gap-4 px-2">
-            <ZoomOut className="h-4 w-4 text-muted-foreground" />
+            <ZoomOut className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
             <Slider
               value={[zoom]}
               onValueChange={([value]) => setZoom(value)}
@@ -75,21 +79,30 @@ export function ImageCropper({ open, imageSrc, onCropComplete, onCancel }: Image
               step={0.1}
               className="flex-1"
             />
-            <ZoomIn className="h-4 w-4 text-muted-foreground" />
+            <ZoomIn className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
           </div>
 
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center">
             {t('profile.dragToReposition')}
           </p>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <Button onClick={onCancel} variant="outline" className="flex-1">
-              <X className="h-4 w-4 mr-2" />
+          {/* Actions - stack verticale su mobile */}
+          <div className={`flex gap-3 pt-2 ${
+            isMobile ? 'flex-col' : 'flex-row'
+          }`}>
+            <Button 
+              onClick={onCancel} 
+              variant="outline" 
+              className={`flex-1 ${isMobile ? 'min-h-[44px] order-2' : ''}`}
+            >
+              <X className={isMobile ? "h-5 w-5 mr-2" : "h-4 w-4 mr-2"} />
               {t('common.actions.cancel')}
             </Button>
-            <Button onClick={handleConfirm} className="flex-1">
-              <Check className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={handleConfirm} 
+              className={`flex-1 ${isMobile ? 'min-h-[44px] order-1' : ''}`}
+            >
+              <Check className={isMobile ? "h-5 w-5 mr-2" : "h-4 w-4 mr-2"} />
               {t('profile.applyCrop')}
             </Button>
           </div>
