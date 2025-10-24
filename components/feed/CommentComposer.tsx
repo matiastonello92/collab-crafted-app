@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useComments } from '@/hooks/useComments';
 import { toast } from 'sonner';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface CommentComposerProps {
   postId: string;
@@ -22,6 +23,7 @@ export function CommentComposer({
   placeholder = 'Aggiungi un commento...',
   onCommentAdded,
 }: CommentComposerProps) {
+  const { isMobile } = useBreakpoint();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -69,14 +71,14 @@ export function CommentComposer({
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder={placeholder}
-        className="resize-none min-h-[80px]"
+        className="resize-none min-h-[80px] sm:min-h-[100px] text-base"
         maxLength={maxLength}
         disabled={isSubmitting}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
         <span
-          className={`text-xs ${
+          className={`text-xs sm:text-sm ${
             isOverLimit ? 'text-destructive' : 'text-muted-foreground'
           }`}
         >
@@ -85,14 +87,15 @@ export function CommentComposer({
 
         <Button
           type="submit"
-          size="sm"
+          size={isMobile ? "default" : "sm"}
+          className={isMobile ? "min-h-[44px] w-full sm:w-auto" : ""}
           disabled={isSubmitting || !content.trim() || isOverLimit}
         >
           {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} animate-spin`} />
           ) : (
             <>
-              <Send className="h-4 w-4 mr-2" />
+              <Send className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
               Pubblica
             </>
           )}
