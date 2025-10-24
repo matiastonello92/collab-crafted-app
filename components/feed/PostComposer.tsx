@@ -9,6 +9,7 @@ import { MentionInput } from './MentionInput';
 import { MediaPreview } from './MediaPreview';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { useFeed } from '@/hooks/useFeed';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { toast } from 'sonner';
 
 interface PostComposerProps {
@@ -28,6 +29,7 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { uploadFile, isUploading, progress } = useMediaUpload(locationId);
+  const { isMobile } = useBreakpoint();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -114,9 +116,9 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
   const isOverLimit = characterCount > MAX_CONTENT_LENGTH;
 
   return (
-    <Card className="p-6 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex gap-4">
-        <Avatar className="h-12 w-12">
+    <Card className="p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Avatar className="h-12 w-12 sm:h-12 sm:w-12">
           <AvatarImage src={userProfile?.avatar_url} />
           <AvatarFallback>
             {userProfile?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
@@ -131,13 +133,13 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
             placeholder="Cosa vuoi condividere?"
             locationId={locationId}
             maxLength={MAX_CONTENT_LENGTH}
-            className="min-h-[120px] text-base"
+            className="min-h-[80px] sm:min-h-[120px] text-base"
           />
 
           <MediaPreview media={media} onRemove={handleRemoveMedia} />
 
-          <div className="flex items-center justify-between pt-3 border-t">
-            <label>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 pt-3 border-t">
+            <label className="w-full sm:w-auto">
               <input
                 type="file"
                 accept="image/*,video/*"
@@ -152,9 +154,9 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
                 size="sm"
                 asChild
                 disabled={isUploading || isSubmitting || media.length >= 10}
-                className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
+                className="w-full sm:w-auto gap-2 min-h-[44px] hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
               >
-                <span className="cursor-pointer flex items-center gap-2">
+                <span className="cursor-pointer flex items-center justify-center gap-2">
                   {isUploading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -165,14 +167,16 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <ImageIcon className="h-4 w-4" />
                       </div>
-                      <span className="font-medium">Aggiungi Media</span>
+                      <span className="font-medium">
+                        {isMobile ? 'Media' : 'Aggiungi Media'}
+                      </span>
                     </>
                   )}
                 </span>
               </Button>
             </label>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between sm:justify-end gap-4">
               <span
                 className={`text-sm font-medium ${
                   isOverLimit ? 'text-destructive' : 'text-muted-foreground'
@@ -185,7 +189,7 @@ export function PostComposer({ locationId, userProfile, onPostCreated }: PostCom
                 onClick={handleSubmit}
                 disabled={isSubmitting || isUploading || isOverLimit || (!content.trim() && media.length === 0)}
                 size="default"
-                className="min-w-[120px]"
+                className="min-w-[120px] min-h-[44px]"
               >
                 {isSubmitting ? (
                   <>

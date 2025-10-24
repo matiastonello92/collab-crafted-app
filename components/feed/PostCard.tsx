@@ -15,9 +15,11 @@ import { MediaGallery } from './MediaGallery';
 import { MentionsText } from './MentionsText';
 import { ReportPostDialog } from './ReportPostDialog';
 import { PostOptionsMenu } from './PostOptionsMenu';
+import { PostActionsSheet } from './PostActionsSheet';
 import { CommentSection } from './CommentSection';
 import { EditPostDialog } from './EditPostDialog';
 import { usePostAnalytics } from '@/hooks/usePostAnalytics';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { toast } from 'sonner';
 
 interface PostCardProps {
@@ -33,6 +35,7 @@ const MAX_CONTENT_LENGTH = 300;
 
 export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpdate }: PostCardProps) {
   const { permissions } = usePermissions();
+  const { isMobile } = useBreakpoint();
   const [isLiked, setIsLiked] = useState(post.is_liked_by_me);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLiking, setIsLiking] = useState(false);
@@ -41,6 +44,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
   const [showComments, setShowComments] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [sharesCount, setSharesCount] = useState(post.shares_count);
+  const [showActionsSheet, setShowActionsSheet] = useState(false);
   const { ref } = usePostAnalytics(post.id, true);
 
   const canLike = hasPermission(permissions, 'posts:like');
@@ -141,15 +145,26 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
               Fissato
             </Badge>
           )}
-          <PostOptionsMenu
-            postId={post.id}
-            isAuthor={isAuthor}
-            isAdmin={hasPermission(permissions, 'posts:moderate')}
-            isPinned={post.is_pinned}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onReport={() => setReportDialogOpen(true)}
-          />
+          {isMobile ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] min-w-[44px] p-0"
+              onClick={() => setShowActionsSheet(true)}
+            >
+              <span className="text-lg">⋮</span>
+            </Button>
+          ) : (
+            <PostOptionsMenu
+              postId={post.id}
+              isAuthor={isAuthor}
+              isAdmin={hasPermission(permissions, 'posts:moderate')}
+              isPinned={post.is_pinned}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onReport={() => setReportDialogOpen(true)}
+            />
+          )}
         </div>
       </div>
 
@@ -172,11 +187,13 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 pt-2 border-t">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-1 pt-3 border-t">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+          className={`gap-2 hover:bg-red-500/10 hover:text-red-500 transition-colors ${
+            isMobile ? 'min-w-[80px] min-h-[44px] flex-1' : ''
+          }`}
           onClick={handleLike}
           disabled={!canLike || isLiking}
         >
@@ -186,7 +203,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
             transition={{ duration: 0.3 }}
           >
             <Heart 
-              className={`h-4 w-4 transition-colors ${
+              className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} transition-colors ${
                 isLiked ? 'fill-red-500 text-red-500' : ''
               }`}
             />
@@ -197,32 +214,38 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+          className={`gap-2 hover:bg-primary/10 hover:text-primary transition-colors ${
+            isMobile ? 'min-w-[80px] min-h-[44px] flex-1' : ''
+          }`}
           onClick={() => setShowComments(!showComments)}
           disabled={!canComment}
         >
-          <MessageCircle className="h-4 w-4" />
+          <MessageCircle className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
           <span className="text-sm font-medium">{post.comments_count}</span>
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+          className={`gap-2 hover:bg-primary/10 hover:text-primary transition-colors ${
+            isMobile ? 'min-w-[80px] min-h-[44px] flex-1' : ''
+          }`}
           onClick={() => onShare?.(post.id)}
           disabled={!canShare}
         >
-          <Share2 className="h-4 w-4" />
+          <Share2 className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 hover:bg-green-500/10 hover:text-green-600 transition-colors"
+          className={`gap-2 hover:bg-green-500/10 hover:text-green-600 transition-colors ${
+            isMobile ? 'min-w-[80px] min-h-[44px] flex-1' : ''
+          }`}
           onClick={handleRepost}
           disabled={!canShare}
         >
-          <Repeat2 className="h-4 w-4" />
+          <Repeat2 className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
           {sharesCount > 0 && (
             <span className="text-sm font-medium">{sharesCount}</span>
           )}
@@ -237,6 +260,20 @@ export function PostCard({ post, currentUserId, onLike, onShare, onDelete, onUpd
         />
       )}
     </Card>
+
+    <PostActionsSheet
+      open={showActionsSheet}
+      onOpenChange={setShowActionsSheet}
+      onLike={canLike ? handleLike : undefined}
+      onComment={canComment ? () => setShowComments(true) : undefined}
+      onShare={canShare ? () => onShare?.(post.id) : undefined}
+      onReport={() => {
+        setShowActionsSheet(false);
+        setReportDialogOpen(true);
+      }}
+      isLiked={isLiked}
+      canModerate={hasPermission(permissions, 'posts:moderate')}
+    />
 
     <ReportPostDialog
       postId={post.id}
