@@ -27,6 +27,7 @@ import {
 import { useTranslation } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useInventoryList } from '@/app/(app)/inventory/hooks/useInventoryList';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface InventoryListPageProps {
   category: 'kitchen' | 'bar' | 'cleaning';
@@ -53,6 +54,7 @@ interface InventoryHeader {
 
 export function InventoryListPage({ category }: InventoryListPageProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [statusFilter, setStatusFilter] = useState<'all' | InventoryStatus>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -179,30 +181,34 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{t(`inventory.fullTitles.${category}`)}</h1>
-          <p className="text-muted-foreground">{t('inventory.descriptions.manageInventories')}</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">{t(`inventory.fullTitles.${category}`)}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('inventory.descriptions.manageInventories')}</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} size="lg">
-          <Plus className="mr-2 h-5 w-5" />
-          {t('inventory.buttons.createInventory')}
+        <Button 
+          onClick={() => setShowCreateModal(true)} 
+          className={isMobile ? "w-full sm:w-auto min-h-[44px]" : ""}
+          size={isMobile ? "default" : "lg"}
+        >
+          <Plus className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-5 w-5'}`} />
+          {isMobile ? t('inventory.buttons.create') : t('inventory.buttons.createInventory')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle>{t('inventory.history')}</CardTitle>
-              <CardDescription>{t('inventory.descriptions.manageInventories')}</CardDescription>
+              <CardTitle className="text-xl sm:text-2xl">{t('inventory.history')}</CardTitle>
+              <CardDescription className="text-sm sm:text-base">{t('inventory.descriptions.manageInventories')}</CardDescription>
             </div>
-            <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-              <TabsList>
-                <TabsTrigger value="all">{t('inventory.filters.all')}</TabsTrigger>
-                <TabsTrigger value="in_progress">{t('inventory.status.inProgress')}</TabsTrigger>
-                <TabsTrigger value="completed">{t('inventory.status.completed')}</TabsTrigger>
-                <TabsTrigger value="approved">{t('inventory.status.approved')}</TabsTrigger>
+            <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)} className="w-full sm:w-auto">
+              <TabsList className={isMobile ? "grid grid-cols-2 w-full h-auto" : ""}>
+                <TabsTrigger value="all" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.filters.all')}</TabsTrigger>
+                <TabsTrigger value="in_progress" className={isMobile ? "min-h-[44px]" : ""}>{isMobile ? 'In Corso' : t('inventory.status.inProgress')}</TabsTrigger>
+                <TabsTrigger value="completed" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.status.completed')}</TabsTrigger>
+                <TabsTrigger value="approved" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.status.approved')}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -210,16 +216,62 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
         <CardContent>
           {filteredInventories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{t('inventory.empty.noInventories')}</p>
+              <FileText className={`${isMobile ? 'h-16 w-16' : 'h-12 w-12'} mx-auto mb-4 opacity-50`} />
+              <p className={isMobile ? "text-base" : ""}>{t('inventory.empty.noInventories')}</p>
               <Button 
                 variant="outline" 
-                className="mt-4"
+                className={`mt-4 ${isMobile ? 'min-h-[44px] w-full sm:w-auto' : ''}`}
                 onClick={() => setShowCreateModal(true)}
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`mr-2 ${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
                 {t('inventory.buttons.createInventory')}
               </Button>
+            </div>
+          ) : isMobile ? (
+            <div className="space-y-3">
+              {filteredInventories.map((inventory) => (
+                <Card key={inventory.id} className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="font-medium text-base mb-1">
+                        {formatDate(inventory.started_at)}
+                      </div>
+                      <Badge variant={inventory.status === 'approved' ? 'outline' : inventory.status === 'completed' ? 'secondary' : 'default'}>
+                        {t(`inventory.status.${inventory.status === 'in_progress' ? 'inProgress' : inventory.status}`)}
+                      </Badge>
+                    </div>
+                    <div className="text-right font-bold text-lg">
+                      {formatCurrency(inventory.total_value)}
+                    </div>
+                  </div>
+                  
+                  {inventory.notes && (
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {inventory.notes}
+                    </p>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 min-h-[44px]"
+                      onClick={() => handleViewInventory(inventory.id)}
+                    >
+                      <Eye className="h-5 w-5 mr-2" />
+                      {t('inventory.buttons.view')}
+                    </Button>
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        className="min-h-[44px] min-w-[44px] px-3"
+                        onClick={() => handleDeleteClick(inventory.id)}
+                      >
+                        <Trash className="h-5 w-5 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
             </div>
           ) : (
             <Table>
