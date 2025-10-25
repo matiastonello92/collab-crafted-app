@@ -67,6 +67,13 @@ export const PERMISSIONS = {
     'posts:like',
     'posts:share',
   ],
+  haccp: [
+    'haccp:view',
+    'haccp:check',
+    'haccp:sign',
+    'haccp:export',
+    'haccp:manage',
+  ],
 } as const;
 
 export type Module = keyof typeof PERMISSIONS;

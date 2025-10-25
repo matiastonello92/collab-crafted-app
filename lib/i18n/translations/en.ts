@@ -1,4 +1,9 @@
+import { haccpEN } from './haccp';
+
 export const en = {
+  // HACCP Module
+  haccp: haccpEN,
+  
   // Common
   common: {
     yes: 'Yes',

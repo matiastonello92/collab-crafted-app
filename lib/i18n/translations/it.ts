@@ -1,4 +1,9 @@
+import { haccpIT } from './haccp';
+
 export const it = {
+  // HACCP Module
+  haccp: haccpIT,
+  
   // Common
   common: {
     yes: 'Sì',
