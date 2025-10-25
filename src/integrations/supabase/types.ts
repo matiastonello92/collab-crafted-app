@@ -720,6 +720,545 @@ export type Database = {
           },
         ]
       }
+      haccp_corrective_actions: {
+        Row: {
+          action_taken: string
+          created_at: string
+          created_by: string | null
+          id: string
+          issue_description: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          task_id: string | null
+          temperature_log_id: string | null
+        }
+        Insert: {
+          action_taken: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issue_description: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          task_id?: string | null
+          temperature_log_id?: string | null
+        }
+        Update: {
+          action_taken?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issue_description?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          task_id?: string | null
+          temperature_log_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_corrective_actions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_corrective_actions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_corrective_actions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "haccp_corrective_actions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_corrective_actions_temperature_log_id_fkey"
+            columns: ["temperature_log_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_temperature_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      haccp_equipment: {
+        Row: {
+          code: string | null
+          created_at: string
+          created_by: string | null
+          equipment_type: string
+          id: string
+          installation_date: string | null
+          last_maintenance_date: string | null
+          location_id: string
+          manufacturer: string | null
+          model: string | null
+          name: string
+          next_maintenance_date: string | null
+          notes: string | null
+          org_id: string
+          photo_url: string | null
+          serial_number: string | null
+          status: string
+          temperature_max: number | null
+          temperature_min: number | null
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_type: string
+          id?: string
+          installation_date?: string | null
+          last_maintenance_date?: string | null
+          location_id: string
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          next_maintenance_date?: string | null
+          notes?: string | null
+          org_id: string
+          photo_url?: string | null
+          serial_number?: string | null
+          status?: string
+          temperature_max?: number | null
+          temperature_min?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_type?: string
+          id?: string
+          installation_date?: string | null
+          last_maintenance_date?: string | null
+          location_id?: string
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          next_maintenance_date?: string | null
+          notes?: string | null
+          org_id?: string
+          photo_url?: string | null
+          serial_number?: string | null
+          status?: string
+          temperature_max?: number | null
+          temperature_min?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_equipment_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_equipment_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_equipment_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      haccp_evidences: {
+        Row: {
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          task_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          task_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          task_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_evidences_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_evidences_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_evidences_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "haccp_evidences_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      haccp_tasks: {
+        Row: {
+          area: string | null
+          assigned_to: string | null
+          checklist_items: Json
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_at: string
+          equipment_id: string | null
+          execution_window_minutes: number | null
+          id: string
+          location_id: string
+          name: string
+          notes: string | null
+          org_id: string
+          priority: string
+          signature_data: string | null
+          started_at: string | null
+          started_by: string | null
+          status: string
+          task_type: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          area?: string | null
+          assigned_to?: string | null
+          checklist_items?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at: string
+          equipment_id?: string | null
+          execution_window_minutes?: number | null
+          id?: string
+          location_id: string
+          name: string
+          notes?: string | null
+          org_id: string
+          priority?: string
+          signature_data?: string | null
+          started_at?: string | null
+          started_by?: string | null
+          status?: string
+          task_type: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area?: string | null
+          assigned_to?: string | null
+          checklist_items?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string
+          equipment_id?: string | null
+          execution_window_minutes?: number | null
+          id?: string
+          location_id?: string
+          name?: string
+          notes?: string | null
+          org_id?: string
+          priority?: string
+          signature_data?: string | null
+          started_at?: string | null
+          started_by?: string | null
+          status?: string
+          task_type?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_tasks_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      haccp_temperature_logs: {
+        Row: {
+          equipment_id: string
+          id: string
+          is_within_range: boolean
+          location_id: string
+          notes: string | null
+          org_id: string
+          recorded_at: string
+          recorded_by: string | null
+          task_id: string | null
+          temperature: number
+          unit: string
+        }
+        Insert: {
+          equipment_id: string
+          id?: string
+          is_within_range: boolean
+          location_id: string
+          notes?: string | null
+          org_id: string
+          recorded_at?: string
+          recorded_by?: string | null
+          task_id?: string | null
+          temperature: number
+          unit?: string
+        }
+        Update: {
+          equipment_id?: string
+          id?: string
+          is_within_range?: boolean
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          task_id?: string | null
+          temperature?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_temperature_logs_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_temperature_logs_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_temperature_logs_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_temperature_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "haccp_temperature_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      haccp_templates: {
+        Row: {
+          active: boolean
+          area: string | null
+          assigned_role: string | null
+          checklist_items: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          equipment_id: string | null
+          execution_window_minutes: number | null
+          id: string
+          location_id: string
+          name: string
+          org_id: string
+          priority: string
+          recurrence_interval: number | null
+          recurrence_type: string | null
+          requires_photo: boolean
+          requires_signature: boolean
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          area?: string | null
+          assigned_role?: string | null
+          checklist_items?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          equipment_id?: string | null
+          execution_window_minutes?: number | null
+          id?: string
+          location_id: string
+          name: string
+          org_id: string
+          priority?: string
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
+          requires_photo?: boolean
+          requires_signature?: boolean
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          area?: string | null
+          assigned_role?: string | null
+          checklist_items?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          equipment_id?: string | null
+          execution_window_minutes?: number | null
+          id?: string
+          location_id?: string
+          name?: string
+          org_id?: string
+          priority?: string
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
+          requires_photo?: boolean
+          requires_signature?: boolean
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_templates_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_templates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       hidden_posts: {
         Row: {
           hidden_at: string

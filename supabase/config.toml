@@ -1,5 +1,8 @@
 project_id = "jwchmdivuwgfjrwvgtia"
 
+[functions.haccp-scheduler]
+verify_jwt = false
+
 [functions.smart-assign]
 verify_jwt = true
 
