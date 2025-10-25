@@ -1096,13 +1096,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_haccp_tasks_assigned_to"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_haccp_tasks_completed_by"
             columns: ["completed_by"]
             isOneToOne: false
@@ -1110,24 +1103,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_haccp_tasks_equipment"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "haccp_equipment"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_haccp_tasks_started_by"
             columns: ["started_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_haccp_tasks_template"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "haccp_templates"
             referencedColumns: ["id"]
           },
           {
