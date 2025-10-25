@@ -1110,6 +1110,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "haccp_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "haccp_tasks_equipment_id_fkey"
             columns: ["equipment_id"]
             isOneToOne: false
@@ -1136,6 +1150,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["org_id"]
+          },
+          {
+            foreignKeyName: "haccp_tasks_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "haccp_tasks_template_id_fkey"
