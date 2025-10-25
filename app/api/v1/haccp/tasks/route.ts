@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // Build query with RLS enforcement
     let query = supabase
       .from('haccp_tasks')
-      .select('*, equipment:haccp_equipment(name, type), assigned:profiles!assigned_to(full_name)', { count: 'exact' })
+      .select('*, equipment:haccp_equipment(name, equipment_type), assigned:profiles!assigned_to(full_name)', { count: 'exact' })
       .order('due_at', { ascending: true })
       .range(offset, offset + limit - 1);
 

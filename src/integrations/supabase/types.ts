@@ -771,6 +771,34 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_haccp_corrective_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_corrective_resolved_by"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_corrective_task"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_corrective_temp_log"
+            columns: ["temperature_log_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_temperature_logs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "haccp_corrective_actions_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -876,6 +904,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_haccp_equipment_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "haccp_equipment_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -939,6 +974,20 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_haccp_evidences_task"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_evidences_uploaded_by"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "haccp_evidences_location_id_fkey"
             columns: ["location_id"]
@@ -1047,6 +1096,41 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_haccp_tasks_assigned_to"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_tasks_completed_by"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_tasks_equipment"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_tasks_started_by"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_tasks_template"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_templates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "haccp_tasks_equipment_id_fkey"
             columns: ["equipment_id"]
             isOneToOne: false
@@ -1124,6 +1208,27 @@ export type Database = {
           unit?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_haccp_temp_logs_equipment"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_temp_logs_recorded_by"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_haccp_temp_logs_task"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_tasks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "haccp_temperature_logs_equipment_id_fkey"
             columns: ["equipment_id"]
@@ -1229,6 +1334,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_haccp_templates_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "haccp_templates_equipment_id_fkey"
             columns: ["equipment_id"]
