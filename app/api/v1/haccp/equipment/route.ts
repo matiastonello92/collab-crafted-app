@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
       equipment_type,
       qr_code,
       nfc_tag,
-      area,
       min_temp,
       max_temp,
       status
@@ -92,7 +91,6 @@ export async function POST(request: NextRequest) {
         equipment_type,
         qr_code,
         nfc_tag,
-        area,
         min_temp,
         max_temp,
         status: status || 'active',

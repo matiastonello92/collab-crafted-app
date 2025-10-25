@@ -114,7 +114,7 @@ export function TaskDetailClient({ taskId }: TaskDetailClientProps) {
           {task.equipment && (
             <div className="flex items-center gap-1">
               <Wrench className="h-4 w-4" />
-              <span>{task.equipment.name} ({task.equipment.type})</span>
+              <span>{task.equipment.name} ({task.equipment.equipment_type})</span>
             </div>
           )}
         </div>
