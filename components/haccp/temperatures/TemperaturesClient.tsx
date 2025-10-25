@@ -5,12 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/src/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Thermometer, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface TemperaturesClientProps {
   locationId: string;
 }
 
 export function TemperaturesClient({ locationId }: TemperaturesClientProps) {
+  const { t } = useTranslation();
   const { data: logs, isLoading } = useQuery({
     queryKey: ['haccp-temperature-logs', locationId],
     queryFn: async () => {
@@ -31,16 +33,16 @@ export function TemperaturesClient({ locationId }: TemperaturesClientProps) {
   });
 
   if (isLoading) {
-    return <div className="p-6">Loading temperature logs...</div>;
+    return <div className="p-6">{t('haccp.temperatures.loading')}</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Temperature Monitoring</h1>
+          <h1 className="text-3xl font-bold">{t('haccp.temperatures.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Temperature monitoring history
+            {t('haccp.temperatures.subtitle')}
           </p>
         </div>
       </div>
@@ -50,12 +52,12 @@ export function TemperaturesClient({ locationId }: TemperaturesClientProps) {
           <table className="w-full">
             <thead className="border-b">
               <tr className="text-left">
-                <th className="p-4 font-medium">Equipment</th>
-                <th className="p-4 font-medium">Temperature</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium">Recorded By</th>
-                <th className="p-4 font-medium">Date & Time</th>
-                <th className="p-4 font-medium">Notes</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.equipment')}</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.temperature')}</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.status')}</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.recordedBy')}</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.dateTime')}</th>
+                <th className="p-4 font-medium">{t('haccp.temperatures.table.notes')}</th>
               </tr>
             </thead>
             <tbody>
@@ -81,16 +83,16 @@ export function TemperaturesClient({ locationId }: TemperaturesClientProps) {
                     {log.is_within_range ? (
                       <span className="flex items-center gap-1 text-green-600">
                         <CheckCircle className="h-4 w-4" />
-                        In Range
+                        {t('haccp.temperatures.status.inRange')}
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-red-600">
                         <AlertTriangle className="h-4 w-4" />
-                        Out of Range
+                        {t('haccp.temperatures.status.outOfRange')}
                       </span>
                     )}
                   </td>
-                  <td className="p-4 text-sm">{log.recorder?.full_name || 'Unknown'}</td>
+                  <td className="p-4 text-sm">{log.recorder?.full_name || t('haccp.temperatures.unknown')}</td>
                   <td className="p-4 text-sm">
                     {new Date(log.recorded_at).toLocaleString()}
                   </td>
@@ -107,9 +109,9 @@ export function TemperaturesClient({ locationId }: TemperaturesClientProps) {
       {logs?.length === 0 && (
         <Card className="p-12 text-center">
           <Thermometer className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No temperature logs yet</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('haccp.temperatures.empty.title')}</h3>
           <p className="text-muted-foreground">
-            Temperature logs will appear here as tasks are completed
+            {t('haccp.temperatures.empty.message')}
           </p>
         </Card>
       )}

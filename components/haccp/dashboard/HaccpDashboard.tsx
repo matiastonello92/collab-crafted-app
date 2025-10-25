@@ -10,6 +10,7 @@ import { TemperatureAlerts } from './TemperatureAlerts';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { AlertCircle, CheckCircle2, Clock, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 interface HaccpDashboardProps {
   orgId: string;
@@ -34,6 +35,7 @@ const fetcher = async (url: string) => {
 };
 
 export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
+  const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   const { data, error, isLoading } = useSWR<DashboardStats>(
     `/api/v1/haccp/dashboard?location_id=${locationId}`,
@@ -60,7 +62,7 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
     return (
       <div className="container mx-auto py-12 px-4 text-center">
         <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Error Loading Dashboard</h2>
+        <h2 className="text-xl font-semibold mb-2">{t('haccp.errors.loadingDashboard')}</h2>
         <p className="text-muted-foreground">{error.message}</p>
       </div>
     );
@@ -82,14 +84,14 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">HACCP Dashboard</h1>
-          <p className="text-muted-foreground">Food safety compliance tracking</p>
+          <h1 className="text-3xl font-bold">{t('haccp.dashboard.title')}</h1>
+          <p className="text-muted-foreground">{t('haccp.dashboard.subtitle')}</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
             <Link href="/haccp/tasks">
               <ClipboardList className="h-4 w-4 mr-2" />
-              View Tasks
+              {t('haccp.dashboard.viewTasks')}
             </Link>
           </Button>
         </div>
@@ -100,52 +102,52 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Due Today</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('haccp.dashboard.stats.dueToday')}</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.tasksDueToday}</div>
-            <p className="text-xs text-muted-foreground mt-1">Tasks requiring attention</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('haccp.dashboard.stats.tasksRequiringAttention')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('haccp.dashboard.stats.overdue')}</CardTitle>
               <AlertCircle className="h-4 w-4 text-destructive" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{stats.tasksOverdue}</div>
-            <p className="text-xs text-muted-foreground mt-1">Tasks past due</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('haccp.dashboard.stats.tasksPastDue')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('haccp.dashboard.stats.completedToday')}</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.tasksCompleted}</div>
-            <p className="text-xs text-muted-foreground mt-1">Tasks finished</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('haccp.dashboard.stats.tasksFinished')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('haccp.dashboard.stats.complianceRate')}</CardTitle>
               <div className="text-xs text-muted-foreground">7d</div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.complianceRate}%</div>
-            <p className="text-xs text-muted-foreground mt-1">Last 7 days</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('haccp.dashboard.stats.last7Days')}</p>
           </CardContent>
         </Card>
       </div>
@@ -160,9 +162,9 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
       {/* Recent Activity Tabs */}
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-3'}`}>
-          <TabsTrigger value="tasks" className="min-h-[44px]">Tasks</TabsTrigger>
-          <TabsTrigger value="templates" className="min-h-[44px]">Templates</TabsTrigger>
-          {!isMobile && <TabsTrigger value="reports" className="min-h-[44px]">Reports</TabsTrigger>}
+          <TabsTrigger value="tasks" className="min-h-[44px]">{t('haccp.dashboard.tabs.tasks')}</TabsTrigger>
+          <TabsTrigger value="templates" className="min-h-[44px]">{t('haccp.dashboard.tabs.templates')}</TabsTrigger>
+          {!isMobile && <TabsTrigger value="reports" className="min-h-[44px]">{t('haccp.dashboard.tabs.reports')}</TabsTrigger>}
         </TabsList>
         <TabsContent value="tasks" className="mt-4">
           <TasksOverview locationId={locationId} />
@@ -170,12 +172,12 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
         <TabsContent value="templates" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>HACCP Templates</CardTitle>
-              <CardDescription>Manage recurring task templates</CardDescription>
+              <CardTitle>{t('haccp.templates.title')}</CardTitle>
+              <CardDescription>{t('haccp.templates.manageRecurringTemplates')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline" className="w-full min-h-[44px]">
-                <Link href="/haccp/templates">Manage Templates</Link>
+                <Link href="/haccp/templates">{t('haccp.templates.manageTemplates')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -184,12 +186,12 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
           <TabsContent value="reports" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Reports & Audit</CardTitle>
-                <CardDescription>View compliance reports and audit history</CardDescription>
+                <CardTitle>{t('haccp.reports.audit.title')}</CardTitle>
+                <CardDescription>{t('haccp.reports.audit.subtitle')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full min-h-[44px]">
-                  <Link href="/haccp/reports">View Reports</Link>
+                  <Link href="/haccp/reports">{t('haccp.reports.audit.viewReports')}</Link>
                 </Button>
               </CardContent>
             </Card>

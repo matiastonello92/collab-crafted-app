@@ -33,10 +33,11 @@ export default async function HaccpPage() {
     .single();
 
   if (!profile?.org_id || !profile?.default_location_id) {
+    const { t } = await import('@/lib/i18n').then(m => ({ t: m.t }));
     return (
       <div className="container mx-auto py-12 px-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Organization Setup Required</h1>
-        <p className="text-muted-foreground">Please complete your organization setup to access HACCP module.</p>
+        <h1 className="text-2xl font-bold mb-4">{t('haccp.setup.title')}</h1>
+        <p className="text-muted-foreground">{t('haccp.setup.message')}</p>
       </div>
     );
   }
