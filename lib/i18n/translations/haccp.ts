@@ -1,5 +1,14 @@
 export const haccpIT = {
   module: 'HACCP',
+  nav: {
+    haccp: 'HACCP',
+    dashboard: 'Dashboard',
+    tasks: 'Task',
+    templates: 'Template',
+    equipment: 'Attrezzature',
+    temperatures: 'Temperature',
+    reports: 'Report',
+  },
   dashboard: {
     title: 'Dashboard HACCP',
     tasksOverview: 'Panoramica Task',
@@ -183,6 +192,15 @@ export const haccpIT = {
 
 export const haccpEN = {
   module: 'HACCP',
+  nav: {
+    haccp: 'HACCP',
+    dashboard: 'Dashboard',
+    tasks: 'Tasks',
+    templates: 'Templates',
+    equipment: 'Equipment',
+    temperatures: 'Temperatures',
+    reports: 'Reports',
+  },
   dashboard: {
     title: 'HACCP Dashboard',
     tasksOverview: 'Tasks Overview',

@@ -33,6 +33,12 @@ import {
   Upload,
   CreditCard,
   MessageSquare,
+  ClipboardCheck,
+  CheckSquare,
+  FileText,
+  Gauge,
+  Thermometer,
+  FileBarChart,
 } from 'lucide-react'
 import { useHydratedStore } from '@/lib/store/useHydratedStore'
 import { can } from '@/lib/permissions'
@@ -96,6 +102,19 @@ export default function SidebarClient({
       permission: null,
       children: [
         { name: t('nav.recipesList'), href: '/recipes', icon: ChefHat, permission: null },
+      ]
+    },
+    {
+      name: t('haccp.nav.haccp'),
+      icon: ClipboardCheck,
+      permission: 'haccp:view',
+      children: [
+        { name: t('haccp.nav.dashboard'), href: '/haccp', icon: Home, permission: 'haccp:view' },
+        { name: t('haccp.nav.tasks'), href: '/haccp/tasks', icon: CheckSquare, permission: 'haccp:check' },
+        { name: t('haccp.nav.templates'), href: '/haccp/templates', icon: FileText, permission: 'haccp:manage' },
+        { name: t('haccp.nav.equipment'), href: '/haccp/equipment', icon: Gauge, permission: 'haccp:manage' },
+        { name: t('haccp.nav.temperatures'), href: '/haccp/temperatures', icon: Thermometer, permission: 'haccp:view' },
+        { name: t('haccp.nav.reports'), href: '/haccp/reports', icon: FileBarChart, permission: 'haccp:export' },
       ]
     },
     {
