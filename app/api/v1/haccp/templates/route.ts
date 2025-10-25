@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('haccp_templates')
-      .select('*, equipment:haccp_equipment(name, type)')
+      .select('*, equipment:haccp_equipment(name, equipment_type)')
       .order('name', { ascending: true });
 
     if (locationId) {

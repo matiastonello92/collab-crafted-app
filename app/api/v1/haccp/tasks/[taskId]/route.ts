@@ -26,7 +26,7 @@ export async function GET(
       .from('haccp_tasks')
       .select(`
         *,
-        equipment:haccp_equipment(id, name, type, area),
+        equipment:haccp_equipment(id, name, equipment_type, area),
         template:haccp_templates(id, name),
         assigned:profiles!assigned_to(id, full_name, avatar_url),
         completed_by_user:profiles!completed_by(id, full_name),

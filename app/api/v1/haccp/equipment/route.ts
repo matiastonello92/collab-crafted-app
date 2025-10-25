@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (locationId) query = query.eq('location_id', locationId);
     if (status) query = query.eq('status', status);
-    if (type) query = query.eq('type', type);
+    if (type) query = query.eq('equipment_type', type);
 
     const { data, error } = await query;
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       org_id,
       location_id,
       name,
-      type,
+      equipment_type,
       qr_code,
       nfc_tag,
       area,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       status
     } = body;
 
-    if (!org_id || !location_id || !name || !type) {
+    if (!org_id || !location_id || !name || !equipment_type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         org_id,
         location_id,
         name,
-        type,
+        equipment_type,
         qr_code,
         nfc_tag,
         area,

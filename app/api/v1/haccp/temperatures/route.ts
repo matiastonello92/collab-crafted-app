@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('haccp_temperature_logs')
-      .select('*, equipment:haccp_equipment(name, type), recorded_by_user:profiles!recorded_by(full_name)')
+      .select('*, equipment:haccp_equipment(name, equipment_type), recorded_by_user:profiles!recorded_by(full_name)')
       .order('recorded_at', { ascending: false })
       .limit(limit);
 
