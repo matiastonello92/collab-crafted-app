@@ -48,6 +48,7 @@ export function TaskEvidenceList({ taskId, evidences, onUpdate }: TaskEvidenceLi
       const response = await fetch(`/api/v1/haccp/tasks/${taskId}/evidences`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -74,7 +75,7 @@ export function TaskEvidenceList({ taskId, evidences, onUpdate }: TaskEvidenceLi
     try {
       const response = await fetch(
         `/api/v1/haccp/tasks/${taskId}/evidences?evidence_id=${evidenceId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', credentials: 'include' }
       );
 
       if (!response.ok) {

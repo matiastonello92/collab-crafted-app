@@ -39,6 +39,7 @@ export function SkipTaskDialog({ open, onOpenChange, taskId, onSkipped }: SkipTa
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ skip_reason: reason }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

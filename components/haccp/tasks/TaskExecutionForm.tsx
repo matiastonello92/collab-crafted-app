@@ -53,6 +53,7 @@ export function TaskExecutionForm({ task, onComplete }: TaskExecutionFormProps) 
           checklist_responses: responses,
           notes,
         }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
