@@ -13,7 +13,7 @@ export const createRecipeSchema = z.object({
   cook_time_minutes: z.number().int().min(0).max(1440).default(0),
   photo_url: z.string().url().optional().nullable(),
   allergens: z.array(z.string()).default([]),
-  season: z.array(z.enum(['spring', 'summer', 'fall', 'winter'])).default([]),
+  season: z.array(z.enum(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])).default([]),
   tags: z.array(z.string()).default([]),
   ingredients: z.array(z.object({
     catalog_item_id: z.string().uuid(),
@@ -21,7 +21,7 @@ export const createRecipeSchema = z.object({
     unit: z.string().min(1),
     item_name_snapshot: z.string().min(1),
     is_optional: z.boolean().default(false),
-    notes: z.string().optional(),
+    notes: z.string().optional().nullable(),
     sort_order: z.number().int().min(0).optional()
   })).optional(),
   steps: z.array(z.object({
@@ -44,7 +44,7 @@ export const updateRecipeSchema = z.object({
   cook_time_minutes: z.number().int().min(0).max(1440).optional(),
   photo_url: z.string().url().optional().nullable(),
   allergens: z.array(z.string()).optional(),
-  season: z.array(z.enum(['spring', 'summer', 'fall', 'winter'])).optional(),
+  season: z.array(z.enum(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])).optional(),
   tags: z.array(z.string()).optional()
 });
 
@@ -56,7 +56,7 @@ export const createIngredientSchema = z.object({
   unit: z.string().min(1),
   item_name_snapshot: z.string().min(1),
   is_optional: z.boolean().default(false),
-  notes: z.string().optional(),
+  notes: z.string().optional().nullable(),
   sort_order: z.number().int().min(0).default(0)
 }).refine(
   data => (data.catalog_item_id && !data.sub_recipe_id) || 
