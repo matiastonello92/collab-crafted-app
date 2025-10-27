@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { TaskCard } from './TaskCard';
+import { CreateTaskDialog } from './CreateTaskDialog';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Search, Filter, Plus } from 'lucide-react';
-import Link from 'next/link';
 
 interface TaskListClientProps {
   locationId: string;
@@ -26,6 +27,7 @@ export function TaskListClient({ locationId }: TaskListClientProps) {
   const { isMobile } = useBreakpoint();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   let url = `/api/v1/haccp/tasks?location_id=${locationId}&limit=100`;
   if (statusFilter !== 'all') {
@@ -52,11 +54,12 @@ export function TaskListClient({ locationId }: TaskListClientProps) {
           <h1 className="text-3xl font-bold">HACCP Tasks</h1>
           <p className="text-muted-foreground">Manage and execute compliance tasks</p>
         </div>
-        <Button asChild className="min-h-[44px] w-full sm:w-auto">
-          <Link href="/haccp/tasks/new">
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Link>
+        <Button 
+          onClick={() => setShowCreateDialog(true)}
+          className="min-h-[44px] w-full sm:w-auto"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New Task
         </Button>
       </div>
 
@@ -130,6 +133,13 @@ export function TaskListClient({ locationId }: TaskListClientProps) {
           ))}
         </div>
       )}
+
+      <CreateTaskDialog
+        locationId={locationId}
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreated={mutate}
+      />
     </div>
   );
 }

@@ -31,8 +31,8 @@ export function usePermissions(locationId?: string) {
     {
       revalidateOnFocus: false,
       dedupingInterval: 300000, // 5min cache
-      errorRetryCount: 2,
-      errorRetryInterval: 1000,
+      errorRetryCount: 1,
+      errorRetryInterval: 2000,
     }
   )
 

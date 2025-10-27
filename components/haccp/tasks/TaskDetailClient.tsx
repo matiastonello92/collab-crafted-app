@@ -32,7 +32,14 @@ export function TaskDetailClient({ taskId }: TaskDetailClientProps) {
 
   const { data, error, isLoading, mutate } = useSWR(
     `/api/v1/haccp/tasks/${taskId}`,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
+      dedupingInterval: 5000,
+    }
   );
 
   if (isLoading) {
