@@ -153,8 +153,8 @@ export function IngredientsForm({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-3 sticky top-0 bg-background z-10 py-2">
         <h3 className="text-lg font-semibold">{t('recipes.ingredients.title')}</h3>
         {!readOnly && (
           <div className="flex gap-2">
@@ -183,54 +183,36 @@ export function IngredientsForm({
 
           return (
             <Card key={index} className={isSubRecipe ? 'border-primary/50' : ''}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
+              <CardContent className={readOnly ? 'p-2' : 'p-3'}>
+                <div className={readOnly ? 'space-y-1' : 'space-y-2'}>
                   {readOnly ? (
                     <>
-                      <div className="flex items-center gap-2">
-                      {isSubRecipe ? (
-                          <Badge variant="default" className="gap-1">
-                            <ChefHat className="h-3 w-3" />
-                            {t('recipes.ingredients.subRecipe')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="gap-1">
-                            <Package className="h-3 w-3" />
-                            {t('recipes.ingredients.product')}
-                          </Badge>
-                        )}
-                      </div>
-                      
                       {isSubRecipe && ingredient.sub_recipe ? (
                         <SubRecipeCard
                           subRecipe={ingredient.sub_recipe}
                           requestedServings={ingredient.quantity}
                         />
                       ) : (
-                        <>
-                          <div>
-                            <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.product')}</Label>
-                            <p className="font-medium">{ingredient.item_name_snapshot}</p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.quantity')}</Label>
-                              <p>{ingredient.quantity} {ingredient.unit}</p>
-                            </div>
+                        <div className="flex items-center justify-between gap-3 py-1">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Badge variant="secondary" className="gap-1 shrink-0">
+                              <Package className="h-3 w-3" />
+                            </Badge>
+                            <span className="font-medium truncate">{ingredient.item_name_snapshot}</span>
                             {ingredient.is_optional && (
-                              <div>
-                                <Badge variant="secondary">{t('common.optional')}</Badge>
-                              </div>
+                              <Badge variant="outline" className="text-xs shrink-0">{t('common.optional')}</Badge>
                             )}
                           </div>
-                        </>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-sm font-mono tabular-nums">
+                              {ingredient.quantity} {ingredient.unit}
+                            </span>
+                          </div>
+                        </div>
                       )}
                       
                       {ingredient.notes && (
-                        <div>
-                          <Label className="text-sm text-muted-foreground">{t('recipes.ingredients.notes')}</Label>
-                          <p className="text-sm">{ingredient.notes}</p>
-                        </div>
+                        <p className="text-xs text-muted-foreground pl-8">{ingredient.notes}</p>
                       )}
                     </>
                   ) : (
@@ -330,30 +312,32 @@ export function IngredientsForm({
                         </>
                       )}
 
-                      <div>
-                        <Label>{t('recipes.ingredients.notes')}</Label>
-                        <Textarea
-                          value={ingredient.notes || ''}
-                          onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-
-                      {!isSubRecipe && (
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`optional-${index}`}
-                            checked={ingredient.is_optional}
-                            onCheckedChange={(checked) => updateIngredient(index, 'is_optional', checked)}
+                      <div className="grid grid-cols-[1fr_auto] gap-2 items-start">
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t('recipes.ingredients.notes')}</Label>
+                          <Textarea
+                            value={ingredient.notes || ''}
+                            onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
+                            rows={1}
+                            className="text-sm resize-none"
                           />
-                          <label
-                            htmlFor={`optional-${index}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {t('recipes.ingredients.optional')}
-                          </label>
                         </div>
-                      )}
+                        {!isSubRecipe && (
+                          <div className="flex items-center space-x-2 pt-5">
+                            <Checkbox
+                              id={`optional-${index}`}
+                              checked={ingredient.is_optional}
+                              onCheckedChange={(checked) => updateIngredient(index, 'is_optional', checked)}
+                            />
+                            <label
+                              htmlFor={`optional-${index}`}
+                              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {t('recipes.ingredients.optional')}
+                            </label>
+                          </div>
+                        )}
+                      </div>
 
                       <Button
                         variant="destructive"

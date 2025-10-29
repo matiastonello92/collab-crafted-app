@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, Loader2, ImageIcon, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -26,6 +26,11 @@ export function StepPhotoUploader({
   const [photoUrl, setPhotoUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Sync with currentUrl prop changes
+  useEffect(() => {
+    setPhotoUrl(currentUrl || null)
+  }, [currentUrl])
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -68,9 +73,6 @@ export function StepPhotoUploader({
       toast.error(t('recipePhoto.uploadError').replace('{error}', error.message))
     } finally {
       setIsUploading(false)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     }
   }
 

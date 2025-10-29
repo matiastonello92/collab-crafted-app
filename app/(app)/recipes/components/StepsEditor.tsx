@@ -230,27 +230,32 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                   <Input
                     value={checklistInput}
                     onChange={e => setChecklistInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAddChecklistItem()}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddChecklistItem();
+                      }
+                    }}
                     placeholder={t('recipes.steps.checklistPlaceholder')}
+                    className="text-sm"
                   />
-                  <Button type="button" onClick={handleAddChecklistItem} size="sm">
-                    <Plus className="h-4 w-4" />
+                  <Button type="button" onClick={handleAddChecklistItem} size="sm" variant="secondary">
+                    <Plus className="h-3 w-3" />
                   </Button>
                 </div>
                 {editingStep.checklist_items && editingStep.checklist_items.length > 0 && (
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-2 flex flex-wrap gap-1">
                     {editingStep.checklist_items.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-sm">
-                        <Badge variant="secondary" className="flex-1">{item}</Badge>
-                        <Button
+                      <Badge key={idx} variant="secondary" className="gap-1 text-xs py-1">
+                        {item}
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="sm"
                           onClick={() => handleRemoveChecklistItem(idx)}
+                          className="ml-1 hover:text-destructive"
                         >
                           <X className="h-3 w-3" />
-                        </Button>
-                      </div>
+                        </button>
+                      </Badge>
                     ))}
                   </div>
                 )}
