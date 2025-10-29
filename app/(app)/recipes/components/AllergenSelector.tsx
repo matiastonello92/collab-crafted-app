@@ -78,33 +78,35 @@ export function AllergenSelector({
             {displayPlaceholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="w-[400px] p-0" align="start">
           <Command>
-            <CommandInput placeholder={t('recipes.allergenSelector.searchPlaceholder')} />
+            <CommandInput placeholder={t('recipes.allergenSelector.searchPlaceholder')} className="h-8" />
             <CommandList>
               <CommandEmpty>{t('recipes.allergenSelector.noAllergens')}</CommandEmpty>
-              <CommandGroup>
-                {COMMON_ALLERGENS.map((allergen) => {
-                  const isSelected = selectedAllergens.includes(allergen.key);
-                  return (
-                    <CommandItem
-                      key={allergen.key}
-                      onSelect={() => handleToggle(allergen.key)}
-                      className="cursor-pointer"
-                    >
-                      <div
-                        className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border ${
-                          isSelected
-                            ? 'bg-primary text-primary-foreground'
-                            : 'opacity-50'
-                        }`}
+              <CommandGroup className="p-2">
+                <div className="grid grid-cols-2 gap-1">
+                  {COMMON_ALLERGENS.map((allergen) => {
+                    const isSelected = selectedAllergens.includes(allergen.key);
+                    return (
+                      <CommandItem
+                        key={allergen.key}
+                        onSelect={() => handleToggle(allergen.key)}
+                        className="cursor-pointer py-1.5 px-2"
                       >
-                        {isSelected && <Check className="h-3 w-3" />}
-                      </div>
-                      <span>{getAllergenLabel(allergen.key)}</span>
-                    </CommandItem>
-                  );
-                })}
+                        <div
+                          className={`mr-2 flex h-3.5 w-3.5 items-center justify-center rounded-sm border ${
+                            isSelected
+                              ? 'bg-primary text-primary-foreground'
+                              : 'opacity-50'
+                          }`}
+                        >
+                          {isSelected && <Check className="h-2.5 w-2.5" />}
+                        </div>
+                        <span className="text-sm">{getAllergenLabel(allergen.key)}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </div>
               </CommandGroup>
             </CommandList>
           </Command>
@@ -113,7 +115,7 @@ export function AllergenSelector({
 
       {/* Selected badges */}
       {selectedAllergens.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-1.5 mt-2">
           {selectedAllergens.map((key) => {
             const info = getAllergenInfo(key);
             if (!info) return null;
@@ -122,14 +124,14 @@ export function AllergenSelector({
               <Badge
                 key={key}
                 variant="secondary"
-                className="gap-1"
+                className="gap-1 text-xs py-0.5 px-2"
                 style={{
                   backgroundColor: `hsl(${info.color} / 0.15)`,
                   color: `hsl(${info.color})`,
                   borderColor: `hsl(${info.color} / 0.3)`
                 }}
               >
-                <AlertTriangle className="h-3 w-3" />
+                <AlertTriangle className="h-2.5 w-2.5" />
                 {getAllergenLabel(info.key)}
                 <button
                   type="button"
@@ -139,7 +141,7 @@ export function AllergenSelector({
                   }}
                   className="ml-1 hover:bg-black/10 rounded-sm"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-2.5 w-2.5" />
                 </button>
               </Badge>
             );

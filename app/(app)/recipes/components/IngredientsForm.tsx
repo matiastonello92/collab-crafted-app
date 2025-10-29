@@ -153,21 +153,9 @@ export function IngredientsForm({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center mb-3 sticky top-0 bg-background z-10 py-2">
-        <h3 className="text-lg font-semibold">{t('recipes.ingredients.title')}</h3>
-        {!readOnly && (
-          <div className="flex gap-2">
-            <Button onClick={() => addIngredient('catalog')} size="sm" variant="outline">
-              <Package className="h-4 w-4 mr-2" />
-              {t('recipes.ingredients.addProduct')}
-            </Button>
-            <Button onClick={() => addIngredient('sub_recipe')} size="sm" variant="outline">
-              <ChefHat className="h-4 w-4 mr-2" />
-              {t('recipes.ingredients.addSubRecipe')}
-            </Button>
-          </div>
-        )}
+    <div className="space-y-2">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-base font-semibold">{t('recipes.ingredients.title')}</h3>
       </div>
 
       {ingredients.length === 0 ? (
@@ -183,8 +171,8 @@ export function IngredientsForm({
 
           return (
             <Card key={index} className={isSubRecipe ? 'border-primary/50' : ''}>
-              <CardContent className={readOnly ? 'p-2' : 'p-3'}>
-                <div className={readOnly ? 'space-y-1' : 'space-y-2'}>
+              <CardContent className={readOnly ? 'p-2' : 'p-2.5'}>
+                <div className={readOnly ? 'space-y-1' : 'space-y-1.5'}>
                   {readOnly ? (
                     <>
                       {isSubRecipe && ingredient.sub_recipe ? (
@@ -218,12 +206,12 @@ export function IngredientsForm({
                   ) : (
                     <>
                       <div className="flex items-center gap-2">
-                        <Label>{t('recipes.ingredients.type')}</Label>
+                        <Label className="text-xs">{t('recipes.ingredients.type')}</Label>
                         <Select
                           value={ingredientType}
                           onValueChange={(value: IngredientType) => updateIngredientType(index, value)}
                         >
-                          <SelectTrigger className="w-40">
+                          <SelectTrigger className="w-40 h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -252,13 +240,14 @@ export function IngredientsForm({
                           />
                           
                           <div>
-                            <Label>{t('recipes.ingredients.servingsNeeded')}</Label>
+                            <Label className="text-xs">{t('recipes.ingredients.servingsNeeded')}</Label>
                             <Input
                               type="number"
                               step="1"
                               min="1"
                               value={ingredient.quantity || ''}
                               onChange={(e) => updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
+                              className="h-8 text-sm"
                             />
                           </div>
 
@@ -272,12 +261,12 @@ export function IngredientsForm({
                       ) : (
                         <>
                           <div>
-                            <Label>{t('recipes.ingredients.product')}</Label>
+                            <Label className="text-xs">{t('recipes.ingredients.product')}</Label>
                             <Select
                               value={ingredient.catalog_item_id || ''}
                               onValueChange={(value) => updateIngredient(index, 'catalog_item_id', value)}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-8 text-sm">
                                 <SelectValue placeholder={t('recipes.ingredients.selectProduct')} />
                               </SelectTrigger>
                               <SelectContent>
@@ -290,63 +279,65 @@ export function IngredientsForm({
                             </Select>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <Label>{t('recipes.ingredients.quantity')}</Label>
+                              <Label className="text-xs">{t('recipes.ingredients.quantity')}</Label>
                               <Input
                                 type="number"
                                 step="0.01"
                                 value={ingredient.quantity || ''}
                                 onChange={(e) => updateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                className="h-8 text-sm"
                               />
                             </div>
                             <div>
-                              <Label>{t('recipes.ingredients.unit')}</Label>
+                              <Label className="text-xs">{t('recipes.ingredients.unit')}</Label>
                               <Input
                                 value={ingredient.unit}
                                 onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
                                 disabled
+                                className="h-8 text-sm"
                               />
                             </div>
                           </div>
                         </>
                       )}
 
-                      <div className="grid grid-cols-[1fr_auto] gap-2 items-start">
-                        <div className="space-y-1">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1 space-y-1">
                           <Label className="text-xs">{t('recipes.ingredients.notes')}</Label>
                           <Textarea
                             value={ingredient.notes || ''}
                             onChange={(e) => updateIngredient(index, 'notes', e.target.value)}
-                            rows={1}
-                            className="text-sm resize-none"
+                            className="text-xs resize-none min-h-[32px]"
                           />
                         </div>
-                        {!isSubRecipe && (
-                          <div className="flex items-center space-x-2 pt-5">
-                            <Checkbox
-                              id={`optional-${index}`}
-                              checked={ingredient.is_optional}
-                              onCheckedChange={(checked) => updateIngredient(index, 'is_optional', checked)}
-                            />
-                            <label
-                              htmlFor={`optional-${index}`}
-                              className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {t('recipes.ingredients.optional')}
-                            </label>
-                          </div>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeIngredient(index)}
+                          className="h-8 w-8 p-0 shrink-0 mt-5"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
                       </div>
 
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeIngredient(index)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {t('recipes.ingredients.remove')}
-                      </Button>
+                      {!isSubRecipe && (
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`optional-${index}`}
+                            checked={ingredient.is_optional}
+                            onCheckedChange={(checked) => updateIngredient(index, 'is_optional', checked)}
+                            className="h-3.5 w-3.5"
+                          />
+                          <label
+                            htmlFor={`optional-${index}`}
+                            className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {t('recipes.ingredients.optional')}
+                          </label>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -354,6 +345,19 @@ export function IngredientsForm({
             </Card>
           );
         })
+      )}
+
+      {!readOnly && (
+        <div className="flex gap-2 pt-2">
+          <Button onClick={() => addIngredient('catalog')} size="sm" variant="outline" className="flex-1">
+            <Package className="h-4 w-4 mr-2" />
+            {t('recipes.ingredients.addProduct')}
+          </Button>
+          <Button onClick={() => addIngredient('sub_recipe')} size="sm" variant="outline" className="flex-1">
+            <ChefHat className="h-4 w-4 mr-2" />
+            {t('recipes.ingredients.addSubRecipe')}
+          </Button>
+        </div>
       )}
     </div>
   );

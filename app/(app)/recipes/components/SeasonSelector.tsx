@@ -56,33 +56,35 @@ export function SeasonSelector({
               : displayPlaceholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
+        <PopoverContent className="w-[380px] p-0" align="start">
           <Command>
-            <CommandInput placeholder={t('recipes.seasonSelector.searchPlaceholder')} />
+            <CommandInput placeholder={t('recipes.seasonSelector.searchPlaceholder')} className="h-8" />
             <CommandList>
               <CommandEmpty>{t('recipes.seasonSelector.noMonths')}</CommandEmpty>
-              <CommandGroup>
-                {MONTHS.map((month) => {
-                  const isSelected = selectedMonths.includes(month.key);
-                  return (
-                    <CommandItem
-                      key={month.key}
-                      onSelect={() => toggleMonth(month.key)}
-                      className="cursor-pointer"
-                    >
-                      <div
-                        className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary"
-                        style={{
-                          backgroundColor: isSelected ? `hsl(${month.color})` : 'transparent',
-                          borderColor: `hsl(${month.color})`
-                        }}
+              <CommandGroup className="p-2">
+                <div className="grid grid-cols-2 gap-1">
+                  {MONTHS.map((month) => {
+                    const isSelected = selectedMonths.includes(month.key);
+                    return (
+                      <CommandItem
+                        key={month.key}
+                        onSelect={() => toggleMonth(month.key)}
+                        className="cursor-pointer py-1.5 px-2"
                       >
-                        {isSelected && <Check className="h-3 w-3 text-white" />}
-                      </div>
-                      <span>{getMonthLabel(month.key)}</span>
-                    </CommandItem>
-                  );
-                })}
+                        <div
+                          className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded-sm border"
+                          style={{
+                            backgroundColor: isSelected ? `hsl(${month.color})` : 'transparent',
+                            borderColor: `hsl(${month.color})`
+                          }}
+                        >
+                          {isSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                        </div>
+                        <span className="text-sm">{getMonthLabel(month.key)}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </div>
               </CommandGroup>
             </CommandList>
           </Command>
@@ -90,7 +92,7 @@ export function SeasonSelector({
       </Popover>
 
       {selectedMonths.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {selectedMonths.map((monthKey) => {
             const month = MONTHS.find(m => m.key === monthKey);
             if (!month) return null;
@@ -98,7 +100,7 @@ export function SeasonSelector({
               <Badge
                 key={monthKey}
                 variant="secondary"
-                className="gap-1 cursor-pointer"
+                className="gap-1 cursor-pointer text-xs py-0.5 px-2"
                 onClick={() => removeMonth(monthKey)}
                 style={{
                   backgroundColor: `hsl(${month.color} / 0.15)`,
@@ -107,7 +109,7 @@ export function SeasonSelector({
                 }}
               >
                 {getMonthLabel(month.key).slice(0, 3)}
-                <X className="h-3 w-3" />
+                <X className="h-2.5 w-2.5" />
               </Badge>
             );
           })}

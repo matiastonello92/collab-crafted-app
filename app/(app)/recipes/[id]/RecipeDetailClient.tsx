@@ -58,6 +58,7 @@ interface Recipe {
   recipe_steps: any[];
   recipe_service_notes?: any[];
   profiles?: { full_name: string };
+  created_by_profile?: { full_name: string; avatar_url?: string };
   is_favorite?: boolean;
   clone_count?: number;
 }
@@ -374,7 +375,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">{recipe.category}</Badge>
+                <Badge variant="secondary">{t(`categories.${recipe.category}`)}</Badge>
                 
                  {/* Allergen Badges */}
                 {recipe.allergens && recipe.allergens.length > 0 && (
@@ -447,7 +448,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               <Separator />
 
               <div className="text-sm text-muted-foreground">
-                {t('recipes.detail.createdBy')} {recipe.profiles?.full_name || 'Utente'} il{' '}
+                {t('recipes.detail.createdBy')} {recipe.created_by_profile?.full_name || recipe.profiles?.full_name || t('common.unknownUser')} il{' '}
                 {new Date(recipe.created_at).toLocaleDateString('it-IT')}
               </div>
             </div>

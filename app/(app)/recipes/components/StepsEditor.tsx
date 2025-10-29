@@ -286,6 +286,17 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               <div className="flex-1 space-y-2">
                 {step.title && <h4 className="font-medium">{step.title}</h4>}
                 <p className="text-sm text-muted-foreground">{step.instruction}</p>
+                
+                {step.photo_url && (
+                  <div className="mt-2 rounded-lg overflow-hidden border w-48">
+                    <img 
+                      src={step.photo_url} 
+                      alt={step.title || `Step ${step.step_number}`}
+                      className="w-full h-36 object-cover"
+                    />
+                  </div>
+                )}
+                
                 <div className="flex flex-wrap gap-2 pt-1">
                   {step.timer_minutes && step.timer_minutes > 0 && (
                     <Badge variant="secondary" className="gap-1">
