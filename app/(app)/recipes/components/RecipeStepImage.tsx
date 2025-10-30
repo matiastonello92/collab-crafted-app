@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
+import { getPublicRecipePhotoUrl } from '@/utils/supabase/storage'
 
 interface RecipeStepImageProps {
   photoUrl: string
@@ -29,9 +30,9 @@ export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
       return
     }
 
-    // For filePath, build public URL directly (bucket is public)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const publicUrl = `${supabaseUrl}/storage/v1/object/public/recipe-photos/${photoUrl}`
+    // For filePath, build public URL using helper
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const publicUrl = getPublicRecipePhotoUrl(supabaseUrl, photoUrl)
     setSignedUrl(publicUrl)
     setLoading(false)
   }

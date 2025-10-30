@@ -11,7 +11,7 @@ export const createRecipeSchema = z.object({
   servings: z.number().int().min(1).max(1000).default(4),
   prep_time_minutes: z.number().int().min(0).max(1440).default(0),
   cook_time_minutes: z.number().int().min(0).max(1440).default(0),
-  photo_url: z.string().url().optional().nullable(),
+  photo_url: z.string().optional().nullable(),
   allergens: z.array(z.string()).default([]),
   season: z.array(z.enum(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])).default([]),
   tags: z.array(z.string()).default([]),
@@ -30,7 +30,7 @@ export const createRecipeSchema = z.object({
     instruction: z.string().min(1),
     timer_minutes: z.number().int().min(0).optional(),
     checklist_items: z.array(z.string()).default([]),
-    photo_url: z.string().url().optional()
+    photo_url: z.string().optional()
   })).optional()
 });
 
@@ -42,7 +42,7 @@ export const updateRecipeSchema = z.object({
   servings: z.number().int().min(1).max(1000).optional(),
   prep_time_minutes: z.number().int().min(0).max(1440).optional(),
   cook_time_minutes: z.number().int().min(0).max(1440).optional(),
-  photo_url: z.string().url().optional().nullable(),
+  photo_url: z.string().optional().nullable(),
   allergens: z.array(z.string()).optional(),
   season: z.array(z.enum(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])).optional(),
   tags: z.array(z.string()).optional()
@@ -79,7 +79,7 @@ export const createStepSchema = z.object({
   instruction: z.string().min(1),
   timer_minutes: z.number().int().min(0).optional(),
   checklist_items: z.array(z.string()).default([]),
-  photo_url: z.string().url().optional()
+  photo_url: z.string().optional()
 });
 
 export const updateStepSchema = z.object({
@@ -87,7 +87,7 @@ export const updateStepSchema = z.object({
   instruction: z.string().min(1).optional(),
   timer_minutes: z.number().int().min(0).optional(),
   checklist_items: z.array(z.string()).optional(),
-  photo_url: z.string().url().optional()
+  photo_url: z.string().optional()
 });
 
 // Service note schema
