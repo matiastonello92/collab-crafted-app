@@ -289,11 +289,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                 <p className="text-sm text-muted-foreground">{step.instruction}</p>
                 
                 {step.photo_url && (
-                  <div className="mt-2 rounded-lg overflow-hidden border w-48">
-                    <img 
-                      src={step.photo_url} 
-                      alt={step.title || `Step ${step.step_number}`}
-                      className="w-full h-36 object-cover"
+                  <div className="mt-2 rounded-lg overflow-hidden border">
+                    <RecipeStepImage 
+                      photoUrl={step.photo_url} 
+                      stepTitle={step.title || `Step ${step.step_number}`}
                     />
                   </div>
                 )}
