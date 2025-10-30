@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Save, X, Clock, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepPhotoUploader } from './StepPhotoUploader';
+import { RecipeStepImage } from './RecipeStepImage';
 import { useTranslation } from '@/lib/i18n';
 
 interface RecipeStep {

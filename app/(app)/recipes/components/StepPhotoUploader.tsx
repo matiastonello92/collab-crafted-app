@@ -27,10 +27,40 @@ export function StepPhotoUploader({
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Sync with currentUrl prop changes
+  // Sync with currentUrl prop changes and fetch signed URL if needed
   useEffect(() => {
-    setPhotoUrl(currentUrl || null)
+    if (currentUrl) {
+      // If it's a file path (not a full URL), fetch signed URL
+      if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
+        fetchSignedUrl(currentUrl)
+      } else {
+        setPhotoUrl(currentUrl)
+      }
+    } else {
+      setPhotoUrl(null)
+    }
   }, [currentUrl])
+
+  const fetchSignedUrl = async (filePath: string) => {
+    try {
+      const response = await fetch('/api/v1/recipes/photo-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath })
+      })
+
+      if (response.ok) {
+        const { signedUrl } = await response.json()
+        setPhotoUrl(signedUrl)
+      } else {
+        console.error('Failed to fetch signed URL')
+        setPhotoUrl(null)
+      }
+    } catch (error) {
+      console.error('Error fetching signed URL:', error)
+      setPhotoUrl(null)
+    }
+  }
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -63,9 +93,9 @@ export function StepPhotoUploader({
         throw new Error(errorData.error || 'Upload failed')
       }
 
-      const { url } = await response.json()
-      setPhotoUrl(url)
-      onPhotoUpdate(url)
+      const { filePath, signedUrl } = await response.json()
+      setPhotoUrl(signedUrl)
+      onPhotoUpdate(filePath)  // Save filePath to DB
       toast.success(t('recipePhoto.uploadSuccess'))
 
     } catch (error: any) {

@@ -3246,6 +3246,53 @@ export type Database = {
           },
         ]
       }
+      recipe_collaboration_requests: {
+        Row: {
+          id: string
+          location_id: string
+          message: string | null
+          org_id: string
+          recipe_id: string
+          requested_at: string
+          requester_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          message?: string | null
+          org_id: string
+          recipe_id: string
+          requested_at?: string
+          requester_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          message?: string | null
+          org_id?: string
+          recipe_id?: string
+          requested_at?: string
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_collaboration_requests_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipe_favorites: {
         Row: {
           created_at: string
@@ -3548,6 +3595,7 @@ export type Database = {
           archived_by: string | null
           category: string
           clone_count: number
+          collaborator_ids: string[] | null
           cook_time_minutes: number
           created_at: string
           created_by: string
@@ -3577,6 +3625,7 @@ export type Database = {
           archived_by?: string | null
           category?: string
           clone_count?: number
+          collaborator_ids?: string[] | null
           cook_time_minutes?: number
           created_at?: string
           created_by: string
@@ -3606,6 +3655,7 @@ export type Database = {
           archived_by?: string | null
           category?: string
           clone_count?: number
+          collaborator_ids?: string[] | null
           cook_time_minutes?: number
           created_at?: string
           created_by?: string

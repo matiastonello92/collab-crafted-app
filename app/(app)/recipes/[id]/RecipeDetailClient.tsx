@@ -39,6 +39,8 @@ import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { CollaborationRequestDialog } from '../components/CollaborationRequestDialog';
+import { CollaborationRequestsList } from '../components/CollaborationRequestsList';
 
 interface Recipe {
   id: string;
@@ -61,6 +63,7 @@ interface Recipe {
   created_by_profile?: { full_name: string; avatar_url?: string };
   is_favorite?: boolean;
   clone_count?: number;
+  collaborator_ids?: string[];
 }
 
 interface RecipeDetailClientProps {
@@ -76,11 +79,19 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const [canManage, setCanManage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const [showCollaborationDialog, setShowCollaborationDialog] = useState(false);
+  const [collaborationStatus, setCollaborationStatus] = useState<'none' | 'pending' | 'approved'>('none');
 
   useEffect(() => {
     loadRecipe();
     loadUserPermissions();
   }, [recipeId]);
+
+  useEffect(() => {
+    if (recipe && currentUserId) {
+      checkCollaborationStatus();
+    }
+  }, [recipe, currentUserId]);
 
   async function loadRecipe() {
     try {
@@ -123,6 +134,30 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
       }
     } catch (error) {
       console.error('Error loading permissions:', error);
+    }
+  }
+
+  async function checkCollaborationStatus() {
+    if (!recipe || !currentUserId || recipe.created_by === currentUserId) return;
+
+    try {
+      // Check if user is already a collaborator
+      if (recipe.collaborator_ids?.includes(currentUserId)) {
+        setCollaborationStatus('approved');
+        return;
+      }
+
+      // Check if there's a pending request
+      const response = await fetch(`/api/v1/recipes/${recipeId}/collaboration-requests`);
+      const data = await response.json();
+      
+      const userRequest = data.requests?.find(
+        (req: any) => req.requester_id === currentUserId && req.status === 'pending'
+      );
+
+      setCollaborationStatus(userRequest ? 'pending' : 'none');
+    } catch (error) {
+      console.error('Error checking collaboration status:', error);
     }
   }
 
@@ -202,10 +237,12 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const isSubmitted = recipe.status === 'submitted';
   const isPublished = recipe.status === 'published';
   const isOwner = currentUserId === recipe.created_by;
-  const canEdit = isDraft && isOwner;
+  const isCollaborator = recipe.collaborator_ids?.includes(currentUserId || '') || false;
+  const canEdit = isDraft && (isOwner || isCollaborator || canManage);
   const canSubmit = isDraft && isOwner && recipe.photo_url;
   const canApprove = (isDraft || isSubmitted) && canManage && recipe.photo_url;
   const canUseCookMode = isPublished && recipe.recipe_steps?.length > 0;
+  const canRequestCollaboration = isDraft && !isOwner && !isCollaborator && collaborationStatus === 'none';
   const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
 
   console.log('Recipe permissions:', {
@@ -266,6 +303,27 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               {t('recipes.detail.cloned')} {recipe.clone_count}x
             </Badge>
           )}
+
+          {isCollaborator && (
+            <Badge variant="default" className="gap-1 bg-blue-600">
+              <Users className="w-3 h-3" />
+              Collaboratore
+            </Badge>
+          )}
+
+          {collaborationStatus === 'pending' && (
+            <Badge variant="secondary" className="gap-1">
+              <Clock className="w-3 h-3" />
+              Richiesta Inviata
+            </Badge>
+          )}
+
+          {isDraft && recipe.collaborator_ids && recipe.collaborator_ids.length > 0 && (
+            <Badge variant="outline" className="gap-1">
+              <Users className="w-3 h-3" />
+              {recipe.collaborator_ids.length} Collaboratori
+            </Badge>
+          )}
           
           {canUseCookMode && (
             <Button
@@ -290,6 +348,17 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
               recipeId={recipeId}
               defaultServings={recipe.servings}
             />
+          )}
+
+          {canRequestCollaboration && (
+            <Button
+              variant="outline"
+              onClick={() => setShowCollaborationDialog(true)}
+              className="gap-2"
+            >
+              <Users className="h-4 w-4" />
+              Richiedi Collaborazione
+            </Button>
           )}
           
           {canEdit && (
@@ -502,6 +571,28 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
           />
         </TabsContent>
       </Tabs>
+
+      {/* Collaboration Requests Management (for owners/admins) */}
+      {isDraft && (isOwner || canManage) && (
+        <div className="mt-6">
+          <CollaborationRequestsList 
+            recipeId={recipeId}
+            canManage={isOwner || canManage}
+          />
+        </div>
+      )}
+
+      {/* Collaboration Request Dialog */}
+      <CollaborationRequestDialog
+        recipeId={recipeId}
+        recipeTitle={recipe.title}
+        isOpen={showCollaborationDialog}
+        onClose={() => setShowCollaborationDialog(false)}
+        onSuccess={() => {
+          checkCollaborationStatus();
+          loadRecipe();
+        }}
+      />
 
     </div>
   );

@@ -19,7 +19,7 @@ export async function POST(
       .from('recipes')
       .select(`
         status, created_by, title, servings,
-        recipe_ingredients(id, quantity),
+        recipe_ingredients!recipe_ingredients_recipe_id_fkey(id, quantity),
         recipe_steps(id, instruction)
       `)
       .eq('id', params.id)

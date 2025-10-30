@@ -84,7 +84,10 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to create signed URL' }, { status: 500 })
     }
 
-    return NextResponse.json({ url: signedUrlData.signedUrl })
+    return NextResponse.json({ 
+      filePath: filePath,  // Store this in DB
+      signedUrl: signedUrlData.signedUrl  // Use for immediate preview
+    })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
