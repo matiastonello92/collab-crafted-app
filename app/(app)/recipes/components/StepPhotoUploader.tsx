@@ -26,16 +26,26 @@ export function StepPhotoUploader({
   const [photoUrl, setPhotoUrl] = useState<string | null>(currentUrl || null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const filePathToUrlMap = useRef<Map<string, string>>(new Map())
 
   // Sync with currentUrl prop changes and fetch signed URL if needed
   useEffect(() => {
     if (currentUrl) {
-      // If it's a file path (not a full URL), fetch signed URL
-      if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
-        fetchSignedUrl(currentUrl)
-      } else {
+      // If it's already a full URL, use it directly
+      if (currentUrl.startsWith('http://') || currentUrl.startsWith('https://')) {
         setPhotoUrl(currentUrl)
+        return
       }
+      
+      // Check if we already have this signedUrl cached
+      const cachedUrl = filePathToUrlMap.current.get(currentUrl)
+      if (cachedUrl) {
+        setPhotoUrl(cachedUrl)
+        return
+      }
+      
+      // Otherwise fetch signed URL
+      fetchSignedUrl(currentUrl)
     } else {
       setPhotoUrl(null)
     }
@@ -51,6 +61,7 @@ export function StepPhotoUploader({
 
       if (response.ok) {
         const { signedUrl } = await response.json()
+        if (filePath) filePathToUrlMap.current.set(filePath, signedUrl)
         setPhotoUrl(signedUrl)
       } else {
         console.error('Failed to fetch signed URL')
@@ -94,6 +105,7 @@ export function StepPhotoUploader({
       }
 
       const { filePath, signedUrl } = await response.json()
+      filePathToUrlMap.current.set(filePath, signedUrl)
       setPhotoUrl(signedUrl)
       onPhotoUpdate(filePath)  // Save filePath to DB
       toast.success(t('recipePhoto.uploadSuccess'))
