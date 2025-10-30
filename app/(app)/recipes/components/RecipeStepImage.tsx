@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 
 interface RecipeStepImageProps {
@@ -30,23 +29,11 @@ export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
       return
     }
 
-    // Otherwise, fetch signed URL from file path
-    try {
-      const response = await fetch('/api/v1/recipes/photo-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filePath: photoUrl })
-      })
-
-      if (response.ok) {
-        const { signedUrl: url } = await response.json()
-        setSignedUrl(url)
-      }
-    } catch (error) {
-      console.error('Error loading image:', error)
-    } finally {
-      setLoading(false)
-    }
+    // For filePath, build public URL directly (bucket is public)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/recipe-photos/${photoUrl}`
+    setSignedUrl(publicUrl)
+    setLoading(false)
   }
 
   if (loading) {
