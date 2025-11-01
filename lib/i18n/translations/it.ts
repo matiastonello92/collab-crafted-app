@@ -2143,6 +2143,8 @@ export const it = {
       stepDeleted: 'Step eliminato',
       errorSaving: 'Errore salvataggio step',
       errorDeleting: 'Errore eliminazione step',
+      reordered: 'Ordine aggiornato',
+      errorReordering: 'Errore nell\'aggiornare l\'ordine',
       items: 'items',
       min: 'min',
     },
