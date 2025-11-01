@@ -163,29 +163,17 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         {editingStep && (
           <Card className="border-primary">
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="step_number">{t('recipes.steps.stepNumber')} *</Label>
+              <div>
+                <Label htmlFor="timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="step_number"
+                    id="timer_minutes"
                     type="number"
-                    min={1}
-                    value={editingStep.step_number || 1}
-                    onChange={e => setEditingStep({ ...editingStep, step_number: parseInt(e.target.value) || 1 })}
+                    min={0}
+                    value={editingStep.timer_minutes || 0}
+                    onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
                   />
-                </div>
-                <div>
-                  <Label htmlFor="timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="timer_minutes"
-                      type="number"
-                      min={0}
-                      value={editingStep.timer_minutes || 0}
-                      onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
                 </div>
               </div>
 
