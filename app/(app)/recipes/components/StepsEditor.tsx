@@ -278,42 +278,46 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         {/* Steps List */}
         {sortedSteps.length > 0 ? (
           sortedSteps.map((step) => (
-            <div key={step.id} className="flex gap-4 p-4 border rounded-lg">
+            <div key={step.id} className="flex gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
               <div className="flex-shrink-0">
-                <Badge variant="outline" className="rounded-full h-10 w-10 flex items-center justify-center text-base font-bold">
+                <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
                   {step.step_number}
-                </Badge>
+                </div>
               </div>
-              <div className="flex-1 space-y-2">
-                {step.title && <h4 className="font-medium">{step.title}</h4>}
-                <p className="text-sm text-muted-foreground">{step.instruction}</p>
-                
-                {step.photo_url && (
-                  <div className="mt-2 rounded-lg overflow-hidden border">
-                    <RecipeStepImage 
-                      photoUrl={step.photo_url} 
-                      stepTitle={step.title || `Step ${step.step_number}`}
-                    />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    {step.title && <h4 className="font-medium text-sm">{step.title}</h4>}
+                    <p className="text-sm text-muted-foreground">{step.instruction}</p>
+                    
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {step.timer_minutes && step.timer_minutes > 0 && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Clock className="h-3 w-3" />
+                          {step.timer_minutes} {t('recipes.steps.min')}
+                        </Badge>
+                      )}
+                      {step.checklist_items && step.checklist_items.length > 0 && (
+                        <Badge variant="secondary" className="gap-1">
+                          <ListChecks className="h-3 w-3" />
+                          {step.checklist_items.length} {t('recipes.steps.items')}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                )}
-                
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {step.timer_minutes && step.timer_minutes > 0 && (
-                    <Badge variant="secondary" className="gap-1">
-                      <Clock className="h-3 w-3" />
-                      {step.timer_minutes} {t('recipes.steps.min')}
-                    </Badge>
-                  )}
-                  {step.checklist_items && step.checklist_items.length > 0 && (
-                    <Badge variant="secondary" className="gap-1">
-                      <ListChecks className="h-3 w-3" />
-                      {step.checklist_items.length} {t('recipes.steps.items')}
-                    </Badge>
+                  
+                  {step.photo_url && (
+                    <div className="flex-shrink-0">
+                      <RecipeStepImage 
+                        photoUrl={step.photo_url} 
+                        stepTitle={step.title || `Step ${step.step_number}`}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
               {!readOnly && (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-1">
                   <Button
                     variant="outline"
                     size="sm"
