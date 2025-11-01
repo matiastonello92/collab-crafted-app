@@ -479,10 +479,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
       if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
 
-      // Refresh from DB only for PATCH operations (existing steps)
-      if (editingStep.id) {
-        await refreshStepsFromDB();
-      }
+      // Refresh from DB to ensure UI is in sync
+      await refreshStepsFromDB();
 
       toast.success(editingStep.id ? t('recipes.steps.stepUpdated') : t('recipes.steps.stepAdded'));
       setEditingStep(null);
