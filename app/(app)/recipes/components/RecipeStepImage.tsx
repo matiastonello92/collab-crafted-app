@@ -57,25 +57,25 @@ export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
 
   if (loading) {
     return (
-      <div className="w-48 h-36 flex items-center justify-center bg-muted">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="w-20 h-20 bg-muted animate-pulse rounded-md flex items-center justify-center flex-shrink-0">
+        <span className="text-xs text-muted-foreground">...</span>
       </div>
     )
   }
 
   if (!signedUrl) {
     return (
-      <div className="w-48 h-36 flex items-center justify-center bg-muted text-muted-foreground text-xs">
-        Foto non disponibile
+      <div className="w-20 h-20 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+        <span className="text-xs text-muted-foreground">N/A</span>
       </div>
     )
   }
 
   return (
-    <img 
-      src={signedUrl} 
+    <img
+      src={signedUrl}
       alt={stepTitle}
-      className="w-48 h-36 object-cover"
+      className="w-20 h-20 object-cover rounded-md flex-shrink-0"
     />
   )
 }

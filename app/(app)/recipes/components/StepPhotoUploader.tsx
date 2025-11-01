@@ -114,7 +114,7 @@ export function StepPhotoUploader({
   return (
     <div className="space-y-2">
       {photoUrl ? (
-        <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden border">
+        <div className="relative w-40 aspect-square bg-muted rounded-lg overflow-hidden border">
           <Image
             src={photoUrl}
             alt="Step photo"
@@ -135,10 +135,10 @@ export function StepPhotoUploader({
           )}
         </div>
       ) : (
-        <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden border-2 border-dashed border-border">
+        <div className="relative w-40 aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
             <ImageIcon className="w-8 h-8" />
-            <p className="text-xs">{t('recipePhoto.formats')}</p>
+            <p className="text-xs text-center px-2">JPG, PNG</p>
           </div>
         </div>
       )}
