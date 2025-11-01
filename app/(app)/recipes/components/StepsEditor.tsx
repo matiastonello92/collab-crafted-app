@@ -81,14 +81,43 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     })
   );
 
-  function handleStartAdd() {
+  async function handleStartAdd() {
     const nextNumber = Math.max(0, ...localSteps.map(s => s.step_number)) + 1;
-    setEditingStep({
-      step_number: nextNumber,
-      instruction: '',
-      timer_minutes: 0,
-      checklist_items: []
-    });
+    
+    setLoading(true);
+    try {
+      // Create step immediately in DB with default values
+      const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step_number: nextNumber,
+          title: null,
+          instruction: '',
+          timer_minutes: 0,
+          checklist_items: [],
+          photo_url: null
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || t('recipes.steps.errorSaving'));
+      }
+
+      const { step } = await response.json();
+      
+      // Add to local state and start editing
+      setLocalSteps([...localSteps, step]);
+      setEditingStep(step);
+      
+      toast.success(t('recipes.steps.readyToAdd'));
+    } catch (error) {
+      console.error('Error creating step:', error);
+      toast.error(t('recipes.steps.errorSaving'));
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleInsertAfter(afterStepNumber: number) {
@@ -113,17 +142,34 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           ? { ...s, step_number: s.step_number + 1 }
           : s
       );
-      setLocalSteps(updatedSteps);
 
-      // Set up new step for editing
-      setEditingStep({
-        step_number: afterStepNumber + 1,
-        instruction: '',
-        timer_minutes: 0,
-        checklist_items: []
+      // Create new step immediately in DB
+      const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step_number: afterStepNumber + 1,
+          title: null,
+          instruction: '',
+          timer_minutes: 0,
+          checklist_items: [],
+          photo_url: null
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || t('recipes.steps.errorSaving'));
+      }
+
+      const { step } = await response.json();
+      
+      // Add to local state and start editing
+      setLocalSteps([...updatedSteps, step]);
+      setEditingStep(step);
+
       toast.success(t('recipes.steps.readyToAdd'));
+      onStepsChange?.();
     } catch (error) {
       console.error('Error preparing to insert step:', error);
       toast.error(t('recipes.steps.errorInserting'));
