@@ -78,6 +78,47 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     });
   }
 
+  async function handleInsertAfter(afterStepNumber: number) {
+    setLoading(true);
+    try {
+      // Update all steps with step_number > afterStepNumber
+      const stepsToUpdate = localSteps.filter(s => s.step_number > afterStepNumber);
+      
+      await Promise.all(
+        stepsToUpdate.map((step) =>
+          fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ step_number: step.step_number + 1 }),
+          })
+        )
+      );
+
+      // Update local state
+      const updatedSteps = localSteps.map(s =>
+        s.step_number > afterStepNumber
+          ? { ...s, step_number: s.step_number + 1 }
+          : s
+      );
+      setLocalSteps(updatedSteps);
+
+      // Set up new step for editing
+      setEditingStep({
+        step_number: afterStepNumber + 1,
+        instruction: '',
+        timer_minutes: 0,
+        checklist_items: []
+      });
+
+      toast.success(t('recipes.steps.readyToAdd'));
+    } catch (error) {
+      console.error('Error preparing to insert step:', error);
+      toast.error(t('recipes.steps.errorInserting'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function handleStartEdit(step: RecipeStep) {
     setEditingStep({ ...step });
     setChecklistInput('');
@@ -246,12 +287,11 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-3">
-                {sortedSteps.map((step) => {
-                  // Se questo step è in modifica, mostra il form inline
-                  if (editingStep?.id === step.id && editingStep) {
-                    const currentStep = editingStep;
-                    return (
-                      <Card key={step.id} className="border-primary">
+                {sortedSteps.map((step, index) => (
+                  <div key={step.id}>
+                    {/* Se questo step è in modifica, mostra il form inline */}
+                    {editingStep?.id === step.id && editingStep ? (
+                      <Card className="border-primary">
                         <CardContent className="pt-6 space-y-4">
                           <div>
                             <Label htmlFor="timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
@@ -261,8 +301,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                                 id="timer_minutes"
                                 type="number"
                                 min={0}
-                                value={currentStep.timer_minutes || 0}
-                                onChange={e => setEditingStep({ ...currentStep, timer_minutes: parseInt(e.target.value) || 0 })}
+                                value={editingStep.timer_minutes || 0}
+                                onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
                               />
                             </div>
                           </div>
@@ -271,8 +311,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                             <Label htmlFor="title">{t('recipes.steps.stepTitle')}</Label>
                             <Input
                               id="title"
-                              value={currentStep.title || ''}
-                              onChange={e => setEditingStep({ ...currentStep, title: e.target.value })}
+                              value={editingStep.title || ''}
+                              onChange={e => setEditingStep({ ...editingStep, title: e.target.value })}
                               placeholder={t('recipes.steps.titlePlaceholder')}
                             />
                           </div>
@@ -281,21 +321,20 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                             <Label htmlFor="instruction">{t('recipes.steps.instruction')} *</Label>
                             <Textarea
                               id="instruction"
-                              value={currentStep.instruction || ''}
-                              onChange={e => setEditingStep({ ...currentStep, instruction: e.target.value })}
+                              value={editingStep.instruction || ''}
+                              onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
                               placeholder={t('recipes.steps.instructionPlaceholder')}
                               rows={4}
                             />
                           </div>
 
-                          {/* Photo Upload */}
                           <div className="space-y-2">
                             <Label>{t('recipes.steps.photoLabel')}</Label>
                             <StepPhotoUploader
                               recipeId={recipeId}
-                              stepId={currentStep.id || 'temp'}
-                              currentUrl={currentStep.photo_url || ''}
-                              onPhotoUpdate={(url) => setEditingStep({ ...currentStep, photo_url: url })}
+                              stepId={editingStep.id || 'temp'}
+                              currentUrl={editingStep.photo_url || ''}
+                              onPhotoUpdate={(url) => setEditingStep({ ...editingStep, photo_url: url })}
                               disabled={readOnly}
                             />
                           </div>
@@ -322,9 +361,9 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                                 <Plus className="h-3 w-3" />
                               </Button>
                             </div>
-                            {currentStep.checklist_items && currentStep.checklist_items.length > 0 && (
+                            {editingStep.checklist_items && editingStep.checklist_items.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-1">
-                                {currentStep.checklist_items.map((item, idx) => (
+                                {editingStep.checklist_items.map((item, idx) => (
                                   <Badge key={idx} variant="secondary" className="gap-1 text-xs py-1">
                                     {item}
                                     <button
@@ -351,22 +390,40 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                           </div>
                         </CardContent>
                       </Card>
-                    );
-                  }
-                  
-                  // Altrimenti mostra lo step normale
-                  return (
-                    <SortableStepItem
-                      key={step.id}
-                      step={step}
-                      readOnly={readOnly}
-                      loading={loading}
-                      onEdit={handleStartEdit}
-                      onDelete={(id) => handleDelete(id)}
-                      t={t}
-                    />
-                  );
-                })}
+                    ) : (
+                      <SortableStepItem
+                        step={step}
+                        readOnly={readOnly}
+                        loading={loading}
+                        onEdit={handleStartEdit}
+                        onDelete={(id) => handleDelete(id)}
+                        t={t}
+                      />
+                    )}
+
+                    {/* Insert button between steps */}
+                    {!readOnly && index < sortedSteps.length - 1 && (
+                      <div className="relative py-2">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-dashed border-border/50" />
+                        </div>
+                        <div className="relative flex justify-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleInsertAfter(step.step_number)}
+                            disabled={loading}
+                            className="bg-background px-2 h-6 text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            {t('recipes.steps.addStep')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
 
                 {/* Form for NEW step (no id) - at the bottom */}
                 {editingStep && !editingStep.id && (
