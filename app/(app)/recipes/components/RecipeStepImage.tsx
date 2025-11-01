@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { getPublicRecipePhotoUrl } from '@/utils/supabase/storage'
 
@@ -12,13 +12,11 @@ interface RecipeStepImageProps {
 export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const filePathToUrlMap = useRef<Map<string, string>>(new Map())
 
   useEffect(() => {
-    loadImage()
-  }, [photoUrl])
-
-  async function loadImage() {
     if (!photoUrl) {
+      setSignedUrl(null)
       setLoading(false)
       return
     }
@@ -30,9 +28,23 @@ export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
       return
     }
 
+    // Check if we already have this signedUrl cached
+    const cachedUrl = filePathToUrlMap.current.get(photoUrl)
+    if (cachedUrl) {
+      setSignedUrl(cachedUrl)
+      setLoading(false)
+      return
+    }
+
+    // Otherwise load the image
+    loadImage()
+  }, [photoUrl])
+
+  async function loadImage() {
     // For filePath, build public URL using helper
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
     const publicUrl = getPublicRecipePhotoUrl(supabaseUrl, photoUrl)
+    filePathToUrlMap.current.set(photoUrl, publicUrl)
     setSignedUrl(publicUrl)
     setLoading(false)
   }
