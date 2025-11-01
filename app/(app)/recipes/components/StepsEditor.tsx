@@ -246,110 +246,6 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-3">
-                {/* Form for NEW step (no id) */}
-                {editingStep && !editingStep.id && (
-                  <Card className="border-primary">
-                    <CardContent className="pt-6 space-y-4">
-                      <div>
-                        <Label htmlFor="new-timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="new-timer_minutes"
-                            type="number"
-                            min={0}
-                            value={editingStep.timer_minutes || 0}
-                            onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="new-title">{t('recipes.steps.stepTitle')}</Label>
-                        <Input
-                          id="new-title"
-                          value={editingStep.title || ''}
-                          onChange={e => setEditingStep({ ...editingStep, title: e.target.value })}
-                          placeholder={t('recipes.steps.titlePlaceholder')}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="new-instruction">{t('recipes.steps.instruction')} *</Label>
-                        <Textarea
-                          id="new-instruction"
-                          value={editingStep.instruction || ''}
-                          onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
-                          placeholder={t('recipes.steps.instructionPlaceholder')}
-                          rows={4}
-                        />
-                      </div>
-
-                      {/* Photo Upload */}
-                      <div className="space-y-2">
-                        <Label>{t('recipes.steps.photoLabel')}</Label>
-                        <StepPhotoUploader
-                          recipeId={recipeId}
-                          stepId="temp"
-                          currentUrl={editingStep.photo_url || ''}
-                          onPhotoUpdate={(url) => setEditingStep({ ...editingStep, photo_url: url })}
-                          disabled={readOnly}
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="flex items-center gap-2">
-                          <ListChecks className="h-4 w-4" />
-                          {t('recipes.steps.checklist')}
-                        </Label>
-                        <div className="flex gap-2 mt-2">
-                          <Input
-                            value={checklistInput}
-                            onChange={e => setChecklistInput(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleAddChecklistItem();
-                              }
-                            }}
-                            placeholder={t('recipes.steps.checklistPlaceholder')}
-                            className="text-sm"
-                          />
-                          <Button type="button" onClick={handleAddChecklistItem} size="sm" variant="secondary">
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        {editingStep.checklist_items && editingStep.checklist_items.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {editingStep.checklist_items.map((item, idx) => (
-                              <Badge key={idx} variant="secondary" className="gap-1 text-xs py-1">
-                                {item}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveChecklistItem(idx)}
-                                  className="ml-1 hover:text-destructive"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2 pt-4">
-                        <Button onClick={handleSave} disabled={loading} className="gap-2">
-                          <Save className="h-4 w-4" />
-                          {t('recipes.steps.save')}
-                        </Button>
-                        <Button variant="outline" onClick={handleCancel} disabled={loading}>
-                          {t('recipes.steps.cancel')}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
                 {sortedSteps.map((step) => {
                   // Se questo step è in modifica, mostra il form inline
                   if (editingStep?.id === step.id && editingStep) {
@@ -471,6 +367,110 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                     />
                   );
                 })}
+
+                {/* Form for NEW step (no id) - at the bottom */}
+                {editingStep && !editingStep.id && (
+                  <Card className="border-primary">
+                    <CardContent className="pt-6 space-y-4">
+                      <div>
+                        <Label htmlFor="new-timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="new-timer_minutes"
+                            type="number"
+                            min={0}
+                            value={editingStep.timer_minutes || 0}
+                            onChange={e => setEditingStep({ ...editingStep, timer_minutes: parseInt(e.target.value) || 0 })}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="new-title">{t('recipes.steps.stepTitle')}</Label>
+                        <Input
+                          id="new-title"
+                          value={editingStep.title || ''}
+                          onChange={e => setEditingStep({ ...editingStep, title: e.target.value })}
+                          placeholder={t('recipes.steps.titlePlaceholder')}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="new-instruction">{t('recipes.steps.instruction')} *</Label>
+                        <Textarea
+                          id="new-instruction"
+                          value={editingStep.instruction || ''}
+                          onChange={e => setEditingStep({ ...editingStep, instruction: e.target.value })}
+                          placeholder={t('recipes.steps.instructionPlaceholder')}
+                          rows={4}
+                        />
+                      </div>
+
+                      {/* Photo Upload */}
+                      <div className="space-y-2">
+                        <Label>{t('recipes.steps.photoLabel')}</Label>
+                        <StepPhotoUploader
+                          recipeId={recipeId}
+                          stepId="temp"
+                          currentUrl={editingStep.photo_url || ''}
+                          onPhotoUpdate={(url) => setEditingStep({ ...editingStep, photo_url: url })}
+                          disabled={readOnly}
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="flex items-center gap-2">
+                          <ListChecks className="h-4 w-4" />
+                          {t('recipes.steps.checklist')}
+                        </Label>
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            value={checklistInput}
+                            onChange={e => setChecklistInput(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddChecklistItem();
+                              }
+                            }}
+                            placeholder={t('recipes.steps.checklistPlaceholder')}
+                            className="text-sm"
+                          />
+                          <Button type="button" onClick={handleAddChecklistItem} size="sm" variant="secondary">
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        {editingStep.checklist_items && editingStep.checklist_items.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {editingStep.checklist_items.map((item, idx) => (
+                              <Badge key={idx} variant="secondary" className="gap-1 text-xs py-1">
+                                {item}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveChecklistItem(idx)}
+                                  className="ml-1 hover:text-destructive"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 pt-4">
+                        <Button onClick={handleSave} disabled={loading} className="gap-2">
+                          <Save className="h-4 w-4" />
+                          {t('recipes.steps.save')}
+                        </Button>
+                        <Button variant="outline" onClick={handleCancel} disabled={loading}>
+                          {t('recipes.steps.cancel')}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </SortableContext>
           </DndContext>
