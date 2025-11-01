@@ -170,16 +170,27 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           s => s.step_number >= newStepNumber
         );
         
-        // Step 1: Renumber existing steps
-        await Promise.all(
-          stepsToUpdate.map((step) =>
-            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+        console.log('[confirmStepNumberChange] Renumbering steps:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number + 1}`));
+        
+        // Step 1: Renumber existing steps with proper error checking
+        const patchResults = await Promise.all(
+          stepsToUpdate.map(async (step) => {
+            const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ step_number: step.step_number + 1 }),
-            })
-          )
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(`Failed to renumber step ${step.id}: ${errorData.error || response.statusText}`);
+            }
+            
+            return response.json();
+          })
         );
+        
+        console.log('[confirmStepNumberChange] PATCH results:', patchResults);
         
         const updatedSteps = localSteps.map(s =>
           s.step_number >= newStepNumber
@@ -189,6 +200,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         setLocalSteps(updatedSteps);
         
         // Step 2: Auto-save the new step at the chosen position
+        console.log('[confirmStepNumberChange] Creating new step at position:', newStepNumber);
         const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -202,7 +214,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           })
         });
 
-        if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || t('recipes.steps.errorSaving'));
+        }
 
         toast.success(t('recipes.steps.stepAdded'));
         setEditingStep(null);
@@ -224,14 +239,23 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           s => s.id !== editingStep.id && s.step_number >= newStepNumber && s.step_number < oldStepNumber
         );
         
+        console.log('[confirmStepNumberChange] Moving up - renumbering:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number + 1}`));
+        
         await Promise.all(
-          stepsToUpdate.map((step) =>
-            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+          stepsToUpdate.map(async (step) => {
+            const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ step_number: step.step_number + 1 }),
-            })
-          )
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(`Failed to renumber step ${step.id}: ${errorData.error || response.statusText}`);
+            }
+            
+            return response.json();
+          })
         );
         
         const updatedSteps = localSteps.map(s => {
@@ -249,14 +273,23 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           s => s.id !== editingStep.id && s.step_number > oldStepNumber && s.step_number <= newStepNumber
         );
         
+        console.log('[confirmStepNumberChange] Moving down - renumbering:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number - 1}`));
+        
         await Promise.all(
-          stepsToUpdate.map((step) =>
-            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+          stepsToUpdate.map(async (step) => {
+            const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ step_number: step.step_number - 1 }),
-            })
-          )
+            });
+            
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(`Failed to renumber step ${step.id}: ${errorData.error || response.statusText}`);
+            }
+            
+            return response.json();
+          })
         );
         
         const updatedSteps = localSteps.map(s => {
@@ -273,8 +306,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       setEditingStep({ ...editingStep, step_number: newStepNumber });
       toast.success(t('recipes.steps.positionUpdated'));
     } catch (error) {
-      console.error('Error changing step number:', error);
-      toast.error(t('recipes.steps.errorChangingPosition'));
+      console.error('[confirmStepNumberChange] Error:', error);
+      toast.error(error instanceof Error ? error.message : t('recipes.steps.errorChangingPosition'));
+      // Refresh data to sync with actual DB state
+      onStepsChange?.();
     } finally {
       setLoading(false);
     }
