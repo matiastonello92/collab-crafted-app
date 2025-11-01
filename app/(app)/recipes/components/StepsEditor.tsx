@@ -152,12 +152,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   async function handleInsertAfter(afterStepNumber: number) {
     setLoading(true);
     try {
-      // STEP 1: Sync with DB to get fresh data
-      console.log('[handleInsertAfter] Syncing with DB before renumbering...');
-      const freshSteps = (await refreshStepsFromDB()) || localSteps;
-      
-      // STEP 2: Calculate steps to renumber using fresh data
-      const stepsToUpdate = freshSteps.filter(
+      // Calculate steps to renumber using localSteps
+      const stepsToUpdate = localSteps.filter(
         (s: RecipeStep) => s.id && s.step_number > afterStepNumber
       );
 
@@ -165,8 +161,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         stepsToUpdate.map((s: RecipeStep) => ({ id: s.id, current: s.step_number, new: s.step_number + 1 }))
       );
 
-      // STEP 3: Renumber steps ONE BY ONE with error handling
-      const updatedSteps = [...freshSteps];
+      // Renumber steps ONE BY ONE with error handling
+      const updatedSteps = [...localSteps];
       const errors: string[] = [];
       
       for (const step of stepsToUpdate) {
@@ -196,14 +192,13 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         }
       }
 
-      // STEP 4: If there were errors, stop and resync
+      // If there were errors, stop
       if (errors.length > 0) {
         toast.error(`Failed to renumber some steps:\n${errors.join('\n')}`);
-        await refreshStepsFromDB();
         return;
       }
 
-      // STEP 5: Only now create the new step
+      // Create the new step
       console.log('[handleInsertAfter] Creating new step at position:', afterStepNumber + 1);
       const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
         method: 'POST',
@@ -224,11 +219,14 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       const { step } = await response.json();
       console.log('[handleInsertAfter] Created step:', step);
       
-      // STEP 6: Update localSteps with the new step
+      // Update localSteps with the new step
       updatedSteps.push(step);
       updatedSteps.sort((a, b) => a.step_number - b.step_number);
       setLocalSteps(updatedSteps);
       setEditingStep(step);
+      
+      // Sync with DB after successful insert
+      await refreshStepsFromDB();
 
       toast.success(t('recipes.steps.addedStep'));
       onStepsChange?.();
