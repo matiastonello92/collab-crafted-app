@@ -326,12 +326,12 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext
-              items={sortedSteps.filter(s => s.id).map(s => s.id!)}
-              strategy={verticalListSortingStrategy}
-              disabled={readOnly || !!editingStep}
-            >
-              {sortedSteps.filter(s => s.id).map((step) => (
+          <SortableContext
+            items={sortedSteps.map(s => s.id!)}
+            strategy={verticalListSortingStrategy}
+            disabled={readOnly || !!editingStep}
+          >
+            {sortedSteps.map((step) => (
                 <SortableStepItem
                   key={step.id}
                   step={step}
