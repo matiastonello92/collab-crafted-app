@@ -164,12 +164,13 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     setLoading(true);
     
     try {
-      // For NEW steps (without id): renumber existing steps from newStepNumber onwards
+      // For NEW steps (without id): renumber existing steps, then auto-save
       if (!editingStep.id) {
         const stepsToUpdate = localSteps.filter(
           s => s.step_number >= newStepNumber
         );
         
+        // Step 1: Renumber existing steps
         await Promise.all(
           stepsToUpdate.map((step) =>
             fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
@@ -186,8 +187,27 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
             : s
         );
         setLocalSteps(updatedSteps);
-        setEditingStep({ ...editingStep, step_number: newStepNumber });
-        toast.success(t('recipes.steps.positionUpdated'));
+        
+        // Step 2: Auto-save the new step at the chosen position
+        const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            step_number: newStepNumber,
+            title: editingStep.title || null,
+            instruction: editingStep.instruction,
+            timer_minutes: editingStep.timer_minutes || 0,
+            checklist_items: editingStep.checklist_items || [],
+            photo_url: editingStep.photo_url || null
+          })
+        });
+
+        if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
+
+        toast.success(t('recipes.steps.stepAdded'));
+        setEditingStep(null);
+        setChecklistInput('');
+        onStepsChange?.();
         setLoading(false);
         return;
       }
