@@ -3291,6 +3291,20 @@ export type Database = {
             referencedRelation: "recipes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "recipe_collaboration_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_collaboration_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       recipe_favorites: {

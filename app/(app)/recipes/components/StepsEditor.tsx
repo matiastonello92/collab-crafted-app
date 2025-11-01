@@ -64,6 +64,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   const [editingStep, setEditingStep] = useState<Partial<RecipeStep> | null>(null);
   const [checklistInput, setChecklistInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [showRenumberDialog, setShowRenumberDialog] = useState(false);
   const [pendingStepNumber, setPendingStepNumber] = useState<number | null>(null);
 
@@ -71,14 +72,29 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
   // Helper to refresh steps from DB
   async function refreshStepsFromDB() {
+    if (isSyncing) {
+      console.log('[refreshStepsFromDB] Already syncing, returning current state');
+      return localSteps;
+    }
+    
+    setIsSyncing(true);
+    console.log('[refreshStepsFromDB] Syncing with database...');
+    
     try {
       const response = await fetch(`/api/v1/recipes/${recipeId}/steps`);
       if (response.ok) {
         const { steps } = await response.json();
+        console.log('[refreshStepsFromDB] Received steps from DB:', steps.map((s: RecipeStep) => ({ id: s.id, step_number: s.step_number })));
         setLocalSteps(steps);
+        return steps;
       }
+      console.warn('[refreshStepsFromDB] Failed to fetch steps:', response.status);
+      return localSteps;
     } catch (error) {
-      console.error('Error refreshing steps:', error);
+      console.error('[refreshStepsFromDB] Error:', error);
+      return localSteps;
+    } finally {
+      setIsSyncing(false);
     }
   }
 
@@ -95,11 +111,12 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   );
 
   async function handleStartAdd() {
-    const nextNumber = Math.max(0, ...localSteps.map(s => s.step_number)) + 1;
-    
     setLoading(true);
     try {
+      const nextNumber = Math.max(0, ...localSteps.map(s => s.step_number)) + 1;
+      
       // Create step immediately in DB with default values
+      console.log('[handleStartAdd] Creating new step at position:', nextNumber);
       const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,6 +134,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       }
 
       const { step } = await response.json();
+      console.log('[handleStartAdd] Created step:', step);
       
       // Add to local state manually and start editing
       setLocalSteps([...localSteps, step]);
@@ -124,7 +142,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       
       toast.success(t('recipes.steps.readyToAdd'));
     } catch (error) {
-      console.error('Error creating step:', error);
+      console.error('[handleStartAdd] Error:', error);
       toast.error(t('recipes.steps.errorSaving'));
     } finally {
       setLoading(false);
@@ -134,27 +152,59 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   async function handleInsertAfter(afterStepNumber: number) {
     setLoading(true);
     try {
-      // Update all steps with step_number > afterStepNumber (only saved steps with ID)
-      const stepsToUpdate = localSteps.filter(s => s.id && s.step_number > afterStepNumber);
+      // STEP 1: Sync with DB to get fresh data
+      console.log('[handleInsertAfter] Syncing with DB before renumbering...');
+      const freshSteps = (await refreshStepsFromDB()) || localSteps;
       
-      await Promise.all(
-        stepsToUpdate.map((step) =>
-          fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+      // STEP 2: Calculate steps to renumber using fresh data
+      const stepsToUpdate = freshSteps.filter(
+        (s: RecipeStep) => s.id && s.step_number > afterStepNumber
+      );
+
+      console.log('[handleInsertAfter] Steps to renumber:', 
+        stepsToUpdate.map((s: RecipeStep) => ({ id: s.id, current: s.step_number, new: s.step_number + 1 }))
+      );
+
+      // STEP 3: Renumber steps ONE BY ONE with error handling
+      const updatedSteps = [...freshSteps];
+      const errors: string[] = [];
+      
+      for (const step of stepsToUpdate) {
+        try {
+          console.log(`[handleInsertAfter] PATCH step ${step.id}: ${step.step_number} → ${step.step_number + 1}`);
+          const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ step_number: step.step_number + 1 }),
-          })
-        )
-      );
+          });
 
-      // Update local state
-      const updatedSteps = localSteps.map(s =>
-        s.step_number > afterStepNumber
-          ? { ...s, step_number: s.step_number + 1 }
-          : s
-      );
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+            console.error(`❌ Failed to renumber step ${step.id}:`, error);
+            errors.push(`Step ${step.step_number}: ${error.message || 'Failed'}`);
+            continue;
+          }
 
-      // Create new step immediately in DB
+          // Update step in our local array
+          const idx = updatedSteps.findIndex(s => s.id === step.id);
+          if (idx !== -1) {
+            updatedSteps[idx] = { ...updatedSteps[idx], step_number: step.step_number + 1 };
+          }
+        } catch (error: any) {
+          console.error(`❌ Exception renumbering step ${step.id}:`, error);
+          errors.push(`Step ${step.step_number}: ${error.message}`);
+        }
+      }
+
+      // STEP 4: If there were errors, stop and resync
+      if (errors.length > 0) {
+        toast.error(`Failed to renumber some steps:\n${errors.join('\n')}`);
+        await refreshStepsFromDB();
+        return;
+      }
+
+      // STEP 5: Only now create the new step
+      console.log('[handleInsertAfter] Creating new step at position:', afterStepNumber + 1);
       const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,8 +212,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           step_number: afterStepNumber + 1,
           instruction: 'Nuovo step',
           timer_minutes: 0,
-          checklist_items: []
-        })
+          checklist_items: [],
+        }),
       });
 
       if (!response.ok) {
@@ -172,15 +222,18 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       }
 
       const { step } = await response.json();
+      console.log('[handleInsertAfter] Created step:', step);
       
-      // Add newly created step to already updated local state
-      setLocalSteps([...updatedSteps, step]);
+      // STEP 6: Update localSteps with the new step
+      updatedSteps.push(step);
+      updatedSteps.sort((a, b) => a.step_number - b.step_number);
+      setLocalSteps(updatedSteps);
       setEditingStep(step);
 
-      toast.success(t('recipes.steps.readyToAdd'));
+      toast.success(t('recipes.steps.addedStep'));
       onStepsChange?.();
-    } catch (error) {
-      console.error('Error preparing to insert step:', error);
+    } catch (error: any) {
+      console.error('[handleInsertAfter] Error:', error);
       toast.error(t('recipes.steps.errorInserting'));
     } finally {
       setLoading(false);
