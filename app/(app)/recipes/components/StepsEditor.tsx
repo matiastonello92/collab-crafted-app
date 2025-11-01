@@ -167,7 +167,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       // For NEW steps (without id): renumber existing steps, then auto-save
       if (!editingStep.id) {
         const stepsToUpdate = localSteps.filter(
-          s => s.step_number >= newStepNumber
+          s => s.id && s.step_number >= newStepNumber
         );
         
         console.log('[confirmStepNumberChange] Renumbering steps:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number + 1}`));
@@ -236,7 +236,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       // Moving up (e.g., from 5 to 2): steps 2,3,4 become 3,4,5
       if (newStepNumber < oldStepNumber) {
         const stepsToUpdate = localSteps.filter(
-          s => s.id !== editingStep.id && s.step_number >= newStepNumber && s.step_number < oldStepNumber
+          s => s.id && s.id !== editingStep.id && s.step_number >= newStepNumber && s.step_number < oldStepNumber
         );
         
         console.log('[confirmStepNumberChange] Moving up - renumbering:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number + 1}`));
@@ -270,7 +270,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       // Moving down (e.g., from 2 to 5): steps 3,4,5 become 2,3,4
       else {
         const stepsToUpdate = localSteps.filter(
-          s => s.id !== editingStep.id && s.step_number > oldStepNumber && s.step_number <= newStepNumber
+          s => s.id && s.id !== editingStep.id && s.step_number > oldStepNumber && s.step_number <= newStepNumber
         );
         
         console.log('[confirmStepNumberChange] Moving down - renumbering:', stepsToUpdate.map(s => `${s.step_number} -> ${s.step_number - 1}`));
