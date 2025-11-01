@@ -221,17 +221,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>{t('recipes.steps.title')}</CardTitle>
-          {!readOnly && (
-            <Button onClick={handleStartAdd} size="sm" className="gap-2">
-              <Plus className="h-4 w-4" />
-              {t('recipes.steps.addStep')}
-            </Button>
-          )}
-        </div>
+        <CardTitle>{t('recipes.steps.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Steps List with drag & drop */}
@@ -377,6 +370,18 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         )}
       </CardContent>
     </Card>
+    
+    {/* Sticky Fixed Add Button */}
+    {!readOnly && !editingStep && (
+      <Button 
+        onClick={handleStartAdd}
+        size="lg"
+        className="fixed bottom-6 right-6 z-50 shadow-lg hover:scale-110 transition-transform rounded-full h-14 w-14 p-0"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+    )}
+    </>
   );
 }
 
