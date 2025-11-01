@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Save, X, Clock, ListChecks, GripVertical, Edit, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepPhotoUploader } from './StepPhotoUploader';
@@ -114,6 +115,82 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     } catch (error) {
       console.error('Error preparing to insert step:', error);
       toast.error(t('recipes.steps.errorInserting'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleStepNumberChange(newStepNumber: number) {
+    if (!editingStep) return;
+    
+    const oldStepNumber = editingStep.step_number;
+    if (oldStepNumber === undefined || oldStepNumber === newStepNumber) return;
+    
+    // For new steps (without id), just update the local state
+    if (!editingStep.id) {
+      setEditingStep({ ...editingStep, step_number: newStepNumber });
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      // Moving up (e.g., from 5 to 2): steps 2,3,4 become 3,4,5
+      if (newStepNumber < oldStepNumber) {
+        const stepsToUpdate = localSteps.filter(
+          s => s.id !== editingStep.id && s.step_number >= newStepNumber && s.step_number < oldStepNumber
+        );
+        
+        await Promise.all(
+          stepsToUpdate.map((step) =>
+            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ step_number: step.step_number + 1 }),
+            })
+          )
+        );
+        
+        const updatedSteps = localSteps.map(s => {
+          if (s.id === editingStep.id) return s;
+          if (s.step_number >= newStepNumber && s.step_number < oldStepNumber) {
+            return { ...s, step_number: s.step_number + 1 };
+          }
+          return s;
+        });
+        setLocalSteps(updatedSteps);
+      }
+      // Moving down (e.g., from 2 to 5): steps 3,4,5 become 2,3,4
+      else {
+        const stepsToUpdate = localSteps.filter(
+          s => s.id !== editingStep.id && s.step_number > oldStepNumber && s.step_number <= newStepNumber
+        );
+        
+        await Promise.all(
+          stepsToUpdate.map((step) =>
+            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ step_number: step.step_number - 1 }),
+            })
+          )
+        );
+        
+        const updatedSteps = localSteps.map(s => {
+          if (s.id === editingStep.id) return s;
+          if (s.step_number > oldStepNumber && s.step_number <= newStepNumber) {
+            return { ...s, step_number: s.step_number - 1 };
+          }
+          return s;
+        });
+        setLocalSteps(updatedSteps);
+      }
+      
+      // Update current step
+      setEditingStep({ ...editingStep, step_number: newStepNumber });
+      toast.success(t('recipes.steps.positionUpdated'));
+    } catch (error) {
+      console.error('Error changing step number:', error);
+      toast.error(t('recipes.steps.errorChangingPosition'));
     } finally {
       setLoading(false);
     }
@@ -294,6 +371,26 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                       <Card className="border-primary">
                         <CardContent className="pt-6 space-y-4">
                           <div>
+                            <Label htmlFor="step-position">{t('recipes.steps.stepPosition')}</Label>
+                            <Select
+                              value={editingStep.step_number?.toString()}
+                              onValueChange={(value) => handleStepNumberChange(parseInt(value))}
+                              disabled={loading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={t('recipes.steps.selectPosition')} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: sortedSteps.length }, (_, i) => i + 1).map((num) => (
+                                  <SelectItem key={num} value={num.toString()}>
+                                    Step {num}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
                             <Label htmlFor="timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -405,6 +502,26 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                     {editingStep && !editingStep.id && editingStep.step_number === step.step_number + 1 && (
                       <Card className="border-primary mt-3 mb-3">
                         <CardContent className="pt-6 space-y-4">
+                          <div>
+                            <Label htmlFor={`inline-position-${step.step_number}`}>{t('recipes.steps.stepPosition')}</Label>
+                            <Select
+                              value={editingStep.step_number?.toString()}
+                              onValueChange={(value) => handleStepNumberChange(parseInt(value))}
+                              disabled={loading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={t('recipes.steps.selectPosition')} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: sortedSteps.length + 1 }, (_, i) => i + 1).map((num) => (
+                                  <SelectItem key={num} value={num.toString()}>
+                                    Step {num}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
                           <div>
                             <Label htmlFor={`inline-timer-${step.step_number}`}>{t('recipes.steps.timerMinutes')}</Label>
                             <div className="flex items-center gap-2">
@@ -532,6 +649,26 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
                 {editingStep && !editingStep.id && editingStep.step_number !== undefined && editingStep.step_number > sortedSteps.length && (
                   <Card className="border-primary">
                     <CardContent className="pt-6 space-y-4">
+                      <div>
+                        <Label htmlFor="new-position">{t('recipes.steps.stepPosition')}</Label>
+                        <Select
+                          value={editingStep.step_number?.toString()}
+                          onValueChange={(value) => handleStepNumberChange(parseInt(value))}
+                          disabled={loading}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('recipes.steps.selectPosition')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: sortedSteps.length + 1 }, (_, i) => i + 1).map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                Step {num}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       <div>
                         <Label htmlFor="new-timer_minutes">{t('recipes.steps.timerMinutes')}</Label>
                         <div className="flex items-center gap-2">
