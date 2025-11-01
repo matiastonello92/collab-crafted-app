@@ -69,6 +69,19 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
   const sortedSteps = [...localSteps].sort((a, b) => a.step_number - b.step_number);
 
+  // Helper to refresh steps from DB
+  async function refreshStepsFromDB() {
+    try {
+      const response = await fetch(`/api/v1/recipes/${recipeId}/steps`);
+      if (response.ok) {
+        const { steps } = await response.json();
+        setLocalSteps(steps);
+      }
+    } catch (error) {
+      console.error('Error refreshing steps:', error);
+    }
+  }
+
   // Setup drag & drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -105,8 +118,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
       const { step } = await response.json();
       
-      // Add to local state and start editing
-      setLocalSteps([...localSteps, step]);
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
+      
+      // Start editing the newly created step
       setEditingStep(step);
       
       toast.success(t('recipes.steps.readyToAdd'));
@@ -121,8 +136,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   async function handleInsertAfter(afterStepNumber: number) {
     setLoading(true);
     try {
-      // Update all steps with step_number > afterStepNumber
-      const stepsToUpdate = localSteps.filter(s => s.step_number > afterStepNumber);
+      // Update all steps with step_number > afterStepNumber (only saved steps with ID)
+      const stepsToUpdate = localSteps.filter(s => s.id && s.step_number > afterStepNumber);
       
       await Promise.all(
         stepsToUpdate.map((step) =>
@@ -160,8 +175,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
       const { step } = await response.json();
       
-      // Add to local state and start editing
-      setLocalSteps([...updatedSteps, step]);
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
+      
+      // Start editing the newly created step
       setEditingStep(step);
 
       toast.success(t('recipes.steps.readyToAdd'));
@@ -344,6 +361,9 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         setLocalSteps(updatedSteps);
       }
       
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
+      
       // Update current step
       setEditingStep({ ...editingStep, step_number: newStepNumber });
       toast.success(t('recipes.steps.positionUpdated'));
@@ -386,20 +406,34 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
 
       const method = editingStep.id ? 'PATCH' : 'POST';
 
+      // Build payload dynamically - omit empty optional fields instead of sending null
+      const payload: any = {
+        step_number: editingStep.step_number,
+        instruction: editingStep.instruction,
+        timer_minutes: editingStep.timer_minutes || 0,
+        checklist_items: editingStep.checklist_items || [],
+      };
+
+      // Only include title if present
+      if (editingStep.title?.trim()) {
+        payload.title = editingStep.title.trim();
+      }
+
+      // Only include photo_url if present
+      if (editingStep.photo_url) {
+        payload.photo_url = editingStep.photo_url;
+      }
+
       const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          step_number: editingStep.step_number,
-          title: editingStep.title || null,
-          instruction: editingStep.instruction,
-          timer_minutes: editingStep.timer_minutes || 0,
-          checklist_items: editingStep.checklist_items || [],
-          photo_url: editingStep.photo_url || null
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
+
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
 
       toast.success(editingStep.id ? t('recipes.steps.stepUpdated') : t('recipes.steps.stepAdded'));
       setEditingStep(null);
@@ -423,6 +457,9 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       });
 
       if (!response.ok) throw new Error(t('recipes.steps.errorDeleting'));
+
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
 
       toast.success(t('recipes.steps.stepDeleted'));
       onStepsChange?.();
@@ -486,6 +523,10 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           })
         )
       );
+      
+      // Refresh from DB to ensure sync
+      await refreshStepsFromDB();
+      
       toast.success(t('recipes.steps.reordered'));
       onStepsChange?.();
     } catch (error) {
