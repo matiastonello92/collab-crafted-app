@@ -37,15 +37,22 @@ export async function PATCH(
     const body = await request.json();
     const validatedData = updateStepSchema.parse(body);
 
-    const { data: step, error } = await supabase
-      .from('recipe_steps')
-      .update(validatedData)
-      .eq('id', params.stepId)
-      .eq('recipe_id', params.id)
-      .select()
-      .single();
+  const { data: step, error } = await supabase
+    .from('recipe_steps')
+    .update(validatedData)
+    .eq('id', params.stepId)
+    .eq('recipe_id', params.id)
+    .select()
+    .maybeSingle();
 
-    if (error) throw error;
+  if (error) throw error;
+  
+  if (!step) {
+    return NextResponse.json(
+      { error: 'Step not found or does not belong to this recipe' },
+      { status: 404 }
+    );
+  }
 
     return NextResponse.json({ step });
   } catch (error: any) {

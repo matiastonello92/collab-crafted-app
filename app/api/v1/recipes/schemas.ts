@@ -83,6 +83,7 @@ export const createStepSchema = z.object({
 });
 
 export const updateStepSchema = z.object({
+  step_number: z.number().int().min(1).optional(),
   title: z.string().optional(),
   instruction: z.string().min(1).optional(),
   timer_minutes: z.number().int().min(0).optional(),
