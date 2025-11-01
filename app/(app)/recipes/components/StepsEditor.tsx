@@ -8,6 +8,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Plus, Trash2, Save, X, Clock, ListChecks, GripVertical, Edit, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepPhotoUploader } from './StepPhotoUploader';
@@ -54,6 +64,8 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   const [editingStep, setEditingStep] = useState<Partial<RecipeStep> | null>(null);
   const [checklistInput, setChecklistInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRenumberDialog, setShowRenumberDialog] = useState(false);
+  const [pendingStepNumber, setPendingStepNumber] = useState<number | null>(null);
 
   const sortedSteps = [...localSteps].sort((a, b) => a.step_number - b.step_number);
 
@@ -120,20 +132,72 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     }
   }
 
-  async function handleStepNumberChange(newStepNumber: number) {
+  function handleStepNumberChange(newStepNumber: number) {
     if (!editingStep) return;
     
     const oldStepNumber = editingStep.step_number;
     if (oldStepNumber === undefined || oldStepNumber === newStepNumber) return;
     
-    // For new steps (without id), just update the local state
-    if (!editingStep.id) {
-      setEditingStep({ ...editingStep, step_number: newStepNumber });
-      return;
-    }
+    // Check if newStepNumber is already taken by another step
+    const isNumberTaken = localSteps.some(
+      s => s.id !== editingStep.id && s.step_number === newStepNumber
+    );
     
+    if (isNumberTaken) {
+      // Open confirmation dialog
+      setPendingStepNumber(newStepNumber);
+      setShowRenumberDialog(true);
+    } else {
+      // No conflict, update directly
+      setEditingStep({ ...editingStep, step_number: newStepNumber });
+    }
+  }
+
+  async function confirmStepNumberChange() {
+    if (!editingStep || pendingStepNumber === null) return;
+    
+    const oldStepNumber = editingStep.step_number;
+    const newStepNumber = pendingStepNumber;
+    
+    setShowRenumberDialog(false);
+    setPendingStepNumber(null);
     setLoading(true);
+    
     try {
+      // For NEW steps (without id): renumber existing steps from newStepNumber onwards
+      if (!editingStep.id) {
+        const stepsToUpdate = localSteps.filter(
+          s => s.step_number >= newStepNumber
+        );
+        
+        await Promise.all(
+          stepsToUpdate.map((step) =>
+            fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ step_number: step.step_number + 1 }),
+            })
+          )
+        );
+        
+        const updatedSteps = localSteps.map(s =>
+          s.step_number >= newStepNumber
+            ? { ...s, step_number: s.step_number + 1 }
+            : s
+        );
+        setLocalSteps(updatedSteps);
+        setEditingStep({ ...editingStep, step_number: newStepNumber });
+        toast.success(t('recipes.steps.positionUpdated'));
+        setLoading(false);
+        return;
+      }
+      
+      // For EXISTING steps (with id): complex renumbering logic
+      if (oldStepNumber === undefined) {
+        setLoading(false);
+        return;
+      }
+      
       // Moving up (e.g., from 5 to 2): steps 2,3,4 become 3,4,5
       if (newStepNumber < oldStepNumber) {
         const stepsToUpdate = localSteps.filter(
@@ -196,6 +260,11 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     }
   }
 
+  function cancelStepNumberChange() {
+    setShowRenumberDialog(false);
+    setPendingStepNumber(null);
+  }
+
   function handleStartEdit(step: RecipeStep) {
     setEditingStep({ ...step });
     setChecklistInput('');
@@ -209,12 +278,6 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
   async function handleSave() {
     if (!editingStep?.instruction) {
       toast.error(t('recipes.steps.enterInstructions'));
-      return;
-    }
-
-    // Check step_number uniqueness
-    if (localSteps.some(s => s.id !== editingStep.id && s.step_number === editingStep.step_number)) {
-      toast.error(t('recipes.steps.stepNumberExists'));
       return;
     }
 
@@ -788,6 +851,34 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
             {t('recipes.steps.addStep')}
           </Button>
         )}
+
+        {/* AlertDialog for step renumbering confirmation */}
+        <AlertDialog open={showRenumberDialog} onOpenChange={setShowRenumberDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {editingStep?.id 
+                  ? 'Spostare questo step?' 
+                  : 'Inserire nuovo step?'
+                }
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {editingStep?.id 
+                  ? `Vuoi spostare questo step alla posizione ${pendingStepNumber}? Gli altri step verranno rinumerati automaticamente.`
+                  : `Vuoi inserire questo nuovo step alla posizione ${pendingStepNumber}? Gli step successivi verranno rinumerati automaticamente.`
+                }
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={cancelStepNumberChange}>
+                Annulla
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={confirmStepNumberChange}>
+                Conferma
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
