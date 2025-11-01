@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { useTranslation } from '@/lib/i18n'
+import { getPublicRecipePhotoUrl } from '@/utils/supabase/storage'
 
 interface StepPhotoUploaderProps {
   recipeId: string
@@ -28,7 +29,7 @@ export function StepPhotoUploader({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const filePathToUrlMap = useRef<Map<string, string>>(new Map())
 
-  // Sync with currentUrl prop changes and fetch signed URL if needed
+  // Sync with currentUrl prop changes and build public URL
   useEffect(() => {
     if (currentUrl) {
       // If it's already a full URL, use it directly
@@ -37,41 +38,22 @@ export function StepPhotoUploader({
         return
       }
       
-      // Check if we already have this signedUrl cached
+      // Check if we already have this URL cached
       const cachedUrl = filePathToUrlMap.current.get(currentUrl)
       if (cachedUrl) {
         setPhotoUrl(cachedUrl)
         return
       }
       
-      // Otherwise fetch signed URL
-      fetchSignedUrl(currentUrl)
+      // Build public URL directly (same as RecipeStepImage)
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const publicUrl = getPublicRecipePhotoUrl(supabaseUrl, currentUrl)
+      filePathToUrlMap.current.set(currentUrl, publicUrl)
+      setPhotoUrl(publicUrl)
     } else {
       setPhotoUrl(null)
     }
   }, [currentUrl])
-
-  const fetchSignedUrl = async (filePath: string) => {
-    try {
-      const response = await fetch('/api/v1/recipes/photo-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filePath })
-      })
-
-      if (response.ok) {
-        const { signedUrl } = await response.json()
-        if (filePath) filePathToUrlMap.current.set(filePath, signedUrl)
-        setPhotoUrl(signedUrl)
-      } else {
-        console.error('Failed to fetch signed URL')
-        setPhotoUrl(null)
-      }
-    } catch (error) {
-      console.error('Error fetching signed URL:', error)
-      setPhotoUrl(null)
-    }
-  }
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -105,8 +87,11 @@ export function StepPhotoUploader({
       }
 
       const { filePath, signedUrl } = await response.json()
-      filePathToUrlMap.current.set(filePath, signedUrl)
-      setPhotoUrl(signedUrl)
+      // Build public URL for immediate display
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const publicUrl = getPublicRecipePhotoUrl(supabaseUrl, filePath)
+      filePathToUrlMap.current.set(filePath, publicUrl)
+      setPhotoUrl(publicUrl)
       onPhotoUpdate(filePath)  // Save filePath to DB
       toast.success(t('recipePhoto.uploadSuccess'))
 

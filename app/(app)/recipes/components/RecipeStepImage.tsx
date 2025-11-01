@@ -41,6 +41,12 @@ export function RecipeStepImage({ photoUrl, stepTitle }: RecipeStepImageProps) {
   }, [photoUrl])
 
   async function loadImage() {
+    if (!photoUrl) {
+      setSignedUrl(null)
+      setLoading(false)
+      return
+    }
+
     // For filePath, build public URL using helper
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
     const publicUrl = getPublicRecipePhotoUrl(supabaseUrl, photoUrl)
