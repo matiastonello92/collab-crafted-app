@@ -7,11 +7,28 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Save, X, Clock, ListChecks } from 'lucide-react';
+import { Plus, Trash2, Save, X, Clock, ListChecks, GripVertical, Edit, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { StepPhotoUploader } from './StepPhotoUploader';
 import { RecipeStepImage } from './RecipeStepImage';
 import { useTranslation } from '@/lib/i18n';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface RecipeStep {
   id?: string;
@@ -32,14 +49,27 @@ interface StepsEditorProps {
 
 export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }: StepsEditorProps) {
   const { t } = useTranslation();
+  const [localSteps, setLocalSteps] = useState<RecipeStep[]>(steps);
   const [editingStep, setEditingStep] = useState<Partial<RecipeStep> | null>(null);
   const [checklistInput, setChecklistInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const sortedSteps = [...steps].sort((a, b) => a.step_number - b.step_number);
+  const sortedSteps = [...localSteps].sort((a, b) => a.step_number - b.step_number);
+
+  // Setup drag & drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   function handleStartAdd() {
-    const nextNumber = Math.max(0, ...steps.map(s => s.step_number)) + 1;
+    const nextNumber = Math.max(0, ...localSteps.map(s => s.step_number)) + 1;
     setEditingStep({
       step_number: nextNumber,
       instruction: '',
@@ -65,7 +95,7 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
     }
 
     // Check step_number uniqueness
-    if (steps.some(s => s.id !== editingStep.id && s.step_number === editingStep.step_number)) {
+    if (localSteps.some(s => s.id !== editingStep.id && s.step_number === editingStep.step_number)) {
       toast.error(t('recipes.steps.stepNumberExists'));
       return;
     }
@@ -143,6 +173,51 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       ...editingStep,
       checklist_items: editingStep.checklist_items?.filter((_, i) => i !== index) || []
     });
+  }
+
+  // Handle drag end
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sortedSteps.findIndex((step) => step.id === active.id);
+    const newIndex = sortedSteps.findIndex((step) => step.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newSteps = arrayMove(sortedSteps, oldIndex, newIndex);
+    
+    // Update step_number for all reordered steps
+    const updatedSteps = newSteps.map((step, index) => ({
+      ...step,
+      step_number: index + 1,
+    }));
+
+    setLocalSteps(updatedSteps);
+
+    // Update step_number in database for each affected step
+    try {
+      setLoading(true);
+      await Promise.all(
+        updatedSteps.map((step) =>
+          fetch(`/api/v1/recipes/${recipeId}/steps/${step.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ step_number: step.step_number }),
+          })
+        )
+      );
+      toast.success(t('recipes.steps.reordered'));
+      onStepsChange?.();
+    } catch (error) {
+      console.error('Error reordering steps:', error);
+      toast.error(t('recipes.steps.errorReordering'));
+      // Revert on error
+      setLocalSteps(localSteps);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -263,69 +338,32 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           </Card>
         )}
 
-        {/* Steps List */}
+        {/* Steps List with drag & drop */}
         {sortedSteps.length > 0 ? (
-          sortedSteps.map((step) => (
-            <div key={step.id} className="flex gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                  {step.step_number}
-                </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortedSteps.map((s) => s.id!)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {sortedSteps.map((step) => (
+                  <SortableStepItem
+                    key={step.id}
+                    step={step}
+                    readOnly={readOnly}
+                    loading={loading}
+                    onEdit={handleStartEdit}
+                    onDelete={(id) => handleDelete(id)}
+                    t={t}
+                  />
+                ))}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0 space-y-1">
-                    {step.title && <h4 className="font-medium text-sm">{step.title}</h4>}
-                    <p className="text-sm text-muted-foreground">{step.instruction}</p>
-                    
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {step.timer_minutes && step.timer_minutes > 0 && (
-                        <Badge variant="secondary" className="gap-1">
-                          <Clock className="h-3 w-3" />
-                          {step.timer_minutes} {t('recipes.steps.min')}
-                        </Badge>
-                      )}
-                      {step.checklist_items && step.checklist_items.length > 0 && (
-                        <Badge variant="secondary" className="gap-1">
-                          <ListChecks className="h-3 w-3" />
-                          {step.checklist_items.length} {t('recipes.steps.items')}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {step.photo_url && (
-                    <div className="flex-shrink-0">
-                      <RecipeStepImage 
-                        photoUrl={step.photo_url} 
-                        stepTitle={step.title || `Step ${step.step_number}`}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              {!readOnly && (
-                <div className="flex flex-col gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStartEdit(step)}
-                    disabled={loading || !!editingStep}
-                  >
-                    {t('recipes.steps.edit')}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => step.id && handleDelete(step.id)}
-                    disabled={loading || !!editingStep}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))
+            </SortableContext>
+          </DndContext>
         ) : (
           <p className="text-sm text-muted-foreground text-center py-8">
             {readOnly ? t('recipes.steps.noSteps') : t('recipes.steps.addFirstStep')}
@@ -333,5 +371,111 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// Sortable Step Item Component
+interface SortableStepItemProps {
+  step: RecipeStep;
+  readOnly: boolean;
+  loading: boolean;
+  onEdit: (step: RecipeStep) => void;
+  onDelete: (id: string) => void;
+  t: (key: string) => string;
+}
+
+function SortableStepItem({ step, readOnly, loading, onEdit, onDelete, t }: SortableStepItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: step.id! });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors"
+    >
+      {/* Drag handle */}
+      {!readOnly && (
+        <button
+          className="cursor-grab active:cursor-grabbing flex-shrink-0 text-muted-foreground hover:text-foreground"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-5 w-5" />
+        </button>
+      )}
+
+      <div className="flex-shrink-0">
+        <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
+          {step.step_number}
+        </div>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0 space-y-1">
+            {step.title && <h4 className="font-medium text-sm">{step.title}</h4>}
+            <p className="text-sm text-muted-foreground">{step.instruction}</p>
+            
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {step.timer_minutes && step.timer_minutes > 0 && (
+                <Badge variant="secondary" className="gap-1">
+                  <Clock className="h-3 w-3" />
+                  {step.timer_minutes} {t('recipes.steps.min')}
+                </Badge>
+              )}
+              {step.checklist_items && step.checklist_items.length > 0 && (
+                <Badge variant="secondary" className="gap-1">
+                  <ListChecks className="h-3 w-3" />
+                  {step.checklist_items.length} {t('recipes.steps.items')}
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          {step.photo_url && (
+            <div className="flex-shrink-0">
+              <RecipeStepImage 
+                photoUrl={step.photo_url} 
+                stepTitle={step.title || `Step ${step.step_number}`}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {!readOnly && (
+        <div className="flex flex-col gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEdit(step)}
+            disabled={loading}
+          >
+            {t('recipes.steps.edit')}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(step.id!)}
+            disabled={loading}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

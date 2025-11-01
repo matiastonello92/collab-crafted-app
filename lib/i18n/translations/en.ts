@@ -2120,6 +2120,8 @@ export const en = {
       stepDeleted: 'Step deleted',
       errorSaving: 'Error saving step',
       errorDeleting: 'Error deleting step',
+      reordered: 'Steps reordered successfully',
+      errorReordering: 'Error reordering steps',
       items: 'items',
       min: 'min',
     },
