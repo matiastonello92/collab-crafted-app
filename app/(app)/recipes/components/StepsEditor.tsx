@@ -92,11 +92,9 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           step_number: nextNumber,
-          title: null,
-          instruction: '',
+          instruction: 'Nuovo step',
           timer_minutes: 0,
-          checklist_items: [],
-          photo_url: null
+          checklist_items: []
         })
       });
 
@@ -149,11 +147,9 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           step_number: afterStepNumber + 1,
-          title: null,
-          instruction: '',
+          instruction: 'Nuovo step',
           timer_minutes: 0,
-          checklist_items: [],
-          photo_url: null
+          checklist_items: []
         })
       });
 
