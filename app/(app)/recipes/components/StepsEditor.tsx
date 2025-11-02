@@ -445,76 +445,132 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
       return;
     }
 
-    setLoading(true);
-    try {
-      const endpoint = editingStep.id
-        ? `/api/v1/recipes/${recipeId}/steps/${editingStep.id}`
-        : `/api/v1/recipes/${recipeId}/steps`;
+    const isNewStep = !editingStep.id;
+    
+    // Build payload
+    const payload: any = {
+      step_number: editingStep.step_number,
+      instruction: editingStep.instruction,
+      timer_minutes: editingStep.timer_minutes || 0,
+      checklist_items: editingStep.checklist_items || [],
+    };
 
-      const method = editingStep.id ? 'PATCH' : 'POST';
+    if (editingStep.title?.trim()) {
+      payload.title = editingStep.title.trim();
+    }
 
-      // Build payload dynamically - omit empty optional fields instead of sending null
-      const payload: any = {
-        step_number: editingStep.step_number,
+    if (editingStep.photo_url) {
+      payload.photo_url = editingStep.photo_url;
+    }
+
+    if (isNewStep) {
+      // === OPTIMISTIC: New step ===
+      const tempId = `temp-${Date.now()}`;
+      const optimisticStep: RecipeStep = {
+        id: tempId,
+        step_number: editingStep.step_number!,
         instruction: editingStep.instruction,
+        title: editingStep.title?.trim() || undefined,
         timer_minutes: editingStep.timer_minutes || 0,
         checklist_items: editingStep.checklist_items || [],
+        photo_url: editingStep.photo_url || undefined,
       };
-
-      // Only include title if present
-      if (editingStep.title?.trim()) {
-        payload.title = editingStep.title.trim();
-      }
-
-      // Only include photo_url if present
-      if (editingStep.photo_url) {
-        payload.photo_url = editingStep.photo_url;
-      }
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
-
-      // Refresh from DB to ensure UI is in sync
-      await refreshStepsFromDB();
-
-      toast.success(editingStep.id ? t('recipes.steps.stepUpdated') : t('recipes.steps.stepAdded'));
+      
+      setLocalSteps(prev => [...prev, optimisticStep]);
       setEditingStep(null);
       setChecklistInput('');
-      onStepsChange?.();
-    } catch (error) {
-      console.error('Error saving step:', error);
-      toast.error(t('recipes.steps.errorSaving'));
-    } finally {
-      setLoading(false);
+      toast.success(t('recipes.steps.stepAdded'));
+      
+      // === BACKGROUND: Create in DB ===
+      try {
+        const response = await fetch(`/api/v1/recipes/${recipeId}/steps`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
+        
+        const { step: realStep } = await response.json();
+        
+        // Replace temp ID with real ID
+        setLocalSteps(prev => prev.map(s => 
+          s.id === tempId ? { ...s, id: realStep.id } : s
+        ));
+        
+        onStepsChange?.();
+      } catch (error) {
+        console.error('Error creating step:', error);
+        // ROLLBACK: Remove temp step
+        setLocalSteps(prev => prev.filter(s => s.id !== tempId));
+        toast.error(t('recipes.steps.errorSaving'));
+      }
+      
+    } else {
+      // === OPTIMISTIC: Update existing step ===
+      const previousSteps = [...localSteps];
+      
+      setLocalSteps(prev => prev.map(s => 
+        s.id === editingStep.id 
+          ? { 
+              ...s, 
+              ...editingStep,
+              title: editingStep.title?.trim() || undefined,
+              timer_minutes: editingStep.timer_minutes || 0,
+              checklist_items: editingStep.checklist_items || [],
+            }
+          : s
+      ));
+      
+      setEditingStep(null);
+      setChecklistInput('');
+      toast.success(t('recipes.steps.stepUpdated'));
+      
+      // === BACKGROUND: Update DB ===
+      try {
+        const response = await fetch(
+          `/api/v1/recipes/${recipeId}/steps/${editingStep.id}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
+        
+        if (!response.ok) throw new Error(t('recipes.steps.errorSaving'));
+        onStepsChange?.();
+      } catch (error) {
+        console.error('Error updating step:', error);
+        // ROLLBACK: Restore previous state
+        setLocalSteps(previousSteps);
+        toast.error(t('recipes.steps.errorSaving'));
+      }
     }
   }
 
   async function handleDelete(stepId: string) {
     if (!confirm(t('recipes.steps.deleteConfirm'))) return;
 
-    setLoading(true);
+    // === OPTIMISTIC: Remove immediately ===
+    const previousSteps = [...localSteps];
+    
+    setLocalSteps(prev => prev.filter(s => s.id !== stepId));
+    toast.success(t('recipes.steps.stepDeleted'));
+    
+    // === BACKGROUND: Delete from DB ===
     try {
-      const response = await fetch(`/api/v1/recipes/${recipeId}/steps/${stepId}`, {
-        method: 'DELETE'
-      });
-
+      const response = await fetch(
+        `/api/v1/recipes/${recipeId}/steps/${stepId}`,
+        { method: 'DELETE' }
+      );
+      
       if (!response.ok) throw new Error(t('recipes.steps.errorDeleting'));
-
-      // Refresh from DB to ensure sync
-      await refreshStepsFromDB();
-
-      toast.success(t('recipes.steps.stepDeleted'));
       onStepsChange?.();
     } catch (error) {
       console.error('Error deleting step:', error);
+      // ROLLBACK: Restore deleted step
+      setLocalSteps(previousSteps);
       toast.error(t('recipes.steps.errorDeleting'));
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -570,9 +626,6 @@ export function StepsEditor({ recipeId, steps, readOnly = false, onStepsChange }
           })
         )
       );
-      
-      // Refresh from DB to ensure sync
-      await refreshStepsFromDB();
       
       toast.success(t('recipes.steps.reordered'));
       onStepsChange?.();
