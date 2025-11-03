@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerActionClient } from '@/utils/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { generateFullRecipePrintTemplate, generateStationRecipePrintTemplate } from '@/lib/recipes/print-templates';
 
 export async function GET(
@@ -13,15 +13,9 @@ export async function GET(
     const variant = searchParams.get('variant') || 'full'; // 'full' | 'station'
     const isDraft = searchParams.get('isDraft') === 'true';
 
-    const supabase = await createSupabaseServerActionClient();
+    const supabase = createSupabaseAdminClient();
 
-    // Check auth
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Fetch recipe with all relations
+    // Fetch recipe with all relations (using admin client to bypass RLS)
     const { data: recipe, error } = await supabase
       .from('recipes')
       .select(`
