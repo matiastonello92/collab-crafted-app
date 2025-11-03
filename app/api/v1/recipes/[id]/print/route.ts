@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseServerActionClient } from '@/utils/supabase/server';
 import { generateFullRecipePrintTemplate, generateStationRecipePrintTemplate } from '@/lib/recipes/print-templates';
 
 export async function GET(
@@ -13,7 +13,7 @@ export async function GET(
     const variant = searchParams.get('variant') || 'full'; // 'full' | 'station'
     const isDraft = searchParams.get('isDraft') === 'true';
 
-    const supabase = createSupabaseAdminClient();
+    const supabase = await createSupabaseServerActionClient();
 
     // Check auth
     const { data: { user } } = await supabase.auth.getUser();

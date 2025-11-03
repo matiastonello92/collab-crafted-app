@@ -22,6 +22,7 @@ import { formatTime } from '@/lib/recipes/scaling';
 import { getAllergenLabel, getAllergenColor } from '../../constants/allergens';
 import { formatSeasonRange, getSeasonColor } from '../../constants/seasons';
 import { RecipeWorkflowBadge } from '../../components/RecipeWorkflowBadge';
+import { RecipeStepImage } from '../../components/RecipeStepImage';
 
 interface Recipe {
   id: string;
@@ -119,12 +120,13 @@ export default function PreviewRecipeMode({ recipeId }: PreviewRecipeModeProps) 
         <Card className="mb-6">
           <CardContent className="p-6">
             {recipe.photo_url && (
-              <Avatar className="h-[400px] w-full rounded-lg mb-6">
-                <AvatarImage src={recipe.photo_url} alt={recipe.title} className="object-cover" />
-                <AvatarFallback className="rounded-lg">
-                  <ChefHat className="h-16 w-16" />
-                </AvatarFallback>
-              </Avatar>
+              <div className="mb-6">
+                <RecipeStepImage 
+                  photoUrl={recipe.photo_url}
+                  stepTitle={recipe.title}
+                  className="h-[400px] w-full"
+                />
+              </div>
             )}
 
             <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
@@ -270,12 +272,13 @@ export default function PreviewRecipeMode({ recipeId }: PreviewRecipeModeProps) 
                   </div>
                   
                   {step.photo_url && (
-                    <Avatar className="h-48 w-full rounded-lg mb-3">
-                      <AvatarImage src={step.photo_url} alt={step.title || `Step ${step.step_number}`} className="object-cover" />
-                      <AvatarFallback className="rounded-lg">
-                        <ChefHat className="h-12 w-12" />
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="mb-3">
+                      <RecipeStepImage 
+                        photoUrl={step.photo_url}
+                        stepTitle={step.title || `Step ${step.step_number}`}
+                        className="h-48 w-full"
+                      />
+                    </div>
                   )}
                   
                   {step.title && (

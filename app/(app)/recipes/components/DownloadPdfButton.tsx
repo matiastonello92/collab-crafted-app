@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Printer } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -17,9 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useTranslation } from '@/lib/i18n';
 
-interface PrintRecipeButtonProps {
+interface DownloadPdfButtonProps {
   recipeId: string;
   defaultServings?: number;
   defaultVariant?: 'full' | 'station';
@@ -28,53 +27,55 @@ interface PrintRecipeButtonProps {
 
 const SERVING_OPTIONS = [2, 4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
 
-export function PrintRecipeButton({ 
+export function DownloadPdfButton({ 
   recipeId, 
   defaultServings = 4,
   defaultVariant = 'full',
   isDraft = false
-}: PrintRecipeButtonProps) {
-  const { t } = useTranslation();
+}: DownloadPdfButtonProps) {
   const [servings, setServings] = useState(defaultServings.toString());
   const [isOpen, setIsOpen] = useState(false);
 
-  const handlePrint = (variant: 'full' | 'station') => {
+  const handleDownload = (variant: 'full' | 'station') => {
     try {
       const url = `/api/v1/recipes/${recipeId}/print?servings=${servings}&variant=${variant}&isDraft=${isDraft}`;
-      window.open(url, '_blank');
-      setIsOpen(false);
-      toast.success(variant === 'full' ? t('recipes.print.fullSheetOpened') : t('recipes.print.stationSheetOpened'));
       
-      // Log print usage
+      // Open print dialog which allows saving as PDF
+      const printWindow = window.open(url, '_blank');
+      
+      setIsOpen(false);
+      toast.success(variant === 'full' ? 'Scheda completa pronta per il download' : 'Scheda postazione pronta per il download');
+      
+      // Log download usage
       fetch(`/api/v1/recipes/${recipeId}/log-usage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          eventType: 'recipe_printed',
+          eventType: 'recipe_pdf_downloaded',
           metadata: { variant, servings: parseInt(servings) }
         })
       }).catch(err => console.error('Failed to log usage:', err));
     } catch (error) {
-      console.error('Print error:', error);
-      toast.error(t('recipes.print.printError'));
+      console.error('Download error:', error);
+      toast.error('Errore durante la generazione del PDF');
     }
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" aria-label={t('recipes.print.print')}>
-          <Printer className="h-4 w-4 mr-2" />
-          {t('recipes.print.print')}
+        <Button variant="outline" size="sm" aria-label="Scarica PDF">
+          <Download className="h-4 w-4 mr-2" />
+          Scarica PDF
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium mb-3">{t('recipes.print.printRecipe')}</h4>
+            <h4 className="font-medium mb-3">Scarica Ricetta PDF</h4>
             
             <div className="space-y-2">
-              <Label htmlFor="servings-select">{t('recipes.print.servings')}</Label>
+              <Label htmlFor="servings-select">Porzioni</Label>
               <Select value={servings} onValueChange={setServings}>
                 <SelectTrigger id="servings-select">
                   <SelectValue />
@@ -82,7 +83,7 @@ export function PrintRecipeButton({
                 <SelectContent>
                   {SERVING_OPTIONS.map(num => (
                     <SelectItem key={num} value={num.toString()}>
-                      {t('recipes.print.servingsCount').replace('{count}', String(num))}
+                      {num} porzioni
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -92,32 +93,32 @@ export function PrintRecipeButton({
 
           <div className="flex flex-col gap-2">
             <Button
-              onClick={() => handlePrint('full')}
+              onClick={() => handleDownload('full')}
               className="w-full justify-start"
               variant="default"
             >
-              <Printer className="h-4 w-4 mr-2" />
-              {t('recipes.print.fullSheet')}
+              <Download className="h-4 w-4 mr-2" />
+              Scheda Completa
               <span className="ml-auto text-xs opacity-70">
-                {t('recipes.print.withPhotosAndNotes')}
+                Con foto e note
               </span>
             </Button>
             
             <Button
-              onClick={() => handlePrint('station')}
+              onClick={() => handleDownload('station')}
               className="w-full justify-start"
               variant="outline"
             >
-              <Printer className="h-4 w-4 mr-2" />
-              {t('recipes.print.stationSheet')}
+              <Download className="h-4 w-4 mr-2" />
+              Scheda Postazione
               <span className="ml-auto text-xs opacity-70">
-                {t('recipes.print.essentialOnly')}
+                Solo essenziale
               </span>
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {t('recipes.print.openInNewWindow')}
+            Si aprirà la finestra di stampa. Seleziona "Salva come PDF" per scaricare.
           </p>
         </div>
       </PopoverContent>

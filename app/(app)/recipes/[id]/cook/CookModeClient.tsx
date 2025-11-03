@@ -20,7 +20,8 @@ import { TimerWidget } from './components/TimerWidget';
 import { ChecklistWidget } from './components/ChecklistWidget';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertCircle, StickyNote } from 'lucide-react';
-import { PrintRecipeButton } from '../../components/PrintRecipeButton';
+import { DownloadPdfButton } from '../../components/DownloadPdfButton';
+import { RecipeStepImage } from '../../components/RecipeStepImage';
 import { useTranslation } from '@/lib/i18n';
 
 interface RecipeStep {
@@ -193,10 +194,11 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
               {t('recipes.cook.notes')} ({recipe.recipe_service_notes.length})
             </Button>
           )}
-          <PrintRecipeButton 
+          <DownloadPdfButton 
             recipeId={recipeId}
             defaultServings={recipe.servings}
             defaultVariant="station"
+            isDraft={isDraft}
           />
           <Badge variant="secondary" className="text-lg px-4 py-2">
             {currentStep.step_number}
@@ -235,16 +237,11 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
         <Card className="h-fit">
           <CardContent className="p-6 space-y-6">
             {currentStep.photo_url && (
-              <Avatar className="h-64 w-full rounded-lg">
-                <AvatarImage 
-                  src={currentStep.photo_url} 
-                  alt={currentStep.title || `Step ${currentStep.step_number}`}
-                  className="object-cover"
-                />
-                <AvatarFallback className="rounded-lg">
-                  <ChefHat className="h-12 w-12" />
-                </AvatarFallback>
-              </Avatar>
+              <RecipeStepImage 
+                photoUrl={currentStep.photo_url}
+                stepTitle={currentStep.title || `Step ${currentStep.step_number}`}
+                className="h-64 w-full"
+              />
             )}
 
             {currentStep.title && (

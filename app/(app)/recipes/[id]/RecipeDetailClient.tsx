@@ -35,7 +35,7 @@ import { formatSeasonRange, getSeasonColor } from '../constants/seasons';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { CloneRecipeButton } from '../components/CloneRecipeButton';
 import { ServiceNotesSection } from '../components/ServiceNotesSection';
-import { PrintRecipeButton } from '../components/PrintRecipeButton';
+import { DownloadPdfButton } from '../components/DownloadPdfButton';
 import { formatTime } from '@/lib/recipes/scaling';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -353,7 +353,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             />
           )}
           
-          <PrintRecipeButton 
+          <DownloadPdfButton 
             recipeId={recipeId}
             defaultServings={recipe.servings}
             isDraft={isDraft}
