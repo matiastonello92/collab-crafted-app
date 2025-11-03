@@ -11,6 +11,7 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const targetServings = parseInt(searchParams.get('servings') || '4');
     const variant = searchParams.get('variant') || 'full'; // 'full' | 'station'
+    const isDraft = searchParams.get('isDraft') === 'true';
 
     const supabase = createSupabaseAdminClient();
 
@@ -113,8 +114,8 @@ export async function GET(
 
     // Generate HTML based on variant
     const html = variant === 'station'
-      ? generateStationRecipePrintTemplate(printData, targetServings)
-      : generateFullRecipePrintTemplate(printData, targetServings);
+      ? generateStationRecipePrintTemplate(printData, targetServings, isDraft)
+      : generateFullRecipePrintTemplate(printData, targetServings, isDraft);
 
     return new NextResponse(html, {
       headers: {

@@ -37,6 +37,7 @@ interface Recipe {
   id: string;
   title: string;
   servings: number;
+  status?: string;
   recipe_steps: RecipeStep[];
   recipe_service_notes?: Array<{
     id: string;
@@ -79,6 +80,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
         id: data.recipe.id,
         title: data.recipe.title,
         servings: data.recipe.servings || 4,
+        status: data.recipe.status,
         recipe_steps: data.recipe.recipe_steps?.sort((a: RecipeStep, b: RecipeStep) => 
           a.step_number - b.step_number
         ) || [],
@@ -153,6 +155,7 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
 
   const currentStep = recipe.recipe_steps[currentStepIndex];
   const progress = ((currentStepIndex + 1) / recipe.recipe_steps.length) * 100;
+  const isDraft = recipe.status === 'draft';
 
   return (
     <div className="min-h-screen flex flex-col p-4 md:p-6 lg:p-8">
@@ -168,7 +171,14 @@ export default function CookModeClient({ recipeId }: CookModeClientProps) {
             <X className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{recipe.title}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{recipe.title}</h1>
+              {isDraft && (
+                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-700 border-yellow-500/30">
+                  BOZZA
+                </Badge>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               {t('recipes.cook.stepOf')
                 .replace('{current}', String(currentStepIndex + 1))

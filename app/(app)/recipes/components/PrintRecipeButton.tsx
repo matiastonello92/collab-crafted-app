@@ -23,6 +23,7 @@ interface PrintRecipeButtonProps {
   recipeId: string;
   defaultServings?: number;
   defaultVariant?: 'full' | 'station';
+  isDraft?: boolean;
 }
 
 const SERVING_OPTIONS = [2, 4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
@@ -30,7 +31,8 @@ const SERVING_OPTIONS = [2, 4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
 export function PrintRecipeButton({ 
   recipeId, 
   defaultServings = 4,
-  defaultVariant = 'full'
+  defaultVariant = 'full',
+  isDraft = false
 }: PrintRecipeButtonProps) {
   const { t } = useTranslation();
   const [servings, setServings] = useState(defaultServings.toString());
@@ -38,7 +40,7 @@ export function PrintRecipeButton({
 
   const handlePrint = (variant: 'full' | 'station') => {
     try {
-      const url = `/api/v1/recipes/${recipeId}/print?servings=${servings}&variant=${variant}`;
+      const url = `/api/v1/recipes/${recipeId}/print?servings=${servings}&variant=${variant}&isDraft=${isDraft}`;
       window.open(url, '_blank');
       setIsOpen(false);
       toast.success(variant === 'full' ? t('recipes.print.fullSheetOpened') : t('recipes.print.stationSheetOpened'));

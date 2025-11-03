@@ -22,7 +22,8 @@ import {
   Loader2,
   AlertTriangle as AlertTriangleIcon,
   Copy,
-  Calendar
+  Calendar,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { IngredientsForm } from '../components/IngredientsForm';
@@ -241,7 +242,7 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
   const canEdit = isDraft && (isOwner || isCollaborator || canManage);
   const canSubmit = isDraft && isOwner && recipe.photo_url;
   const canApprove = (isDraft || isSubmitted) && canManage && recipe.photo_url;
-  const canUseCookMode = isPublished && recipe.recipe_steps?.length > 0;
+  const canUseCookMode = recipe.recipe_steps?.length > 0; // Available for all statuses including draft
   const canRequestCollaboration = isDraft && !isOwner && !isCollaborator && collaborationStatus === 'none';
   const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
 
@@ -325,6 +326,15 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             </Badge>
           )}
           
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/recipes/${recipeId}/preview`)}
+            className="gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Anteprima
+          </Button>
+
           {canUseCookMode && (
             <Button
               variant="default"
@@ -343,12 +353,11 @@ export default function RecipeDetailClient({ recipeId }: RecipeDetailClientProps
             />
           )}
           
-          {(isPublished || isSubmitted) && (
-            <PrintRecipeButton 
-              recipeId={recipeId}
-              defaultServings={recipe.servings}
-            />
-          )}
+          <PrintRecipeButton 
+            recipeId={recipeId}
+            defaultServings={recipe.servings}
+            isDraft={isDraft}
+          />
 
           {canRequestCollaboration && (
             <Button

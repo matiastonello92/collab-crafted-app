@@ -233,7 +233,8 @@ const baseStyles = `
 
 export function generateFullRecipePrintTemplate(
   data: PrintRecipeData,
-  targetServings: number
+  targetServings: number,
+  isDraft: boolean = false
 ): string {
   const totalTime = data.prep_time_minutes + data.cook_time_minutes;
   const scaleFactor = data.servings > 0 ? targetServings / data.servings : 1;
@@ -246,6 +247,27 @@ export function generateFullRecipePrintTemplate(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ricetta: ${data.title}</title>
   ${baseStyles}
+  ${isDraft ? `
+    <style>
+      body::before {
+        content: "BOZZA";
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 120pt;
+        font-weight: 900;
+        color: rgba(220, 38, 38, 0.08);
+        z-index: 1;
+        pointer-events: none;
+        letter-spacing: 20pt;
+      }
+      .container {
+        position: relative;
+        z-index: 2;
+      }
+    </style>
+  ` : ''}
 </head>
 <body>
   <div class="container">
@@ -341,7 +363,8 @@ export function generateFullRecipePrintTemplate(
 
 export function generateStationRecipePrintTemplate(
   data: PrintRecipeData,
-  targetServings: number
+  targetServings: number,
+  isDraft: boolean = false
 ): string {
   const totalTime = data.prep_time_minutes + data.cook_time_minutes;
   const scaleFactor = data.servings > 0 ? targetServings / data.servings : 1;
@@ -354,6 +377,27 @@ export function generateStationRecipePrintTemplate(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scheda Stazione: ${data.title}</title>
   ${baseStyles}
+  ${isDraft ? `
+    <style>
+      body::before {
+        content: "BOZZA";
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 120pt;
+        font-weight: 900;
+        color: rgba(220, 38, 38, 0.08);
+        z-index: 1;
+        pointer-events: none;
+        letter-spacing: 20pt;
+      }
+      .container {
+        position: relative;
+        z-index: 2;
+      }
+    </style>
+  ` : ''}
 </head>
 <body>
   <div class="container">
