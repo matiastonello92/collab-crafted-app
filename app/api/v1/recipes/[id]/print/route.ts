@@ -64,7 +64,7 @@ export async function GET(
         )
       `)
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error || !recipe) {
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
