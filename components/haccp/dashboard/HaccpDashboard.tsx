@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TasksOverview } from './TasksOverview';
 import { TemperatureAlerts } from './TemperatureAlerts';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { AlertCircle, CheckCircle2, Clock, ClipboardList } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, ClipboardList, Thermometer, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 
@@ -87,8 +87,20 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
           <h1 className="text-3xl font-bold">{t('haccp.dashboard.title')}</h1>
           <p className="text-muted-foreground">{t('haccp.dashboard.subtitle')}</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
+        <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+          <Button asChild variant="default" className="flex-1 sm:flex-none min-h-[44px]">
+            <Link href="/haccp/temperature-check">
+              <Thermometer className="h-4 w-4 mr-2" />
+              Temperature Check
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+            <Link href="/haccp/cleaning-plan">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Cleaning Plan
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
             <Link href="/haccp/tasks">
               <ClipboardList className="h-4 w-4 mr-2" />
               {t('haccp.dashboard.viewTasks')}
