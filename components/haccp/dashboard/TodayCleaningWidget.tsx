@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, Clock, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useSupabase } from '@/hooks/useSupabase';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
 
       const { data: completions, error } = await supabase
         .from('haccp_cleaning_completions')
-        .select('*')
+        .select('*, completion_type')
         .eq('location_id', locationId)
         .gte('scheduled_for', today.toISOString())
         .lt('scheduled_for', tomorrow.toISOString())
@@ -34,7 +34,8 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
       if (error) throw error;
 
       const pending = completions?.filter(c => c.status === 'pending').length || 0;
-      const completed = completions?.filter(c => c.status === 'completed').length || 0;
+      const completed = completions?.filter(c => c.status === 'completed' && c.completion_type === 'full').length || 0;
+      const partial = completions?.filter(c => c.status === 'completed' && c.completion_type === 'partial').length || 0;
       const overdue = completions?.filter(c => c.status === 'overdue').length || 0;
 
       // Get missed tasks from last 7 days for reporting
@@ -55,6 +56,7 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
         total: completions?.length || 0,
         pending,
         completed,
+        partial,
         overdue,
         missed: missedData?.length || 0,
       };
@@ -75,7 +77,7 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
     );
   }
 
-  const { total = 0, pending = 0, completed = 0, overdue = 0, missed = 0 } = data || {};
+  const { total = 0, pending = 0, completed = 0, partial = 0, overdue = 0, missed = 0 } = data || {};
 
   return (
     <Card>
@@ -109,6 +111,17 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
             </div>
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               {completed}
+            </Badge>
+          </div>
+        )}
+        {partial > 0 && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <span className="text-sm">Partial</span>
+            </div>
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              {partial}
             </Badge>
           </div>
         )}

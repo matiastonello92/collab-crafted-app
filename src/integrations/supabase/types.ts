@@ -811,12 +811,14 @@ export type Database = {
           checklist_responses: Json | null
           completed_at: string | null
           completed_by: string | null
+          completion_type: string | null
           created_at: string
           deadline_at: string | null
           id: string
           location_id: string
           notes: string | null
           org_id: string
+          partial_completion_reason: string | null
           photo_urls: string[] | null
           scheduled_for: string
           status: string
@@ -826,12 +828,14 @@ export type Database = {
           checklist_responses?: Json | null
           completed_at?: string | null
           completed_by?: string | null
+          completion_type?: string | null
           created_at?: string
           deadline_at?: string | null
           id?: string
           location_id: string
           notes?: string | null
           org_id: string
+          partial_completion_reason?: string | null
           photo_urls?: string[] | null
           scheduled_for: string
           status?: string
@@ -841,12 +845,14 @@ export type Database = {
           checklist_responses?: Json | null
           completed_at?: string | null
           completed_by?: string | null
+          completion_type?: string | null
           created_at?: string
           deadline_at?: string | null
           id?: string
           location_id?: string
           notes?: string | null
           org_id?: string
+          partial_completion_reason?: string | null
           photo_urls?: string[] | null
           scheduled_for?: string
           status?: string
@@ -857,6 +863,44 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "haccp_cleaning_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      haccp_cleaning_item_completions: {
+        Row: {
+          completed_at: string
+          completed_by: string
+          completion_id: string
+          id: string
+          item_id: string
+          location_id: string
+          org_id: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_by: string
+          completion_id: string
+          id?: string
+          item_id: string
+          location_id: string
+          org_id: string
+        }
+        Update: {
+          completed_at?: string
+          completed_by?: string
+          completion_id?: string
+          id?: string
+          item_id?: string
+          location_id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_cleaning_item_completions_completion_id_fkey"
+            columns: ["completion_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_cleaning_completions"
             referencedColumns: ["id"]
           },
         ]

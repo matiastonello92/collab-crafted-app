@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const { id } = params;
     const body = await request.json();
-    const { checklist_responses, photo_urls, notes } = body;
+    const { checklist_responses, photo_urls, notes, completion_type, partial_completion_reason } = body;
 
     // Permission check
     const { data: hasPermission } = await supabase.rpc('user_has_permission', {
@@ -22,6 +22,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     if (!hasPermission) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Validate partial completion
+    if (completion_type === 'partial' && !partial_completion_reason) {
+      return NextResponse.json({ error: 'Partial completion reason is required' }, { status: 400 });
     }
 
     // Update completion
@@ -34,6 +39,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         checklist_responses: checklist_responses || {},
         photo_urls: photo_urls || [],
         notes: notes || null,
+        completion_type: completion_type || 'full',
+        partial_completion_reason: partial_completion_reason || null,
       })
       .eq('id', id)
       .select()

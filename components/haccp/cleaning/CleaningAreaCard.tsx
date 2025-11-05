@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format, differenceInHours, differenceInMinutes } from 'date-fns';
 
 interface CleaningArea {
@@ -22,6 +22,8 @@ interface CleaningCompletion {
   completed_at: string | null;
   status: 'pending' | 'completed' | 'skipped' | 'overdue' | 'missed';
   deadline_at?: string | null;
+  completion_type?: 'full' | 'partial';
+  partial_completion_reason?: string | null;
 }
 
 interface CleaningAreaCardProps {
@@ -69,11 +71,20 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
 
   const getStatusBadge = () => {
     if (isCompleted) {
+      const isPartial = completion?.completion_type === 'partial';
       return (
-        <Badge variant="default" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
-          <CheckCircle className="w-3 h-3 mr-1" />
-          Completed
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="default" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Completed
+          </Badge>
+          {isPartial && (
+            <Badge variant="outline" className="gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Parziale
+            </Badge>
+          )}
+        </div>
       );
     }
     if (isOverdue) {
@@ -117,6 +128,12 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
             </div>
             {area.description && (
               <p className="text-sm text-muted-foreground mt-1">{area.description}</p>
+            )}
+            {completion?.partial_completion_reason && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+                <span className="font-medium">Motivo: </span>
+                {completion.partial_completion_reason}
+              </p>
             )}
             {area.zone_code && (
               <div className="flex items-center gap-1 mt-2">

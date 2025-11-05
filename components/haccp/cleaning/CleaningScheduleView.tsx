@@ -32,6 +32,8 @@ interface CleaningCompletion {
   completed_at: string | null;
   status: 'pending' | 'completed' | 'skipped' | 'overdue' | 'missed';
   deadline_at: string | null;
+  completion_type?: 'full' | 'partial';
+  partial_completion_reason?: string | null;
 }
 
 interface ChecklistDialogState {
@@ -73,7 +75,7 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
     queryFn: async () => {
       const { data, error } = await supabase
         .from('haccp_cleaning_completions')
-        .select('*')
+        .select('*, completion_type, partial_completion_reason')
         .eq('location_id', locationId)
         .gte('scheduled_for', todayStart)
         .lte('scheduled_for', todayEnd)
