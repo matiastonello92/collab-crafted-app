@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TasksOverview } from './TasksOverview';
 import { TemperatureAlerts } from './TemperatureAlerts';
+import { TodayTemperatureWidget } from './TodayTemperatureWidget';
+import { TodayCleaningWidget } from './TodayCleaningWidget';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { AlertCircle, CheckCircle2, Clock, ClipboardList, Thermometer, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -170,6 +172,12 @@ export function HaccpDashboard({ orgId, locationId }: HaccpDashboardProps) {
           <TemperatureAlerts alerts={temperatureAlerts} />
         </div>
       )}
+
+      {/* Today's Widgets */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <TodayTemperatureWidget locationId={locationId} />
+        <TodayCleaningWidget locationId={locationId} />
+      </div>
 
       {/* Recent Activity Tabs */}
       <Tabs defaultValue="tasks" className="w-full">

@@ -110,10 +110,16 @@ export default function SidebarClient({
       permission: 'haccp:view',
       children: [
         { name: t('haccp.nav.dashboard'), href: '/haccp', icon: Home, permission: 'haccp:view' },
-        { name: t('haccp.nav.tasks'), href: '/haccp/tasks', icon: CheckSquare, permission: 'haccp:check' },
+        { name: `--- ${t('haccp.nav.temperatureSection')} ---`, disabled: true },
+        { name: t('haccp.nav.temperatureCheck'), href: '/haccp/temperature-check', icon: Thermometer, permission: 'haccp:check', badge: 'QUICK' },
+        { name: t('haccp.nav.temperatureLogs'), href: '/haccp/temperatures', icon: History, permission: 'haccp:view' },
+        { name: `--- ${t('haccp.nav.cleaningSection')} ---`, disabled: true },
+        { name: t('haccp.nav.cleaningPlan'), href: '/haccp/cleaning-plan', icon: Sparkles, permission: 'haccp:view' },
+        { name: t('haccp.nav.areasConfig'), href: '/haccp/cleaning-plan/config', icon: Settings, permission: 'haccp:manage' },
+        { name: `--- ${t('haccp.nav.inspectionsSection')} ---`, disabled: true },
+        { name: t('haccp.nav.inspections'), href: '/haccp/tasks', icon: CheckSquare, permission: 'haccp:check' },
         { name: t('haccp.nav.templates'), href: '/haccp/templates', icon: FileText, permission: 'haccp:manage' },
         { name: t('haccp.nav.equipment'), href: '/haccp/equipment', icon: Gauge, permission: 'haccp:manage' },
-        { name: t('haccp.nav.temperatures'), href: '/haccp/temperatures', icon: Thermometer, permission: 'haccp:view' },
         { name: t('haccp.nav.reports'), href: '/haccp/reports', icon: FileBarChart, permission: 'haccp:export' },
       ]
     },

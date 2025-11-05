@@ -720,6 +720,135 @@ export type Database = {
           },
         ]
       }
+      haccp_cleaning_areas: {
+        Row: {
+          assigned_role: string | null
+          checklist_items: Json
+          cleaning_frequency: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          frequency_times: Json | null
+          id: string
+          is_active: boolean | null
+          location_id: string
+          name: string
+          org_id: string
+          updated_at: string
+          updated_by: string | null
+          zone_code: string | null
+        }
+        Insert: {
+          assigned_role?: string | null
+          checklist_items?: Json
+          cleaning_frequency: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency_times?: Json | null
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          name: string
+          org_id: string
+          updated_at?: string
+          updated_by?: string | null
+          zone_code?: string | null
+        }
+        Update: {
+          assigned_role?: string | null
+          checklist_items?: Json
+          cleaning_frequency?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency_times?: Json | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          zone_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_cleaning_areas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_cleaning_areas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_cleaning_areas_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
+      haccp_cleaning_completions: {
+        Row: {
+          area_id: string
+          checklist_responses: Json | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          location_id: string
+          notes: string | null
+          org_id: string
+          photo_urls: string[] | null
+          scheduled_for: string
+          status: string
+        }
+        Insert: {
+          area_id: string
+          checklist_responses?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          location_id: string
+          notes?: string | null
+          org_id: string
+          photo_urls?: string[] | null
+          scheduled_for: string
+          status?: string
+        }
+        Update: {
+          area_id?: string
+          checklist_responses?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          location_id?: string
+          notes?: string | null
+          org_id?: string
+          photo_urls?: string[] | null
+          scheduled_for?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_cleaning_completions_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "haccp_cleaning_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       haccp_corrective_actions: {
         Row: {
           action_taken: string
@@ -5480,6 +5609,7 @@ export type Database = {
       }
       storage_org_from_name: { Args: { p_name: string }; Returns: string }
       storage_user_from_name: { Args: { p_name: string }; Returns: string }
+      update_overdue_cleaning_completions: { Args: never; Returns: number }
       user_can_manage_inventory: {
         Args: { p_location_id: string; p_org_id: string }
         Returns: boolean
