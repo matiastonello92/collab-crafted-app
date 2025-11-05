@@ -18,7 +18,6 @@ import { useSupabase } from '@/hooks/useSupabase';
 import { toast } from 'sonner';
 import { PartialCompletionDialog } from './PartialCompletionDialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Users } from 'lucide-react';
 
 interface ChecklistItem {
   id: string;
@@ -200,41 +199,39 @@ export function CleaningChecklistDialog({
                 const isCompleted = completedBy.length > 0;
                 
                 return (
-                  <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
+                  <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border hover:bg-accent/50 transition-colors">
                     <Checkbox
                       id={item.id}
+                      variant="round"
                       checked={isCompleted}
                       onCheckedChange={() => handleToggle(item.id)}
                       disabled={isSaving}
+                      className="shrink-0"
                     />
-                    <div className="flex-1 space-y-2">
-                      <label
-                        htmlFor={item.id}
-                        className="text-sm font-medium leading-none cursor-pointer block"
-                      >
-                        {item.text}
-                      </label>
-                      {completedBy.length > 0 && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Users className="h-3 w-3" />
-                          <div className="flex -space-x-2">
-                            {completedBy.slice(0, 3).map((completion) => (
-                              <Avatar key={completion.id} className="h-6 w-6 border-2 border-background">
-                                <AvatarFallback className="text-xs">
-                                  {completion.profiles.full_name?.charAt(0) || completion.profiles.email.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                            ))}
-                          </div>
-                          <span>
-                            {completedBy.length === 1 
-                              ? completedBy[0].profiles.full_name || completedBy[0].profiles.email
-                              : `${completedBy.length} utenti`
-                            }
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    <label
+                      htmlFor={item.id}
+                      className="flex-1 text-sm font-medium leading-none cursor-pointer select-none"
+                    >
+                      {item.text}
+                    </label>
+                    {completedBy.length > 0 && (
+                      <div className="flex -space-x-2 shrink-0">
+                        {completedBy.slice(0, 3).map((completion) => (
+                          <Avatar key={completion.id} className="h-7 w-7 border-2 border-background ring-1 ring-border">
+                            <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+                              {completion.profiles.full_name?.charAt(0) || completion.profiles.email.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                        {completedBy.length > 3 && (
+                          <Avatar className="h-7 w-7 border-2 border-background ring-1 ring-border">
+                            <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                              +{completedBy.length - 3}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
