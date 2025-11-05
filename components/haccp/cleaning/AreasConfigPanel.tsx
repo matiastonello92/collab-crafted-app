@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, Plus, Pencil, Trash2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -104,7 +105,7 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
           .map((text, index) => ({ id: `item-${index}`, text })),
         deadline_type: data.deadline_type,
         deadline_time: data.deadline_time,
-        deadline_offset_hours: 0, // Always set to 0 - simplified UX
+        deadline_offset_hours: data.deadline_offset_hours, // Preserve user choice
       };
 
       if (editingArea) {
@@ -337,31 +338,63 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
                 </div>
 
                 {formData.deadline_type === 'custom_time' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="deadline_time" className="text-xs">
-                      Scadenza Entro Le *
-                    </Label>
-                    <Input
-                      id="deadline_time"
-                      type="time"
-                      value={formData.deadline_time}
-                      onChange={(e) => setFormData({ ...formData, deadline_time: e.target.value })}
-                      className="w-full"
-                    />
-                    <div className="p-3 rounded-md bg-muted/50 text-xs text-muted-foreground">
-                      <p className="flex items-start gap-2">
-                        <span className="text-primary mt-0.5">ℹ️</span>
-                        <span>
-                          La task deve essere completata entro l'orario indicato. 
-                          Se l'orario è già passato, la deadline sarà per il giorno successivo.
-                        </span>
-                      </p>
-                      {formData.deadline_time && (
-                        <p className="mt-2 font-medium text-foreground">
-                          Esempio: Scadenza ore {formData.deadline_time}
-                        </p>
-                      )}
+                  <div className="space-y-4">
+                    {/* Scelta Giorno */}
+                    <div className="space-y-3">
+                      <Label className="text-xs font-medium">Giorno Scadenza *</Label>
+                      <RadioGroup
+                        value={formData.deadline_offset_hours === 24 ? 'next_day' : 'same_day'}
+                        onValueChange={(value) => {
+                          setFormData({
+                            ...formData,
+                            deadline_offset_hours: value === 'next_day' ? 24 : 0
+                          })
+                        }}
+                        className="flex gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="same_day" id="same_day" />
+                          <Label htmlFor="same_day" className="cursor-pointer font-normal">
+                            Stesso giorno
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="next_day" id="next_day" />
+                          <Label htmlFor="next_day" className="cursor-pointer font-normal">
+                            Giorno successivo
+                          </Label>
+                        </div>
+                      </RadioGroup>
                     </div>
+
+                    {/* Orario Deadline */}
+                    <div className="space-y-2">
+                      <Label htmlFor="deadline_time" className="text-xs">
+                        Orario Scadenza *
+                      </Label>
+                      <Input
+                        id="deadline_time"
+                        type="time"
+                        value={formData.deadline_time}
+                        onChange={(e) => setFormData({ ...formData, deadline_time: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Preview Dinamico */}
+                    {formData.deadline_time && (
+                      <div className="p-3 rounded-md bg-primary/5 border border-primary/20">
+                        <p className="text-sm font-medium text-foreground">
+                          📅 Scadenza: {formData.deadline_offset_hours === 24 ? 'Domani' : 'Oggi'} alle {formData.deadline_time}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formData.deadline_offset_hours === 24 
+                            ? 'La task deve essere completata entro le ore indicate del giorno successivo'
+                            : 'La task deve essere completata entro le ore indicate dello stesso giorno'
+                          }
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
