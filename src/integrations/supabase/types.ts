@@ -5651,6 +5651,10 @@ export type Database = {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean
       }
+      recalculate_pending_deadlines: {
+        Args: { p_area_id: string }
+        Returns: number
+      }
       recipe_has_cycle: {
         Args: { p_recipe_id: string; p_sub_recipe_id: string }
         Returns: boolean
