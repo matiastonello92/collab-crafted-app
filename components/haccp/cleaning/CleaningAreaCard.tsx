@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react';
+import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format, differenceInHours, differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -176,24 +176,6 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
           )}
         </ul>
       </div>
-
-      {completion && (
-        <div className="flex items-center justify-between pt-3 border-t">
-          <div className="text-xs text-muted-foreground">
-            {isCompleted && completion.completed_at ? (
-              <span>Completed {format(new Date(completion.completed_at), 'HH:mm')}</span>
-            ) : (
-              <span>Scheduled {format(new Date(completion.scheduled_for), 'HH:mm')}</span>
-            )}
-          </div>
-          {isPending && (
-            <div className="text-xs text-muted-foreground flex items-center gap-1">
-              <span className="opacity-60">Tap to complete</span>
-              <ChevronRight className="w-3 h-3 opacity-40" />
-            </div>
-          )}
-        </div>
-      )}
     </Card>
   );
 }
