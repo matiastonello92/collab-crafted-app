@@ -897,6 +897,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_item_completions_completed_by"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "haccp_cleaning_item_completions_completion_id_fkey"
             columns: ["completion_id"]
             isOneToOne: false
