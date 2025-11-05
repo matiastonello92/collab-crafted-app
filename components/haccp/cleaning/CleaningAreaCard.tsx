@@ -1,10 +1,10 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle, AlertCircle } from 'lucide-react';
+import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react';
 import { format, differenceInHours, differenceInMinutes } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CleaningArea {
   id: string;
@@ -37,6 +37,12 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
   const isCompleted = completion?.status === 'completed';
   const isPending = completion?.status === 'pending';
   const isOverdue = completion?.status === 'overdue';
+
+  const handleCardClick = () => {
+    if (isPending && completion && !isCompleting) {
+      onComplete(area.id, completion.id);
+    }
+  };
 
   const getDeadlineInfo = () => {
     if (!completion?.deadline_at) return null;
@@ -115,7 +121,14 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
   };
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow">
+    <Card 
+      className={cn(
+        "p-4 transition-all",
+        isPending && "cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+        isCompleted && "opacity-90"
+      )}
+      onClick={handleCardClick}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3 flex-1">
           <div className="p-2 rounded-lg bg-primary/10">
@@ -174,13 +187,10 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
             )}
           </div>
           {isPending && (
-            <Button
-              size="sm"
-              onClick={() => onComplete(area.id, completion.id)}
-              disabled={isCompleting}
-            >
-              {isCompleting ? 'Completing...' : 'Complete'}
-            </Button>
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <span className="opacity-60">Tap to complete</span>
+              <ChevronRight className="w-3 h-3 opacity-40" />
+            </div>
           )}
         </div>
       )}

@@ -50,6 +50,7 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
     area: null,
     completion: null,
   });
+  const [prefetchedItemCompletions, setPrefetchedItemCompletions] = useState<any[]>([]);
 
   const today = new Date();
   const todayStart = startOfDay(today).toISOString();
@@ -94,6 +95,18 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
       const completion = todayCompletions?.find((c) => c.id === completionId);
 
       if (!area || !completion) throw new Error('Area or completion not found');
+
+      // Pre-fetch item completions before opening dialog
+      try {
+        const response = await fetch(`/api/v1/haccp/cleaning-completions/${completionId}/items`);
+        if (response.ok) {
+          const data = await response.json();
+          setPrefetchedItemCompletions(data.item_completions || []);
+        }
+      } catch (error) {
+        console.error('Error prefetching item completions:', error);
+        setPrefetchedItemCompletions([]);
+      }
 
       setChecklistDialog({ open: true, area, completion });
     },
@@ -246,11 +259,15 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
       {checklistDialog.open && checklistDialog.area && checklistDialog.completion && (
         <CleaningChecklistDialog
           open={checklistDialog.open}
-          onOpenChange={(open) => setChecklistDialog({ ...checklistDialog, open })}
+          onOpenChange={(open) => {
+            setChecklistDialog({ ...checklistDialog, open });
+            if (!open) setPrefetchedItemCompletions([]);
+          }}
           areaName={checklistDialog.area.name}
           checklist={checklistDialog.area.checklist_items}
           completionId={checklistDialog.completion.id}
           onSuccess={handleChecklistSuccess}
+          initialItemCompletions={prefetchedItemCompletions}
         />
       )}
     </div>

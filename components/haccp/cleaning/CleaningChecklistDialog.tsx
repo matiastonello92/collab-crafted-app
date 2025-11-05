@@ -43,6 +43,7 @@ interface CleaningChecklistDialogProps {
   checklist: ChecklistItem[];
   completionId: string;
   onSuccess: () => void;
+  initialItemCompletions?: ItemCompletion[];
 }
 
 export function CleaningChecklistDialog({
@@ -52,8 +53,11 @@ export function CleaningChecklistDialog({
   checklist,
   completionId,
   onSuccess,
+  initialItemCompletions,
 }: CleaningChecklistDialogProps) {
-  const [itemCompletions, setItemCompletions] = useState<ItemCompletion[]>([]);
+  const [itemCompletions, setItemCompletions] = useState<ItemCompletion[]>(
+    initialItemCompletions || []
+  );
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,7 +67,10 @@ export function CleaningChecklistDialog({
   // Fetch existing item completions
   useEffect(() => {
     if (open && completionId) {
-      fetchItemCompletions();
+      // Only fetch if we don't have initial data
+      if (!initialItemCompletions || initialItemCompletions.length === 0) {
+        fetchItemCompletions();
+      }
       
       // Subscribe to realtime updates
       const channel = supabase
@@ -86,7 +93,7 @@ export function CleaningChecklistDialog({
         supabase.removeChannel(channel);
       };
     }
-  }, [open, completionId]);
+  }, [open, completionId, initialItemCompletions]);
 
   const fetchItemCompletions = async () => {
     try {
