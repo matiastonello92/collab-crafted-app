@@ -3,8 +3,8 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Sparkles, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { CheckCircle, Clock, Sparkles, MapPin, AlertTriangle } from 'lucide-react';
+import { format, differenceInHours, differenceInMinutes } from 'date-fns';
 
 interface CleaningArea {
   id: string;
@@ -20,7 +20,8 @@ interface CleaningCompletion {
   area_id: string;
   scheduled_for: string;
   completed_at: string | null;
-  status: 'pending' | 'completed' | 'skipped';
+  status: 'pending' | 'completed' | 'skipped' | 'overdue' | 'missed';
+  deadline_at?: string | null;
 }
 
 interface CleaningAreaCardProps {
@@ -33,6 +34,38 @@ interface CleaningAreaCardProps {
 export function CleaningAreaCard({ area, completion, onComplete, isCompleting }: CleaningAreaCardProps) {
   const isCompleted = completion?.status === 'completed';
   const isPending = completion?.status === 'pending';
+  const isOverdue = completion?.status === 'overdue';
+
+  const getDeadlineInfo = () => {
+    if (!completion?.deadline_at) return null;
+    
+    const deadline = new Date(completion.deadline_at);
+    const now = new Date();
+    const hoursLeft = differenceInHours(deadline, now);
+    const minutesLeft = differenceInMinutes(deadline, now);
+    
+    if (minutesLeft < 0) return null; // Expired
+    
+    let color = 'text-green-600';
+    let bgColor = 'bg-green-500/10';
+    let borderColor = 'border-green-500/20';
+    
+    if (hoursLeft < 2) {
+      color = 'text-destructive';
+      bgColor = 'bg-destructive/10';
+      borderColor = 'border-destructive/20';
+    } else if (hoursLeft < 24) {
+      color = 'text-amber-600';
+      bgColor = 'bg-amber-500/10';
+      borderColor = 'border-amber-500/20';
+    }
+    
+    const timeLeft = hoursLeft > 0 ? `${hoursLeft}h left` : `${minutesLeft}m left`;
+    
+    return { timeLeft, color, bgColor, borderColor, hoursLeft };
+  };
+
+  const deadlineInfo = getDeadlineInfo();
 
   const getStatusBadge = () => {
     if (isCompleted) {
@@ -40,6 +73,22 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
         <Badge variant="default" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
           <CheckCircle className="w-3 h-3 mr-1" />
           Completed
+        </Badge>
+      );
+    }
+    if (isOverdue) {
+      return (
+        <Badge variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          Overdue
+        </Badge>
+      );
+    }
+    if (isPending && deadlineInfo) {
+      return (
+        <Badge variant="secondary" className={`${deadlineInfo.bgColor} ${deadlineInfo.color} ${deadlineInfo.borderColor}`}>
+          <Clock className="w-3 h-3 mr-1" />
+          {deadlineInfo.timeLeft}
         </Badge>
       );
     }

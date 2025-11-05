@@ -28,7 +28,8 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
         .select('*')
         .eq('location_id', locationId)
         .gte('scheduled_for', today.toISOString())
-        .lt('scheduled_for', tomorrow.toISOString());
+        .lt('scheduled_for', tomorrow.toISOString())
+        .neq('status', 'missed');
 
       if (error) throw error;
 
@@ -36,11 +37,26 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
       const completed = completions?.filter(c => c.status === 'completed').length || 0;
       const overdue = completions?.filter(c => c.status === 'overdue').length || 0;
 
+      // Get missed tasks from last 7 days for reporting
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const { data: missedData, error: missedError } = await supabase
+        .from('haccp_cleaning_completions')
+        .select('*')
+        .eq('location_id', locationId)
+        .eq('status', 'missed')
+        .gte('scheduled_for', weekAgo.toISOString())
+        .lt('scheduled_for', today.toISOString());
+
+      if (missedError) throw missedError;
+
       return {
         total: completions?.length || 0,
         pending,
         completed,
         overdue,
+        missed: missedData?.length || 0,
       };
     },
     refetchInterval: 60000,
@@ -59,7 +75,7 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
     );
   }
 
-  const { total = 0, pending = 0, completed = 0, overdue = 0 } = data || {};
+  const { total = 0, pending = 0, completed = 0, overdue = 0, missed = 0 } = data || {};
 
   return (
     <Card>
@@ -104,6 +120,14 @@ export function TodayCleaningWidget({ locationId }: TodayCleaningWidgetProps) {
             </div>
             <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
               {overdue}
+            </Badge>
+          </div>
+        )}
+        {missed > 0 && (
+          <div className="flex items-center justify-between pt-2 border-t">
+            <span className="text-xs text-muted-foreground">Missed This Week</span>
+            <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+              {missed}
             </Badge>
           </div>
         )}

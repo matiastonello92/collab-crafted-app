@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSupabase } from '@/hooks/useSupabase';
 import { CleaningAreaCard } from './CleaningAreaCard';
@@ -30,7 +30,8 @@ interface CleaningCompletion {
   area_id: string;
   scheduled_for: string;
   completed_at: string | null;
-  status: 'pending' | 'completed' | 'skipped';
+  status: 'pending' | 'completed' | 'skipped' | 'overdue' | 'missed';
+  deadline_at: string | null;
 }
 
 interface ChecklistDialogState {
@@ -76,11 +77,13 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
         .eq('location_id', locationId)
         .gte('scheduled_for', todayStart)
         .lte('scheduled_for', todayEnd)
+        .neq('status', 'missed')
         .order('scheduled_for');
 
       if (error) throw error;
       return data as CleaningCompletion[];
     },
+    refetchInterval: 30000,
   });
 
   const completeMutation = useMutation({
@@ -101,6 +104,39 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
   const handleChecklistSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['cleaning-completions-today'] });
   };
+
+  // Failsafe: ensure tasks exist and close expired ones
+  useEffect(() => {
+    const ensureTasksAndCloseExpired = async () => {
+      if (!areas || areas.length === 0) return;
+      
+      // Close expired tasks
+      try {
+        await supabase.rpc('close_expired_cleaning_tasks');
+      } catch (err) {
+        console.error('Failed to close expired tasks:', err);
+      }
+      
+      // Generate missing tasks
+      for (const area of areas) {
+        try {
+          await supabase.rpc('generate_next_cleaning_task', {
+            p_area_id: area.id
+          });
+        } catch (err) {
+          // Ignore errors (task might already exist)
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['cleaning-completions-today'] });
+    };
+    
+    ensureTasksAndCloseExpired();
+    
+    // Run every 5 minutes
+    const interval = setInterval(ensureTasksAndCloseExpired, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [areas, supabase, queryClient]);
 
   if (areasLoading || completionsLoading) {
     return (
@@ -127,7 +163,7 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
     );
   }
 
-  const pendingCompletions = todayCompletions?.filter((c) => c.status === 'pending') || [];
+  const pendingCompletions = todayCompletions?.filter((c) => c.status === 'pending' || c.status === 'overdue') || [];
   const completedCompletions = todayCompletions?.filter((c) => c.status === 'completed') || [];
 
   return (

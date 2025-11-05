@@ -727,6 +727,9 @@ export type Database = {
           cleaning_frequency: string
           created_at: string
           created_by: string | null
+          deadline_offset_hours: number | null
+          deadline_time: string | null
+          deadline_type: string | null
           description: string | null
           frequency_times: Json | null
           id: string
@@ -744,6 +747,9 @@ export type Database = {
           cleaning_frequency: string
           created_at?: string
           created_by?: string | null
+          deadline_offset_hours?: number | null
+          deadline_time?: string | null
+          deadline_type?: string | null
           description?: string | null
           frequency_times?: Json | null
           id?: string
@@ -761,6 +767,9 @@ export type Database = {
           cleaning_frequency?: string
           created_at?: string
           created_by?: string | null
+          deadline_offset_hours?: number | null
+          deadline_time?: string | null
+          deadline_type?: string | null
           description?: string | null
           frequency_times?: Json | null
           id?: string
@@ -803,6 +812,7 @@ export type Database = {
           completed_at: string | null
           completed_by: string | null
           created_at: string
+          deadline_at: string | null
           id: string
           location_id: string
           notes: string | null
@@ -817,6 +827,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          deadline_at?: string | null
           id?: string
           location_id: string
           notes?: string | null
@@ -831,6 +842,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          deadline_at?: string | null
           id?: string
           location_id?: string
           notes?: string | null
@@ -5354,11 +5366,16 @@ export type Database = {
         Returns: undefined
       }
       app_health: { Args: never; Returns: Json }
+      calculate_cleaning_deadline: {
+        Args: { p_area_id: string; p_scheduled_for: string }
+        Returns: string
+      }
       calculate_header_total: { Args: { p_header_id: string }; Returns: number }
       can_report_post: {
         Args: { p_post_id: string; p_user_id: string }
         Returns: boolean
       }
+      close_expired_cleaning_tasks: { Args: never; Returns: number }
       create_default_permissions_for_org: {
         Args: { p_org_id: string }
         Returns: number
@@ -5372,6 +5389,10 @@ export type Database = {
         Returns: Json
       }
       generate_job_tag_key: { Args: { p_label: string }; Returns: string }
+      generate_next_cleaning_task: {
+        Args: { p_area_id: string }
+        Returns: string
+      }
       get_active_plan_id: { Args: { p_org: string }; Returns: string }
       get_my_default_location: { Args: never; Returns: string }
       get_post_stats: { Args: { p_post_id: string }; Returns: Json }

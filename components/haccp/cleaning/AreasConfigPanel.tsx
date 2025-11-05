@@ -49,6 +49,9 @@ interface AreaFormData {
   zone_code: string;
   cleaning_frequency: string;
   checklist_items: string[];
+  deadline_type: 'end_of_period' | 'custom_time';
+  deadline_time: string;
+  deadline_offset_hours: number;
 }
 
 const FREQUENCY_OPTIONS = [
@@ -68,6 +71,9 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
     zone_code: '',
     cleaning_frequency: 'daily',
     checklist_items: [''],
+    deadline_type: 'end_of_period',
+    deadline_time: '23:59',
+    deadline_offset_hours: 0,
   });
 
   const { data: areas, isLoading } = useQuery({
@@ -96,6 +102,9 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
         checklist_items: data.checklist_items
           .filter((item) => item.trim())
           .map((text, index) => ({ id: `item-${index}`, text })),
+        deadline_type: data.deadline_type,
+        deadline_time: data.deadline_time,
+        deadline_offset_hours: data.deadline_offset_hours,
       };
 
       if (editingArea) {
@@ -147,6 +156,9 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
         zone_code: area.zone_code || '',
         cleaning_frequency: area.cleaning_frequency,
         checklist_items: area.checklist_items.map((item) => item.text),
+        deadline_type: (area as any).deadline_type || 'end_of_period',
+        deadline_time: (area as any).deadline_time || '23:59',
+        deadline_offset_hours: (area as any).deadline_offset_hours || 0,
       });
     } else {
       setEditingArea(null);
@@ -156,6 +168,9 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
         zone_code: '',
         cleaning_frequency: 'daily',
         checklist_items: [''],
+        deadline_type: 'end_of_period',
+        deadline_time: '23:59',
+        deadline_offset_hours: 0,
       });
     }
     setDialogOpen(true);
@@ -170,6 +185,9 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
       zone_code: '',
       cleaning_frequency: 'daily',
       checklist_items: [''],
+      deadline_type: 'end_of_period',
+      deadline_time: '23:59',
+      deadline_offset_hours: 0,
     });
   };
 
@@ -291,6 +309,61 @@ export function AreasConfigPanel({ locationId, orgId }: AreasConfigPanelProps) {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
+                <Label className="text-sm font-semibold">Deadline Configuration</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="deadline_type" className="text-xs">Deadline Type</Label>
+                  <Select
+                    value={formData.deadline_type}
+                    onValueChange={(value: 'end_of_period' | 'custom_time') =>
+                      setFormData({ ...formData, deadline_type: value })
+                    }
+                  >
+                    <SelectTrigger id="deadline_type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="end_of_period">End of Period (Default)</SelectItem>
+                      <SelectItem value="custom_time">Custom Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.deadline_type === 'end_of_period' 
+                      ? 'Task expires at end of day/week/month based on frequency'
+                      : 'Set a custom deadline time for the task'}
+                  </p>
+                </div>
+
+                {formData.deadline_type === 'custom_time' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="deadline_time" className="text-xs">Deadline Time *</Label>
+                      <Input
+                        id="deadline_time"
+                        type="time"
+                        value={formData.deadline_time}
+                        onChange={(e) => setFormData({ ...formData, deadline_time: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground">Time of day for deadline</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="deadline_offset" className="text-xs">Offset (hours)</Label>
+                      <Input
+                        id="deadline_offset"
+                        type="number"
+                        min="0"
+                        max="48"
+                        value={formData.deadline_offset_hours}
+                        onChange={(e) => setFormData({ ...formData, deadline_offset_hours: parseInt(e.target.value) || 0 })}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        +{formData.deadline_offset_hours}h = next day {formData.deadline_time}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
