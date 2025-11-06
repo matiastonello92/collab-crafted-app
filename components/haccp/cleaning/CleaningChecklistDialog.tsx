@@ -18,6 +18,7 @@ import { useSupabase } from '@/hooks/useSupabase';
 import { toast } from 'sonner';
 import { PartialCompletionDialog } from './PartialCompletionDialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 interface ChecklistItem {
   id: string;
@@ -199,7 +200,15 @@ export function CleaningChecklistDialog({
                 const isCompleted = completedBy.length > 0;
                 
                 return (
-                  <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border hover:bg-accent/50 transition-colors">
+                  <div 
+                    key={item.id} 
+                    className={cn(
+                      "flex items-center gap-3 p-2 rounded-lg border transition-colors",
+                      isCompleted 
+                        ? "bg-green-50 border-green-500"
+                        : "hover:bg-accent/50"
+                    )}
+                  >
                     <Checkbox
                       id={item.id}
                       variant="round"

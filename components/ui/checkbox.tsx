@@ -76,7 +76,7 @@ function Checkbox({
             "h-5 w-5 transition-colors",
             disabled 
               ? "text-muted-foreground" 
-              : "text-primary"
+              : "text-green-600"
           )}
         />
       ) : (
