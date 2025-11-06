@@ -41,7 +41,8 @@ interface CleaningHistoryFiltersProps {
   initialDateRange: { from: Date; to: Date };
 }
 
-const STATUS_OPTIONS: { value: CleaningStatus; label: string; color: string }[] = [
+const STATUS_OPTIONS: { value: CleaningStatus | 'all'; label: string; color: string }[] = [
+  { value: 'all', label: 'All', color: 'text-gray-700' },
   { value: 'completed', label: 'Completed', color: 'text-green-700' },
   { value: 'partial', label: 'Partial', color: 'text-amber-700' },
   { value: 'missed', label: 'Missed', color: 'text-red-700' },
@@ -73,10 +74,19 @@ export function CleaningHistoryFilters({
     });
   };
 
-  const handleStatusToggle = (status: CleaningStatus) => {
-    const newStatuses = selectedStatuses.includes(status)
-      ? selectedStatuses.filter((s) => s !== status)
-      : [...selectedStatuses, status];
+  const handleStatusToggle = (status: CleaningStatus | 'all') => {
+    let newStatuses: CleaningStatus[];
+    
+    if (status === 'all') {
+      // If clicking "All", deselect all specific statuses
+      newStatuses = [];
+    } else {
+      // Normal behavior for other statuses
+      newStatuses = selectedStatuses.includes(status)
+        ? selectedStatuses.filter((s) => s !== status)
+        : [...selectedStatuses, status];
+    }
+    
     setSelectedStatuses(newStatuses);
     onFiltersChange({
       statuses: newStatuses,
@@ -171,7 +181,7 @@ export function CleaningHistoryFilters({
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Filter className="h-4 w-4" />
-                Status
+                {selectedStatuses.length === 0 ? 'All Status' : 'Status'}
                 {selectedStatuses.length > 0 && (
                   <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                     {selectedStatuses.length}
@@ -184,11 +194,15 @@ export function CleaningHistoryFilters({
                 <div className="font-medium text-sm">Filter by status</div>
                 {STATUS_OPTIONS.map((option) => (
                   <div key={option.value} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`status-${option.value}`}
-                      checked={selectedStatuses.includes(option.value)}
-                      onCheckedChange={() => handleStatusToggle(option.value)}
-                    />
+                  <Checkbox
+                    id={`status-${option.value}`}
+                    checked={
+                      option.value === 'all' 
+                        ? selectedStatuses.length === 0 
+                        : selectedStatuses.includes(option.value as CleaningStatus)
+                    }
+                    onCheckedChange={() => handleStatusToggle(option.value)}
+                  />
                     <label
                       htmlFor={`status-${option.value}`}
                       className={cn('text-sm font-medium cursor-pointer', option.color)}

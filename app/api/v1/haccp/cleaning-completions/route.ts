@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
       .order('scheduled_for', { ascending: false });
 
     if (status) {
-      query = query.eq('status', status);
+      const statuses = status.split(',').map(s => s.trim());
+      query = query.in('status', statuses);
     }
 
     if (from) {
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch completions' }, { status: 500 });
     }
 
-    return NextResponse.json(completions);
+    return NextResponse.json({ completions });
   } catch (error) {
     console.error('Error in GET completions:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
