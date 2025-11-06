@@ -31,15 +31,20 @@ interface CleaningAreaCardProps {
   completion?: CleaningCompletion;
   onComplete: (areaId: string, completionId: string) => void;
   isCompleting?: boolean;
+  readOnly?: boolean;
 }
 
-export function CleaningAreaCard({ area, completion, onComplete, isCompleting }: CleaningAreaCardProps) {
+export function CleaningAreaCard({ area, completion, onComplete, isCompleting, readOnly }: CleaningAreaCardProps) {
   const isCompleted = completion?.status === 'completed';
   const isPending = completion?.status === 'pending';
   const isOverdue = completion?.status === 'overdue';
+  const isMissed = completion?.status === 'missed';
+  const isSkipped = completion?.status === 'skipped';
 
   const handleCardClick = () => {
-    if (isPending && completion && !isCompleting) {
+    if (readOnly && completion) {
+      onComplete(area.id, completion.id);
+    } else if (isPending && completion && !isCompleting) {
       onComplete(area.id, completion.id);
     }
   };
@@ -93,11 +98,27 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
         </div>
       );
     }
+    if (isMissed) {
+      return (
+        <Badge variant="destructive" className="bg-red-500/10 text-red-700 border-red-500/20">
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          Missed
+        </Badge>
+      );
+    }
     if (isOverdue) {
       return (
-        <Badge variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
+        <Badge variant="destructive" className="bg-orange-500/10 text-orange-700 border-orange-500/20">
           <AlertTriangle className="w-3 h-3 mr-1" />
           Overdue
+        </Badge>
+      );
+    }
+    if (isSkipped) {
+      return (
+        <Badge variant="secondary" className="bg-gray-500/10 text-gray-700 border-gray-500/20">
+          <Clock className="w-3 h-3 mr-1" />
+          Skipped
         </Badge>
       );
     }
@@ -124,8 +145,8 @@ export function CleaningAreaCard({ area, completion, onComplete, isCompleting }:
     <Card 
       className={cn(
         "p-4 transition-all",
-        isPending && "cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
-        isCompleted && "opacity-90"
+        (isPending || readOnly) && "cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+        isCompleted && !readOnly && "opacity-90"
       )}
       onClick={handleCardClick}
     >

@@ -5,10 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSupabase } from '@/hooks/useSupabase';
 import { CleaningAreaCard } from './CleaningAreaCard';
 import { CleaningChecklistDialog } from './CleaningChecklistDialog';
+import { CleaningHistoryView } from './CleaningHistoryView';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Settings, Calendar } from 'lucide-react';
+import { Loader2, Settings, Calendar, History } from 'lucide-react';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import Link from 'next/link';
 
@@ -199,12 +200,16 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="pending">
             Pending ({pendingCompletions.length})
           </TabsTrigger>
           <TabsTrigger value="completed">
             Completed ({completedCompletions.length})
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="w-4 h-4 mr-2" />
+            History
           </TabsTrigger>
         </TabsList>
 
@@ -253,6 +258,10 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
               })}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4">
+          <CleaningHistoryView locationId={locationId} />
         </TabsContent>
       </Tabs>
 
