@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 function Checkbox({
   className,
-  variant = "default",
+  variant = "round",
   ...props
 }: React.ComponentProps<typeof CheckboxPrimitive.Root> & {
   variant?: "default" | "round"
