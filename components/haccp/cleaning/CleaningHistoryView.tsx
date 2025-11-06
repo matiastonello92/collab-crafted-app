@@ -2,12 +2,22 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, History, Calendar } from 'lucide-react';
+import { Loader2, History, Calendar, Eye } from 'lucide-react';
+import { format } from 'date-fns';
 import { CleaningHistoryFilters, CleaningStatus } from './CleaningHistoryFilters';
 import { CleaningAreaCard } from './CleaningAreaCard';
 import { CleaningDetailsDialog } from './CleaningDetailsDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface CleaningHistoryViewProps {
   locationId: string;
@@ -132,6 +142,17 @@ export function CleaningHistoryView({ locationId }: CleaningHistoryViewProps) {
     setSelectedCompletion(completion);
   };
 
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+      case 'completed': return 'default';
+      case 'missed': return 'destructive';
+      case 'overdue': return 'destructive';
+      case 'pending': return 'secondary';
+      case 'skipped': return 'outline';
+      default: return 'secondary';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -186,25 +207,79 @@ export function CleaningHistoryView({ locationId }: CleaningHistoryViewProps) {
             </span>
           </div>
 
-          {/* Grid of cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCompletions.map((completion) => (
-              <CleaningAreaCard
-                key={completion.id}
-                area={completion.area}
-                completion={{
-                  id: completion.id,
-                  area_id: completion.area_id,
-                  scheduled_for: completion.scheduled_for,
-                  completed_at: completion.completed_at,
-                  deadline_at: completion.deadline_at,
-                  status: completion.status,
-                  completion_type: completion.completion_type,
-                }}
-                onComplete={() => handleCardClick(completion)}
-                readOnly
-              />
-            ))}
+          {/* Table view */}
+          <div className="rounded-lg border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Frequency</TableHead>
+                  <TableHead>Scheduled</TableHead>
+                  <TableHead>Completed</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="w-[80px]">Details</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCompletions.map((completion) => (
+                  <TableRow 
+                    key={completion.id}
+                    onClick={() => handleCardClick(completion)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{completion.area.name}</div>
+                        {completion.area.zone_code && (
+                          <div className="text-xs text-muted-foreground">
+                            Zone: {completion.area.zone_code}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {completion.area.cleaning_frequency}
+                      </Badge>
+                    </TableCell>
+                    
+                    <TableCell className="text-sm">
+                      {format(new Date(completion.scheduled_for), 'dd/MM/yyyy HH:mm')}
+                    </TableCell>
+                    
+                    <TableCell className="text-sm">
+                      {completion.completed_at 
+                        ? format(new Date(completion.completed_at), 'dd/MM/yyyy HH:mm')
+                        : <span className="text-muted-foreground">—</span>
+                      }
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Badge variant={getStatusVariant(completion.status)}>
+                        {completion.status}
+                      </Badge>
+                    </TableCell>
+                    
+                    <TableCell>
+                      {completion.completion_type && (
+                        <Badge 
+                          variant={completion.completion_type === 'full' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {completion.completion_type}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    
+                    <TableCell>
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </>
       )}
