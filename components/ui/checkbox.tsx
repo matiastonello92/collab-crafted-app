@@ -1,37 +1,95 @@
 "use client"
 
 import * as React from "react"
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
-import { CheckIcon } from "lucide-react"
-
+import { Circle, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+interface CheckboxProps {
+  id?: string
+  checked?: boolean
+  onCheckedChange?: (checked: boolean) => void
+  disabled?: boolean
+  className?: string
+  variant?: "default" | "round"
+  "aria-label"?: string
+  "aria-labelledby"?: string
+  "aria-describedby"?: string
+  "aria-invalid"?: boolean
+}
+
 function Checkbox({
+  id,
+  checked = false,
+  onCheckedChange,
+  disabled = false,
   className,
   variant = "round",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  "aria-describedby": ariaDescribedby,
+  "aria-invalid": ariaInvalid,
   ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root> & {
-  variant?: "default" | "round"
-}) {
+}: CheckboxProps) {
+  const handleClick = () => {
+    if (!disabled && onCheckedChange) {
+      onCheckedChange(!checked)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!disabled && (e.key === ' ' || e.key === 'Enter')) {
+      e.preventDefault()
+      if (onCheckedChange) {
+        onCheckedChange(!checked)
+      }
+    }
+  }
+
   return (
-    <CheckboxPrimitive.Root
-      data-slot="checkbox"
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-disabled={disabled}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
+      aria-describedby={ariaDescribedby}
+      aria-invalid={ariaInvalid}
+      id={id}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      disabled={disabled}
+      tabIndex={disabled ? -1 : 0}
       className={cn(
-        className,
-        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shrink-0 border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
-        variant === "round"
-          ? "!size-5 !aspect-square inline-flex items-center justify-center rounded-full leading-none p-0"
-          : "size-4 rounded-[4px] p-0"
+        "inline-flex items-center justify-center shrink-0",
+        "transition-all outline-none",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        disabled && "cursor-not-allowed opacity-50",
+        !disabled && "cursor-pointer hover:opacity-80",
+        className
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="absolute inset-0 flex items-center justify-center text-current transition-none"
-      >
-        <CheckIcon className="size-3.5" />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
+      {checked ? (
+        <CheckCircle2 
+          className={cn(
+            "h-5 w-5 transition-colors",
+            disabled 
+              ? "text-muted-foreground" 
+              : "text-primary"
+          )}
+        />
+      ) : (
+        <Circle 
+          className={cn(
+            "h-5 w-5 transition-colors",
+            disabled 
+              ? "text-muted-foreground/30" 
+              : "text-muted-foreground hover:text-primary/50"
+          )}
+        />
+      )}
+    </button>
   )
 }
 
