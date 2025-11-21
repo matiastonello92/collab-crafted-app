@@ -5027,6 +5027,10 @@ export type Database = {
       user_dashboard_widgets: {
         Row: {
           config: Json | null
+          grid_h: number | null
+          grid_w: number | null
+          grid_x: number | null
+          grid_y: number | null
           is_visible: boolean | null
           position: number | null
           size: string | null
@@ -5036,6 +5040,10 @@ export type Database = {
         }
         Insert: {
           config?: Json | null
+          grid_h?: number | null
+          grid_w?: number | null
+          grid_x?: number | null
+          grid_y?: number | null
           is_visible?: boolean | null
           position?: number | null
           size?: string | null
@@ -5045,6 +5053,10 @@ export type Database = {
         }
         Update: {
           config?: Json | null
+          grid_h?: number | null
+          grid_w?: number | null
+          grid_x?: number | null
+          grid_y?: number | null
           is_visible?: boolean | null
           position?: number | null
           size?: string | null

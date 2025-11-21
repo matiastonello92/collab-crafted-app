@@ -47,11 +47,51 @@ export function useDashboardWidgets() {
     }
   };
 
+  const updateWidgetPosition = async (
+    widgetId: string, 
+    x: number, 
+    y: number, 
+    w: number, 
+    h: number
+  ) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Optimistic update
+    mutate(
+      (current) => {
+        if (!current) return current;
+        return current.map(pref => 
+          pref.widget_id === widgetId 
+            ? { ...pref, grid_x: x, grid_y: y, grid_w: w, grid_h: h }
+            : pref
+        );
+      },
+      false
+    );
+
+    const { error } = await supabase
+      .from('user_dashboard_widgets')
+      .upsert({
+        user_id: user.id,
+        widget_id: widgetId,
+        grid_x: x,
+        grid_y: y,
+        grid_w: w,
+        grid_h: h,
+      });
+
+    if (error) {
+      mutate(); // Revert on error
+    }
+  };
+
   return {
     preferences: data || [],
     isLoading,
     error,
     updateWidget,
+    updateWidgetPosition,
     mutate,
   };
 }
