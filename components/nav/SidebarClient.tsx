@@ -179,7 +179,7 @@ export default function SidebarClient({
     } else {
       setOpenGroups([]);
     }
-  }, [pathname, navigation]);
+  }, [pathname]);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
