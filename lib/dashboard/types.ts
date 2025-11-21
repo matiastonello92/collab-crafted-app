@@ -24,6 +24,18 @@ export interface UserWidgetPreference {
   position: number;
   size: WidgetSize;
   config: Record<string, any>;
+  grid_x?: number;
+  grid_y?: number;
+  grid_w?: number;
+  grid_h?: number;
+}
+
+export interface WidgetLayout {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export interface DashboardWidget extends WidgetDefinition {

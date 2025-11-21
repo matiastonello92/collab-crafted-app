@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useTranslation } from '@/lib/i18n';
 import { WidgetSize } from '@/lib/dashboard/types';
 import { cn } from '@/lib/utils';
+import { GripVertical } from 'lucide-react';
 
 interface WidgetContainerProps {
   title: string;
@@ -29,7 +30,10 @@ export function WidgetContainer({
   const { t } = useTranslation();
 
   return (
-    <Card className={cn(sizeClasses[size], className)}>
+    <Card className={cn(sizeClasses[size], 'group relative', className)}>
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10 pointer-events-none">
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
+      </div>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
