@@ -202,7 +202,7 @@ export default function SidebarClient({
     <aside
       aria-label={t('aria.mainNav')}
       className={cn(
-        'relative flex h-dvh flex-col border-r border-border/60 bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
+        'relative flex h-full flex-col border-r border-border/60 bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
         collapsed ? 'w-20' : 'w-64'
       )}
     >
