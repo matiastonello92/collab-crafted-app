@@ -5245,6 +5245,40 @@ export type Database = {
       }
     }
     Views: {
+      cleaning_tasks_stats: {
+        Row: {
+          completed_today: number | null
+          last_task_created_at: string | null
+          location_id: string | null
+          org_id: string | null
+          overdue_tasks: number | null
+          pending_tasks: number | null
+          total_active_areas: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "haccp_cleaning_areas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_cleaning_areas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "my_accessible_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "haccp_cleaning_areas_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["org_id"]
+          },
+        ]
+      }
       my_accessible_locations: {
         Row: {
           address: string | null
@@ -5430,6 +5464,15 @@ export type Database = {
       create_default_permissions_for_org: {
         Args: { p_org_id: string }
         Returns: number
+      }
+      ensure_all_cleaning_tasks: {
+        Args: never
+        Returns: {
+          areas_processed: number
+          execution_time_ms: number
+          tasks_created: number
+          tasks_expired: number
+        }[]
       }
       feature_enabled: {
         Args: { p_feature_key: string; p_org: string }
