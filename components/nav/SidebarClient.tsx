@@ -163,6 +163,24 @@ export default function SidebarClient({
     return children?.some(child => pathname === child.href) || false;
   };
 
+  // Sync openGroups with active route - only keep the group with active route open
+  useEffect(() => {
+    // Find which group contains the current pathname
+    const activeGroup = navigation.find(item => {
+      if (!item.children) return false;
+      return item.children.some((child: any) => 
+        !child.disabled && child.href === pathname
+      );
+    });
+
+    // Update openGroups to contain only the active group (or empty if none)
+    if (activeGroup) {
+      setOpenGroups([activeGroup.name]);
+    } else {
+      setOpenGroups([]);
+    }
+  }, [pathname, navigation]);
+
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
