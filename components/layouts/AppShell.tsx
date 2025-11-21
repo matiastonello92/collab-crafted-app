@@ -7,16 +7,16 @@ import { MobileSidebar } from './MobileSidebar';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh bg-background text-foreground pt-safe">
-      {/* DESKTOP: Sidebar normale */}
-      <Suspense fallback={<aside className="hidden min-h-dvh w-64 border-r border-border/60 bg-card lg:block" />}>
-        <div className="hidden lg:block">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground pt-safe">
+      {/* DESKTOP: Sidebar FIXED */}
+      <Suspense fallback={<aside className="hidden h-screen w-64 border-r border-border/60 bg-card lg:block" />}>
+        <div className="hidden lg:block sticky top-0 h-screen">
           <SidebarWrapper />
         </div>
       </Suspense>
 
-      <div className="flex min-h-dvh flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-screen flex-1 flex-col overflow-hidden">
+        <header className="sticky top-0 z-40 shrink-0 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <Suspense fallback={<div className="h-10 w-full" />}>
             <Header />
           </Suspense>
