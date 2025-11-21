@@ -121,36 +121,25 @@ export function CleaningScheduleView({ locationId }: CleaningScheduleViewProps) 
     queryClient.invalidateQueries({ queryKey: ['cleaning-completions-today'] });
   };
 
-  // Failsafe: ensure tasks exist and close expired ones
+  // Lightweight interval: only close expired tasks (real-time UI feedback)
+  // Task generation is now handled by pg_cron automatic scheduler
   useEffect(() => {
-    const ensureTasksAndCloseExpired = async () => {
-      if (!areas || areas.length === 0) return;
-      
-      // Close expired tasks
+    if (!areas || areas.length === 0) return;
+    
+    const closeExpiredTasks = async () => {
       try {
         await supabase.rpc('close_expired_cleaning_tasks');
+        queryClient.invalidateQueries({ queryKey: ['cleaning-completions-today'] });
       } catch (err) {
         console.error('Failed to close expired tasks:', err);
       }
-      
-      // Generate missing tasks
-      for (const area of areas) {
-        try {
-          await supabase.rpc('generate_next_cleaning_task', {
-            p_area_id: area.id
-          });
-        } catch (err) {
-          // Ignore errors (task might already exist)
-        }
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['cleaning-completions-today'] });
     };
     
-    ensureTasksAndCloseExpired();
+    // Initial run
+    closeExpiredTasks();
     
-    // Run every 5 minutes
-    const interval = setInterval(ensureTasksAndCloseExpired, 5 * 60 * 1000);
+    // Run every 5 minutes for real-time UI updates
+    const interval = setInterval(closeExpiredTasks, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [areas, supabase, queryClient]);
 
