@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useMemo, useRef, useState, useEffect } from 'react';
+import { useIsClient } from '@/lib/hydration/HydrationToolkit';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { getUserLevel, getVisibleWidgets } from '@/lib/dashboard/widget-selector';
@@ -16,6 +17,7 @@ import { toast } from 'sonner';
 
 export default function DashboardClient() {
   const { t } = useTranslation();
+  const isClient = useIsClient();
   const { permissions, isAdmin, isLoading: permissionsLoading } = usePermissions();
   const { preferences, isLoading: widgetsLoading, updateWidgetPosition } = useDashboardWidgets();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,7 @@ export default function DashboardClient() {
 
   const isMobile = gridCols === 1;
 
-  if (permissionsLoading || widgetsLoading) {
+  if (!isClient || permissionsLoading || widgetsLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="mb-8">
