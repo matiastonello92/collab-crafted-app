@@ -3,9 +3,8 @@
 import useSWR from 'swr';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 
-const supabase = createSupabaseBrowserClient();
-
 const fetcher = async () => {
+  const supabase = createSupabaseBrowserClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
