@@ -4,9 +4,8 @@ import useSWR from 'swr';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client';
 import { UserWidgetPreference } from '@/lib/dashboard/types';
 
-const supabase = createSupabaseBrowserClient();
-
 const fetcher = async (): Promise<UserWidgetPreference[]> => {
+  const supabase = createSupabaseBrowserClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
@@ -31,6 +30,7 @@ export function useDashboardWidgets() {
   );
 
   const updateWidget = async (widgetId: string, updates: Partial<UserWidgetPreference>) => {
+    const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -54,6 +54,7 @@ export function useDashboardWidgets() {
     w: number, 
     h: number
   ) => {
+    const supabase = createSupabaseBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 

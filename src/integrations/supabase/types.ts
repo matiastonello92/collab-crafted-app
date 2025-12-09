@@ -5520,7 +5520,6 @@ export type Database = {
             Args: {
               p_days?: number
               p_email: string
-              p_job_tags?: Json
               p_location_ids: string[]
               p_overrides?: Json
               p_role_id: string
@@ -5552,6 +5551,7 @@ export type Database = {
             Args: {
               p_days?: number
               p_email: string
+              p_job_tags?: Json
               p_location_ids: string[]
               p_overrides?: Json
               p_role_id: string
@@ -5625,7 +5625,8 @@ export type Database = {
         | {
             Args: {
               p_avatar_url?: string
-              p_full_name?: string
+              p_first_name?: string
+              p_last_name?: string
               p_locale?: string
               p_marketing_opt_in?: boolean
               p_notif_prefs?: Json
@@ -5664,8 +5665,7 @@ export type Database = {
         | {
             Args: {
               p_avatar_url?: string
-              p_first_name?: string
-              p_last_name?: string
+              p_full_name?: string
               p_locale?: string
               p_marketing_opt_in?: boolean
               p_notif_prefs?: Json
