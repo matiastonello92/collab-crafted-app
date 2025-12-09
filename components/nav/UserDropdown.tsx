@@ -13,12 +13,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { User, Settings, LogOut, Sun, Moon, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n'
+import { useTheme } from 'next-themes'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
 
 export function UserDropdown() {
   const { t } = useTranslation()
+  const { theme, setTheme } = useTheme()
+  const { locale, setLocale } = useLocale()
   const [user, setUser] = useState<{ email: string; name?: string; avatar_url?: string | null } | null>(null)
 
   useEffect(() => {
@@ -98,6 +102,36 @@ export function UserDropdown() {
             <Settings className="h-4 w-4" />
             {t('user.settings')}
           </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        {/* Theme toggle */}
+        <DropdownMenuItem 
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          className="flex items-center justify-between cursor-pointer"
+        >
+          <span className="flex items-center gap-2">
+            {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {t('user.appearance')}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {theme === 'light' ? t('user.themeLight') : t('user.themeDark')}
+          </span>
+        </DropdownMenuItem>
+        
+        {/* Language toggle */}
+        <DropdownMenuItem 
+          onClick={() => setLocale(locale === 'it' ? 'en' : 'it')}
+          className="flex items-center justify-between cursor-pointer"
+        >
+          <span className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            {t('user.language')}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {locale === 'it' ? '🇮🇹 IT' : '🇬🇧 EN'}
+          </span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

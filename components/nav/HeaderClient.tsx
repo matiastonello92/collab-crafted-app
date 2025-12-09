@@ -7,8 +7,6 @@ import { Search, MapPin } from 'lucide-react';
 import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
 import { GlobalSearchCommand } from '@/components/search/GlobalSearchCommand';
 import { Button } from '@/components/ui/button';
@@ -160,10 +158,8 @@ export default function HeaderClient({
           </PopoverContent>
         </Popover>
 
-        {/* Theme + Language + Notifications + User */}
+        {/* Notifications + User */}
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <LanguageSwitcher />
           <NotificationsBell />
           <UserDropdown />
         </div>
