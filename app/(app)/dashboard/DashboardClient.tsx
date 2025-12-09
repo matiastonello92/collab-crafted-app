@@ -16,11 +16,19 @@ import { toast } from 'sonner';
 
 export default function DashboardClient() {
   const { t } = useTranslation();
+  const [isReady, setIsReady] = useState(false);
   const { permissions, isAdmin, isLoading: permissionsLoading } = usePermissions();
   const { preferences, isLoading: widgetsLoading, updateWidgetPosition } = useDashboardWidgets();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState(3);
+
+  // Set ready only after mount + data loaded
+  useEffect(() => {
+    if (!permissionsLoading && !widgetsLoading) {
+      setIsReady(true);
+    }
+  }, [permissionsLoading, widgetsLoading]);
 
   // Responsive grid columns
   useEffect(() => {
@@ -48,7 +56,7 @@ export default function DashboardClient() {
 
   const isMobile = gridCols === 1;
 
-  if (permissionsLoading || widgetsLoading) {
+  if (!isReady) {
     return (
       <div className="container mx-auto p-6">
         <div className="mb-8">
