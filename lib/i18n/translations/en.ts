@@ -679,6 +679,10 @@ export const en = {
     myProfile: 'My Profile',
     settings: 'Settings',
     logout: 'Logout',
+    appearance: 'Appearance',
+    language: 'Language',
+    themeLight: 'Light',
+    themeDark: 'Dark',
   },
 
   // Admin
