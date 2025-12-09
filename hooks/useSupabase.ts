@@ -24,7 +24,13 @@ function getOrCreateClient(): SupabaseClient | null {
  * @returns The Supabase client (non-null after initial client-side render)
  */
 export function useSupabase(): SupabaseClient {
-  const [client, setClient] = useState<SupabaseClient | null>(null);
+  const [client, setClient] = useState<SupabaseClient | null>(() => {
+    // Initialize only on client side
+    if (typeof window !== 'undefined') {
+      return getOrCreateClient();
+    }
+    return null;
+  });
   
   useEffect(() => {
     if (!client) {
@@ -32,15 +38,10 @@ export function useSupabase(): SupabaseClient {
     }
   }, [client]);
   
-  // Return client or throw - components should be wrapped in AuthGuard/ClientOnly
-  // which handles the SSR case
-  if (!client) {
-    // During SSR, return a dummy that will be replaced on client
-    // This prevents null checks everywhere while maintaining SSR safety
-    return getOrCreateClient() as SupabaseClient;
-  }
-  
-  return client;
+  // During SSR or before mount, return a placeholder that will be replaced
+  // Components wrapped in AuthGuard won't render until client is ready
+  // For type safety, we assert non-null since AuthGuard handles the null case
+  return client ?? getOrCreateClient()!;
 }
 
 /**

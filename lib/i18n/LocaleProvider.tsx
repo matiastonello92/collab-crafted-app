@@ -21,15 +21,21 @@ export function LocaleProvider({ children, initialLocale = 'it' }: LocaleProvide
   const [isMounted, setIsMounted] = useState(false);
 
   // Sync with localStorage after mount (client-side only)
+  // Use setTimeout(0) to delay localStorage read AFTER React hydration completes
   useEffect(() => {
     setIsMounted(true);
     
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('klyra-locale') as Locale;
-      if (stored && (stored === 'it' || stored === 'en')) {
-        setLocaleState(stored);
+    // Delay locale change to prevent hydration mismatch
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('klyra-locale') as Locale;
+        if (stored && (stored === 'it' || stored === 'en')) {
+          setLocaleState(stored);
+        }
       }
-    }
+    }, 0);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Sync global locale when locale changes (only after mount)
