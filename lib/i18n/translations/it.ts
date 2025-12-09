@@ -2376,6 +2376,10 @@ export const it = {
   dashboard: {
     title: 'Dashboard',
     welcome: 'Benvenuto nella tua dashboard',
+    overview: 'Panoramica delle tue attività',
+    noWidgets: 'Nessun widget configurato',
+    addWidgets: 'Aggiungi Widget',
+    positionUpdated: 'Posizione aggiornata',
     systemOperational: 'Sistema Operativo',
     quickActions: 'Azioni Rapide',
     quickActionsDesc: 'Accedi rapidamente alle funzionalità principali della piattaforma',
