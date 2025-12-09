@@ -24,7 +24,7 @@ function getOrCreateClient(): SupabaseClient | null {
  * @returns The Supabase client (non-null after initial client-side render)
  */
 export function useSupabase(): SupabaseClient {
-  const [client, setClient] = useState<SupabaseClient | null>(() => getOrCreateClient());
+  const [client, setClient] = useState<SupabaseClient | null>(null);
   
   useEffect(() => {
     if (!client) {
@@ -47,7 +47,7 @@ export function useSupabase(): SupabaseClient {
  * Check if Supabase client is ready (useful for guards)
  */
 export function useSupabaseReady(): boolean {
-  const [ready, setReady] = useState(() => typeof window !== 'undefined');
+  const [ready, setReady] = useState(false);
   
   useEffect(() => {
     setReady(true);
