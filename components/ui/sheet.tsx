@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import { useState, useRef } from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
+import { useDrag } from "@use-gesture/react"
 
 import { cn } from "@/lib/utils"
 
@@ -127,11 +129,99 @@ function SheetDescription({
   )
 }
 
+function SwipeableSheetContent({
+  className,
+  children,
+  side = "left",
+  onClose,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Content> & {
+  side?: "top" | "right" | "bottom" | "left"
+  onClose?: () => void
+}) {
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  
+  const bind = useDrag(({ movement: [mx], velocity: [vx], direction: [xDir], active, cancel }) => {
+    if (side === "left") {
+      // Ignore right swipe
+      if (mx > 20) { cancel(); return }
+      
+      if (active) {
+        setIsDragging(true)
+        setDragX(Math.max(mx, -280))
+      } else {
+        // Check threshold for close
+        if (mx < -80 || (xDir < 0 && vx > 0.5)) {
+          onClose?.()
+        }
+        setIsDragging(false)
+        setDragX(0)
+      }
+    } else if (side === "right") {
+      // Ignore left swipe
+      if (mx < -20) { cancel(); return }
+      
+      if (active) {
+        setIsDragging(true)
+        setDragX(Math.min(mx, 280))
+      } else {
+        if (mx > 80 || (xDir > 0 && vx > 0.5)) {
+          onClose?.()
+        }
+        setIsDragging(false)
+        setDragX(0)
+      }
+    }
+  }, { axis: 'x', filterTaps: true })
+
+  const opacity = isDragging ? 1 - Math.abs(dragX) / 280 : 1
+
+  return (
+    <SheetPortal>
+      <SheetOverlay 
+        style={{ opacity: isDragging ? opacity : undefined }}
+      />
+      <SheetPrimitive.Content
+        ref={contentRef}
+        data-slot="sheet-content"
+        {...bind()}
+        style={{
+          transform: isDragging ? `translateX(${dragX}px)` : undefined,
+          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+        }}
+        className={cn(
+          "bg-background fixed z-50 flex flex-col gap-4 shadow-lg touch-pan-y",
+          !isDragging && "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+          side === "right" &&
+            (!isDragging ? "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right" : "") + " inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+          side === "left" &&
+            (!isDragging ? "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left" : "") + " inset-y-0 left-0 h-full w-3/4 sm:max-w-sm",
+          side === "top" &&
+            "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
+          side === "bottom" &&
+            "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
+          <XIcon className="size-4" />
+          <span className="sr-only">Close</span>
+        </SheetPrimitive.Close>
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  )
+}
+
 export {
   Sheet,
   SheetTrigger,
   SheetClose,
   SheetContent,
+  SwipeableSheetContent,
   SheetHeader,
   SheetFooter,
   SheetTitle,
