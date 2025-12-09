@@ -33,6 +33,7 @@ export function MobileSidebar({
       </SheetTrigger>
       <SheetContent side="left" className="w-[280px] p-0">
         <SidebarClient 
+          isMobile
           onNavigate={() => setOpen(false)}
           locations={locations}
           activeLocationId={activeLocationId}

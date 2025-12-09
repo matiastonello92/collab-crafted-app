@@ -51,12 +51,14 @@ export default function SidebarClient({
   onNavigate,
   locations,
   activeLocationId,
-  setActiveLocation
+  setActiveLocation,
+  isMobile = false
 }: { 
   onNavigate?: () => void
   locations?: { id: string; name: string; org_id: string }[]
   activeLocationId?: string | null
   setActiveLocation?: (id?: string | null) => Promise<void>
+  isMobile?: boolean
 } = {}) {
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
@@ -220,30 +222,33 @@ export default function SidebarClient({
     <aside
       aria-label={t('aria.mainNav')}
       className={cn(
-        'relative flex h-full flex-col border-r border-border/60 bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
-        collapsed ? 'w-20' : 'w-64'
+        'relative flex h-full flex-col bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
+        !isMobile && 'border-r border-border/60',
+        collapsed && !isMobile ? 'w-20' : 'w-64'
       )}
     >
       <div className="flex h-16 items-center justify-between gap-2 px-4">
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <div className="flex items-center gap-2">
             <Image src="/brand/klyra-icon.svg" alt="Klyra" width={24} height={24} className="size-6" priority />
             <h2 className="text-lg font-semibold tracking-tight text-foreground">Klyra</h2>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={collapsed ? t('aria.expandNav') : t('aria.collapseNav')}
-          onClick={() => setCollapsed(!collapsed)}
-          className="size-8 rounded-full text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground"
-        >
-          {collapsed ? (
-            <ChevronRight className="size-4" />
-          ) : (
-            <ChevronLeft className="size-4" />
-          )}
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={collapsed ? t('aria.expandNav') : t('aria.collapseNav')}
+            onClick={() => setCollapsed(!collapsed)}
+            className="size-8 rounded-full text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground"
+          >
+            {collapsed ? (
+              <ChevronRight className="size-4" />
+            ) : (
+              <ChevronLeft className="size-4" />
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Location Switcher */}
