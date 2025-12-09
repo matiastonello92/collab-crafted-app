@@ -2241,6 +2241,10 @@ export const en = {
   dashboard: {
     title: 'Dashboard',
     welcome: 'Welcome to your dashboard',
+    overview: 'Overview of your activities',
+    noWidgets: 'No widgets configured',
+    addWidgets: 'Add Widgets',
+    positionUpdated: 'Position updated',
     systemOperational: 'System Operational',
     quickActions: 'Quick Actions',
     quickActionsDesc: 'Quickly access the main features of the platform',
