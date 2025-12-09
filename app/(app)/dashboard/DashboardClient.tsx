@@ -13,23 +13,17 @@ import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSenso
 import { DraggableWidget } from '@/components/dashboard/DraggableWidget';
 import { calculateAutoLayout, calculateDropPosition, sizeToColumns, WidgetPosition } from '@/lib/dashboard/grid-layout';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardClient() {
   const { t } = useTranslation();
-  const [hasMounted, setHasMounted] = useState(false);
   const { permissions, isAdmin, isLoading: permissionsLoading } = usePermissions();
   const { preferences, isLoading: widgetsLoading, updateWidgetPosition } = useDashboardWidgets();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState(3);
 
-  // hasMounted è SEMPRE false durante SSR e primo render client
-  // Diventa true SOLO dopo hydration (useEffect con deps vuote)
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  // Responsive grid columns
+  // Responsive grid columns - only runs on client
   useEffect(() => {
     const updateGridCols = () => {
       const width = window.innerWidth;
@@ -55,16 +49,17 @@ export default function DashboardClient() {
 
   const isMobile = gridCols === 1;
 
-  if (!hasMounted || permissionsLoading || widgetsLoading) {
+  // Loading state - aligned with PlannerClient pattern
+  if (permissionsLoading || widgetsLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="mb-8">
-          <div className="h-8 w-48 bg-muted animate-pulse rounded" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <WidgetSkeleton size="large" />
-          <WidgetSkeleton size="medium" />
-          <WidgetSkeleton size="small" />
+      <div className="flex flex-col h-full">
+        <div className="container mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-48" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-40" />
+          </div>
         </div>
       </div>
     );
