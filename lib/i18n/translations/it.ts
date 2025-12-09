@@ -4014,4 +4014,11 @@ export const it = {
     closeDialog: 'Chiudi dialog',
     close: 'Chiudi',
   },
+
+  // Bottom Bar
+  bottomBar: {
+    home: 'Home',
+    smart: 'Suggerito',
+    showBar: 'Mostra menu',
+  },
 } as const;
