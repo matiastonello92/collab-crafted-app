@@ -1484,6 +1484,16 @@ export const it = {
 
   // Planner & Shifts
   planner: {
+    mobile: {
+      shift: 'turno',
+      shifts: 'turni',
+      unassigned: 'Non assegnato',
+      noShifts: 'Nessun turno',
+      tapToAdd: 'Tocca per aggiungere',
+      addShift: 'Aggiungi turno',
+      inProgress: 'In corso',
+      completed: 'Completato',
+    },
     unassignedPool: {
       allAssigned: 'Tutti i turni sono assegnati',
     },

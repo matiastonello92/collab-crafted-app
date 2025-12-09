@@ -1476,6 +1476,16 @@ export const en = {
 
   // Planner & Shifts
   planner: {
+    mobile: {
+      shift: 'shift',
+      shifts: 'shifts',
+      unassigned: 'Unassigned',
+      noShifts: 'No shifts',
+      tapToAdd: 'Tap to add',
+      addShift: 'Add shift',
+      inProgress: 'In progress',
+      completed: 'Completed',
+    },
     unassignedPool: {
       allAssigned: 'All shifts are assigned',
     },

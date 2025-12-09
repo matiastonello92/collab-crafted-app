@@ -124,7 +124,7 @@ export default function DashboardClient() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">{t('dashboard.welcome')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{t('dashboard.welcome')}</h1>
             <p className="text-muted-foreground mt-1">{t('dashboard.overview')}</p>
           </div>
           <Link href="/settings/dashboard">
