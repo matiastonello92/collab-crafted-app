@@ -206,7 +206,7 @@ export function InventoryListPage({ category }: InventoryListPageProps) {
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)} className="w-full sm:w-auto">
               <TabsList className={isMobile ? "grid grid-cols-2 w-full h-auto" : ""}>
                 <TabsTrigger value="all" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.filters.all')}</TabsTrigger>
-                <TabsTrigger value="in_progress" className={isMobile ? "min-h-[44px]" : ""}>{isMobile ? 'In Corso' : t('inventory.status.inProgress')}</TabsTrigger>
+                <TabsTrigger value="in_progress" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.status.inProgress')}</TabsTrigger>
                 <TabsTrigger value="completed" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.status.completed')}</TabsTrigger>
                 <TabsTrigger value="approved" className={isMobile ? "min-h-[44px]" : ""}>{t('inventory.status.approved')}</TabsTrigger>
               </TabsList>
