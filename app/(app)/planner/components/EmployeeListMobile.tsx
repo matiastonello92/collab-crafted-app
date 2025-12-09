@@ -100,7 +100,7 @@ export function EmployeeListMobile({
                   </div>
                 </div>
                 <Badge variant="secondary">
-                  {dayShifts.length} {dayShifts.length === 1 ? 'turno' : 'turni'}
+                  {dayShifts.length} {dayShifts.length === 1 ? t('planner.mobile.shift') : t('planner.mobile.shifts')}
                 </Badge>
               </div>
             </AccordionTrigger>
@@ -140,7 +140,7 @@ export function EmployeeListMobile({
                               <User className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div className="flex-1">
-                              <div className="font-medium text-muted-foreground">Non assegnato</div>
+                              <div className="font-medium text-muted-foreground">{t('planner.mobile.unassigned')}</div>
                             </div>
                           </>
                         )}
@@ -172,12 +172,12 @@ export function EmployeeListMobile({
                       {/* Status Indicators */}
                       {shift.actual_start_at && !shift.actual_end_at && (
                         <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/30">
-                          🟠 In corso
+                          🟠 {t('planner.mobile.inProgress')}
                         </Badge>
                       )}
                       {shift.actual_start_at && shift.actual_end_at && (
                         <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
-                          ✓ Completato
+                          ✓ {t('planner.mobile.completed')}
                         </Badge>
                       )}
                     </Card>
@@ -229,8 +229,8 @@ export function EmployeeListMobile({
                     onClick={() => handleAddClick(dateStr)}
                   >
                     <Plus className="h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Nessun turno</p>
-                    <p className="text-xs text-muted-foreground mt-1">Tocca per aggiungere</p>
+                    <p className="text-sm text-muted-foreground">{t('planner.mobile.noShifts')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('planner.mobile.tapToAdd')}</p>
                   </Card>
                 )}
                 
@@ -241,7 +241,7 @@ export function EmployeeListMobile({
                     onClick={() => handleAddClick(dateStr)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Aggiungi turno
+                    {t('planner.mobile.addShift')}
                   </Button>
                 )}
               </div>
