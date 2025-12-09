@@ -49,7 +49,17 @@ export default function DashboardClient() {
 
   const isMobile = gridCols === 1;
 
-  // Loading state - aligned with PlannerClient pattern
+  // Compute these BEFORE early return to respect React Hooks rules
+  const userLevel = getUserLevel(isAdmin, permissions);
+  const visibleWidgets = getVisibleWidgets(userLevel, permissions, preferences);
+
+  // useMemo MUST be called on every render (before any early return)
+  const widgetPositions = useMemo(() => {
+    if (!visibleWidgets || visibleWidgets.length === 0) return [];
+    return calculateAutoLayout(visibleWidgets, gridCols);
+  }, [visibleWidgets, gridCols]);
+
+  // Loading state - now AFTER all hooks
   if (permissionsLoading || widgetsLoading) {
     return (
       <div className="flex flex-col h-full">
@@ -64,14 +74,6 @@ export default function DashboardClient() {
       </div>
     );
   }
-
-  const userLevel = getUserLevel(isAdmin, permissions);
-  const visibleWidgets = getVisibleWidgets(userLevel, permissions, preferences);
-
-  // Calculate widget positions
-  const widgetPositions = useMemo(() => {
-    return calculateAutoLayout(visibleWidgets, gridCols);
-  }, [visibleWidgets, gridCols]);
 
   const handleDragStart = (event: any) => {
     setActiveId(event.active.id);
