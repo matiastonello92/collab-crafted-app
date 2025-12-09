@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Users } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface PresenceUser {
   user_id: string;
@@ -13,11 +14,13 @@ interface InventoryPresenceProps {
 }
 
 export function InventoryPresence({ users }: InventoryPresenceProps) {
+  const { t } = useTranslation();
+  
   if (users.length === 0) {
     return (
       <div className="flex items-center gap-2 text-muted-foreground">
         <Users className="h-4 w-4" />
-        <span>Solo tu</span>
+        <span>{t('inventory.presence.onlyYou')}</span>
       </div>
     );
   }

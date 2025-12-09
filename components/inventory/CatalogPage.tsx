@@ -211,19 +211,19 @@ export function CatalogPage({ category }: CatalogPageProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('inventory.filters.all')}</SelectItem>
-                <SelectItem value="Carne">Carne</SelectItem>
-                <SelectItem value="Pesce">Pesce</SelectItem>
-                <SelectItem value="Vegetali">Vegetali</SelectItem>
-                <SelectItem value="Latticini">Latticini</SelectItem>
-                <SelectItem value="Conserve">Conserve</SelectItem>
-                <SelectItem value="Surgelati">Surgelati</SelectItem>
-                <SelectItem value="Vini">Vini</SelectItem>
-                <SelectItem value="Birre">Birre</SelectItem>
-                <SelectItem value="Soft Drink">Soft Drink</SelectItem>
-                <SelectItem value="Consumabili">Consumabili</SelectItem>
-                <SelectItem value="Altro">Altro</SelectItem>
-                <SelectItem value="Pulizia">Pulizia</SelectItem>
-                <SelectItem value="Manutenzione">Manutenzione</SelectItem>
+                <SelectItem value="Carne">{t('inventory.catalogCategories.meat')}</SelectItem>
+                <SelectItem value="Pesce">{t('inventory.catalogCategories.fish')}</SelectItem>
+                <SelectItem value="Vegetali">{t('inventory.catalogCategories.vegetables')}</SelectItem>
+                <SelectItem value="Latticini">{t('inventory.catalogCategories.dairy')}</SelectItem>
+                <SelectItem value="Conserve">{t('inventory.catalogCategories.preserves')}</SelectItem>
+                <SelectItem value="Surgelati">{t('inventory.catalogCategories.frozen')}</SelectItem>
+                <SelectItem value="Vini">{t('inventory.catalogCategories.wines')}</SelectItem>
+                <SelectItem value="Birre">{t('inventory.catalogCategories.beers')}</SelectItem>
+                <SelectItem value="Soft Drink">{t('inventory.catalogCategories.softDrinks')}</SelectItem>
+                <SelectItem value="Consumabili">{t('inventory.catalogCategories.consumables')}</SelectItem>
+                <SelectItem value="Altro">{t('inventory.catalogCategories.other')}</SelectItem>
+                <SelectItem value="Pulizia">{t('inventory.catalogCategories.cleaning')}</SelectItem>
+                <SelectItem value="Manutenzione">{t('inventory.catalogCategories.maintenance')}</SelectItem>
               </SelectContent>
             </Select>
 

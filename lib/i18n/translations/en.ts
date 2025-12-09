@@ -2912,6 +2912,29 @@ export const en = {
       saveChanges: 'Save Changes',
       complete: 'Complete',
       approve: 'Approve',
+      create: 'Create',
+    },
+    
+    // Presence
+    presence: {
+      onlyYou: 'Only you',
+    },
+    
+    // Catalog Categories (for filter dropdown)
+    catalogCategories: {
+      meat: 'Meat',
+      fish: 'Fish',
+      vegetables: 'Vegetables',
+      dairy: 'Dairy',
+      preserves: 'Preserves',
+      frozen: 'Frozen',
+      wines: 'Wines',
+      beers: 'Beers',
+      softDrinks: 'Soft Drinks',
+      consumables: 'Consumables',
+      other: 'Other',
+      cleaning: 'Cleaning',
+      maintenance: 'Maintenance',
     },
     
     // Dialogs

@@ -2968,6 +2968,7 @@ export const it = {
     
     // Buttons
     buttons: {
+      create: 'Crea',
       createInventory: 'Crea Inventario',
       createTemplate: 'Crea Template',
       addProduct: 'Aggiungi Prodotto',
@@ -2988,6 +2989,28 @@ export const it = {
       saveChanges: 'Salva Modifiche',
       complete: 'Completa',
       approve: 'Approva',
+    },
+    
+    // Presence
+    presence: {
+      onlyYou: 'Solo tu',
+    },
+    
+    // Catalog Categories (for filter dropdown)
+    catalogCategories: {
+      meat: 'Carne',
+      fish: 'Pesce',
+      vegetables: 'Vegetali',
+      dairy: 'Latticini',
+      preserves: 'Conserve',
+      frozen: 'Surgelati',
+      wines: 'Vini',
+      beers: 'Birre',
+      softDrinks: 'Soft Drink',
+      consumables: 'Consumabili',
+      other: 'Altro',
+      cleaning: 'Pulizia',
+      maintenance: 'Manutenzione',
     },
     
     // Dialogs
