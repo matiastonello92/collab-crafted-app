@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { UserDropdown } from '@/components/nav/UserDropdown';
 import { useHydratedStore, useHydratedContext } from '@/lib/store/useHydratedStore';
 import { useEffectivePermissions } from '@/hooks/useEffectivePermissions';
@@ -102,21 +102,35 @@ export default function HeaderClient({
     });
   };
 
+  // Find active location for mobile indicator
+  const activeLocation = locations.find(l => l.id === activeLocationId);
+
   // --- RENDER ---
   return (
     <div className="flex w-full items-center justify-between gap-3">
-      {/* Left: Error messages only (if any) */}
-      {errorMessage ? (
-        <span className="inline-flex items-center rounded-full border border-klyra-warning/40 bg-klyra-warning/10 px-2 py-1 text-xs font-medium text-klyra-warning sm:px-3">
-          {errorMessage}
-        </span>
-      ) : !locations?.length ? (
-        <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-2 py-1 text-xs font-medium text-muted-foreground sm:px-3">
-          {t('header.noLocation')}
-        </span>
-      ) : null}
+      {/* Left: Active location indicator (mobile only) + Error messages */}
+      <div className="flex items-center gap-2">
+        {activeLocation && (
+          <div className="flex items-center gap-1.5 lg:hidden">
+            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="text-sm font-medium text-foreground truncate max-w-[120px]">
+              {activeLocation.name}
+            </span>
+          </div>
+        )}
+        
+        {errorMessage ? (
+          <span className="inline-flex items-center rounded-full border border-klyra-warning/40 bg-klyra-warning/10 px-2 py-1 text-xs font-medium text-klyra-warning sm:px-3">
+            {errorMessage}
+          </span>
+        ) : !locations?.length ? (
+          <span className="inline-flex items-center rounded-full border border-muted/50 bg-muted/40 px-2 py-1 text-xs font-medium text-muted-foreground sm:px-3">
+            {t('header.noLocation')}
+          </span>
+        ) : null}
+      </div>
       
-      <div className="flex-1" />
+      <div className="flex-1 hidden lg:block" />
       
       {/* Right: Search + Controls */}
       <div className="flex items-center gap-2">
