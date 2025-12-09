@@ -16,19 +16,18 @@ import { toast } from 'sonner';
 
 export default function DashboardClient() {
   const { t } = useTranslation();
-  const [isReady, setIsReady] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const { permissions, isAdmin, isLoading: permissionsLoading } = usePermissions();
   const { preferences, isLoading: widgetsLoading, updateWidgetPosition } = useDashboardWidgets();
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState(3);
 
-  // Set ready only after mount + data loaded
+  // hasMounted è SEMPRE false durante SSR e primo render client
+  // Diventa true SOLO dopo hydration (useEffect con deps vuote)
   useEffect(() => {
-    if (!permissionsLoading && !widgetsLoading) {
-      setIsReady(true);
-    }
-  }, [permissionsLoading, widgetsLoading]);
+    setHasMounted(true);
+  }, []);
 
   // Responsive grid columns
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function DashboardClient() {
 
   const isMobile = gridCols === 1;
 
-  if (!isReady) {
+  if (!hasMounted || permissionsLoading || widgetsLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="mb-8">
