@@ -224,7 +224,7 @@ export default function SidebarClient({
       className={cn(
         'relative flex h-full flex-col bg-card/90 text-sm shadow-sm transition-[width] duration-300 ease-out supports-[backdrop-filter]:backdrop-blur',
         !isMobile && 'border-r border-border/60',
-        collapsed && !isMobile ? 'w-20' : 'w-64'
+        collapsed && !isMobile ? 'w-20' : (isMobile ? 'w-full' : 'w-64')
       )}
     >
       <div className="flex h-16 items-center justify-between gap-2 px-4">
