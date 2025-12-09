@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useSupabase } from '@/hooks/useSupabase';
+import { useSupabase, useSupabaseReady } from '@/hooks/useSupabase';
 import { useRouter } from '@/hooks/useRouter';
 import type { Session } from '@supabase/supabase-js';
 import { useTranslation } from '@/lib/i18n';
@@ -17,10 +17,16 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const { t } = useTranslation();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const isReady = useSupabaseReady();
   const supabase = useSupabase();
   const { replaceTo } = useRouter();
 
   useEffect(() => {
+    // Guard: wait for client to be ready (client-side only)
+    if (!isReady) {
+      return;
+    }
+
     let mounted = true;
     console.log('🔍 AuthGuard: Initializing auth state listener');
 
@@ -61,9 +67,10 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase.auth, replaceTo]);
+  }, [isReady, supabase, replaceTo]);
 
-  if (loading) {
+  // Show loading while Supabase client initializes or auth check is in progress
+  if (!isReady || loading) {
     return fallback || <div className="flex items-center justify-center min-h-screen">{t('common.loading')}</div>;
   }
 
