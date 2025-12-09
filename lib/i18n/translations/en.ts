@@ -3879,4 +3879,11 @@ export const en = {
     closeDialog: 'Close dialog',
     close: 'Close',
   },
+
+  // Bottom Bar
+  bottomBar: {
+    home: 'Home',
+    smart: 'Suggested',
+    showBar: 'Show menu',
+  },
 } as const;

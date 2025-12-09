@@ -1,8 +1,7 @@
 import { Suspense } from 'react';
 import Header from '@/components/nav/Header';
 import SidebarWrapper from '@/components/nav/SidebarWrapper';
-import { ClientOnly } from '@/lib/hydration/ClientOnly';
-import { MobileSidebar } from './MobileSidebar';
+import { SmartBottomBar } from '@/components/nav/smart-bottom-bar';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -20,12 +19,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Header />
           </Suspense>
         </header>
-        <main className="flex-1 overflow-y-auto bg-muted/10">
+        <main className="flex-1 overflow-y-auto bg-muted/10 pb-20 lg:pb-0">
           <div className="mx-auto w-full max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Smart Bottom Bar - Mobile only */}
+      <SmartBottomBar />
     </div>
   );
 }
